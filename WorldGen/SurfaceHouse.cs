@@ -10,7 +10,7 @@ using Terraria.Localization;
 using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
 
-namespace SpawnHouses.WorldGen
+namespace SpawnHouses.Structures
 {
     public class SurfaceHouse : ModSystem
     {

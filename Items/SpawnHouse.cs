@@ -5,7 +5,7 @@ using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
 using Terraria.Chat;
 using Terraria.WorldBuilding;
-using SpawnHouses.WorldGen;
+using SpawnHouses.Structures;
 
 
 namespace SpawnHouses.Items

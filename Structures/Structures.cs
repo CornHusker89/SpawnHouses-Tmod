@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 using Terraria.Chat;
 using Terraria.WorldBuilding;
 
-namespace SpawnHouses.WorldGen
+namespace SpawnHouses.Structures
 {
     public class CustomStructure
     {
@@ -73,6 +73,10 @@ namespace SpawnHouses.WorldGen
                         tile.TileType = BeamTileID;
 
                     }
+
+                    //make the tile on the bottom of the beam a full block
+                    Tile bottomTile = Main.tile[x2, y + y2];
+                    bottomTile.Slope = SlopeType.Solid;
                 }
             }
             return true;
