@@ -1,0 +1,25 @@
+# This file will automatically update with entries for new content after a build and reload
+
+Items: {
+	TestSword: {
+		DisplayName: Test Sword
+		Tooltip: ""
+	}
+
+	TestItem: {
+		DisplayName: Test Item
+		Tooltip: ""
+	}
+
+	TestArmor: {
+		DisplayName: Test Armor
+		Tooltip: ""
+	}
+
+	SpawnHouse: {
+		DisplayName: Spawn House
+		Tooltip: ""
+	}
+}
+
+WorldGen.WorldGenCustomHousesPassMessage: Mods.SpawnHouses.WorldGen.WorldGenCustomHousesPassMessage

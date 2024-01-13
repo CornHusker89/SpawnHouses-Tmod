@@ -1,0 +1,12 @@
+Mods: {
+	SpawnHouses: {
+		WorldGen.WorldGenCustomHousesPassMessage: Mods.SpawnHouses.WorldGen.WorldGenCustomHousesPassMessage
+
+		Items: {
+			SpawnHouse: {
+				DisplayName: Spawn House
+				Tooltip: ""
+			}
+		}
+	}
+}
