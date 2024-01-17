@@ -10,10 +10,8 @@ using SpawnHouses.Structures;
 
 namespace SpawnHouses.Items
 {
-	public class SpawnHouse : ModItem
+	public class SpawnMainHouse : ModItem
 	{
-
-		
 		
 		public override void SetDefaults()
 		{
@@ -39,7 +37,7 @@ namespace SpawnHouses.Items
 
 		public override bool? UseItem(Player player)
 		{
-			SurfaceHouseStructure structure = new SurfaceHouseStructure();
+			MainHouseStructure structure = new MainHouseStructure();
 			
 			bool foundLocation = false;
 			int x = 0;
@@ -57,10 +55,11 @@ namespace SpawnHouses.Items
 				foundLocation = true;
 			}
 
-			y -= 16; //the structure spawning has an offset + we want it to be a little off the ground
+			structure.Y = y - 27; //the structure spawning has an offset + we want it to be a little off the ground
+			structure.X = x - 31; //center the struct
 			
-			bool beamResult = structure.GenerateBeams(x: x, y: y);
-			bool structResult = structure.GenerateStructure(x: x, y: y);
+			bool foundationResult = structure.GenerateFoundation();
+			bool structResult = structure.GenerateStructure();
 			return structResult;
 		}
 

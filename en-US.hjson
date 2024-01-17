@@ -7,6 +7,21 @@ Mods: {
 				DisplayName: Spawn House
 				Tooltip: ""
 			}
+
+			SpawnMainHouse: {
+				DisplayName: Spawn Main House
+				Tooltip: ""
+			}
+
+			SpawnTestHouse: {
+				DisplayName: Spawn Test House
+				Tooltip: ""
+			}
+
+			SpawnBeachHouse: {
+				DisplayName: Spawn Beach House
+				Tooltip: ""
+			}
 		}
 	}
 }
