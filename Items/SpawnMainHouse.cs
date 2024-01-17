@@ -23,10 +23,6 @@ namespace SpawnHouses.Items
 
 		public override void AddRecipes()
 		{
-			Recipe recipe = CreateRecipe();
-			recipe.AddIngredient(ItemID.DirtBlock, 10);
-			recipe.AddTile(TileID.WorkBenches);
-			recipe.Register();
 		}
 
 		public override bool AltFunctionUse(Player player)
@@ -57,9 +53,11 @@ namespace SpawnHouses.Items
 
 			structure.Y = y - 27; //the structure spawning has an offset + we want it to be a little off the ground
 			structure.X = x - 31; //center the struct
-			
+
 			bool foundationResult = structure.GenerateFoundation();
 			bool structResult = structure.GenerateStructure();
+			bool blendLeftResult = structure.BlendLeft();
+			bool blendRightResult = structure.BlendLeft(true);
 			return structResult;
 		}
 

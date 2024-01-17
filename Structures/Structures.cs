@@ -38,13 +38,14 @@ namespace SpawnHouses.Structures
         public virtual bool CanBlendLeft { get; set; } = false;
         public virtual bool CanBlendRight { get; set; } = false;
         public virtual int BlendDistance { get; set; } = 6;
+        public virtual ushort BlendTileID { get; set; } = 0;
 
-        private bool FrameTiles()    
+        public bool FrameTiles()    
         {
             int centerX = X + StructureFloorXOffset + (StructureFloorLength / 2);
             int centerY = Y + StructureFloorYOffset + (StructureFloorLength / 2);
             
-            WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle((int)(StructureXSize * 1.33)), new Actions.SetFrames());
+            WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(StructureXSize * 3), new Actions.SetFrames());
 
             return true;
         }
@@ -189,62 +190,137 @@ namespace SpawnHouses.Structures
             return true;
         }
 
-        public bool BlendLeft()
+        public bool BlendLeft(bool reverse = false)
         {
-            if (!CanBlendLeft)
+            if (!CanBlendLeft && !reverse)
             {
                 throw new Exception("structure can not blend terrain on left");
+            } 
+            if (!CanBlendRight && reverse)
+            {
+                throw new Exception("structure can not blend terrain on right");
             }
 
-            int startX = X + StructureFloorXOffset;
-            int startY = Y + StructureFloorYOffset;
+            int startX = 0;
+            int startY = 0;
 
-            int endX = startX - BlendDistance;
-            int endY = startY - 35; // to make sure that it starts outside the terrain
+            int endX = 0;
+            int endY = 0;
             
-            while (!Main.tile[endX, endY].HasTile) {
-                endY++;
+            if (reverse)
+            {
+                endX = X + StructureFloorXOffset + StructureFloorLength;
+                endY = Y + StructureFloorYOffset;
+                
+                startX = endX + BlendDistance;
+                startY = endY - 35; // to make sure that it starts outside the terrain
+                
+                while (!Terraria.WorldGen.SolidTile(startX, startY)) {
+                    startY++;
+                }
+            }
+            else
+            {
+                startX = X + StructureFloorXOffset;
+                startY = Y + StructureFloorYOffset;
+
+                endX = startX - BlendDistance;
+                endY = startY - 35; // to make sure that it starts outside the terrain
+                
+                while (!Terraria.WorldGen.SolidTile(endX, endY)) {
+                    endY++;
+                }
             }
 
-            ushort topTileType = Main.tile[endX, endY].TileType;
+            
+
+
+            ushort topTileType = 0;
+            if (BlendTileID == 0)
+            {
+                topTileType = Main.tile[endX, endY].TileType;
+            }
+            else
+            {
+                topTileType = BlendTileID;
+            }
+            
+            
             ushort fillTileType = 0;
             if (topTileType == TileID.Grass)
             {
-                fillTileType = TileID.Grass;
+                fillTileType = TileID.Dirt;
             } 
             else if (topTileType == TileID.JungleGrass)
             {
-                fillTileType = TileID.Grass;
+                fillTileType = TileID.Mud;
             }
             else
             {
                 fillTileType = topTileType;
             }
-
-            double slope = (double) (endY - startY) / (endX - startX);
-            double changePerTile = slope / BlendDistance;
             
-            for (int i = 0; i < BlendDistance; i++)
+
+            double slope = (double) (endY - startY) / (endX - startX) * -1;
+            
+            if (Debug)
+            {
+                Main.NewText($"sX: {startX} sY: {startY} eX: {endX} eY: {endY} slope: {slope}");
+            }
+
+            int frameCenterX = 0;
+            int frameCenterY = 0;
+            
+            for (int i = BlendDistance; i >= 0; i--)
             {
                 // get the top tile, change its values
-                int topTileY = Y + (int)Math.Round(i * changePerTile);
-                Tile tile = Main.tile[X - i, topTileY];
+                int topTileY = startY + (int)Math.Round(i * slope);
+
+                if (Debug)
+                {
+                    Main.NewText($"x: {startX - i} y: {topTileY}");
+                }
+
+                if (i == BlendDistance / 2 || i - 1 == BlendDistance / 2)
+                {
+                    frameCenterX = startX - i;
+                    frameCenterY = topTileY;
+                }
+                
+                Tile tile = Main.tile[startX - i, topTileY];
                 tile.HasTile = true;
                 tile.Slope = SlopeType.Solid;
                 tile.TileType = topTileType;
 
-                // get/change the tiles beneath the top tiles
-                int y = 0;
-                while (!Main.tile[X - i, topTileY + y].HasTile || Main.tile[X - i, topTileY + y].Slope != SlopeType.Solid)
+                //remove the tiles above
+                for (int j = 1; j < 55; j++)
                 {
-                    Tile lowerTile = Main.tile[X - i, topTileY + y];
+                    Tile lowerTile = Main.tile[startX - j, topTileY - j];
+                    lowerTile.HasTile = false;
+                }
+
+                // get/change the tiles beneath the top tiles
+                int y = 1;
+                while (!Terraria.WorldGen.SolidTile(startX - i, topTileY + y)) 
+                {
+                    Tile lowerTile = Main.tile[startX - i, topTileY + y];
                     lowerTile.HasTile = true;
                     lowerTile.Slope = SlopeType.Solid;
                     lowerTile.TileType = fillTileType;
                     
                     y++;
                 }
+                
+                // make sure that the tile we found at the bottom is full
+                Tile lowestTile = Main.tile[startX - i, topTileY + y];
+                lowestTile.HasTile = true;
+                lowestTile.Slope = SlopeType.Solid;
+                
+                lowestTile = Main.tile[startX - i, topTileY + y - 1];
+                lowestTile.Slope = SlopeType.Solid;
             }
+
+            FrameTiles(frameCenterX, frameCenterY, (int)(BlendDistance * 6));
             
             return true;
         }
@@ -267,18 +343,21 @@ namespace SpawnHouses.Structures
     
     public class MainHouseStructure : CustomStructure
     {
+        public override bool Debug => true;
         public override string FilePath => "Structures/mainHouse";
         public override int StructureXSize => 63;
-        public override int StructureFloorLength => 41;
-        public override int StructureFloorYOffset => 27;
-        public override int StructureFloorXOffset => 11;
+        public override int StructureFloorLength => 63; //41
+        public override int StructureFloorYOffset => 26;
+        public override int StructureFloorXOffset => 0;
         public override bool CanHaveFoundation => true; 
         public override ushort FoundationTileID => TileID.Dirt;
         public override int FoudationRadiusOverride => 31;
-        public override int FoudationYOffsetOverride => 31;
+        public override int FoudationYOffsetOverride => 36;
+        public override int FoudationXOffsetOverride => 31;
         public override bool CanBlendLeft => true;
         public override bool CanBlendRight => true;
-        public override int BlendDistance => 12;
+        public override int BlendDistance => 20;
+        public override ushort BlendTileID => TileID.Grass;
     }
     
     public class BeachHouseStructure : CustomStructure

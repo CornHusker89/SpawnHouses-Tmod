@@ -67,7 +67,7 @@ namespace SpawnHouses.WorldGen
 				int x = (i * 10) + (initialX);
 				int y = Main.spawnTileY - 80;
 				
-				while (!Main.tile[x, y].HasTile)
+				while (!Terraria.WorldGen.SolidTile(x, y))
 				{
 					y++;
 				}
@@ -75,18 +75,19 @@ namespace SpawnHouses.WorldGen
 				sum += y;
 			}
 
-			int average = (int) Math.Round(sum / 7.0);
-			
-			
-			
+			// set initialY to the average y pos of the raycasts
+			initialY = (int) Math.Round(sum / 7.0);
 			
 			MainHouseStructure structure = new MainHouseStructure();
 
-			structure.y = y -16; // the structure spawning has an offset + we want it to be a little off the ground
-			structure.x = x - 12; // center the struct
-		
-			bool beamResult = structure.GenerateFoundation();
+			structure.Y = initialY - 27; //the structure spawning has an offset + we want it to be a little off the ground
+			structure.X = initialX - 31; //center the struct
+
+			bool foundationResult = structure.GenerateFoundation();
 			bool structResult = structure.GenerateStructure();
+			bool blendLeftResult = structure.BlendLeft();
+			bool blendRightResult = structure.BlendLeft(true);
+			bool frames = structure.FrameTiles();
 		}
 	}
 }
