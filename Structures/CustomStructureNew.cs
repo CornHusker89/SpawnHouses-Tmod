@@ -59,14 +59,66 @@ namespace SpawnHouses.Structures
         public virtual ushort beamsXOffset { get; set; } = 0;
         public virtual ushort beamsCount { get; set; } = 0;
         public virtual ushort maxBeamSize { get; set; } = 50;
-        public virtual ushort beamTileID { get; set; } = TileID.WoodenBeam;
-        public virtual byte beamTilePaintID { get; set; } = PaintID.None;
+        public virtual Tile beamTile { get; set; } = None;
         public virtual bool canHaveFoundation { get; set; } = false;
         public virtual bool canSampleFoundation { get; set; } = false;
-        public virtual ushort foundationTileID { get; set; } = TileID.Dirt;
+        public virtual Tile foundationTile { get; set; } = None;
         public virtual int foudationRadius { get; set; } = 0;
         public virtual int foudationXOffset { get; set; } = 0;
         public virtual int foudationYOffset { get; set; } = 0;
+
+        public bool GenerateBeams()
+        {
+            if (!canHaveBeams)
+            {
+                throw new Exception("this floor cannot have beams");
+            }
+            
+            for (int currentBeamNum = 0; currentBeamNum < beamsCount; currentBeamNum++)
+            {
+                bool validBeamLocation = true;
+                int y2 = Y + 1; //put us 1 below the floor
+                int x2 = X + beamsXOffset + (currentBeamNum * BeamInterval);
+
+                //if there's a tile there already, dont place a beam
+                if (Terraria.WorldGen.SolidTile(x2, Y + y2))
+                {
+                    continue;
+                }
+				
+                while (!Terraria.WorldGen.SolidTile(x2, Y + y2))
+                {
+                    if (y2 >= MaxBeamSize + StructureFloorYOffset)
+                    {
+                        validBeamLocation = false;
+                        break;
+                    }
+                    y2++;
+                }
+
+                if (Debug)
+                {
+                    Main.NewText($"X:{x2}, Y:{Y}, X2:{x2}, Y2:{y2}, currentBeamNum:{currentBeamNum}, interval:{BeamInterval}");
+                }
+
+                if (validBeamLocation)
+                {
+                    for (int j = 0; j < y2 - StructureFloorYOffset; j++)
+                    {
+                        Main.tile[x2, Y + j + StructureFloorYOffset] = beamTile;
+                    }
+
+                    //make the tile beneath the beam (and the one just above) a full block
+                    Tile bottomTile = Main.tile[x2, Y + y2 - 1];
+                    bottomTile.Slope = SlopeType.Solid;
+                    bottomTile = Main.tile[x2, Y + y2];
+                    bottomTile.Slope = SlopeType.Solid;
+                }
+            }
+            FrameTiles();
+            
+            return true;
+        }
     }
 
     public class ConnectPoint {
