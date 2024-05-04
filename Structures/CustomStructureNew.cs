@@ -39,13 +39,12 @@ namespace SpawnHouses.Structures
             return true;
         }
 
-        public bool GenerateStructure()
+        public bool GenerateStructure() 
         {
-            bool result = StructureHelper.Generator.GenerateStructure(FilePath, new Point16(X:X, Y:Y), _mod);
-
-            FrameTiles();
+            bool structureSuccess = StructureHelper.Generator.GenerateStructure(FilePath, new Point16(X:X, Y:Y), _mod);
+            bool frameSuccess = FrameTiles();
             
-            return result;
+            return (structureSuccess && frameSuccess);
         }
     }
 
@@ -54,69 +53,18 @@ namespace SpawnHouses.Structures
         public virtual int Y { get; set; } = 0;
 
         public virtual ushort floorLength { get; set; } = 1;
-        public virtual bool canHaveBeams { get; set; } = false;
-        public virtual ushort beamInterval { get; set; } = 1;
-        public virtual ushort beamsXOffset { get; set; } = 0;
-        public virtual ushort beamsCount { get; set; } = 0;
-        public virtual ushort maxBeamSize { get; set; } = 50;
-        public virtual Tile beamTile { get; set; } = None;
-        public virtual bool canHaveFoundation { get; set; } = false;
-        public virtual bool canSampleFoundation { get; set; } = false;
-        public virtual Tile foundationTile { get; set; } = None;
-        public virtual int foudationRadius { get; set; } = 0;
-        public virtual int foudationXOffset { get; set; } = 0;
-        public virtual int foudationYOffset { get; set; } = 0;
 
-        public bool GenerateBeams()
+        public bool GenerateBeams(Tile beamTile, ushort beamInterval, ushort beamsXOffset = 0, ushort beamsCount, ushort maxBeamSize = 50) 
         {
-            if (!canHaveBeams)
-            {
-                throw new Exception("this floor cannot have beams");
+            return true;
+        }
+
+        public bool GenerateFoundation(Tile foundationTile = None, ushort foudationRadius, ushort foudationXOffset = 0, ushort foudationYOffset = 0) 
+        {
+            if (foundationTile == None) {
+                
             }
-            
-            for (int currentBeamNum = 0; currentBeamNum < beamsCount; currentBeamNum++)
-            {
-                bool validBeamLocation = true;
-                int y2 = Y + 1; //put us 1 below the floor
-                int x2 = X + beamsXOffset + (currentBeamNum * BeamInterval);
 
-                //if there's a tile there already, dont place a beam
-                if (Terraria.WorldGen.SolidTile(x2, Y + y2))
-                {
-                    continue;
-                }
-				
-                while (!Terraria.WorldGen.SolidTile(x2, Y + y2))
-                {
-                    if (y2 >= MaxBeamSize + StructureFloorYOffset)
-                    {
-                        validBeamLocation = false;
-                        break;
-                    }
-                    y2++;
-                }
-
-                if (Debug)
-                {
-                    Main.NewText($"X:{x2}, Y:{Y}, X2:{x2}, Y2:{y2}, currentBeamNum:{currentBeamNum}, interval:{BeamInterval}");
-                }
-
-                if (validBeamLocation)
-                {
-                    for (int j = 0; j < y2 - StructureFloorYOffset; j++)
-                    {
-                        Main.tile[x2, Y + j + StructureFloorYOffset] = beamTile;
-                    }
-
-                    //make the tile beneath the beam (and the one just above) a full block
-                    Tile bottomTile = Main.tile[x2, Y + y2 - 1];
-                    bottomTile.Slope = SlopeType.Solid;
-                    bottomTile = Main.tile[x2, Y + y2];
-                    bottomTile.Slope = SlopeType.Solid;
-                }
-            }
-            FrameTiles();
-            
             return true;
         }
     }
@@ -125,14 +73,20 @@ namespace SpawnHouses.Structures
         public virtual int X { get; set; } = 0;
         public virtual int Y { get; set; } = 0;
 
-        public virtual string orientation { get; set; } = "right";
-        public virtual bool canBlend { get; set; } = false;
-        public virtual int blendDistance { get; set; } = 10;
-        public virtual ushort blendTileID { get; set; } = 0;
+        public virtual short orientation { get; set; } = 1; //-1 is left, 0 is None, 1 is right
         public virtual Bridge bridgeInfo { get; set; } = None;
 
-        public bool GenerateBridge(other: ConnectPoint) {
+        public bool GenerateBridge(ConnectPoint other)
+        {
+            if (bridgeInfo == None || other.bridgeInfo == None) {
+                return false;
+            }
 
+            return true;
+        }
+
+        public bool Blend(Tile blendTile, ushort blendDistance, bool canUseSlopes = true)
+        {
             return true;
         }
     }
