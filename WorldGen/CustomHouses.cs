@@ -78,16 +78,16 @@ namespace SpawnHouses.WorldGen
 			// set initialY to the average y pos of the raycasts
 			initialY = (int) Math.Round(sum / 7.0);
 			
-			MainHouseStructure structure = new MainHouseStructure();
+			MainHouseStructure houseStructure = new MainHouseStructure();
 
-			structure.Y = initialY - 27; //the structure spawning has an offset + we want it to be a little off the ground
-			structure.X = initialX - 31; //center the struct
+			houseStructure.Y = initialY - 27; //the structure spawning has an offset + we want it to be a little off the ground
+			houseStructure.X = initialX - 31; //center the structure
 
-			bool foundationResult = structure.GenerateFoundation();
-			bool structResult = structure.GenerateStructure();
-			bool blendLeftResult = structure.BlendLeft();
-			bool blendRightResult = structure.BlendLeft(true);
-			bool frames = structure.FrameTiles();
+			houseStructure.GenerateFoundation();
+			houseStructure.GenerateStructure();
+			houseStructure.BlendLeft();
+			houseStructure.BlendRight();
+			houseStructure.FrameTiles();
 		}
 	}
 }
