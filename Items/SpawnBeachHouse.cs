@@ -54,8 +54,9 @@ namespace SpawnHouses.Items
 			structure.Y = y - 29; //the structure spawning has an offset + we want it to be a little off the ground
 			structure.X = x - 18; //center the struct
 			
-			bool beamResult = structure.GenerateBeams();
-			bool foundationResult = structure.GenerateFoundation();
+			structure.GenerateBeams();
+			structure.GenerateFoundation();
+			structure.BlendRight();
 			bool structResult = structure.GenerateStructure();
 			return structResult;
 		}

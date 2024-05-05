@@ -54,10 +54,10 @@ namespace SpawnHouses.Items
 			structure.Y = y - 27; //the structure spawning has an offset + we want it to be a little off the ground
 			structure.X = x - 31; //center the struct
 
-			bool foundationResult = structure.GenerateFoundation();
+			structure.GenerateFoundation();
 			bool structResult = structure.GenerateStructure();
-			bool blendLeftResult = structure.BlendLeft();
-			bool blendRightResult = structure.BlendLeft(true);
+			structure.BlendLeft();
+			structure.BlendRight();
 			return structResult;
 		}
 
