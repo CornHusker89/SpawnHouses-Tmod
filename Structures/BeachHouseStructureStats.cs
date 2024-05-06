@@ -10,10 +10,10 @@ namespace SpawnHouses.Structures;
 public class BeachHouseStructure : CustomStructure
 {
     public override string FilePath => "Structures/PrebuiltStructures/beachHouse";
-    public override int StructureXSize => 35;
-    public override int StructureYSize => 24;
+    public override ushort StructureXSize => 35;
+    public override ushort StructureYSize => 24;
 
-    public BeachHouseStructure(int x, int y)
+    public BeachHouseStructure(ushort x, ushort y)
     {
         Floors =
         [

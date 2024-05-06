@@ -23,5 +23,26 @@ Mods: {
 				Tooltip: ""
 			}
 		}
+
+		Configs: {
+			SpawnHousesConfig: {
+				DisplayName: Spawn Houses Config
+
+				EnableMainHouse: {
+					Label: Enable Main House
+					Tooltip: ""
+				}
+
+				EnableBeachHouse: {
+					Label: Enable Beach House
+					Tooltip: ""
+				}
+
+				EnableSpawnPointHouse: {
+					Label: Enable Spawn Point House
+					Tooltip: ""
+				}
+			}
+		}
 	}
 }

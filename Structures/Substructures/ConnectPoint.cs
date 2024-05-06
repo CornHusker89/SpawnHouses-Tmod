@@ -10,35 +10,23 @@ namespace SpawnHouses.Structures.Substructures;
 #nullable enable
 
 public class ConnectPoint {
-    public int X { get; set; }
-    public int Y { get; set; }
+    public ushort X { get; set; }
+    public ushort Y { get; set; }
     private short _YOffset { get; set; }
     private short _XOffset { get; set; }
-
-    public Bridge? BridgeInfo { get; set; }
     
-    
-    public ConnectPoint(short xOffset, short yOffset, Bridge? bridgeInfo = null)
+    public ConnectPoint(short xOffset, short yOffset)
     {
         _XOffset = xOffset;
         _YOffset = yOffset;
-        BridgeInfo = bridgeInfo;
     }
     
     public void SetPosition(int mainStructureX, int mainStructureY)
     {
-        X = mainStructureX + _XOffset;
-        Y = mainStructureY + _YOffset;
+        X = Convert.ToUInt16(mainStructureX + _XOffset);
+        Y = Convert.ToUInt16(mainStructureY + _YOffset);
     }
     
-    public void GenerateBridge(ConnectPoint other)
-    {
-        if (BridgeInfo == null || other.BridgeInfo == null)
-        {
-            throw new Exception("Bridge cannot be made here");
-        }
-    }
-
     public void BlendLeft(ushort topTileID, ushort blendDistance, ushort fillTileID = 0,
         bool canUsePartialTiles = true, bool removeWalls = true, bool reverseDirection = false, bool debug = false)
     {
@@ -232,4 +220,26 @@ public class ConnectPoint {
         BlendLeft(topTileID: topTileID, blendDistance: blendDistance, fillTileID: fillTileID,
             canUsePartialTiles: canUsePartialTiles, reverseDirection: true, debug: debug);
     }
+
+    private Tuple<double, double, double> _CalculateParabolaCoefficients(
+        ushort x1, ushort y1, ushort x2, ushort y2, double maxSlope)
+    {
+        // straight up no clue how this works
+        double a = (y1 - y2 + maxSlope * (x2 - x1)) / (x1 * x1 - x2 * x2);
+        double b = (y1 - a * x1 * x1 - maxSlope * x1);
+        double c = y1 - a * x1 * x1 - b * x1;
+        return Tuple.Create(a, b, c);
+    }
+    
+    public void GenerateBridge(ConnectPoint other, ushort tileID, sbyte MaxSlope)
+    {
+        
+    }
+
+    public void GenerateBridge(ConnectPoint other, string StructureFilePath, ushort StructureLength,
+        ushort StructureHeight, sbyte MaxSlope)
+    {
+        
+    }
+    
 }

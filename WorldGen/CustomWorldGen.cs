@@ -1,4 +1,3 @@
-
 using System;
 using Terraria;
 using Terraria.ModLoader;
@@ -10,11 +9,12 @@ using Terraria.IO;
 using Terraria.Localization;
 using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Structures;
+using SpawnHouses;
+
 
 namespace SpawnHouses.WorldGen
 {
-    public class CustomHouseGen : ModSystem
+    public class CustomWorldGen : ModSystem
     {
         // 3. These lines setup the localization for the message shown during world generation. Update your localization files after building and reloading the mod to provide values for this.
         public static LocalizedText WorldGenCustomHousesPassMessage { get; private set; }
@@ -44,43 +44,12 @@ namespace SpawnHouses.WorldGen
 		protected override void ApplyPass(GenerationProgress progress, GameConfiguration configuration) {
 			
 			// 9. Finally, we do the actual world generation code.
-			
-			
-			int initialX = 1;
-			int initialY = 1;
-			ushort counts = 1000;
-			// do while the tile is not grass
-			while (!Main.tile[initialX, initialY].HasTile || Main.tile[initialX, initialY].TileType != TileID.Grass)
+
+			if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointHouse)
 			{
-				counts++;
-				initialX = Terraria.WorldGen.genRand.Next(Main.spawnTileX - (counts / 10), Main.spawnTileX + (counts / 10));
-				initialY = Main.spawnTileY - 80;
-				while (initialY < Main.worldSurface) {
-					if (Terraria.WorldGen.SolidTile(initialX, initialY)) {
-						break;
-					}
-					initialY++;
-				}
+				GenCustomStructures.GenerateMainHouse();
 			}
 			
-			int sum = 0;
-			for (int i = -3; i <= 3; i++)
-			{
-				int x = (i * 10) + (initialX);
-				int y = Main.spawnTileY - 80;
-				
-				while (!Terraria.WorldGen.SolidTile(x, y))
-				{
-					y++;
-				}
-
-				sum += y;
-			}
-
-			// set initialY to the average y pos of the raycasts
-			initialY = (int) Math.Round(sum / 7.0);
-			
-			MainHouseStructure houseStructure = new MainHouseStructure(initialX - 31, initialY - 27);
 		}
 	}
 }

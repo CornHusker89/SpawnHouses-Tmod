@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Terraria.Chat;
 using Terraria.WorldBuilding;
 using SpawnHouses.Structures;
+using SpawnHouses;
 
 
 namespace SpawnHouses.Items
@@ -34,11 +35,11 @@ namespace SpawnHouses.Items
 		public override bool? UseItem(Player player)
 		{
 			bool foundLocation = false;
-			int x = 0;
-			int y = 0;
+			ushort x;
+			ushort y = 0;
 			while (!foundLocation)
 			{
-				x = (Main.MouseWorld / 16).ToPoint16().X;;
+				x = (ushort)(Main.MouseWorld / 16).ToPoint16().X;;
 				y = 1;
 				while (y < Main.worldSurface) {
 					if (Terraria.WorldGen.SolidTile(x, y)) {
@@ -49,8 +50,8 @@ namespace SpawnHouses.Items
 				foundLocation = true;
 			}
 
-			y += -29; //the structure spawning has an offset + we want it to be a little off the ground
-			x += -18; //center the struct
+			y = (ushort)(y - 29); //the structure spawning has an offset + we want it to be a little off the ground
+			x = (ushort)(y - 18); //center the struct
 			
 			Main.NewText($"x: {x} y: {y}");
 			
