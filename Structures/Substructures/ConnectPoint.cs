@@ -8,6 +8,8 @@ using Microsoft.Xna.Framework;
 namespace SpawnHouses.Structures.Substructures;
 
 public class ConnectPoint {
+    private readonly Mod _mod = ModContent.GetInstance<SpawnHouses>();
+
     public ushort X { get; set; }
     public ushort Y { get; set; }
     private short _YOffset { get; set; }
@@ -241,7 +243,7 @@ public class ConnectPoint {
         return Tuple.Create(a, b, c, startX, endX);
     }
     
-    public void GenerateBridge(ConnectPoint other, ushort tileID, double MaxSlope)
+    public void GenerateBridge(ConnectPoint other, ushort tileID, double maxSlope)
     {
         Tuple parabola = _CalculateBridge(other, maxSlope);
         double a = Tuple.firstItem;
@@ -252,7 +254,7 @@ public class ConnectPoint {
 
         for (ushort bridgeTileX = startX + 1; bridgeTileX < endX; bridgeTileX++)
         {
-            Tile tile = Main.tile[bridgeTileX, a * x * x + b * x + c];
+            Tile tile = Main.tile[bridgeTileX, a * bridgeTileX * bridgeTileX + b * bridgeTileX + c];
             tile.HasTile = true;
             tile.BlockType = BlockType.Soild;
             tile.TileType = tileID;
@@ -260,12 +262,25 @@ public class ConnectPoint {
 
     }
 
-    public void GenerateBridge(ConnectPoint other, string StructureFilePath, ushort StructureLength,
-        double MaxSlope)
+    public void GenerateBridge(ConnectPoint other, string structureFilePath, ushort structureLength,
+        ushort structureYOffset, double maxSlope)
     {
-        if (Math.abs(X - other.X) % StructureLength != 0)
+        if ((Math.abs(X - other.X) - 1) % structureLength != 0)
         {
             throw new Exception("Bridge length cannot be resolved with the given Structure's length");
+        }
+
+        Tuple parabola = _CalculateBridge(other, maxSlope);
+        double a = Tuple.firstItem;
+        double b = Tuple.secondItem;
+        double c = Tuple.thirdItem;
+        ushort startX = Tuple.fourthItem;
+        ushort endX = Tuple.fifthItem;
+
+        for (ushort bridgeStructureX = startX + 1; bridgeStructureX < endX; bridgeStructureX += structureLength)
+        {
+            ushort bridgeStructureY = (a * bridgeStructureX * bridgeStructureX + b * bridgeStructureX + c) + structureYOffset;
+            StructureHelper.Generator.GenerateStructure(structureFilePath, new Point16(X:bridgeStructureX, Y:bridgeStructureY), _mod);
         }
     }
     
