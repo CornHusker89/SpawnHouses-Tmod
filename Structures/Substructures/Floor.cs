@@ -7,8 +7,8 @@ using Microsoft.Xna.Framework;
 namespace SpawnHouses.Structures.Substructures;
 
 public class Floor {
-    public int X { get; set; }
-    public int Y { get; set; }
+    public ushort X { get; set; }
+    public ushort Y { get; set; }
     private short _YOffset { get; set; }
     private short _XOffset { get; set; }
 
@@ -21,10 +21,10 @@ public class Floor {
         this.FloorLength = floorLength;
     }
 
-    public void SetPosition(int mainStructureX, int mainStructureY)
+    public void SetPosition(ushort mainStructureX, ushort mainStructureY)
     {
-        X = mainStructureX + _XOffset;
-        Y = mainStructureY + _YOffset;
+        X = Convert.ToUInt16(mainStructureX + _XOffset);
+        Y = Convert.ToUInt16(mainStructureY + _YOffset);
     }
 
     public void GenerateBeams(ushort tileID, ushort beamInterval, ushort beamsCount, byte tileColor = 0, ushort beamsXOffset = 0,

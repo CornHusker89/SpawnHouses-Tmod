@@ -1,0 +1,3 @@
+- Added mod settings (which can be accessed by pressing the gear icon in 'Manage Mods') for enabling/disabling
+  generating specific structures
+- Minor performance optimizations

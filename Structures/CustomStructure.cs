@@ -15,11 +15,11 @@ namespace SpawnHouses.Structures
         private readonly Mod _mod = ModContent.GetInstance<SpawnHouses>();
         
         public virtual string FilePath { get; set; } = "Structures/_";
-        public virtual int StructureXSize { get; set; } = 1;
-        public virtual int StructureYSize { get; set; } = 1;
+        public virtual ushort StructureXSize { get; set; } = 1;
+        public virtual ushort StructureYSize { get; set; } = 1;
         
-        public int X { get; set; }
-        public int Y { get; set; }
+        public ushort X { get; set; }
+        public ushort Y { get; set; }
         
         public Floor[] Floors { get; set; }
         public ConnectPoint[] ConnectPoints { get; set; }
@@ -51,7 +51,6 @@ namespace SpawnHouses.Structures
 
         public void GenerateStructure() 
         {
-            #pragma error disable
             StructureHelper.Generator.GenerateStructure(FilePath, new Point16(X:X, Y:Y), _mod);
             FrameTiles();
         }

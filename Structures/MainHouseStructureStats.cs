@@ -10,10 +10,10 @@ namespace SpawnHouses.Structures;
 public class MainHouseStructure : CustomStructure
 {
     public override string FilePath => "Structures/PrebuiltStructures/mainHouse";
-    public override int StructureXSize => 63;
-    public override int StructureYSize => 33;
+    public override ushort StructureXSize => 63;
+    public override ushort StructureYSize => 33;
 
-    public MainHouseStructure(int x, int y)
+    public MainHouseStructure(ushort x, ushort y)
     {
         Floors = 
         [
