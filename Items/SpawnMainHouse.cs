@@ -33,8 +33,6 @@ namespace SpawnHouses.Items
 
 		public override bool? UseItem(Player player)
 		{
-			MainHouseStructure structure = new MainHouseStructure();
-			
 			bool foundLocation = false;
 			int x = 0;
 			int y = 0;
@@ -51,14 +49,14 @@ namespace SpawnHouses.Items
 				foundLocation = true;
 			}
 
-			structure.Y = y - 27; //the structure spawning has an offset + we want it to be a little off the ground
-			structure.X = x - 31; //center the struct
+			y += -27; //the structure spawning has an offset + we want it to be a little off the ground
+			x += -31; //center the struct
+			
+			Main.NewText($"x: {x} y: {y}");
+			
+			MainHouseStructure structure = new MainHouseStructure(x, y);
 
-			structure.GenerateFoundation();
-			bool structResult = structure.GenerateStructure();
-			structure.BlendLeft();
-			structure.BlendRight();
-			return structResult;
+			return true;
 		}
 
 	}

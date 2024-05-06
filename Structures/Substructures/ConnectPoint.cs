@@ -7,33 +7,46 @@ using Microsoft.Xna.Framework;
 
 namespace SpawnHouses.Structures.Substructures;
 
-public class ConnectPoint {
-    
-    
-    public virtual int X { get; set; } = 0;
-    public virtual int Y { get; set; } = 0;
-    
 #nullable enable
-    public virtual Bridge? bridgeInfo { get; set; } = null;
-#nullable disable
-    
-    public bool GenerateBridge(ConnectPoint other)
-    {
-        if (bridgeInfo == null || other.bridgeInfo == null) {
-            return false;
-        }
 
-        return true;
+public class ConnectPoint {
+    public int X { get; set; }
+    public int Y { get; set; }
+    private short _YOffset { get; set; }
+    private short _XOffset { get; set; }
+
+    public Bridge? BridgeInfo { get; set; }
+    
+    
+    public ConnectPoint(short xOffset, short yOffset, Bridge? bridgeInfo = null)
+    {
+        _XOffset = xOffset;
+        _YOffset = yOffset;
+        BridgeInfo = bridgeInfo;
+    }
+    
+    public void SetPosition(int mainStructureX, int mainStructureY)
+    {
+        X = mainStructureX + _XOffset;
+        Y = mainStructureY + _YOffset;
+    }
+    
+    public void GenerateBridge(ConnectPoint other)
+    {
+        if (BridgeInfo == null || other.BridgeInfo == null)
+        {
+            throw new Exception("Bridge cannot be made here");
+        }
     }
 
-    public bool BlendLeft(Tile blendTileTop, ushort blendDistance, Tile? blendFillTile = null,
-        bool canUsePartialTiles = true, bool reverseDirection = false, bool debug = false)
+    public void BlendLeft(ushort topTileID, ushort blendDistance, ushort fillTileID = 0,
+        bool canUsePartialTiles = true, bool removeWalls = true, bool reverseDirection = false, bool debug = false)
     {
-        int startX = 0;
-        int startY = 0;
+        int startX;
+        int startY;
 
-        int endX = 0;
-        int endY = 0;
+        int endX;
+        int endY;
         
         if (reverseDirection)
         {
@@ -59,32 +72,27 @@ public class ConnectPoint {
                 endY++;
             }
         }
-
+        
         if (debug)
         {
-            blendTileTop = new Tile();
-            blendTileTop.TileType = TileID.Adamantite;
-            blendFillTile = new Tile();
-            blendFillTile.GetValueOrDefault().TileType = TileID.Cobalt;
+            topTileID = TileID.Adamantite;
+            fillTileID = TileID.Cobalt;
         }
         else
         {
-            if (!blendFillTile.HasValue)
+            if (fillTileID == 0)
             {
-                ushort topTileType = blendTileTop.TileType;
-                if (topTileType == TileID.Grass)
+                if (topTileID == TileID.Grass)
                 {
-                    blendFillTile = new Tile();
-                    blendFillTile.GetValueOrDefault().TileType = TileID.Dirt;
+                    fillTileID = TileID.Dirt;
                 } 
-                else if (topTileType == TileID.JungleGrass)
+                else if (topTileID == TileID.JungleGrass)
                 {
-                    blendFillTile = new Tile();
-                    blendFillTile.GetValueOrDefault().TileType = TileID.Mud;
+                    fillTileID = TileID.Mud;
                 }
                 else
                 {
-                    blendFillTile = blendTileTop;
+                    fillTileID = topTileID;
                 }
             }
         }
@@ -123,8 +131,13 @@ public class ConnectPoint {
             
             // make the top tile
             Tile tile = Main.tile[startX - dX, topTileY];
-            tile = blendTileTop;
             tile.HasTile = true;
+            tile.BlockType = BlockType.Solid;
+            tile.TileType = topTileID;
+            if (removeWalls)
+            {
+                tile.WallType = WallID.None;
+            }
             
             // give the top tile a random slope if it's in the right spot
             int nextTileDx = 1; 
@@ -162,20 +175,35 @@ public class ConnectPoint {
 
             //remove the tiles above. start at 1 because we don't want to remove the top tile itself
             ushort dYUp = 1;
-            while (Main.tile[startX - dX, topTileY - dYUp].HasTile)
+            if (removeWalls)
             {
-                Tile lowerTile = Main.tile[startX - dX, topTileY - dYUp];
-                lowerTile.HasTile = false;
-                dYUp++;
+                while (Main.tile[startX - dX, topTileY - dYUp].HasTile || Main.tile[startX - dX, topTileY - dYUp].WallType != 0) 
+                {
+                    Tile upperTile = Main.tile[startX - dX, topTileY - dYUp];
+                    upperTile.HasTile = false;
+                    upperTile.WallType = WallID.None;
+                    dYUp++;
+                }
             }
+            else
+            {
+                while (Main.tile[startX - dX, topTileY - dYUp].HasTile)
+                {
+                    Tile upperTile = Main.tile[startX - dX, topTileY - dYUp];
+                    upperTile.HasTile = false;
+                    dYUp++;
+                }
+            }
+
 
             // get/change the tiles beneath the top tiles. make sure we establish a min/max depth based on the last tile
             ushort dYDown = 1;
             while ( (!Terraria.WorldGen.SolidTile(startX - dX, topTileY + dYDown) && dYDown <= (lastTileVerticalFillLen * 1.3) + 2) || dYDown <= (lastTileVerticalFillLen * 0.6))
             {
                 Tile lowerTile = Main.tile[startX - dX, topTileY + dYDown];
-                lowerTile = blendFillTile.GetValueOrDefault();
                 lowerTile.HasTile = true;
+                lowerTile.BlockType = BlockType.Solid;
+                lowerTile.TileType = fillTileID;
                 
                 dYDown++;
             }
@@ -185,19 +213,23 @@ public class ConnectPoint {
             // make sure that the tile we found at the bottom is full
             // 'dyDown' will end up as the y-coord of the lowest tile
             Tile lowestTile = Main.tile[startX - dX, topTileY + dYDown];
+
+            bool overwriteTileType = !lowestTile.HasTile;
             lowestTile.HasTile = true;
-            lowestTile.Slope = SlopeType.Solid;
-            lowestTile.IsHalfBlock = false;
+            lowestTile.BlockType = BlockType.Solid;
+            if (overwriteTileType)
+            {
+                lowestTile.TileType = fillTileID;
+            }
+            
         }
         WorldUtils.Gen(new Point(frameCenterX, frameCenterY), new Shapes.Circle(radius: (int)(blendDistance * 6)), new Actions.SetFrames());
-        
-        return true;
     }
 
-    public bool BlendRight(Tile blendTileTop, ushort blendDistance, Tile? blendFillTile = null,
+    public void BlendRight(ushort topTileID, ushort blendDistance, ushort fillTileID = 0,
         bool canUsePartialTiles = true, bool debug = false)
     {
-        return BlendLeft(blendTileTop: blendTileTop, blendDistance: blendDistance, blendFillTile: blendFillTile,
-            canUsePartialTiles: canUsePartialTiles, debug: debug);
+        BlendLeft(topTileID: topTileID, blendDistance: blendDistance, fillTileID: fillTileID,
+            canUsePartialTiles: canUsePartialTiles, reverseDirection: true, debug: debug);
     }
 }

@@ -7,18 +7,33 @@ using Microsoft.Xna.Framework;
 namespace SpawnHouses.Structures.Substructures;
 
 public class Floor {
-    public virtual int X { get; set; } = 0;
-    public virtual int Y { get; set; } = 0;
+    public int X { get; set; }
+    public int Y { get; set; }
+    private short _YOffset { get; set; }
+    private short _XOffset { get; set; }
 
-    public virtual ushort floorLength { get; set; } = 1;
+    public ushort FloorLength { get; set; }
+    
+    public Floor(short xOffset, short yOffset, ushort floorLength)
+    {
+        _XOffset = xOffset;
+        _YOffset = yOffset;
+        this.FloorLength = floorLength;
+    }
 
-    public bool GenerateBeams(Tile beamTile, ushort beamInterval, ushort beamsCount, ushort beamsXOffset = 0,
+    public void SetPosition(int mainStructureX, int mainStructureY)
+    {
+        X = mainStructureX + _XOffset;
+        Y = mainStructureY + _YOffset;
+    }
+
+    public void GenerateBeams(ushort tileID, ushort beamInterval, ushort beamsCount, byte tileColor = 0, ushort beamsXOffset = 0,
         ushort maxBeamSize = 50, bool debug = false) 
     {
             for (int i = 0; i < beamsCount; i++)
             {
                 bool validBeamLocation = true;
-                int y2 = Y + 1; //put us 1 below the floor
+                int y2 = 1; //put us 1 below the floor
                 int x2 = X + beamsXOffset + (i * beamInterval);
 
                 //if there's a tile there already, dont place a beam
@@ -26,7 +41,7 @@ public class Floor {
 				
                 while (!Terraria.WorldGen.SolidTile(x2, Y + y2))
                 {
-                    if (y2 >= maxBeamSize + Y)
+                    if (y2 >= maxBeamSize)
                     {
                         validBeamLocation = false;
                         break;
@@ -44,8 +59,10 @@ public class Floor {
                     for (int j = 0; j < y2; j++)
                     {
                         Tile tile = Main.tile[x2, Y + j];
-                        tile = beamTile;
                         tile.HasTile = true;
+                        tile.BlockType = BlockType.Solid;
+                        tile.TileType = tileID;
+                        tile.TileColor = tileColor;
                     }
 
                     //make the tile beneath the beam (and the one just above) a full block
@@ -61,20 +78,17 @@ public class Floor {
             // set the tile frames
             WorldUtils.Gen(new Point(X + ( (beamInterval + 1) * beamsCount), Y + (maxBeamSize / 2)),
                 new Shapes.Circle(radius: maxBeamSize), new Actions.SetFrames());
-            
-            return true;
     }
 
-    public bool GenerateFoundation(Tile? foundationTile = null, short foudationRadius = 0, ushort foudationXOffset = 0,
-        ushort foudationYOffset = 0, bool debug = false) 
+    public void GenerateFoundation(ushort tileID = 0, ushort foundationRadius = 0, ushort foundationXOffset = 0,
+        ushort foundationYOffset = 0, bool debug = false) 
     {
-
         
-        if (!foundationTile.HasValue) 
+        if (tileID == 9999) 
         {
-            int x2 = X + (floorLength / 2);
-            int y2 = Y + (foudationRadius / 2);
-            while (!Terraria.WorldGen.SolidTile(X, Y))
+            int x2 = X + (FloorLength / 2);
+            int y2 = Y + (foundationRadius / 2);
+            while (!Terraria.WorldGen.SolidTile(X, y2))
             {
                 y2++;
             }
@@ -82,49 +96,23 @@ public class Floor {
             Tile tile = Main.tile[x2, y2];
             tile.Slope = SlopeType.Solid;
             tile.IsHalfBlock = false;
-            foundationTile = tile;
+            tileID = tile.TileType;
         }
-        
-        
-        int centerX = 0;
-        
-        if (foudationXOffset == 0)
-        {
-            centerX = X + (floorLength / 2);
-        }
-        else
-        {
-            centerX = X + foudationXOffset;
-        }
-        
-        int centerY = 0;
 
-        if (foudationYOffset == 0)
-        {
-            centerY = Y + foudationYOffset + (foudationYOffset / 2);
-        }
-        else
-        {
-            centerY = Y + foudationYOffset;
-        }
-        
+        int centerX = X + foundationXOffset + (FloorLength / 2);
+        int centerY = Y + foundationYOffset;
 
-        if (foudationRadius == 0)
+        if (foundationRadius == 0)
         {
-            foudationRadius = Convert.ToInt16(floorLength / 2);
+            foundationRadius = Convert.ToUInt16(FloorLength / 2);
         }
 
         if (debug)
         {
-            Main.NewText($"cx: {centerX} cy: {centerY} rad: {foudationRadius} y: {Y} FoudationYOffset: {foudationYOffset}");
+            Main.NewText($"cx: {centerX} cy: {centerY} rad: {foundationRadius} x: {X} y: {Y} FoundationYOffset: {foundationYOffset}");
         }
 
-        WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(foudationRadius),
-            new Actions.SetTile(foundationTile.GetValueOrDefault().TileType));
-
-        WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(foudationRadius + 5),
-            new Actions.SetFrames());
-    
-        return true;
+        WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(foundationRadius),
+            new Actions.SetTile(type: tileID));
     }
 }
