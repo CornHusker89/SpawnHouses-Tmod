@@ -7,8 +7,6 @@ using Microsoft.Xna.Framework;
 
 namespace SpawnHouses.Structures.Substructures;
 
-#nullable enable
-
 public class ConnectPoint {
     public ushort X { get; set; }
     public ushort Y { get; set; }
@@ -221,25 +219,54 @@ public class ConnectPoint {
             canUsePartialTiles: canUsePartialTiles, reverseDirection: true, debug: debug);
     }
 
-    private Tuple<double, double, double> _CalculateParabolaCoefficients(
-        ushort x1, ushort y1, ushort x2, ushort y2, double maxSlope)
+    private Tuple<double, double, double, ushort, ushort> _CalculateBridge(ConnectPoint other, double maxSlope)
     {
+        ushort startX;
+        ushort endX;
+        if (X < other.X)
+        {
+            startX = X;
+            endX = other.X;
+        }
+        else
+        {
+            startX = other.X;
+            endX = X;
+        }
+
         // straight up no clue how this works
-        double a = (y1 - y2 + maxSlope * (x2 - x1)) / (x1 * x1 - x2 * x2);
-        double b = (y1 - a * x1 * x1 - maxSlope * x1);
-        double c = y1 - a * x1 * x1 - b * x1;
-        return Tuple.Create(a, b, c);
+        double a = (Y - other.Y + maxSlope * (other.X - X)) / (X * X - other.X * other.X);
+        double b = (Y - a * X * X - maxSlope * X);
+        double c = Y - a * X * X - b * X;
+        return Tuple.Create(a, b, c, startX, endX);
     }
     
-    public void GenerateBridge(ConnectPoint other, ushort tileID, sbyte MaxSlope)
+    public void GenerateBridge(ConnectPoint other, ushort tileID, double MaxSlope)
     {
-        
+        Tuple parabola = _CalculateBridge(other, maxSlope);
+        double a = Tuple.firstItem;
+        double b = Tuple.secondItem;
+        double c = Tuple.thirdItem;
+        ushort startX = Tuple.fourthItem;
+        ushort endX = Tuple.fifthItem;
+
+        for (ushort bridgeTileX = startX + 1; bridgeTileX < endX; bridgeTileX++)
+        {
+            Tile tile = Main.tile[bridgeTileX, a * x * x + b * x + c];
+            tile.HasTile = true;
+            tile.BlockType = BlockType.Soild;
+            tile.TileType = tileID;
+        }
+
     }
 
     public void GenerateBridge(ConnectPoint other, string StructureFilePath, ushort StructureLength,
-        ushort StructureHeight, sbyte MaxSlope)
+        double MaxSlope)
     {
-        
+        if (Math.abs(X - other.X) % StructureLength != 0)
+        {
+            throw new Exception("Bridge length cannot be resolved with the given Structure's length");
+        }
     }
     
 }
