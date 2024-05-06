@@ -28,7 +28,7 @@ public class Floor {
     }
 
     public void GenerateBeams(ushort tileID, ushort beamInterval, ushort beamsCount, byte tileColor = 0, ushort beamsXOffset = 0,
-        ushort maxBeamSize = 50, bool debug = false) 
+        ushort maxBeamSize = 50, bool stopOnNonSolidTile = false, bool debug = false) 
     {
             for (int i = 0; i < beamsCount; i++)
             {
@@ -39,7 +39,7 @@ public class Floor {
                 //if there's a tile there already, dont place a beam
                 if (Terraria.WorldGen.SolidTile(x2, Y + y2)) { continue; }
 				
-                while (!Terraria.WorldGen.SolidTile(x2, Y + y2))
+                while (!Terraria.WorldGen.SolidTile(x2, Y + y2) && !(stopOnNonSolidTile && Main.tile[x2, Y + y2].HasTile == true))
                 {
                     if (y2 >= maxBeamSize)
                     {
