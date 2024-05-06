@@ -14,7 +14,7 @@ using SpawnHouses.Structures;
 
 namespace SpawnHouses.WorldGen
 {
-    public class CustomHouses : ModSystem
+    public class CustomHouseGen : ModSystem
     {
         // 3. These lines setup the localization for the message shown during world generation. Update your localization files after building and reloading the mod to provide values for this.
         public static LocalizedText WorldGenCustomHousesPassMessage { get; private set; }
@@ -48,10 +48,12 @@ namespace SpawnHouses.WorldGen
 			
 			int initialX = 1;
 			int initialY = 1;
+			ushort counts = 1000;
 			// do while the tile is not grass
 			while (!Main.tile[initialX, initialY].HasTile || Main.tile[initialX, initialY].TileType != TileID.Grass)
 			{
-				initialX = Terraria.WorldGen.genRand.Next(Main.spawnTileX - 100, Main.spawnTileX + 100);
+				counts++;
+				initialX = Terraria.WorldGen.genRand.Next(Main.spawnTileX - (counts / 10), Main.spawnTileX + (counts / 10));
 				initialY = Main.spawnTileY - 80;
 				while (initialY < Main.worldSurface) {
 					if (Terraria.WorldGen.SolidTile(initialX, initialY)) {
@@ -60,7 +62,7 @@ namespace SpawnHouses.WorldGen
 					initialY++;
 				}
 			}
-
+			
 			int sum = 0;
 			for (int i = -3; i <= 3; i++)
 			{
@@ -78,16 +80,7 @@ namespace SpawnHouses.WorldGen
 			// set initialY to the average y pos of the raycasts
 			initialY = (int) Math.Round(sum / 7.0);
 			
-			MainHouseStructure houseStructure = new MainHouseStructure();
-
-			houseStructure.Y = initialY - 27; //the structure spawning has an offset + we want it to be a little off the ground
-			houseStructure.X = initialX - 31; //center the structure
-
-			houseStructure.GenerateFoundation();
-			houseStructure.GenerateStructure();
-			houseStructure.BlendLeft();
-			houseStructure.BlendRight();
-			houseStructure.FrameTiles();
+			MainHouseStructure houseStructure = new MainHouseStructure(initialX - 31, initialY - 27);
 		}
 	}
 }
