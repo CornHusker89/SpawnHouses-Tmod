@@ -22,6 +22,11 @@ Mods: {
 				DisplayName: Spawn Beach House
 				Tooltip: ""
 			}
+
+			SpawnBridgeTest: {
+				DisplayName: Spawn Bridge Test
+				Tooltip: ""
+			}
 		}
 
 		Configs: {
