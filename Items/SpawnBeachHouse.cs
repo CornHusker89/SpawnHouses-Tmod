@@ -35,7 +35,7 @@ namespace SpawnHouses.Items
 		public override bool? UseItem(Player player)
 		{
 			bool foundLocation = false;
-			ushort x;
+			ushort x = 0;
 			ushort y = 0;
 			while (!foundLocation)
 			{
@@ -51,9 +51,7 @@ namespace SpawnHouses.Items
 			}
 
 			y = (ushort)(y - 29); //the structure spawning has an offset + we want it to be a little off the ground
-			x = (ushort)(y - 18); //center the struct
-			
-			Main.NewText($"x: {x} y: {y}");
+			x = (ushort)(x - 18); //center the struct
 			
 			BeachHouseStructure structure = new BeachHouseStructure(x, y);
 			

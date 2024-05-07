@@ -4,6 +4,7 @@ using Terraria.ID;
 using Terraria.WorldBuilding;
 using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
+using Terraria.ModLoader;
 
 namespace SpawnHouses.Structures.Substructures;
 
@@ -135,8 +136,8 @@ public class ConnectPoint {
             if (canUsePartialTiles && topTileY != nextTileY )
             {
                 // val of 0-2 --> full tile, 3 --> slope right/left, 4 --> half tile
-                int randomVal = Terraria.WorldGen.genRand.Next(minValue: 1, maxValue: 5);
-                if (randomVal == 3)
+                int randomVal = Terraria.WorldGen.genRand.Next(minValue: 2, maxValue: 6);
+                if (randomVal == 3 || randomVal == 4)
                 {
                     if (slope > 0)
                     {
@@ -149,7 +150,7 @@ public class ConnectPoint {
                         tile.Slope = SlopeType.SlopeDownLeft;
                     }
                 }
-                else if (randomVal == 4)
+                else if (randomVal == 5)
                 {
                     tile.Slope = SlopeType.Solid;
                     tile.IsHalfBlock = true;
@@ -225,63 +226,78 @@ public class ConnectPoint {
     {
         ushort startX;
         ushort endX;
+        ushort startY;
+        ushort endY;
         if (X < other.X)
         {
             startX = X;
             endX = other.X;
+            startY = Y;
+            endY = other.Y;
         }
         else
         {
             startX = other.X;
             endX = X;
+            startY = other.Y;
+            endY = Y;
         }
 
-        // straight up no clue how this works
-        double a = (Y - other.Y + maxSlope * (other.X - X)) / (X * X - other.X * other.X);
-        double b = (Y - a * X * X - maxSlope * X);
-        double c = Y - a * X * X - b * X;
+        // straight up no clue how this works but make coefficients for ax^2 + bx + c parabola
+        double a = -1 * Math.Abs((maxSlope - (2.0 * (endY - startY) / (endX - startX))) / (endX - startX));
+        double b = (endY - startY - a * (endX * endX - startX * startX)) / (endX - startX);
+        double c = startY - a * startX * startX - b * startX;
         return Tuple.Create(a, b, c, startX, endX);
     }
     
-    public void GenerateBridge(ConnectPoint other, ushort tileID, double maxSlope)
+    public void GenerateBridge(ConnectPoint other, ushort tileID, double attemptSlope)
     {
-        Tuple parabola = _CalculateBridge(other, maxSlope);
-        double a = Tuple.firstItem;
-        double b = Tuple.secondItem;
-        double c = Tuple.thirdItem;
-        ushort startX = Tuple.fourthItem;
-        ushort endX = Tuple.fifthItem;
+        var parabola = _CalculateBridge(other, attemptSlope);
+        double a = parabola.Item1;
+        double b = parabola.Item2;
+        double c = parabola.Item3;
+        ushort startX = parabola.Item4;
+        ushort endX = parabola.Item5;
 
-        for (ushort bridgeTileX = startX + 1; bridgeTileX < endX; bridgeTileX++)
+        for (ushort bridgeTileX = (ushort)(startX + 1); bridgeTileX < endX; bridgeTileX++)
         {
-            Tile tile = Main.tile[bridgeTileX, a * bridgeTileX * bridgeTileX + b * bridgeTileX + c];
+            Tile tile = Main.tile[bridgeTileX, (ushort)Math.Floor(a * bridgeTileX * bridgeTileX + b * bridgeTileX + c)];
             tile.HasTile = true;
-            tile.BlockType = BlockType.Soild;
+            tile.BlockType = BlockType.Solid;
             tile.TileType = tileID;
         }
 
+        ushort centerX = (ushort)((X + other.X) / 2);
+        ushort centerY = (ushort)((Y + other.Y) / 2);
+        int radius = Math.Abs(X - other.X) + 4;
+        WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(radius), new Actions.SetFrames());
     }
 
     public void GenerateBridge(ConnectPoint other, string structureFilePath, ushort structureLength,
-        ushort structureYOffset, double maxSlope)
+        short structureYOffset, double attemptSlope)
     {
-        if ((Math.abs(X - other.X) - 1) % structureLength != 0)
+        if ((Math.Abs(X - other.X) - 1) % structureLength != 0)
         {
-            throw new Exception("Bridge length cannot be resolved with the given Structure's length");
+            throw new Exception("Bridge length cannot be resolved with the given BridgeStructure's length");
         }
 
-        Tuple parabola = _CalculateBridge(other, maxSlope);
-        double a = Tuple.firstItem;
-        double b = Tuple.secondItem;
-        double c = Tuple.thirdItem;
-        ushort startX = Tuple.fourthItem;
-        ushort endX = Tuple.fifthItem;
+        var parabola = _CalculateBridge(other, attemptSlope);
+        double a = parabola.Item1;
+        double b = parabola.Item2;
+        double c = parabola.Item3;
+        ushort startX = parabola.Item4;
+        ushort endX = parabola.Item5;
 
-        for (ushort bridgeStructureX = startX + 1; bridgeStructureX < endX; bridgeStructureX += structureLength)
+        for (ushort bridgeStructureX = (ushort)(startX + 1); bridgeStructureX < endX; bridgeStructureX += structureLength)
         {
-            ushort bridgeStructureY = (a * bridgeStructureX * bridgeStructureX + b * bridgeStructureX + c) + structureYOffset;
+            ushort bridgeStructureY = (ushort)Math.Floor(a * bridgeStructureX * bridgeStructureX + b * bridgeStructureX + c + structureYOffset);
             StructureHelper.Generator.GenerateStructure(structureFilePath, new Point16(X:bridgeStructureX, Y:bridgeStructureY), _mod);
         }
+
+        ushort centerX = (ushort)((X + other.X) / 2);
+        ushort centerY = (ushort)((Y + other.Y) / 2);
+        int radius = Math.Abs(X - other.X) + 4;
+        WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(radius), new Actions.SetFrames());
     }
     
 }
