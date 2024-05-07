@@ -115,4 +115,29 @@ public class Floor {
         WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(foundationRadius),
             new Actions.SetTile(type: tileID));
     }
+
+    public void GenerateCobwebs(ushort height, ushort xOffset = 0, ushort lengthOverride = 0, short wallFilterID = -1)
+    {
+        ushort length = FloorLength;
+        if (lengthOverride != 0) 
+        {
+            length = lengthOverride;
+        }
+
+        for (ushort cobwebX = 0; cobwebX < length; cobwebX++)
+        {
+            for (ushort cobwebY = 0; cobwebY < height; cobwebY++)
+            {
+                Tile tile = Main.tile[X + cobwebX + xOffset, Y + cobwebY];
+                if (!Tile.HasTile)
+                {
+                    if (Tile.WallID == wallFilterID || wallFilterID == -1)
+                    {
+                        tile.HasTile = true;
+                        tile.TileID = TileID.Cobweb;
+                    }
+                }
+            }
+        }
+    }
 }

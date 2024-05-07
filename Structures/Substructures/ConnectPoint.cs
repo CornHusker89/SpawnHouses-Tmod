@@ -287,11 +287,19 @@ public class ConnectPoint {
         double c = parabola.Item3;
         ushort startX = parabola.Item4;
         ushort endX = parabola.Item5;
+        
+        uint cumulativeBridgeStructureY = 0;
 
-        for (ushort bridgeStructureX = (ushort)(startX + 1); bridgeStructureX < endX; bridgeStructureX += structureLength)
+        for (ushort currentX = (ushort)(startX + 1); currentX < endX; currentX++)
         {
-            ushort bridgeStructureY = (ushort)Math.Floor(a * bridgeStructureX * bridgeStructureX + b * bridgeStructureX + c + structureYOffset);
-            StructureHelper.Generator.GenerateStructure(structureFilePath, new Point16(X:bridgeStructureX, Y:bridgeStructureY), _mod);
+            cumulativeBridgeStructureY += (uint)Math.Floor(a * currentX * currentX + b * currentX + c + structureYOffset);
+
+            if ((currentX - 1) % structureLength == 0) {
+                ushort bridgeStructureX = currentX - structureLength + 1;
+                ushort bridgeStructureY = cumulativeBridgeStructureY / structureLength;
+                StructureHelper.Generator.GenerateStructure(structureFilePath, new Point16(X:bridgeStructureX, Y:bridgeStructureY), _mod);
+                cumulativeBridgeStructureY = 0;
+            }            
         }
 
         ushort centerX = (ushort)((X + other.X) / 2);
