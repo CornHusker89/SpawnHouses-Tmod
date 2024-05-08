@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -7,7 +8,7 @@ using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
 using Terraria.WorldBuilding;
 
-using SpawnHouses.Structures.Substructures;
+using SpawnHouses.Structures.StructureParts;
 
 namespace SpawnHouses.Structures
 {
@@ -27,13 +28,10 @@ namespace SpawnHouses.Structures
         public void SetSubstructurePositions()
         {
             foreach (Floor floor in Floors)
-            {
                 floor.SetPosition(mainStructureX: X, mainStructureY: Y);
-            }
+
             foreach (ConnectPoint connectPoint in ConnectPoints)
-            {
                 connectPoint.SetPosition(mainStructureX: X, mainStructureY: Y);
-            }
         }
 
         public void FrameTiles()    
@@ -53,6 +51,20 @@ namespace SpawnHouses.Structures
         {
             StructureHelper.Generator.GenerateStructure(FilePath, new Point16(X:X, Y:Y), _mod);
             FrameTiles();
+        }
+    }
+
+    public static class CustomStructureID
+    {
+        public static readonly byte TestHouse = 1;
+        public static readonly byte MainHouse = 2;
+        public static readonly byte BeachHouse = 3;
+        public static readonly byte BridgeTest = 4;
+
+        public static List<short> MakeCostList(short testHouse = -1, short mainHouse = -1, short beachHouse = -1,
+            short bridgeTest = -1)
+        {
+            return [testHouse, mainHouse, beachHouse, bridgeTest];
         }
     }
 }

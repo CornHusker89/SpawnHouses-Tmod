@@ -4,7 +4,7 @@ using Terraria.ID;
 using Terraria.WorldBuilding;
 using Microsoft.Xna.Framework;
 
-namespace SpawnHouses.Structures.Substructures;
+namespace SpawnHouses.Structures.StructureParts;
 
 public class Floor {
     public ushort X { get; set; }
@@ -50,9 +50,7 @@ public class Floor {
                 }
 
                 if (debug)
-                {
                     Main.NewText($"X:{x2}, Y:{Y}, X2:{x2}, Y2:{y2}, i:{i}, interval:{beamInterval}");
-                }
 
                 if (validBeamLocation)
                 {
@@ -89,9 +87,7 @@ public class Floor {
             int x2 = X + (FloorLength / 2);
             int y2 = Y + (foundationRadius / 2);
             while (!Terraria.WorldGen.SolidTile(X, y2))
-            {
                 y2++;
-            }
     
             Tile tile = Main.tile[x2, y2];
             tile.Slope = SlopeType.Solid;
@@ -103,14 +99,12 @@ public class Floor {
         int centerY = Y + foundationYOffset;
 
         if (foundationRadius == 0)
-        {
             foundationRadius = Convert.ToUInt16(FloorLength / 2);
-        }
+
 
         if (debug)
-        {
             Main.NewText($"cx: {centerX} cy: {centerY} rad: {foundationRadius} x: {X} y: {Y} FoundationYOffset: {foundationYOffset}");
-        }
+
 
         WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(foundationRadius),
             new Actions.SetTile(type: tileID));
@@ -120,22 +114,18 @@ public class Floor {
     {
         ushort length = FloorLength;
         if (lengthOverride != 0) 
-        {
             length = lengthOverride;
-        }
+
 
         for (ushort cobwebX = 0; cobwebX < length; cobwebX++)
         {
             for (ushort cobwebY = 0; cobwebY < height; cobwebY++)
             {
                 Tile tile = Main.tile[X + cobwebX + xOffset, Y + cobwebY];
-                if (!Tile.HasTile)
+                if (!tile.HasTile && (tile.WallType == wallFilterID || wallFilterID == -1))
                 {
-                    if (Tile.WallID == wallFilterID || wallFilterID == -1)
-                    {
-                        tile.HasTile = true;
-                        tile.TileID = TileID.Cobweb;
-                    }
+                    tile.HasTile = true;
+                    tile.WallType = TileID.Cobweb;
                 }
             }
         }

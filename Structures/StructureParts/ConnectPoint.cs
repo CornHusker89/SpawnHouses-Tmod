@@ -6,20 +6,24 @@ using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
 using Terraria.ModLoader;
 
-namespace SpawnHouses.Structures.Substructures;
+namespace SpawnHouses.Structures.StructureParts;
 
 public class ConnectPoint {
     private readonly Mod _mod = ModContent.GetInstance<SpawnHouses>();
 
+    public bool FacingLeft { get; set; } = true;
+    public bool CanBridge { get; set; } = false;
     public ushort X { get; set; }
     public ushort Y { get; set; }
     private short _YOffset { get; set; }
     private short _XOffset { get; set; }
     
-    public ConnectPoint(short xOffset, short yOffset)
+    public ConnectPoint(short xOffset, short yOffset, bool facingLeft = true, bool canBridge = false)
     {
         _XOffset = xOffset;
         _YOffset = yOffset;
+        FacingLeft = facingLeft;
+        CanBridge = canBridge;
     }
     
     public void SetPosition(int mainStructureX, int mainStructureY)
@@ -45,9 +49,8 @@ public class ConnectPoint {
             startX = endX + blendDistance;
             startY = endY - 38; // to make sure that it starts outside the terrain
             
-            while (!Terraria.WorldGen.SolidTile(startX, startY)) {
+            while (!Terraria.WorldGen.SolidTile(startX, startY)) 
                 startY++;
-            }
         }
         else
         {
@@ -57,9 +60,8 @@ public class ConnectPoint {
             endX = startX - blendDistance;
             endY = startY - 38; // to make sure that it starts outside the terrain
             
-            while (!Terraria.WorldGen.SolidTile(endX, endY)) {
+            while (!Terraria.WorldGen.SolidTile(endX, endY))
                 endY++;
-            }
         }
         
         if (debug)
@@ -72,26 +74,20 @@ public class ConnectPoint {
             if (fillTileID == 0)
             {
                 if (topTileID == TileID.Grass)
-                {
                     fillTileID = TileID.Dirt;
-                } 
+
                 else if (topTileID == TileID.JungleGrass)
-                {
                     fillTileID = TileID.Mud;
-                }
+
                 else
-                {
                     fillTileID = topTileID;
-                }
             }
         }
         
         double slope = (double) (endY - startY) / (endX - startX) * -1;
         
         if (debug)
-        {
             Main.NewText($"sX: {startX} sY: {startY} eX: {endX} eY: {endY} slope: {slope}");
-        }
 
         // initialize the center tiles for when we call frametiles()
         int frameCenterX = 0;
@@ -106,9 +102,7 @@ public class ConnectPoint {
             int topTileY = startY + (int)Math.Round(dX * slope);
 
             if (debug)
-            {
                 Main.NewText($"x: {startX - dX} y: {topTileY}");
-            }
             
             // when we're roughly in the center of the blend, make the center of the frame 
             // for when we call frametiles()
@@ -124,9 +118,7 @@ public class ConnectPoint {
             tile.BlockType = BlockType.Solid;
             tile.TileType = topTileID;
             if (removeWalls)
-            {
                 tile.WallType = WallID.None;
-            }
             
             // give the top tile a random slope if it's in the right spot
             int nextTileDx = 1; 
@@ -273,15 +265,14 @@ public class ConnectPoint {
         WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(radius), new Actions.SetFrames());
     }
 
-    public void GenerateBridge(ConnectPoint other, string structureFilePath, ushort structureLength,
-        short structureYOffset, double attemptSlope)
+    public void GenerateBridge(ConnectPoint other, Bridge bridge)
     {
-        if ((Math.Abs(X - other.X) - 1) % structureLength != 0)
+        if ((Math.Abs(X - other.X) - 1) % bridge.StructureLength != 0)
         {
             throw new Exception("Bridge length cannot be resolved with the given BridgeStructure's length");
         }
 
-        var parabola = _CalculateBridge(other, attemptSlope);
+        var parabola = _CalculateBridge(other, bridge.AttemptSlope);
         double a = parabola.Item1;
         double b = parabola.Item2;
         double c = parabola.Item3;
@@ -289,17 +280,18 @@ public class ConnectPoint {
         ushort endX = parabola.Item5;
         
         uint cumulativeBridgeStructureY = 0;
+        ushort tileCount = 0;
 
         for (ushort currentX = (ushort)(startX + 1); currentX < endX; currentX++)
         {
-            cumulativeBridgeStructureY += (uint)Math.Floor(a * currentX * currentX + b * currentX + c + structureYOffset);
-
-            if ((currentX - 1) % structureLength == 0) {
-                ushort bridgeStructureX = currentX - structureLength + 1;
-                ushort bridgeStructureY = cumulativeBridgeStructureY / structureLength;
-                StructureHelper.Generator.GenerateStructure(structureFilePath, new Point16(X:bridgeStructureX, Y:bridgeStructureY), _mod);
+            cumulativeBridgeStructureY += (uint)Math.Floor(a * currentX * currentX + b * currentX + c + bridge.StructureYOffset);
+            if ((tileCount - 1) % bridge.StructureLength == 0) {
+                ushort bridgeStructureX = (ushort)(currentX - bridge.StructureLength + 1);
+                ushort bridgeStructureY = (ushort)(cumulativeBridgeStructureY / bridge.StructureLength);
+                StructureHelper.Generator.GenerateStructure(bridge.StructureFilePath, new Point16(X:bridgeStructureX, Y:bridgeStructureY), _mod);
                 cumulativeBridgeStructureY = 0;
-            }            
+            }
+            tileCount++;
         }
 
         ushort centerX = (ushort)((X + other.X) / 2);

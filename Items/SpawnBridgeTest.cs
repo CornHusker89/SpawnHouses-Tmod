@@ -5,11 +5,11 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Structures;
 using Terraria.Chat;
 using Terraria.WorldBuilding;
-using SpawnHouses.Structures;
+using SpawnHouses.Structures.Structures;
 using Terraria.Utilities;
-using Timer = System.Timers.Timer;
 
 
 namespace SpawnHouses.Items
@@ -82,10 +82,9 @@ namespace SpawnHouses.Items
 			x = (ushort)(x - 4); //center the struct
 			
 			BridgeTestStructure structure2 = new BridgeTestStructure(x, y);
-
-
-			string filepath = "Structures/PrebuiltStructures/bridgeWoodStructure";
-			structure1.ConnectPoints[1].GenerateBridge(structure2.ConnectPoints[0], filepath, 2, -2, 0.6);
+			
+			Bridge bridge = new Bridge("Structures/StructureFiles/bridgeWoodStructure", 2, -2, 0.6);
+			structure1.ConnectPoints[1].GenerateBridge(structure2.ConnectPoints[0], bridge);
 			
 			return true;
 		}
