@@ -9,7 +9,7 @@ using Terraria.IO;
 using Terraria.Localization;
 using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Structures;
+using SpawnHouses.Structures.Structures;
 
 
 namespace SpawnHouses.WorldGen

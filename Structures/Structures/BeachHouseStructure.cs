@@ -1,19 +1,17 @@
-using System.Collections;
 using Terraria.ID;
-using Terraria;
 
 using SpawnHouses.Structures;
-using SpawnHouses.Structures.Substructures;
+using SpawnHouses.Structures.StructureParts;
 
-namespace SpawnHouses.Structures;
+namespace SpawnHouses.Structures.Structures;
 
 public class BeachHouseStructure : CustomStructure
 {
-    public override string FilePath => "Structures/PrebuiltStructures/beachHouse";
+    public override string FilePath => "Structures/StructureFiles/beachHouse";
     public override ushort StructureXSize => 35;
     public override ushort StructureYSize => 24;
-
-    public BeachHouseStructure(ushort x, ushort y)
+    
+    public BeachHouseStructure(ushort x, ushort y, bool generate = true)
     {
         Floors =
         [
@@ -22,12 +20,19 @@ public class BeachHouseStructure : CustomStructure
 
         ConnectPoints =
         [
-            new ConnectPoint(34, 29)
+            new ConnectPoint(34, 29, false)
         ];
 
         X = x;
         Y = y;
         SetSubstructurePositions();
+
+        if (generate)
+            Generate();
+    }
+
+    private void Generate()
+    {
         Floors[0].GenerateBeams(TileID.RichMahoganyBeam, 4, 3, tileColor: PaintID.BrownPaint, 1);
         Floors[0].GenerateFoundation(TileID.Sand, 11, 8, 4);
         ConnectPoints[0].BlendRight(TileID.Sand, 10);

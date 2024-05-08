@@ -15,4 +15,7 @@
       <HintPath>..\..\ModReader\StructureHelper\StructureHelper.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Structures\StructureChains\" />
+  </ItemGroup>
 </Project>
