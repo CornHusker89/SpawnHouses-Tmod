@@ -11,7 +11,7 @@ public class BeachHouseStructure : CustomStructure
     public override ushort StructureXSize => 35;
     public override ushort StructureYSize => 24;
     
-    public BeachHouseStructure(ushort x, ushort y, bool generate = true)
+    public BeachHouseStructure(ushort x = 0, ushort y = 0, sbyte cost = -1)
     {
         Floors =
         [
@@ -25,10 +25,8 @@ public class BeachHouseStructure : CustomStructure
 
         X = x;
         Y = y;
+        Cost = cost;
         SetSubstructurePositions();
-
-        if (generate)
-            Generate();
     }
 
     private void Generate()

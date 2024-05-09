@@ -11,7 +11,7 @@ public class MainHouseStructure : CustomStructure
     public override ushort StructureXSize => 63;
     public override ushort StructureYSize => 33;
 
-    public MainHouseStructure(ushort x, ushort y, bool generate = true)
+    public MainHouseStructure(ushort x = 0, ushort y = 0, sbyte cost = -1)
     {
         Floors =
         [
@@ -26,10 +26,8 @@ public class MainHouseStructure : CustomStructure
 
         X = x;
         Y = y;
+        Cost = cost;
         SetSubstructurePositions();
-        
-        if (generate)
-            Generate();
     }
 
     private void Generate()

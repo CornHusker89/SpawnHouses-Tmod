@@ -7,23 +7,25 @@ using SpawnHouses.Structures.StructureParts;
 
 namespace SpawnHouses.Structures.Structures;
 
-public class BridgeTestStructure : CustomStructure
+public class ChainTestStructure : CustomStructure
 {
     public override string FilePath => "Structures/StructureFiles/bridgeTest";
     public override ushort StructureXSize => 8;
     public override ushort StructureYSize => 9;
+    
+    public ChainTestStructure() {}
 
-    public BridgeTestStructure(ushort x = 0, ushort y = 0, sbyte cost = -1)
+    public ChainTestStructure(ushort x = 0, ushort y = 0, sbyte cost = -1)
     {
         Floors =
         [
-            new Floor(0, 8, 8)
         ];
 
         ConnectPoints =
         [
-            new ConnectPoint(0, 0, true, true),
-            new ConnectPoint(7, 0, false, true)
+            new ConnectPoint(0, 6, true, true),
+            new ConnectPoint(14, 6, false, true),
+            new ConnectPoint(14, 12, false, true)
         ];
 
         X = x;

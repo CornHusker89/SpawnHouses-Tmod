@@ -1,17 +1,22 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Structures;
+using SpawnHouses.Structures.Bridges;
 using Terraria.Chat;
 using Terraria.WorldBuilding;
 using SpawnHouses.Structures.Structures;
-using SpawnHouses;
+using Terraria.Utilities;
 
 
 namespace SpawnHouses.Items
 {
-	public class SpawnBeachHouse : ModItem
+	public class SpawnChainTest : ModItem
 	{
 		
 		public override void SetDefaults()
@@ -34,27 +39,16 @@ namespace SpawnHouses.Items
 
 		public override bool? UseItem(Player player)
 		{
-			bool foundLocation = false;
-			ushort x = 0;
-			ushort y = 0;
-			while (!foundLocation)
-			{
-				x = (ushort)(Main.MouseWorld / 16).ToPoint16().X;;
-				y = 1;
-				while (y < Main.worldSurface) {
-					if (Terraria.WorldGen.SolidTile(x, y)) {
-						break;
-					}
-					y++;
-				}
-				foundLocation = true;
-			}
+			Point16 point = (Main.MouseWorld / 16).ToPoint16();
+			List<CustomStructure> costList = new List<CustomStructure>();
+			costList.Add(new ChainTestStructure(cost: 15));
+			List<Bridge> bridgeList = new List<Bridge>();
+			bridgeList.Add(new ParabolaBridge("Structures/StructureFiles/WoodBridge", 2, -2, 6, 0.6));
 
-			y = (ushort)(y - 29); //the structure spawning has an offset + we want it to be a little off the ground
-			x = (ushort)(x - 18); //center the struct
+			StructureChain chain = new StructureChain(100, costList, bridgeList, point, 7);
 			
-			BeachHouseStructure structure = new BeachHouseStructure(x, y);	
-			structure.GenerateStructure();
+			
+			
 			
 			return true;
 		}

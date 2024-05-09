@@ -2,16 +2,16 @@ using System.Collections.Generic;
 
 namespace SpawnHouses.Structures;
 
-delegate void TreeVisitor<T>(T nodeData);
+public delegate void TreeVisitor<T>(T nodeData);
 
-class NodeTree<T>
+public class NodeTree<T>
 {
-    private readonly T _data;
-    private readonly LinkedList<NodeTree<T>> _children;
+    public T data;
+    protected LinkedList<NodeTree<T>> _children;
 
     public NodeTree(T data)
     {
-        this._data = data;
+        this.data = data;
         _children = new LinkedList<NodeTree<T>>();
     }
 
@@ -31,7 +31,7 @@ class NodeTree<T>
 
     public void Traverse(NodeTree<T> node, TreeVisitor<T> visitor)
     {
-        visitor(node._data);
+        visitor(node.data);
         foreach (NodeTree<T> child in node._children)
             Traverse(child, visitor);
     }

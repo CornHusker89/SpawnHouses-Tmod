@@ -5,7 +5,7 @@ using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
 using Terraria.Chat;
 using Terraria.WorldBuilding;
-using SpawnHouses.Structures;
+using SpawnHouses.Structures.Structures;
 
 
 namespace SpawnHouses.Items
@@ -55,6 +55,7 @@ namespace SpawnHouses.Items
 			Main.NewText($"x: {x} y: {y}");
 			
 			MainHouseStructure structure = new MainHouseStructure(x, y);
+			structure.GenerateStructure();
 
 			return true;
 		}
