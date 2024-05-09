@@ -6,6 +6,7 @@ using Terraria.ModLoader;
 using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Structures;
+using SpawnHouses.Structures.Bridges;
 using Terraria.Chat;
 using Terraria.WorldBuilding;
 using SpawnHouses.Structures.Structures;
@@ -57,6 +58,7 @@ namespace SpawnHouses.Items
 			x = (ushort)(x - 4); //center the struct
 			
 			BridgeTestStructure structure1 = new BridgeTestStructure(x, y);
+			structure1.GenerateStructure();
 
 
 
@@ -82,9 +84,11 @@ namespace SpawnHouses.Items
 			x = (ushort)(x - 4); //center the struct
 			
 			BridgeTestStructure structure2 = new BridgeTestStructure(x, y);
+			structure2.GenerateStructure();
 			
-			Bridge bridge = new Bridge("Structures/StructureFiles/bridgeWoodStructure", 2, -2, 0.6);
-			structure1.ConnectPoints[1].GenerateBridge(structure2.ConnectPoints[0], bridge);
+			
+			ParabolaBridge bridge = new ParabolaBridge("Structures/StructureFiles/WoodBridge", 2, -2, 6, 0.6, structure1.ConnectPoints[1], structure2.ConnectPoints[0]);
+			bridge.Generate();
 			
 			return true;
 		}

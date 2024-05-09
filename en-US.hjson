@@ -27,6 +27,11 @@ Mods: {
 				DisplayName: Spawn Bridge Test
 				Tooltip: ""
 			}
+
+			SpawnChainTest: {
+				DisplayName: Spawn Chain Test
+				Tooltip: ""
+			}
 		}
 
 		Configs: {
