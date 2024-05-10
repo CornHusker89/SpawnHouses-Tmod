@@ -59,23 +59,21 @@ public class StructureChain
             int structureIndex = Terraria.WorldGen.genRand.Next(0, costList.Count);
             CustomStructure structure = costList[structureIndex].Clone();
             structure.SetPosition(x, y);
-            
-            Main.NewText("i got 1");
                 
             int deltaX = structure.ConnectPoints[0].X - entryPos.X;
             int deltaY = structure.ConnectPoints[0].Y - entryPos.Y;
             
-            Main.NewText("i got 2");
-            
             structure.SetPosition((ushort)(structure.X - deltaX), (ushort)(structure.Y - deltaY));
             currentCost += (ushort)structure.Cost;
-            boundingBoxes.Add(structure.boundingBox);
+            boundingBoxes.Add(structure.BoundingBox);
             return structure;
         }
         
         void GenerateChildren(ConnectPoint connectPoint, ushort structureXSize, byte currentBranchLength)
         {
             if (Terraria.WorldGen.genRand.Next(0, maxBranchLength - currentBranchLength) == 0 || averageCost + currentCost >= maxCost) return;
+            
+            Main.NewText("starting child");
             
             byte bridgeIndex = (byte)Terraria.WorldGen.genRand.Next(0, bridgeList.Count);
             Bridge bridge = bridgeList[bridgeIndex].Clone();
@@ -104,7 +102,7 @@ public class StructureChain
 
                 foreach (var boundingBox in boundingBoxes)
                 {
-                    if (structure.boundingBox.IsBoundingBoxColliding(boundingBox)) continue;
+                    if (structure.BoundingBox.IsBoundingBoxColliding(boundingBox)) continue;
                     validLocation = true;
                     break;
                 }

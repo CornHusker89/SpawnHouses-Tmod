@@ -36,30 +36,6 @@ public class Bridge
     
     public Bridge Clone()
     {
-        Type type = GetType();
-        Bridge copy = (Bridge)Activator.CreateInstance(type);
-
-        // Get all fields of the class
-        FieldInfo[] fields = type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-
-        foreach (FieldInfo field in fields)
-        {
-            // Check if the field is a reference type and not null
-            if (!field.FieldType.IsValueType && field.GetValue(this) != null)
-            {
-                // If it's a reference type, create a deep copy
-                object fieldValue = field.GetValue(this);
-                MethodInfo method = typeof(Bridge).GetMethod("Clone").MakeGenericMethod(field.FieldType);
-                object copiedFieldValue = method.Invoke(fieldValue, null);
-                field.SetValue(copy, copiedFieldValue);
-            }
-            else
-            {
-                // If it's a value type or null, just copy the value
-                field.SetValue(copy, field.GetValue(this));
-            }
-        }
-
-        return copy;
+        return new Bridge(StructureFilePath, StructureLength, StructureYOffset, MaxDeltaY, Point1, Point2);
     }
 }

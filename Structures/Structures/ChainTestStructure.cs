@@ -9,14 +9,16 @@ namespace SpawnHouses.Structures.Structures;
 
 public class ChainTestStructure : CustomStructure
 {
-    public override string FilePath => "Structures/StructureFiles/bridgeTest";
-    public override ushort StructureXSize => 8;
-    public override ushort StructureYSize => 9;
+    public override string FilePath => "Structures/StructureFiles/chainTest";
+    public sealed override ushort StructureXSize => 8;
+    public sealed override ushort StructureYSize => 9;
     
-    public ChainTestStructure() {}
-
     public ChainTestStructure(ushort x = 0, ushort y = 0, sbyte cost = -1)
     {
+        X = x;
+        Y = y;
+        Cost = cost;
+        
         Floors =
         [
         ];
@@ -28,9 +30,8 @@ public class ChainTestStructure : CustomStructure
             new ConnectPoint(14, 12, false, true)
         ];
 
-        X = x;
-        Y = y;
-        Cost = cost;
+        BoundingBox = new BoundingBox(x - 3, y - 3, x + StructureXSize + 3, y + StructureYSize + 3);
+        
         SetSubstructurePositions();
     }
 
@@ -40,5 +41,10 @@ public class ChainTestStructure : CustomStructure
 
         GenerateStructure();
         FrameTiles();
+    }
+
+    public override ChainTestStructure Clone()
+    {
+        return new ChainTestStructure(X, Y, Cost);
     }
 }

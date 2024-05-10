@@ -2,6 +2,7 @@ using Terraria.ID;
 
 using SpawnHouses.Structures;
 using SpawnHouses.Structures.StructureParts;
+using System.Reflection;
 
 namespace SpawnHouses.Structures.Structures;
 
@@ -37,5 +38,10 @@ public class BeachHouseStructure : CustomStructure
 
         GenerateStructure();
         FrameTiles();
+    }
+
+    public override BeachHouseStructure Clone()
+    {
+        return new BeachHouseStructure(X, Y, Cost);
     }
 }

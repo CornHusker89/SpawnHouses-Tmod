@@ -39,4 +39,9 @@ public class BridgeTestStructure : CustomStructure
         GenerateStructure();
         FrameTiles();
     }
+
+    public override BridgeTestStructure Clone()
+    {
+        return new BridgeTestStructure(X, Y, Cost);
+    }
 }

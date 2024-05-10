@@ -11,13 +11,13 @@ public class BoundingBox
     public Point16 Point1 { get; set; }
     public Point16 Point2 { get; set; }
 
-    BoundingBox(Point16 point1, Point16 point2)
+    public BoundingBox(Point16 point1, Point16 point2)
     {
         Point1 = point1;
         Point2 = point2;
     }
 
-    BoundingBox(int x1, int y1, int x2, int y2)
+    public BoundingBox(int x1, int y1, int x2, int y2)
     {
         Point1 = new Point16(x1, y1);
         Point2 = new Point16(x2, y2);
