@@ -39,4 +39,9 @@ public class MainHouseStructure : CustomStructure
         GenerateStructure();
         FrameTiles();
     }
+
+    public override MainHouseStructure Clone()
+    {
+        return new MainHouseStructure(X, Y, Cost);
+    }
 }   

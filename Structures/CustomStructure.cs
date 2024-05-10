@@ -20,7 +20,7 @@ public class CustomStructure {
     public virtual string FilePath { get; set; } = "Structures/_";
     public virtual ushort StructureXSize { get; set; } = 1;
     public virtual ushort StructureYSize { get; set; } = 1;
-    public virtual BoundingBox boundingBox { get; set; }
+    public virtual BoundingBox BoundingBox { get; set; }
     
     public sbyte Cost { get; set; } = -1;
     public ushort X { get; set; } = 10;
@@ -28,6 +28,23 @@ public class CustomStructure {
 
     public Floor[] Floors { get; set; } = Array.Empty<Floor>();
     public ConnectPoint[] ConnectPoints { get; set; } = Array.Empty<ConnectPoint>();
+
+    // you're not really intended to make a base customStructure, so this is private
+    private CustomStructure(String filePath, ushort structureXSize, ushort structureYSize, BoundingBox boundingBox,
+        sbyte cost, ushort x, ushort y, Floor[] floors, ConnectPoint[] connectPoints)
+    {
+        FilePath = FilePath;
+        StructureXSize = structureXSize;
+        StructureYSize = structureYSize;
+        BoundingBox = boundingBox;
+        Cost = cost;
+        X = x;
+        Y = y;
+        Floors = floors;
+        ConnectPoints = connectPoints;
+    }
+    
+    protected CustomStructure() {}
 
     protected void SetSubstructurePositions()
     {
@@ -64,33 +81,20 @@ public class CustomStructure {
         FrameTiles();
     }
     
-    public CustomStructure Clone()
+    public virtual CustomStructure Clone()
     {
-        Type type = GetType();
-        CustomStructure copy = (CustomStructure)Activator.CreateInstance(type);
-
-        // Get all fields of the class
-        FieldInfo[] fields = type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-
-        foreach (FieldInfo field in fields)
-        {
-            // Check if the field is a reference type and not null
-            if (!field.FieldType.IsValueType && field.GetValue(this) != null)
-            {
-                // If it's a reference type, create a deep copy
-                object fieldValue = field.GetValue(this);
-                MethodInfo method = typeof(CustomStructure).GetMethod("Clone").MakeGenericMethod(field.FieldType);
-                object copiedFieldValue = method.Invoke(fieldValue, null);
-                field.SetValue(copy, copiedFieldValue);
-            }
-            else
-            {
-                // If it's a value type or null, just copy the value
-                field.SetValue(copy, field.GetValue(this));
-            }
-        }
-
-        return copy;
+        return new CustomStructure
+        (
+            FilePath = FilePath,
+            StructureXSize = StructureXSize,
+            StructureYSize = StructureYSize,
+            BoundingBox = BoundingBox,
+            Cost = Cost,
+            X = X,
+            Y = Y,
+            Floors = (Floor[])Floors.Clone(),
+            ConnectPoints = (ConnectPoint[])ConnectPoints.Clone()
+        );
     }
 }
 
