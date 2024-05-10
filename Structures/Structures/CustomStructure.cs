@@ -20,9 +20,7 @@ public class CustomStructure {
     public virtual string FilePath { get; set; } = "Structures/_";
     public virtual ushort StructureXSize { get; set; } = 1;
     public virtual ushort StructureYSize { get; set; } = 1;
-    public virtual BoundingBox BoundingBox { get; set; }
     
-    public sbyte Cost { get; set; } = -1;
     public ushort X { get; set; } = 10;
     public ushort Y { get; set; } = 10;
 
@@ -30,8 +28,8 @@ public class CustomStructure {
     public ConnectPoint[] ConnectPoints { get; set; } = Array.Empty<ConnectPoint>();
 
     // you're not really intended to make a base customStructure, so this is private
-    private CustomStructure(String filePath, ushort structureXSize, ushort structureYSize, BoundingBox boundingBox,
-        sbyte cost, ushort x, ushort y, Floor[] floors, ConnectPoint[] connectPoints)
+    private CustomStructure(String filePath, ushort structureXSize, ushort structureYSize, 
+        ushort x, ushort y, Floor[] floors, ConnectPoint[] connectPoints)
     {
         FilePath = FilePath;
         StructureXSize = structureXSize;
@@ -88,26 +86,10 @@ public class CustomStructure {
             FilePath = FilePath,
             StructureXSize = StructureXSize,
             StructureYSize = StructureYSize,
-            BoundingBox = BoundingBox,
-            Cost = Cost,
             X = X,
             Y = Y,
             Floors = (Floor[])Floors.Clone(),
             ConnectPoints = (ConnectPoint[])ConnectPoints.Clone()
         );
-    }
-}
-
-public partial class CustomStructureID
-{
-    public const byte TestHouse = 1;
-    public const byte MainHouse = 2;
-    public const byte BeachHouse = 3;
-    public const byte BridgeTest = 4;
-
-    public static List<short> MakeCostList(short testHouse = -1, short mainHouse = -1, short beachHouse = -1,
-        short bridgeTest = -1)
-    {
-        return [testHouse, mainHouse, beachHouse, bridgeTest];
     }
 }

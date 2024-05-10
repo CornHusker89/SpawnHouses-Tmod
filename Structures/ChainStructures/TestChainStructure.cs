@@ -7,7 +7,7 @@ using SpawnHouses.Structures.StructureParts;
 
 namespace SpawnHouses.Structures.Structures;
 
-public class ChainTestStructure : CustomStructure
+public class ChainTestStructure : CustomChainStructure
 {
     public override string FilePath => "Structures/StructureFiles/chainTest";
     public sealed override ushort StructureXSize => 8;

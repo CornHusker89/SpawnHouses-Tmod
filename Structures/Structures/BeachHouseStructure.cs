@@ -12,7 +12,7 @@ public class BeachHouseStructure : CustomStructure
     public override ushort StructureXSize => 35;
     public override ushort StructureYSize => 24;
     
-    public BeachHouseStructure(ushort x = 0, ushort y = 0, sbyte cost = -1)
+    public BeachHouseStructure(ushort x = 0, ushort y = 0)
     {
         Floors =
         [
@@ -42,6 +42,6 @@ public class BeachHouseStructure : CustomStructure
 
     public override BeachHouseStructure Clone()
     {
-        return new BeachHouseStructure(X, Y, Cost);
+        return new BeachHouseStructure(X, Y);
     }
 }

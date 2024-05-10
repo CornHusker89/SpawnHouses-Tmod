@@ -13,7 +13,7 @@ public class BridgeTestStructure : CustomStructure
     public override ushort StructureXSize => 8;
     public override ushort StructureYSize => 9;
 
-    public BridgeTestStructure(ushort x = 0, ushort y = 0, sbyte cost = -1)
+    public BridgeTestStructure(ushort x = 0, ushort y = 0)
     {
         Floors =
         [
@@ -28,7 +28,6 @@ public class BridgeTestStructure : CustomStructure
 
         X = x;
         Y = y;
-        Cost = cost;
         SetSubstructurePositions();
     }
 
@@ -38,10 +37,5 @@ public class BridgeTestStructure : CustomStructure
 
         GenerateStructure();
         FrameTiles();
-    }
-
-    public override BridgeTestStructure Clone()
-    {
-        return new BridgeTestStructure(X, Y, Cost);
     }
 }
