@@ -5,13 +5,13 @@ using SpawnHouses.Structures.StructureParts;
 
 namespace SpawnHouses.Structures.Structures;
 
-public class MainHouseStructure : CustomStructure
+public class MainHouseStructure : CustomChainStructure
 {
     public override string FilePath => "Structures/StructureFiles/mainHouse";
     public override ushort StructureXSize => 63;
     public override ushort StructureYSize => 33;
 
-    public MainHouseStructure(ushort x = 0, ushort y = 0, sbyte cost = -1)
+    public MainHouseStructure(ushort x = 0, ushort y = 0)
     {
         Floors =
         [
@@ -26,7 +26,6 @@ public class MainHouseStructure : CustomStructure
 
         X = x;
         Y = y;
-        Cost = cost;
         SetSubstructurePositions();
     }
 
@@ -38,10 +37,5 @@ public class MainHouseStructure : CustomStructure
 
         GenerateStructure();
         FrameTiles();
-    }
-
-    public override MainHouseStructure Clone()
-    {
-        return new MainHouseStructure(X, Y, Cost);
     }
 }   
