@@ -34,7 +34,7 @@ public class Bridge
 
     public virtual void Generate() {}
     
-    public Bridge Clone()
+    public virtual Bridge Clone()
     {
         return new Bridge(StructureFilePath, StructureLength, StructureYOffset, MaxDeltaY, Point1, Point2);
     }
