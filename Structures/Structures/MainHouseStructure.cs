@@ -1,11 +1,13 @@
 using Terraria.ID;
-
 using SpawnHouses.Structures;
+
+
+
 using SpawnHouses.Structures.StructureParts;
 
 namespace SpawnHouses.Structures.Structures;
 
-public class MainHouseStructure : CustomChainStructure
+public class MainHouseStructure : CustomStructure
 {
     public override string FilePath => "Structures/StructureFiles/mainHouse";
     public override ushort StructureXSize => 63;

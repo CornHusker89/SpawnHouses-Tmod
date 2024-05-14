@@ -5,33 +5,39 @@ using Terraria;
 using SpawnHouses.Structures;
 using SpawnHouses.Structures.StructureParts;
 
-namespace SpawnHouses.Structures.Structures;
+namespace SpawnHouses.Structures.StructureChains;
 
-public class ChainTestStructure : CustomChainStructure
+public class TestChainStructure : CustomChainStructure
 {
-    public override string FilePath => "Structures/StructureFiles/chainTest";
-    public sealed override ushort StructureXSize => 8;
-    public sealed override ushort StructureYSize => 9;
+    // constants
+    private static readonly string _filePath = "Structures/StructureFiles/chainTest";
+    private static readonly ushort _structureXSize = 15;
+    private static readonly ushort _structureYSize = 13;
     
-    public ChainTestStructure(ushort x = 0, ushort y = 0, sbyte cost = -1)
+    private static readonly Floor[] _floors =
+    [
+    ];
+
+    private static readonly ConnectPoint[] _connectPoints =
+    [
+        new ConnectPoint(0, 6, true, true),
+        new ConnectPoint(14, 6, false, true),
+        new ConnectPoint(14, 12, false, true)
+    ];
+    
+    
+        
+    public override string FilePath => _filePath;
+    public sealed override ushort StructureXSize => _structureXSize;
+    public sealed override ushort StructureYSize => _structureYSize;
+    
+    public TestChainStructure(sbyte cost, ushort x = 1, ushort y = 1) : 
+        base(_filePath,  _structureXSize,  _structureYSize, _floors, _connectPoints, x, y, cost)
     {
         X = x;
         Y = y;
         Cost = cost;
-        
-        Floors =
-        [
-        ];
-
-        ConnectPoints =
-        [
-            new ConnectPoint(0, 6, true, true),
-            new ConnectPoint(14, 6, false, true),
-            new ConnectPoint(14, 12, false, true)
-        ];
-
-        BoundingBox = new BoundingBox(x - 3, y - 3, x + StructureXSize + 3, y + StructureYSize + 3);
-        
+        StructureBoundingBox = new BoundingBox(x - 3, y - 3, x + StructureXSize + 3, y + StructureYSize + 3);
         SetSubstructurePositions();
     }
 
@@ -43,8 +49,8 @@ public class ChainTestStructure : CustomChainStructure
         FrameTiles();
     }
 
-    public override ChainTestStructure Clone()
+    public override TestChainStructure Clone()
     {
-        return new ChainTestStructure(X, Y, Cost);
+        return new TestChainStructure(Cost, X, Y);
     }
 }

@@ -26,7 +26,6 @@ public class BeachHouseStructure : CustomStructure
 
         X = x;
         Y = y;
-        Cost = cost;
         SetSubstructurePositions();
     }
 
@@ -38,10 +37,5 @@ public class BeachHouseStructure : CustomStructure
 
         GenerateStructure();
         FrameTiles();
-    }
-
-    public override BeachHouseStructure Clone()
-    {
-        return new BeachHouseStructure(X, Y);
     }
 }

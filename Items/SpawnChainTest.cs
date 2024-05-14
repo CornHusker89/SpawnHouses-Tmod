@@ -10,6 +10,7 @@ using SpawnHouses.Structures;
 using SpawnHouses.Structures.Bridges;
 using Terraria.Chat;
 using Terraria.WorldBuilding;
+using SpawnHouses.Structures.StructureChains;
 using SpawnHouses.Structures.Structures;
 using Terraria.Utilities;
 
@@ -40,10 +41,10 @@ namespace SpawnHouses.Items
 		public override bool? UseItem(Player player)
 		{
 			Point16 point = (Main.MouseWorld / 16).ToPoint16();
-			List<CustomStructure> costList = new List<CustomStructure>();
-			costList.Add(new ChainTestStructure(cost: 15));
+			List<CustomChainStructure> costList = new List<CustomChainStructure>();
+			costList.Add(new TestChainStructure(cost: 10));
 			List<Bridge> bridgeList = new List<Bridge>();
-			bridgeList.Add(new ParabolaBridge("Structures/StructureFiles/WoodBridge", 2, -2, 6, 0.6));
+			bridgeList.Add(new ParabolaBridge("Structures/StructureFiles/WoodBridge", 2, -2, 25, 0.6));
 
 			StructureChain chain = new StructureChain(100, costList, bridgeList, point, 7);
 			

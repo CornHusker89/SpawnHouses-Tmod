@@ -7,7 +7,6 @@ using Terraria.ModLoader;
 using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
 using Terraria.WorldBuilding;
-using System.Reflection;
 
 using SpawnHouses.Structures.StructureParts;
 using SpawnHouses.Structures;
@@ -26,34 +25,18 @@ public class CustomStructure {
 
     public Floor[] Floors { get; set; } = Array.Empty<Floor>();
     public ConnectPoint[] ConnectPoints { get; set; } = Array.Empty<ConnectPoint>();
-
-    // you're not really intended to make a base customStructure, so this is private
-    private CustomStructure(String filePath, ushort structureXSize, ushort structureYSize, 
-        ushort x, ushort y, Floor[] floors, ConnectPoint[] connectPoints)
-    {
-        FilePath = FilePath;
-        StructureXSize = structureXSize;
-        StructureYSize = structureYSize;
-        BoundingBox = boundingBox;
-        Cost = cost;
-        X = x;
-        Y = y;
-        Floors = floors;
-        ConnectPoints = connectPoints;
-    }
     
     protected CustomStructure() {}
 
-    protected void SetSubstructurePositions()
+    protected virtual void SetSubstructurePositions()
     {
         foreach (Floor floor in Floors)
             floor.SetPosition(mainStructureX: X, mainStructureY: Y);
-
         foreach (ConnectPoint connectPoint in ConnectPoints)
             connectPoint.SetPosition(mainStructureX: X, mainStructureY: Y);
     }
 
-    public void SetPosition(ushort x, ushort y)
+    public virtual void SetPosition(ushort x, ushort y)
     {
         X = x;
         Y = y;
@@ -77,19 +60,5 @@ public class CustomStructure {
     {
         StructureHelper.Generator.GenerateStructure(FilePath, new Point16(X:X, Y:Y), _mod);
         FrameTiles();
-    }
-    
-    public virtual CustomStructure Clone()
-    {
-        return new CustomStructure
-        (
-            FilePath = FilePath,
-            StructureXSize = StructureXSize,
-            StructureYSize = StructureYSize,
-            X = X,
-            Y = Y,
-            Floors = (Floor[])Floors.Clone(),
-            ConnectPoints = (ConnectPoint[])ConnectPoints.Clone()
-        );
     }
 }

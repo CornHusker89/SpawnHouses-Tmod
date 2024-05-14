@@ -5,6 +5,7 @@ using Terraria.DataStructures;
 using SpawnHouses.Structures.StructureParts;
 using Terraria.ModLoader;
 using Microsoft.Xna.Framework;
+using Terraria;
 
 namespace SpawnHouses.Structures.Bridges;
 
@@ -51,11 +52,14 @@ public class ParabolaBridge : Bridge
 
     public override void Generate()
     {
-        // probably do a check to see if the points aren't null
+        if (Point1 == null || Point2 == null)
+        {
+            throw new Exception("bridge point 1 or 2 is invalid");
+        }
         
         if ((Math.Abs(Point1.X - Point2.X) - 1) % StructureLength != 0)
         {
-            throw new Exception("Bridge length cannot be resolved with the given BridgeStructure's length");
+            throw new Exception($"Bridge length cannot be resolved with the given BridgeStructure's length, width - 1: {Math.Abs(Point1.X - Point2.X) - 1}, structureLength: {StructureLength}");
         }
 
         var parabola = _CalculateParabolaBridge(AttemptSlope);
@@ -84,5 +88,11 @@ public class ParabolaBridge : Bridge
         ushort centerY = (ushort)((Point1.Y + Point2.Y) / 2);
         int radius = Math.Abs(Point1.X - Point2.X) + 4;
         WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(radius), new Actions.SetFrames());
+    }
+
+    public override ParabolaBridge Clone()
+    {
+        return new ParabolaBridge(StructureFilePath, StructureLength, StructureYOffset, MaxDeltaY, 
+            AttemptSlope, Point1, Point2);
     }
 }
