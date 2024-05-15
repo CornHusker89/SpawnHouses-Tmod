@@ -9,34 +9,26 @@ namespace SpawnHouses.Structures.StructureParts;
 
 public class ConnectPoint {
     public bool FacingLeft { get; set; } = true;
-    public bool CanBridge { get; set; } = false;
-    public bool HasBridge { get; set; } = false;
     public ushort X { get; set; }
     public ushort Y { get; set; }
     private short _YOffset { get; set; }
     private short _XOffset { get; set; }
     
-    public ConnectPoint(short xOffset, short yOffset, bool facingLeft = true,
-        bool canBridge = false, bool hasBridge = false)
+    public ConnectPoint(short xOffset, short yOffset, bool facingLeft = true)
     {
         _XOffset = xOffset;
         _YOffset = yOffset;
         FacingLeft = facingLeft;
-        CanBridge = canBridge;
-        HasBridge = hasBridge;
     }
     
     // for cloning
-    private ConnectPoint(bool facingLeft, bool canBridge, bool hasBridge,
-        ushort x, ushort y, short xOffset, short yOffset)
+    private ConnectPoint(ushort x, ushort y, short xOffset, short yOffset, bool facingLeft)
     {
-        FacingLeft = facingLeft;
-        CanBridge = canBridge;
-        HasBridge = hasBridge;
         X = x;
         Y = y;
         _XOffset = xOffset;
         _YOffset = yOffset;
+        FacingLeft = facingLeft;
     }
     
     public void SetPosition(int mainStructureX, int mainStructureY)
@@ -227,8 +219,8 @@ public class ConnectPoint {
             canUsePartialTiles: canUsePartialTiles, reverseDirection: true, debug: debug);
     }
 
-    public ConnectPoint Clone()
+    public virtual ConnectPoint Clone()
     {
-        return new ConnectPoint(FacingLeft, CanBridge, HasBridge, X, Y, _XOffset, _YOffset);
+        return new ConnectPoint(X, Y, _XOffset, _YOffset, FacingLeft);
     }
 }
