@@ -14,10 +14,10 @@ namespace SpawnHouses.Structures;
 
 public class Bridge
 {
-    public string StructureFilePath;
-    public ushort StructureLength;
-    public short StructureYOffset;
-    public ushort MaxDeltaY;
+    public readonly string StructureFilePath;
+    public readonly ushort StructureLength;
+    public readonly short StructureYOffset;
+    public readonly ushort MaxDeltaY;
     public ConnectPoint Point1;
     public ConnectPoint Point2;
     

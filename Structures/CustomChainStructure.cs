@@ -9,13 +9,14 @@ namespace SpawnHouses.Structures;
 
 public class CustomChainStructure : CustomStructure
 {
+    public Bridge ChildBridge { get; set; }
     public sbyte Cost { get; set; }
     public BoundingBox StructureBoundingBox { get; set; }
     private readonly byte _boundingBoxMargin;
     
     // you're not really intended to make a base customStructure, so this is private
     protected CustomChainStructure(String filePath, ushort structureXSize, ushort structureYSize, Floor[] floors,
-        ConnectPoint[] connectPoints, ushort x = 1, ushort y = 1, sbyte cost = -1, byte boundingBoxMargin = 3)
+        ConnectPoint[] connectPoints, Bridge childBridge,  ushort x = 1, ushort y = 1, sbyte cost = -1, byte boundingBoxMargin = 0)
     {
         FilePath = filePath;
         StructureXSize = structureXSize;
@@ -24,6 +25,7 @@ public class CustomChainStructure : CustomStructure
         Y = y;
         Floors = floors;
         ConnectPoints = connectPoints;
+        ChildBridge = childBridge;
         Cost = cost;
         _boundingBoxMargin = boundingBoxMargin;
         SetSubstructurePositions();
@@ -55,6 +57,7 @@ public class CustomChainStructure : CustomStructure
             StructureYSize = StructureYSize,
             Floors = (Floor[])Floors.Clone(),
             ConnectPoints = (ConnectPoint[])ConnectPoints.Clone(),
+            ChildBridge = ChildBridge,
             X = X,
             Y = Y,
             Cost = Cost
