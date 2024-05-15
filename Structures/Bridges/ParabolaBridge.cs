@@ -59,7 +59,7 @@ public class ParabolaBridge : Bridge
         
         if ((Math.Abs(Point1.X - Point2.X) - 1) % StructureLength != 0)
         {
-            throw new Exception($"Bridge length cannot be resolved with the given BridgeStructure's length, width - 1: {Math.Abs(Point1.X - Point2.X) - 1}, structureLength: {StructureLength}");
+            throw new Exception($"Bridge length cannot be resolved with the given BridgeStructure's length, p1: {Point1.X}, p2 {Point2.X}, width - 1: {Math.Abs(Point1.X - Point2.X) - 1}, structureLength: {StructureLength}");
         }
 
         var parabola = _CalculateParabolaBridge(AttemptSlope);
