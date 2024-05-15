@@ -18,11 +18,11 @@ public class TestChainStructure : CustomChainStructure
     [
     ];
 
-    private static readonly ConnectPoint[] _connectPoints =
+    private static readonly ChainConnectPoint[] _connectPoints =
     [
-        new ConnectPoint(0, 6, true, true),
-        new ConnectPoint(14, 6, false, true),
-        new ConnectPoint(14, 12, false, true)
+        new ChainConnectPoint(0, 6, true, true),
+        new ChainConnectPoint(14, 6, false, true),
+        new ChainConnectPoint(14, 12, false, true)
     ];
     
     
@@ -39,14 +39,6 @@ public class TestChainStructure : CustomChainStructure
         Cost = cost;
         StructureBoundingBox = new BoundingBox(x - 3, y - 3, x + StructureXSize + 3, y + StructureYSize + 3);
         SetSubstructurePositions();
-    }
-
-    private void Generate()
-    {
-        Floors[0].GenerateFoundation(TileID.Dirt, 4, 0, 1);
-
-        GenerateStructure();
-        FrameTiles();
     }
 
     public override TestChainStructure Clone()

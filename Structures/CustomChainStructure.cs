@@ -9,9 +9,10 @@ namespace SpawnHouses.Structures;
 
 public class CustomChainStructure : CustomStructure
 {
-    public Bridge ChildBridge { get; set; }
+    public Bridge ChildBridgeType { get; set; }
     public sbyte Cost { get; set; }
     public BoundingBox StructureBoundingBox { get; set; }
+    public ChainConnectPoint ParentChainConnectPoint { get; set; }
     private readonly byte _boundingBoxMargin;
     
     // you're not really intended to make a base customStructure, so this is private
@@ -25,7 +26,7 @@ public class CustomChainStructure : CustomStructure
         Y = y;
         Floors = floors;
         ConnectPoints = connectPoints;
-        ChildBridge = childBridge;
+        ChildBridgeType = childBridge;
         Cost = cost;
         _boundingBoxMargin = boundingBoxMargin;
         SetSubstructurePositions();
@@ -57,7 +58,7 @@ public class CustomChainStructure : CustomStructure
             StructureYSize = StructureYSize,
             Floors = (Floor[])Floors.Clone(),
             ConnectPoints = (ConnectPoint[])ConnectPoints.Clone(),
-            ChildBridge = ChildBridge,
+            ChildBridgeType = ChildBridgeType,
             X = X,
             Y = Y,
             Cost = Cost
