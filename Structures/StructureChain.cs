@@ -1,63 +1,71 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.Utilities;
+using Microsoft.Extensions.Logging;
 using SpawnHouses.Structures.StructureParts;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.ModLoader;
 
 namespace SpawnHouses.Structures;
 
 public class StructureChain
 {
     /*
-     * @summary makes a chain of CustomStructures and Bridges using NodeTree
+     * @summary makes a chain of CustomStructures and Bridges
      * 
-     * @param totalCost the total structure cost for the whole chain
-     * @param costList a list of the costs for every possible structure
-     * @param bridges a list of the possible bridges to pick from when generating
      */
-    public StructureChain(ushort maxCost, List<CustomChainStructure> costList, Point16 entryPos, byte maxBranchLength)
+    public StructureChain(ushort maxCost, List<CustomChainStructure> structureList, Point16 entryPos, byte maxBranchLength)
     {
-        foreach (var structure in costList)
+        foreach (var structure in structureList)
             if (structure.Cost == -1)
-                throw new Exception("invalid item in costList");
+                throw new Exception("invalid item in structureList");
 
-        if (costList.Count == 0)
-            throw new Exception("costList had no valid options");
+        if (structureList.Count == 0)
+            throw new Exception("structureList had no valid options");
         
         ushort currentCost = 0;
         ushort averageCost = 1;
-        foreach (var structure in costList)
+        foreach (var structure in structureList)
             averageCost += (ushort)structure.Cost;
-        averageCost /= (ushort)costList.Count;
-        
+        averageCost /= (ushort)structureList.Count;
+
         List<BoundingBox> boundingBoxes = new List<BoundingBox>();
         
-        CustomChainStructure rootStructure = NewStructure((ushort)entryPos.X, (ushort)entryPos.Y);
+        CustomChainStructure rootStructure = NewStructure(null, (ushort)entryPos.X, (ushort)entryPos.Y);
         boundingBoxes.Add(rootStructure.StructureBoundingBox);
         for (byte index = 1; index < rootStructure.ConnectPoints.Length; index++)
             CalculateChildrenStructures(rootStructure.ConnectPoints[index], rootStructure.StructureXSize, 1);
+
+        GenerateChildren(rootStructure);
+        Console.WriteLine();
+        Console.WriteLine();
+        Console.WriteLine();
         
-        //generate the structures and bridges
-        void GenerateChild(CustomChainStructure structure)
+        // start of functions
+        void GenerateChildren(CustomChainStructure structure, int branchLength = 0)
         {
+            if (branchLength > maxBranchLength) return;
             structure.GenerateStructure();
             foreach (ChainConnectPoint connectPoint in structure.ConnectPoints)
             {
-                if (connectPoint.ChildStructure == null) continue;
-                ChainConnectPoint endPoint = connectPoint.ChildStructure.ConnectPoints[0];
+                if (connectPoint.ChildStructure is null) continue;
                 Bridge bridge = structure.ChildBridgeType.Clone();
+                
                 bridge.Point1 = connectPoint;
-                bridge.Point2 = endPoint;
+                bridge.Point2 = connectPoint.ChildStructure.ConnectPoints[0];
                 bridge.Generate();
+                
+                //recursive call
+                GenerateChildren(connectPoint.ChildStructure, branchLength + 1);
             }
         }
         
-        // start of functions
-        CustomChainStructure NewStructure(ChainConnectPoint connectPoint, ushort x = 100, ushort y = 100)
+        CustomChainStructure NewStructure(ChainConnectPoint parentConnectPoint, ushort x = 100, ushort y = 100)
         {
-            byte structureIndex = (byte)Terraria.WorldGen.genRand.Next(0, costList.Count);
-            CustomChainStructure structure = costList[structureIndex].Clone();
-            structure.ParentChainConnectPoint = connectPoint;
+            byte structureIndex = (byte)Terraria.WorldGen.genRand.Next(0, structureList.Count);
+            CustomChainStructure structure = structureList[structureIndex].Clone();
+            structure.ParentChainConnectPoint = parentConnectPoint;
             structure.SetPosition(x, y);
             return structure;
         }
@@ -71,12 +79,13 @@ public class StructureChain
         
         void CalculateChildrenStructures(ChainConnectPoint connectPoint, ushort structureXSize, byte currentBranchLength)
         {
-            if (Terraria.WorldGen.genRand.Next(0, maxBranchLength - currentBranchLength) == 0 || averageCost + currentCost >= maxCost) return;
+            if (Terraria.WorldGen.genRand.Next(0, maxBranchLength - currentBranchLength) == 0 || currentCost + averageCost >= maxCost) return;
             
             bool validLocation = false;
             byte validLocationCount = 0;
+            
             CustomChainStructure structure = NewStructure(connectPoint);
-
+            
             while (!validLocation && validLocationCount < 20)
             {
                 ushort structureX;
@@ -85,38 +94,42 @@ public class StructureChain
                                                structureXSize * Terraria.WorldGen.genRand.Next(7, 13) / 10.0);
                 else
                     structureX = (ushort)(connectPoint.X +
-                                               structureXSize * Terraria.WorldGen.genRand.Next(10, 10) / 10.0);
+                                               structureXSize * Terraria.WorldGen.genRand.Next(7, 13) / 10.0);
     
                 // ensure that the bridge like actually fits right lol
-                structureX -= (ushort)((Math.Abs(connectPoint.X - structureX) - 1) % structure.ChildBridgeType.StructureLength);
-                ushort structureY = (ushort)(connectPoint.Y + Terraria.WorldGen.genRand.Next(0, 101) / 100.0 * structure.ChildBridgeType.MaxDeltaY);
+                structureX += (ushort)((Math.Abs(connectPoint.X - structureX) - 1) % structure.ChildBridgeType.StructureLength);
+                ushort structureY = (ushort)(connectPoint.Y + Terraria.WorldGen.genRand.Next(-100, 101) / 100.0 * structure.ChildBridgeType.MaxDeltaY);
                 
                 MoveStructureConnectPoint(structure, structureX, structureY);
                 
+                validLocation = true;
                 foreach (var boundingBox in boundingBoxes)
                 {
                     if (structure.StructureBoundingBox.IsBoundingBoxColliding(boundingBox))
                     {
-                        Main.NewText("retrying house gen cuz of bounding box collision");
-                        continue;
-                    }; 
-                    boundingBoxes.Add(structure.StructureBoundingBox);
-                    validLocation = true;
-                    break;
+                        validLocationCount++;
+                        validLocation = false;
+                        break;
+                    }
                 }
-                validLocationCount++;
             }
 
             if (!validLocation)
             {
-                Main.NewText("child failed becuase it couldnt find valid location");
+                Console.WriteLine("child failed because it couldn't find valid location");
                 return;
             }
-
+            
+            boundingBoxes.Add(structure.StructureBoundingBox);
+            
             connectPoint.ChildStructure = structure;
             currentCost += (ushort)structure.Cost;
+            
+            
+            
             for (byte index = 1; index < structure.ConnectPoints.Length; index++)
-                GenerateChildren(structure.ConnectPoints[index], structure.StructureXSize, (byte)(currentBranchLength + 1));
+                // recursive
+                CalculateChildrenStructures(structure.ConnectPoints[index], structure.StructureXSize, (byte)(currentBranchLength + 1));
         }
         
     }

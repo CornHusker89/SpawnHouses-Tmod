@@ -18,7 +18,17 @@ public class Floor {
     {
         _XOffset = xOffset;
         _YOffset = yOffset;
-        this.FloorLength = floorLength;
+        FloorLength = floorLength;
+    }
+    
+    // for clones
+    private Floor(ushort x, ushort y, short xOffset, short yOffset, ushort floorLength)
+    {
+        X = x;
+        Y = y;
+        _XOffset = xOffset;
+        _YOffset = yOffset;
+        FloorLength = floorLength;
     }
 
     public void SetPosition(ushort mainStructureX, ushort mainStructureY)
@@ -129,5 +139,10 @@ public class Floor {
                 }
             }
         }
+    }
+
+    public Floor Clone()
+    {
+        return new Floor(X, Y, _XOffset, _YOffset, FloorLength);
     }
 }

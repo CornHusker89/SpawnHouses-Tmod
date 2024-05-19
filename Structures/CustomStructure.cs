@@ -24,7 +24,7 @@ public class CustomStructure {
     public ushort Y { get; set; } = 10;
 
     public Floor[] Floors { get; set; } = Array.Empty<Floor>();
-    public ConnectPoint[] ConnectPoints { get; set; } = Array.Empty<ConnectPoint>();
+    public virtual ConnectPoint[] ConnectPoints { get; set; } = Array.Empty<ConnectPoint>();
     
     protected CustomStructure() {}
 
@@ -56,7 +56,8 @@ public class CustomStructure {
         WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(radius), new Actions.SetFrames());
     }
 
-    public void GenerateStructure() 
+    [NoJIT]
+    public void GenerateStructure()
     {
         StructureHelper.Generator.GenerateStructure(FilePath, new Point16(X:X, Y:Y), _mod);
         FrameTiles();

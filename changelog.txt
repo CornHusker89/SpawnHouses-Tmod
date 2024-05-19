@@ -1,4 +1,5 @@
 - Added mod settings (which can be accessed by pressing the gear icon in 'Manage Mods') for enabling/disabling
   generating specific structures
 - Minor performance optimizations
-- Moved main house into the ground by a little bit, to prevent guide spawning in the ground
+- Moved main house further into the ground, to prevent guide spawning in the ground
+- Updated in-game description

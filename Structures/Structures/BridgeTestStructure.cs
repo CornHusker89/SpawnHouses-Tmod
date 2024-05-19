@@ -22,8 +22,8 @@ public class BridgeTestStructure : CustomStructure
 
         ConnectPoints =
         [
-            new ConnectPoint(0, 0, true, true),
-            new ConnectPoint(7, 0, false, true)
+            new ConnectPoint(0, 0, true),
+            new ConnectPoint(7, 0, false)
         ];
 
         X = x;

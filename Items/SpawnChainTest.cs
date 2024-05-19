@@ -42,11 +42,11 @@ namespace SpawnHouses.Items
 		{
 			Point16 point = (Main.MouseWorld / 16).ToPoint16();
 			List<CustomChainStructure> costList = new List<CustomChainStructure>();
-			costList.Add(new TestChainStructure(cost: 10));
-			List<Bridge> bridgeList = new List<Bridge>();
-			bridgeList.Add(new ParabolaBridge("Structures/StructureFiles/WoodBridge", 2, -2, 25, 0.6));
+			Bridge bridge = new ParabolaBridge("Structures/StructureFiles/WoodBridge", 2, -2, 6, 0.4);
+			costList.Add(new TestChainStructure(10, bridge));
+			
 
-			StructureChain chain = new StructureChain(100, costList, bridgeList, point, 7);
+			StructureChain chain = new StructureChain(100, costList, point, 7);
 			
 			
 			
