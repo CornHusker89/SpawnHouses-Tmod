@@ -9,6 +9,12 @@ namespace SpawnHouses.Structures;
 
 public class CustomChainStructure : CustomStructure
 {
+    public new ChainConnectPoint[] ConnectPoints { get; set; }
+    public ChainConnectPoint[] TopConnectPoints { get; set; }
+    public ChainConnectPoint[] BottomConnectPoints { get; set; }
+    public ChainConnectPoint[] LeftConnectPoints { get; set; }
+    public ChainConnectPoint[] RightConnectPoints { get; set; }
+    
     public Bridge ChildBridgeType { get; set; }
     public sbyte Cost { get; set; }
     public BoundingBox StructureBoundingBox { get; set; }
@@ -17,7 +23,9 @@ public class CustomChainStructure : CustomStructure
     
     // you're not really intended to make a base customStructure, so this is private
     protected CustomChainStructure(String filePath, ushort structureXSize, ushort structureYSize, Floor[] floors,
-        ConnectPoint[] connectPoints, Bridge childBridge,  ushort x = 1, ushort y = 1, sbyte cost = -1, byte boundingBoxMargin = 0)
+        ChainConnectPoint[] connectPoints, ChainConnectPoint[] topConnectPoints, ChainConnectPoint[] bottomConnectPoints,
+        ChainConnectPoint[] leftConnectPoints, ChainConnectPoint[] rightConnectPoints, Bridge childBridge,
+        ushort x = 1, ushort y = 1, sbyte cost = -1, byte boundingBoxMargin = 0)
     {
         FilePath = filePath;
         StructureXSize = structureXSize;
@@ -26,6 +34,10 @@ public class CustomChainStructure : CustomStructure
         Y = y;
         Floors = floors;
         ConnectPoints = connectPoints;
+        TopConnectPoints = topConnectPoints;
+        BottomConnectPoints = bottomConnectPoints;
+        LeftConnectPoints = leftConnectPoints;
+        RightConnectPoints = rightConnectPoints;
         ChildBridgeType = childBridge;
         Cost = cost;
         _boundingBoxMargin = boundingBoxMargin;
@@ -36,7 +48,7 @@ public class CustomChainStructure : CustomStructure
     {
         foreach (Floor floor in Floors)
             floor.SetPosition(mainStructureX: X, mainStructureY: Y);
-        foreach (ConnectPoint connectPoint in ConnectPoints)
+        foreach (var connectPoint in ConnectPoints)
             connectPoint.SetPosition(mainStructureX: X, mainStructureY: Y);
         StructureBoundingBox = new BoundingBox(X - _boundingBoxMargin, Y - _boundingBoxMargin,
             X + StructureXSize + _boundingBoxMargin, Y + StructureYSize + _boundingBoxMargin);
@@ -49,6 +61,22 @@ public class CustomChainStructure : CustomStructure
         SetSubstructurePositions();
     }
     
+    protected static Floor[] CopyFloors(Floor[] floors)
+    {
+        Floor[] newFloors = (Floor[])floors.Clone();
+        for (byte i = 0; i < newFloors.Length; i++)
+            newFloors[i] = newFloors[i].Clone();
+        return newFloors;
+    }
+    
+    protected static ChainConnectPoint[] CopyConnectPoints(ChainConnectPoint[] connectPoints)
+    {
+        ChainConnectPoint[] newConnectPoints = (ChainConnectPoint[])connectPoints.Clone();
+        for (byte i = 0; i < newConnectPoints.Length; i++)
+            newConnectPoints[i] = newConnectPoints[i].Clone();
+        return newConnectPoints;
+    }
+    
     public virtual CustomChainStructure Clone()
     {
         return new CustomChainStructure
@@ -56,8 +84,12 @@ public class CustomChainStructure : CustomStructure
             FilePath = FilePath,
             StructureXSize = StructureXSize,
             StructureYSize = StructureYSize,
-            Floors = (Floor[])Floors.Clone(),
-            ConnectPoints = (ConnectPoint[])ConnectPoints.Clone(),
+            Floors = CopyFloors(Floors),
+            ConnectPoints = CopyConnectPoints(ConnectPoints),
+            TopConnectPoints = CopyConnectPoints(TopConnectPoints),
+            BottomConnectPoints = CopyConnectPoints(BottomConnectPoints),
+            LeftConnectPoints = CopyConnectPoints(LeftConnectPoints),
+            RightConnectPoints = CopyConnectPoints(RightConnectPoints),
             ChildBridgeType = ChildBridgeType,
             X = X,
             Y = Y,

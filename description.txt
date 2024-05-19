@@ -1,1 +1,3 @@
 When making a world, a house will spawn near the spawn point.
+
+Expect much, much more in the coming weeks! We've got a lot of new things coming up

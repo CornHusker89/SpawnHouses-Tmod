@@ -11,8 +11,8 @@ public class ConnectPoint {
     public bool FacingLeft { get; set; } = true;
     public ushort X { get; set; }
     public ushort Y { get; set; }
-    private short _YOffset { get; set; }
-    private short _XOffset { get; set; }
+    protected short _YOffset { get; set; }
+    protected short _XOffset { get; set; }
     
     public ConnectPoint(short xOffset, short yOffset, bool facingLeft = true)
     {
@@ -219,7 +219,7 @@ public class ConnectPoint {
             canUsePartialTiles: canUsePartialTiles, reverseDirection: true, debug: debug);
     }
 
-    public virtual ConnectPoint Clone()
+    public ConnectPoint Clone()
     {
         return new ConnectPoint(X, Y, _XOffset, _YOffset, FacingLeft);
     }

@@ -8,11 +8,11 @@ using Microsoft.Xna.Framework;
 namespace SpawnHouses.Structures.StructureParts;
 
 public class ChainConnectPoint : ConnectPoint {
-    public Bridge ChildBridge { get; set; } = false;
+    public Bridge ChildBridge { get; set; }
     public CustomChainStructure ChildStructure { get; set; }
     
     public ChainConnectPoint(short xOffset, short yOffset, bool facingLeft = true,
-        Bridge childBridge = false, CustomChainStructure childStructure = null) : base(xOffset, yOffset, facingLeft)
+        Bridge childBridge = null, CustomChainStructure childStructure = null) : base(xOffset, yOffset, facingLeft)
     {
         _XOffset = xOffset;
         _YOffset = yOffset;
@@ -34,8 +34,8 @@ public class ChainConnectPoint : ConnectPoint {
         ChildStructure = childStructure;
     }
     
-    public override CustomChainStructure Clone()
+    public new ChainConnectPoint Clone()
     {
-        return new CustomChainStructure(FacingLeft, X, Y, _XOffset, _YOffset, ChildBridge, ChildStructure);
+        return new ChainConnectPoint(FacingLeft, X, Y, _XOffset, _YOffset, ChildBridge, ChildStructure);
     }
 }

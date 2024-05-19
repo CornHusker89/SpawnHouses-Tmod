@@ -50,6 +50,7 @@ public class ParabolaBridge : Bridge
         return Tuple.Create(a, b, c, startX, endX);
     }
 
+    [NoJIT]
     public override void Generate()
     {
         if (Point1 == null || Point2 == null)

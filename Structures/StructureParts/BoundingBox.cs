@@ -27,7 +27,7 @@ public class BoundingBox
     {
         // see if they aren't colliding
         if (Point1.X > other.Point2.X || Point2.X < other.Point1.X ||
-            Point2.Y > other.Point1.Y || Point1.Y < other.Point2.Y)
+            Point1.Y > other.Point2.Y || Point2.Y < other.Point1.Y)
         {
             return false;
         }
