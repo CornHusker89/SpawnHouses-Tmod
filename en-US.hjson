@@ -32,6 +32,11 @@ Mods: {
 				DisplayName: Spawn Chain Test
 				Tooltip: ""
 			}
+
+			SpawnWorldGen: {
+				DisplayName: Spawn World Gen
+				Tooltip: ""
+			}
 		}
 
 		Configs: {

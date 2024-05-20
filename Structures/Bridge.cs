@@ -8,7 +8,6 @@ using Terraria.ModLoader;
 using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
 using Terraria.WorldBuilding;
-using System.Reflection;
 
 namespace SpawnHouses.Structures;
 
