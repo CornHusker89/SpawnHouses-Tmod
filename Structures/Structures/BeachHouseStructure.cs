@@ -2,7 +2,6 @@ using Terraria.ID;
 
 using SpawnHouses.Structures;
 using SpawnHouses.Structures.StructureParts;
-using System.Reflection;
 
 namespace SpawnHouses.Structures.Structures;
 

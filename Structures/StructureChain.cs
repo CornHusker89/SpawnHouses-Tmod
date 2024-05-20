@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Utilities;
-using Microsoft.Extensions.Logging;
 using SpawnHouses.Structures.StructureParts;
 using Terraria;
 using Terraria.DataStructures;

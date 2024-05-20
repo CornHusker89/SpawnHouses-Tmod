@@ -7,9 +7,9 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="tModLoader.CodeAssist" Version="0.1.*" />
-  </ItemGroup>
+<!--  <ItemGroup>-->
+<!--    <PackageReference Include="tModLoader.CodeAssist" Version="0.1.*" />-->
+<!--  </ItemGroup>-->
   <ItemGroup>
     <Reference Include="StructureHelper">
       <HintPath>..\..\ModReader\StructureHelper\StructureHelper.dll</HintPath>
