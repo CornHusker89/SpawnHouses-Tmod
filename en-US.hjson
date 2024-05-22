@@ -37,6 +37,11 @@ Mods: {
 				DisplayName: Spawn World Gen
 				Tooltip: ""
 			}
+
+			SpawnIceCave: {
+				DisplayName: Spawn Ice Cave
+				Tooltip: ""
+			}
 		}
 
 		Configs: {
