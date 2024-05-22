@@ -14,7 +14,7 @@ using SpawnHouses.Structures.Structures;
 
 namespace SpawnHouses.WorldGen
 {
-    public class CustomWorldGen : ModSystem
+    public class CustomStructureGen : ModSystem
     {
         // 3. These lines setup the localization for the message shown during world generation. Update your localization files after building and reloading the mod to provide values for this.
         public static LocalizedText WorldGenCustomHousesPassMessage { get; private set; }
