@@ -82,8 +82,64 @@ namespace SpawnHouses.WorldGen
 				initialY = (ushort) Math.Round(sum / 7.0);
 			
 				MainHouseStructure houseStructure = new MainHouseStructure(Convert.ToUInt16(initialX - 31), Convert.ToUInt16(initialY - 24));
+				houseStructure.Generate();
 			}
 			
+			if (ModContent.GetInstance<SpawnHousesConfig>().EnableBeachHouse)
+			{
+				ushort tileX, tileY;
+
+				bool findLeft(bool reverse = false) {
+					ushort X;
+					if (!reverse)
+						X = 10;
+					else
+						X = WorldLimitX;
+
+					bool found = false;
+					while (true) {
+						if (!reverse)
+							X++;
+						else
+							X--;
+
+						Y = 10;
+						while (true) {
+							Y++;
+							if (Main.tile[X, Y].HasLiquid) 
+								break;
+							
+							if (Main.tile[X, Y].HasTile)
+								if (Main.tile[X, Y].TileType == TileID.Sand)
+								{
+									tileX = X;
+									tileY = Y;
+									return true;
+								}
+								else
+									return false;
+						}
+					}
+				}
+
+				bool findRight() {
+					return findLeft(true);
+				}
+
+				if (Terraria.WorldGen.genRand.Next(0, 2) == 0) {
+					if (!getRight()) {
+						findLeft();
+					}
+				}
+				else
+				{
+					if (!getLeft()) {
+						findRight();
+					}
+				}
+
+				//MainHouseStructure houseStructure = new MainHouseStructure(Convert.ToUInt16(initialX - 31), Convert.ToUInt16(initialY - 24));
+			}
 		}
 	}
 }
