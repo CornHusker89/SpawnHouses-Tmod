@@ -9,12 +9,7 @@ namespace SpawnHouses.Structures;
 
 public class CustomChainStructure : CustomStructure
 {
-    public new ChainConnectPoint[] ConnectPoints { get; set; }
-    public ChainConnectPoint[] TopConnectPoints { get; set; }
-    public ChainConnectPoint[] BottomConnectPoints { get; set; }
-    public ChainConnectPoint[] LeftConnectPoints { get; set; }
-    public ChainConnectPoint[] RightConnectPoints { get; set; }
-    
+    public new ChainConnectPoint[4][] ConnectPoints { get; set; }    
     public Bridge ChildBridgeType { get; set; }
     public sbyte Cost { get; set; }
     public BoundingBox StructureBoundingBox { get; set; }
@@ -23,8 +18,7 @@ public class CustomChainStructure : CustomStructure
     
     // you're not really intended to make a base customStructure, so this is private
     protected CustomChainStructure(String filePath, ushort structureXSize, ushort structureYSize, Floor[] floors,
-        ChainConnectPoint[] connectPoints, ChainConnectPoint[] topConnectPoints, ChainConnectPoint[] bottomConnectPoints,
-        ChainConnectPoint[] leftConnectPoints, ChainConnectPoint[] rightConnectPoints, Bridge childBridge,
+        ChainConnectPoint[4][] connectPoints, Bridge childBridge,
         ushort x = 1, ushort y = 1, sbyte cost = -1, byte boundingBoxMargin = 0)
     {
         FilePath = filePath;
@@ -33,11 +27,10 @@ public class CustomChainStructure : CustomStructure
         X = x;
         Y = y;
         Floors = floors;
-        ConnectPoints = connectPoints;
-        TopConnectPoints = topConnectPoints;
-        BottomConnectPoints = bottomConnectPoints;
-        LeftConnectPoints = leftConnectPoints;
-        RightConnectPoints = rightConnectPoints;
+        ConnectPoints[0] = topConnectPoints;
+        ConnectPoints[1] = bottomConnectPoints;
+        ConnectPoints[2] = leftConnectPoints;
+        ConnectPoints[3] = rightConnectPoints;
         ChildBridgeType = childBridge;
         Cost = cost;
         _boundingBoxMargin = boundingBoxMargin;
@@ -69,11 +62,13 @@ public class CustomChainStructure : CustomStructure
         return newFloors;
     }
     
-    protected static ChainConnectPoint[] CopyConnectPoints(ChainConnectPoint[] connectPoints)
+    protected static ChainConnectPoint[][] CopyConnectPoints(ChainConnectPoint[][] connectPoints)
     {
-        ChainConnectPoint[] newConnectPoints = (ChainConnectPoint[])connectPoints.Clone();
-        for (byte i = 0; i < newConnectPoints.Length; i++)
-            newConnectPoints[i] = newConnectPoints[i].Clone();
+        ChainConnectPoint[][] newConnectPoints = (ChainConnectPoint[][])connectPoints.Clone();
+        for (byte i = 0; i < 4; i++)
+            newConnectPoints[i] = (ChainConnectPoint[])connectPoints.Clone();
+            for (byte j = 0; j < newConnectPoints[i].Length; j++)
+                newConnectPoints[i] = newConnectPoints[i].Clone();
         return newConnectPoints;
     }
     
@@ -86,14 +81,25 @@ public class CustomChainStructure : CustomStructure
             StructureYSize = StructureYSize,
             Floors = CopyFloors(Floors),
             ConnectPoints = CopyConnectPoints(ConnectPoints),
-            TopConnectPoints = CopyConnectPoints(TopConnectPoints),
-            BottomConnectPoints = CopyConnectPoints(BottomConnectPoints),
-            LeftConnectPoints = CopyConnectPoints(LeftConnectPoints),
-            RightConnectPoints = CopyConnectPoints(RightConnectPoints),
             ChildBridgeType = ChildBridgeType,
             X = X,
             Y = Y,
             Cost = Cost
         );
+    }
+}
+
+public class CPDirection {
+    public static byte Up = 0;
+    public static byte Down = 1;
+    public static byte Left = 2;
+    public static byte Right = 3;
+
+    public static byte flipDirection(byte direction)
+    {
+        if (direction != 1 || direction != 3)
+            return direction - 1;
+        else
+            return direction + 1;
     }
 }
