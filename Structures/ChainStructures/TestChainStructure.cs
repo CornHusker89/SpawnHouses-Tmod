@@ -17,32 +17,25 @@ public class TestChainStructure : CustomChainStructure
     
     private static readonly Floor[] _floors = [];
 
-    private static readonly ChainConnectPoint[] _connectPoints =
+    private static readonly ChainConnectPoint[][] _connectPoints =
     [
-        new ChainConnectPoint(0, 6, true),
-        new ChainConnectPoint(14, 6, false),
-        new ChainConnectPoint(14, 12, false)
+        // top
+        [],
+        
+        // bottom
+        [],
+        
+        // left
+        [
+            new ChainConnectPoint(0, 6, true)
+        ],
+        
+        // right
+        [
+            new ChainConnectPoint(14, 6, false),
+            new ChainConnectPoint(14, 12, false)
+        ]
     ];
-    
-    private static readonly ChainConnectPoint[] _topConnectPoints =
-    [
-    ];
-    
-    private static readonly ChainConnectPoint[] _bottomConnectPoints =
-    [
-    ];
-    
-    private static readonly ChainConnectPoint[] _leftConnectPoints =
-    [
-        _connectPoints[0]
-    ];
-    
-    private static readonly ChainConnectPoint[] _rightConnectPoints =
-    [
-        _connectPoints[1],
-        _connectPoints[2]
-    ];
-    
     
     public override string FilePath => _filePath;
     public sealed override ushort StructureXSize => _structureXSize;
@@ -50,9 +43,7 @@ public class TestChainStructure : CustomChainStructure
     
     public TestChainStructure(sbyte cost, Bridge childBridgeType, ushort x = 1, ushort y = 1) : 
         base(_filePath,  _structureXSize,  _structureYSize, CopyFloors(_floors), 
-            CopyConnectPoints(_connectPoints), CopyConnectPoints(_topConnectPoints),
-            CopyConnectPoints(_bottomConnectPoints), CopyConnectPoints(_leftConnectPoints),
-            CopyConnectPoints(_rightConnectPoints), childBridgeType, x, y, cost)
+            CopyConnectPoints(_connectPoints), childBridgeType, x, y, cost)
     {
         X = x;
         Y = y;

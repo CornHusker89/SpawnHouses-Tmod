@@ -47,10 +47,10 @@ public class StructureChain
         void GenerateChildren(CustomChainStructure structure, int branchLength = 0)
         {
             if (branchLength > maxBranchLength) return;
-            structure.GenerateStructure();
+            structure.Generate();
             for (byte direction = 0; direction < 4; direction++)
             {
-                foreach (ChainConnectPoint connectPoint in structure.ConnectPoints[di])
+                foreach (ChainConnectPoint connectPoint in structure.ConnectPoints[direction])
                 {
                     if (connectPoint.ChildStructure is null) continue;
                     Bridge bridge = structure.ChildBridgeType.Clone();
@@ -89,11 +89,11 @@ public class StructureChain
             byte validLocationCount = 0;
             
             CustomChainStructure structure = NewStructure(connectPoint);
-            ChainConnectPoint targetConnectPoint;
+            ChainConnectPoint targetConnectPoint = null;
             
             while (!validLocation && validLocationCount < 20)
             {
-                byte randomSide = Terraria.WorldGen.genRand.Next(0, 2);
+                byte randomSide = (byte)Terraria.WorldGen.genRand.Next(0, 2);
                 ushort structureX, structureY;
                 if (targetDirection == CPDirection.Left || targetDirection == CPDirection.Right)
                 {
@@ -114,9 +114,9 @@ public class StructureChain
                     structureX = connectPoint.X;
 
                     if (targetDirection == CPDirection.Up)
-                        structureY = connectPoint.Y - 1;
+                        structureY = (ushort)(connectPoint.Y - 1);
                     else
-                        structureY = connectPoint.Y + 1;
+                        structureY = (ushort)(connectPoint.Y + 1);
                 }
 
                 ChainConnectPoint[] targetConnectPointList = structure.ConnectPoints[CPDirection.flipDirection(targetDirection)];
@@ -148,11 +148,10 @@ public class StructureChain
             connectPoint.ChildConnectPoint = targetConnectPoint;
             currentCost += (ushort)structure.Cost;
             
-            
-            for (byte index = 1; index < structure.ConnectPoints.Length; index++)
-                // recursive
-                CalculateChildrenStructures(structure.ConnectPoints[index], structure.StructureXSize, (byte)(currentBranchLength + 1));
+            for (byte direction = 0; direction < 4; direction++)
+                foreach (var nextConnectPoint in structure.ConnectPoints[direction])
+                    // recursive
+                    CalculateChildrenStructures(nextConnectPoint, structure.StructureXSize, CPDirection.flipDirection(direction), (byte)(currentBranchLength + 1));
         }
-        
     }
 }

@@ -31,11 +31,11 @@ public class BridgeTestStructure : CustomStructure
         SetSubstructurePositions();
     }
 
-    private void Generate()
+    public override void Generate()
     {
         Floors[0].GenerateFoundation(TileID.Dirt, 4, 0, 1);
 
-        GenerateStructure();
+        _GenerateStructure();
         FrameTiles();
     }
 }

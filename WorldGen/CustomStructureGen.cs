@@ -27,17 +27,22 @@ namespace SpawnHouses.WorldGen
         public override void ModifyWorldGenTasks(List<GenPass> tasks, ref double totalWeight) {
             // 5. We use FindIndex to locate the index of the vanilla world generation task called "Sunflowers". This ensures our code runs at the correct step.
             int sunflowersIndex = tasks.FindIndex(genpass => genpass.Name.Equals("Sunflowers"));
-            if (sunflowersIndex != -1) {
+            
+            if (sunflowersIndex != -1) 
                 // 6. We register our world generation pass by passing in an instance of our custom GenPass class below. The GenPass class will execute our world generation code.
-                tasks.Insert(sunflowersIndex + 1, new WorldGenCustomHousesPass("World Gen Custom Houses", 100f));
-            }
+                tasks.Insert(sunflowersIndex + 1, new CustomHousesPass("Generate Custom Houses Pass", 100f));
+            else
+	            tasks.Insert(tasks.Count - 2, new CustomHousesPass("Generate Custom Houses Pass", 100f));
+            
+            
+            tasks.Insert(tasks.Count - 2, item: new CustomBeachHousePass("Custom Beach House Pass", 100f));
         }
     }
     
 	// 7. Make sure to inherit from the GenPass class.
-	public class WorldGenCustomHousesPass : GenPass
+	public class CustomHousesPass : GenPass
 	{
-		public WorldGenCustomHousesPass(string name, float loadWeight) : base(name, loadWeight) {
+		public CustomHousesPass(string name, float loadWeight) : base(name, loadWeight) {
 		}
 
 		// 8. The ApplyPass method is where the actual world generation code is placed.
@@ -85,61 +90,90 @@ namespace SpawnHouses.WorldGen
 				houseStructure.Generate();
 			}
 			
+		}
+	}
+	
+	public class CustomBeachHousePass : GenPass
+	{
+		public CustomBeachHousePass(string name, float loadWeight) : base(name, loadWeight) {
+		}
+
+		// 8. The ApplyPass method is where the actual world generation code is placed.
+		protected override void ApplyPass(GenerationProgress progress, GameConfiguration configuration) {
+			
+			// 9. Finally, we do the actual world generation code.
+
 			if (ModContent.GetInstance<SpawnHousesConfig>().EnableBeachHouse)
 			{
-				ushort tileX, tileY;
+				ushort tileX = 0, tileY = 0;
 
-				bool findLeft(bool reverse = false) {
-					ushort X;
+				bool FindLeft(bool reverse = false, bool force = false) {
+					ushort x, y;
 					if (!reverse)
-						X = 10;
+						x = 70;	
 					else
-						X = WorldLimitX;
-
-					bool found = false;
+						x = (ushort)(Main.maxTilesX - 70);
+					
 					while (true) {
 						if (!reverse)
-							X++;
+							x++;
 						else
-							X--;
+							x--;
 
-						Y = 10;
+						y = 60;
 						while (true) {
-							Y++;
-							if (Main.tile[X, Y].HasLiquid) 
-								break;
+							y++;
 							
-							if (Main.tile[X, Y].HasTile)
-								if (Main.tile[X, Y].TileType == TileID.Sand)
+							if (Main.tile[x, y].HasTile)
+							{
+								if ((Main.tile[x, y].TileType == TileID.Sand || Main.tile[x, y].TileType == TileID.ShellPile) || force)
 								{
-									tileX = X;
-									tileY = Y;
+									tileX = x;
+									tileY = y;
 									return true;
 								}
-								else
-									return false;
+								return false;
+							}
+							
+							if (Main.tile[x, y].LiquidAmount != 0) 
+								break;
 						}
 					}
 				}
 
-				bool findRight() {
-					return findLeft(true);
+				bool FindRight(bool force = false) {
+					return FindLeft(true, force);
 				}
 
-				if (Terraria.WorldGen.genRand.Next(0, 2) == 0) {
-					if (!getRight()) {
-						findLeft();
+				bool leftSide = Terraria.WorldGen.genRand.Next(0, 2) == 0;
+				if (leftSide)
+				{
+					if (!FindLeft())
+					{
+						leftSide = false;
+						FindRight(force: true);
 					}
 				}
 				else
 				{
-					if (!getLeft()) {
-						findRight();
+					if (!FindRight())
+					{
+						leftSide = true;
+						FindLeft(force: true);
 					}
 				}
 
-				//MainHouseStructure houseStructure = new MainHouseStructure(Convert.ToUInt16(initialX - 31), Convert.ToUInt16(initialY - 24));
+				if (tileX != 0 && tileY != 0)
+				{
+					BeachHouseStructure houseStructure = leftSide ? 
+						new BeachHouseStructure(Convert.ToUInt16(tileX - 9), Convert.ToUInt16(tileY - 32)) : 
+						new BeachHouseStructure(Convert.ToUInt16(tileX - 23), Convert.ToUInt16(tileY - 32), true);
+
+					
+					houseStructure.Generate();
+				}
 			}
+			
 		}
 	}
 }
