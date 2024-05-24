@@ -55,7 +55,7 @@ namespace SpawnHouses.Items
 			Main.NewText($"x: {x} y: {y}");
 			
 			MainHouseStructure structure = new MainHouseStructure(x, y);
-			structure.GenerateStructure();
+			structure._GenerateStructure();
 
 			return true;
 		}

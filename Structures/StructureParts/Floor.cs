@@ -37,7 +37,7 @@ public class Floor {
         Y = Convert.ToUInt16(mainStructureY + _YOffset);
     }
 
-    public void GenerateBeams(ushort tileID, ushort beamInterval, ushort beamsCount, byte tileColor = 0, ushort beamsXOffset = 0,
+    public void GenerateBeams(ushort tileID, ushort beamInterval, ushort beamsCount, byte tileColor = 0, int beamsXOffset = 0,
         ushort maxBeamSize = 50, bool stopOnNonSolidTile = false, bool debug = false) 
     {
             for (int i = 0; i < beamsCount; i++)
@@ -88,7 +88,7 @@ public class Floor {
                 new Shapes.Circle(radius: maxBeamSize), new Actions.SetFrames());
     }
 
-    public void GenerateFoundation(ushort tileID = 0, ushort foundationRadius = 0, ushort foundationXOffset = 0,
+    public void GenerateFoundation(ushort tileID = 0, ushort foundationRadius = 0, int foundationXOffset = 0,
         ushort foundationYOffset = 0, bool debug = false) 
     {
         

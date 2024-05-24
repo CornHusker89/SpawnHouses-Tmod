@@ -58,7 +58,7 @@ namespace SpawnHouses.Items
 			x = (ushort)(x - 4); //center the struct
 			
 			BridgeTestStructure structure1 = new BridgeTestStructure(x, y);
-			structure1.GenerateStructure();
+			structure1._GenerateStructure();
 
 
 
@@ -84,7 +84,7 @@ namespace SpawnHouses.Items
 			x = (ushort)(x - 4); //center the struct
 			
 			BridgeTestStructure structure2 = new BridgeTestStructure(x, y);
-			structure2.GenerateStructure();
+			structure2._GenerateStructure();
 			
 			
 			ParabolaBridge bridge = new ParabolaBridge("Structures/StructureFiles/WoodBridge", 2, -2, 6, 0.6, structure1.ConnectPoints[1], structure2.ConnectPoints[0]);

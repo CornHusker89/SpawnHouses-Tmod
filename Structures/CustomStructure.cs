@@ -48,18 +48,24 @@ public class CustomStructure {
         int centerX = X + (StructureXSize / 2);
         int centerY = Y + (StructureXSize / 2);
         
-        WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(Convert.ToInt32(StructureXSize + StructureYSize) ), new Actions.SetFrames());
+        WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(StructureXSize + StructureYSize ), new Actions.SetFrames());
     }
     
     protected void FrameTiles(int centerX, int centerY, int radius)    
     {
         WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(radius), new Actions.SetFrames());
     }
+    
+    public virtual void Generate() {}
 
     [NoJIT]
-    public void GenerateStructure()
+    public void _GenerateStructure(bool reverse = false)
     {
-        StructureHelper.Generator.GenerateStructure(FilePath, new Point16(X:X, Y:Y), _mod);
+        String reverseString = "";
+        if (reverse)
+            reverseString = "_r";
+        
+        StructureHelper.Generator.GenerateStructure(FilePath + reverseString, new Point16(X:X, Y:Y), _mod);
         FrameTiles();
     }
 }

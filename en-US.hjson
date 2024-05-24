@@ -42,6 +42,11 @@ Mods: {
 				DisplayName: Spawn Ice Cave
 				Tooltip: ""
 			}
+
+			FlipRegion: {
+				DisplayName: Flip Region
+				Tooltip: ""
+			}
 		}
 
 		Configs: {

@@ -54,7 +54,7 @@ namespace SpawnHouses.Items
 			x = (ushort)(x - 18); //center the struct
 			
 			BeachHouseStructure structure = new BeachHouseStructure(x, y);	
-			structure.GenerateStructure();
+			structure._GenerateStructure();
 			
 			return true;
 		}

@@ -1,6 +1,10 @@
-Version 0.x.x
+Version 0.2.0
+Major Changes
+- Added beach house
 - Added mod settings (accessed by pressing the gear icon on the mod, in "Manage Mods") for enabling/disabling
   generation of specific structures
+  
+Minor Changes
 - Minor performance optimizations
-- Moved main house further into the ground, to prevent guide spawning in the ground
+- Moved main house further into the ground to prevent guide spawning inside the ground
 - Updated in-game description
