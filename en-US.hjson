@@ -47,6 +47,11 @@ Mods: {
 				DisplayName: Flip Region
 				Tooltip: ""
 			}
+
+			SpawnFirepit: {
+				DisplayName: Spawn Firepit
+				Tooltip: ""
+			}
 		}
 
 		Configs: {

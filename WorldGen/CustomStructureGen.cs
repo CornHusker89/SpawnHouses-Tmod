@@ -168,12 +168,40 @@ namespace SpawnHouses.WorldGen
 					BeachHouseStructure houseStructure = leftSide ? 
 						new BeachHouseStructure(Convert.ToUInt16(tileX - 9), Convert.ToUInt16(tileY - 32)) : 
 						new BeachHouseStructure(Convert.ToUInt16(tileX - 23), Convert.ToUInt16(tileY - 32), true);
-
-					
 					houseStructure.Generate();
+					
+					// firepit generation
+					if (Terraria.WorldGen.genRand.Next(0, 3) != 0) // 2/3 chance
+					{
+						bool foundLocation = false;
+						ushort x;
+
+						if (leftSide)
+							x = (ushort)(tileX - 9 + 35 + Terraria.WorldGen.genRand.Next(8, 12));
+						else
+							x = (ushort)(tileX - 23 - Terraria.WorldGen.genRand.Next(8, 12));
+					
+						ushort y = 10;
+						while (!foundLocation)
+						{
+							y = tileY;
+							while (y < Main.worldSurface) {
+								if (Terraria.WorldGen.SolidTile(x, y)) {
+									break;
+								}
+								y++;
+							}
+							foundLocation = true;
+						}
+
+						y = (ushort)(y - 2);
+						x = (ushort)(x - 3);
+			
+						FirepitStructure structure = new FirepitStructure(x, y);
+						structure.Generate();
+					}
 				}
 			}
-			
 		}
 	}
 }

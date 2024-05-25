@@ -1,5 +1,9 @@
 Version 0.2.1
+Major Changes
+- Added fun little firepit next to beach house
+
 Minor Changes
 - Updated description
 - Bug fix for when beach house is not placed on sand
 - Updated steam workshop pictures
+- Fixed lights not spawning when beach house is on right side of world
