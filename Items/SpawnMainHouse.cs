@@ -52,8 +52,6 @@ namespace SpawnHouses.Items
 			y = (ushort)(y - 27); //the structure spawning has an offset + we want it to be a little off the ground
 			x = (ushort)(x - 31); //center the struct
 			
-			Main.NewText($"x: {x} y: {y}");
-			
 			MainHouseStructure structure = new MainHouseStructure(x, y);
 			structure._GenerateStructure();
 

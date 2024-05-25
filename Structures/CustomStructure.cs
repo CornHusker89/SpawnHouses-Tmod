@@ -59,6 +59,9 @@ public class CustomStructure {
     public virtual void Generate() {}
 
     [NoJIT]
+    /*
+     * @Summary Generates the structure file of the structure, but nothing else.
+     */
     public void _GenerateStructure(bool reverse = false)
     {
         String reverseString = "";
