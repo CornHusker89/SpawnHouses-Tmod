@@ -1,8 +1,11 @@
 using System;
+using Microsoft.Xna.Framework;
 using Terraria.ID;
 
 using SpawnHouses.Structures;
 using SpawnHouses.Structures.StructureParts;
+using Terraria;
+using Terraria.WorldBuilding;
 
 namespace SpawnHouses.Structures.Structures;
 
@@ -54,6 +57,8 @@ public class BeachHouseStructure : CustomStructure
 
     public override void Generate()
     {
+        ushort bottomTileID = Main.tile[Floors[0].X + Floors[0].FloorLength / 2, Floors[0].Y + 10].TileType;
+        
         if (!Reverse)
         {
             ConnectPoints[0].BlendRight(TileID.Sand, 8);
@@ -68,6 +73,18 @@ public class BeachHouseStructure : CustomStructure
         }
 
         _GenerateStructure(Reverse);
+        
+        if (bottomTileID != TileID.Sand && bottomTileID != TileID.ShellPile)
+        {
+            WorldUtils.Gen(new Point(Floors[0].X + Floors[0].FloorLength / 2, Floors[0].Y),
+                new Shapes.Circle(Floors[0].FloorLength + 16), // +16 for the blendDistance
+                Actions.Chain(
+                    new Modifiers.OnlyTiles(TileID.Sand),
+                    new Actions.Custom((i, j, args) => { Main.tile[i, j].TileType = bottomTileID; return true; })
+                )
+            );
+        }
+        
         FrameTiles();
     }
 }
