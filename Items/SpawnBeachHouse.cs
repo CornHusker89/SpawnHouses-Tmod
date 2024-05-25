@@ -1,3 +1,4 @@
+using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -54,7 +55,8 @@ namespace SpawnHouses.Items
 			x = (ushort)(x - 18); //center the struct
 			
 			BeachHouseStructure structure = new BeachHouseStructure(x, y);	
-			structure._GenerateStructure();
+			structure.Generate();
+			//structure._GenerateStructure();
 			
 			return true;
 		}
