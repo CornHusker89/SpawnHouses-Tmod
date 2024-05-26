@@ -43,7 +43,7 @@ public class CustomStructure {
         SetSubstructurePositions();
     }
 
-    protected void FrameTiles()    
+    protected void FrameTiles()
     {
         int centerX = X + (StructureXSize / 2);
         int centerY = Y + (StructureXSize / 2);
@@ -59,9 +59,7 @@ public class CustomStructure {
     public virtual void Generate() {}
 
     [NoJIT]
-    /*
-     * @Summary Generates the structure file of the structure, but nothing else.
-     */
+    // Generates structure file, nothing else
     public void _GenerateStructure(bool reverse = false)
     {
         String reverseString = "";

@@ -1,9 +1,4 @@
-Version 0.2.1
-Major Changes
-- Added fun little firepit next to beach house
-
+Version 0.2.2
 Minor Changes
-- Updated description
-- Bug fix for when beach house is not placed on sand
-- Updated steam workshop pictures
-- Fixed lights not spawning when beach house is on right side of world
+- Removed StructureHelper as a dependency because the mod now uses a modified version of it.
+- Added credit to ScalarVector1 in the description
