@@ -4,4 +4,5 @@ You can use Mod Configs to enable/disable generation of any house.
 
 If you come across any bugged world generation, be sure to leave a comment with the world seed on the mod's steam page, along with any other useful information such as other world generation mods or location of the bugged generation.
 
+Huge thanks to ScalarVector1's Structure Helper, this wouldn't be possible without it. Steam workshop page can be found [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2790924965] Here [/url]
 Expect much, much more in the coming weeks! We've got a lot of new things coming up
