@@ -1,4 +1,3 @@
-using Microsoft.CodeAnalysis;
 using System;
 using Terraria.WorldBuilding;
 using Terraria.DataStructures;

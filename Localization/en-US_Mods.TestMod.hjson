@@ -1,8 +1,0 @@
-Items: {
-	SpawnHouse: {
-		DisplayName: Spawn House
-		Tooltip: ""
-	}
-}
-
-WorldGen.WorldGenCustomHousesPassMessage: Mods.SpawnHouses.WorldGen.WorldGenCustomHousesPassMessage

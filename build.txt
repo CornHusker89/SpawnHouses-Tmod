@@ -1,4 +1,3 @@
 displayName = Spawn Houses
 author = CornHusker
-version = 0.2.1
-modReferences = StructureHelper
+version = 0.2.2
