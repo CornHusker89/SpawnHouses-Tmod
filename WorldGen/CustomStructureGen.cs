@@ -32,9 +32,11 @@ namespace SpawnHouses.WorldGen
                 // 6. We register our world generation pass by passing in an instance of our custom GenPass class below. The GenPass class will execute our world generation code.
                 tasks.Insert(sunflowersIndex + 1, new CustomHousesPass("Generate Custom Houses Pass", 100f));
             else
+            {
 	            tasks.Insert(tasks.Count - 2, new CustomHousesPass("Generate Custom Houses Pass", 100f));
-            
-            
+            }
+
+
             tasks.Insert(tasks.Count - 2, item: new CustomBeachHousePass("Custom Beach House Pass", 100f));
         }
     }
@@ -55,26 +57,41 @@ namespace SpawnHouses.WorldGen
 				ushort initialX = 1;
 				ushort initialY = 1;
 				ushort counts = 500;
-				// do while the tile is not grass
-				while (!Main.tile[initialX, initialY].HasTile || Main.tile[initialX, initialY].TileType != TileID.Grass)
+
+				short yModifier = 0; //used when the generation is much taller than we thought
+
+				while (Terraria.WorldGen.SolidTile(
+					    (Terraria.WorldGen.genRand.Next(
+						    Main.spawnTileX - (counts / 10), Main.spawnTileX + (counts / 10))),
+					    (ushort)(Main.worldSurface * 2 / 3 - yModifier)))
+				{
+					yModifier -= 85;
+				}
+
+				while ((!Main.tile[initialX, initialY].HasTile || Main.tile[initialX, initialY].TileType != TileID.Grass) && counts < 700)
 				{
 					counts++;
-					initialX = Convert.ToUInt16( Terraria.WorldGen.genRand.Next(Main.spawnTileX - (counts / 10), Main.spawnTileX + (counts / 10)) );
-					initialY = Convert.ToUInt16(Main.spawnTileY - 80);
-					while (initialY < Main.worldSurface) {
+					initialX = (ushort)( Terraria.WorldGen.genRand.Next(Main.spawnTileX - (counts / 10), Main.spawnTileX + (counts / 10)) );
+					initialY = (ushort)(Main.worldSurface * 2 / 3 - yModifier);
+					while (initialY < Main.worldSurface + 20)
+					{
 						if (Terraria.WorldGen.SolidTile(initialX, initialY)) {
 							break;
 						}
 						initialY++;
 					}
 				}
+				
+				// just in case something above got fucked up
+				if (!Main.tile[initialX, initialY].HasTile) return;
 			
 				int sum = 0;
 				for (int i = -3; i <= 3; i++)
 				{
 					int x = (i * 10) + (initialX);
-					int y = Main.spawnTileY - 80;
+					int y = (ushort)(Main.worldSurface * 2 / 3 - yModifier);
 				
+					
 					while (!Terraria.WorldGen.SolidTile(x, y))
 					{
 						y++;
@@ -106,6 +123,7 @@ namespace SpawnHouses.WorldGen
 			if (ModContent.GetInstance<SpawnHousesConfig>().EnableBeachHouse)
 			{
 				ushort tileX = 0, tileY = 0;
+				short yModifier = 0;
 
 				bool FindLeft(bool reverse = false, bool force = false) {
 					ushort x, y;
@@ -120,7 +138,10 @@ namespace SpawnHouses.WorldGen
 						else
 							x--;
 
-						y = 60;
+						y = (ushort)(Main.worldSurface * 2 / 5 - yModifier);
+						if (Terraria.WorldGen.SolidTile(x, y))
+							yModifier -= 70;
+							
 						while (true) {
 							y++;
 							

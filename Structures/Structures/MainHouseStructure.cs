@@ -34,8 +34,8 @@ public class MainHouseStructure : CustomStructure
     public override void Generate()
     {
         Floors[0].GenerateFoundation(TileID.Dirt, foundationRadius: 31, foundationYOffset: 5);
-        ConnectPoints[0].BlendLeft(topTileID: TileID.Grass, blendDistance: 20);
-        ConnectPoints[1].BlendRight(topTileID: TileID.Grass, blendDistance: 20);
+        ConnectPoints[0].BlendLeft(topTileID: TileID.Grass, blendDistance: 20, maxFillCount: 25);
+        ConnectPoints[1].BlendRight(topTileID: TileID.Grass, blendDistance: 20, maxFillCount: 25);
 
         _GenerateStructure();
         FrameTiles();
