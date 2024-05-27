@@ -37,7 +37,7 @@ public class ConnectPoint {
         Y = Convert.ToUInt16(mainStructureY + _YOffset);
     }
     
-    public void BlendLeft(ushort topTileID, ushort blendDistance, ushort fillTileID = 0,
+    public void BlendLeft(ushort topTileID, ushort blendDistance, ushort fillTileID = 0, ushort maxFillCount = 999,
         bool canUsePartialTiles = true, bool removeWalls = true, bool reverseDirection = false, bool debug = false)
     {
         int startX;
@@ -184,7 +184,8 @@ public class ConnectPoint {
 
             // get/change the tiles beneath the top tiles. make sure we establish a min/max depth based on the last tile
             ushort dYDown = 1;
-            while ( (!Terraria.WorldGen.SolidTile(startX - dX, topTileY + dYDown) && dYDown <= (lastTileVerticalFillLen * 1.3) + 2) || dYDown <= (lastTileVerticalFillLen * 0.6))
+            ushort fillCount = 0;
+            while ( ( (!Terraria.WorldGen.SolidTile(startX - dX, topTileY + dYDown) && dYDown <= (lastTileVerticalFillLen * 1.3) + 2) || dYDown <= (lastTileVerticalFillLen * 0.6)) && fillCount <= maxFillCount)
             {
                 Tile lowerTile = Main.tile[startX - dX, topTileY + dYDown];
                 lowerTile.HasTile = true;
@@ -192,6 +193,7 @@ public class ConnectPoint {
                 lowerTile.TileType = fillTileID;
                 
                 dYDown++;
+                fillCount++;
             }
 
             lastTileVerticalFillLen = dYDown;
@@ -213,10 +215,10 @@ public class ConnectPoint {
     }
 
     public void BlendRight(ushort topTileID, ushort blendDistance, ushort fillTileID = 0,
-        bool canUsePartialTiles = true, bool debug = false)
+        ushort maxFillCount = 999, bool canUsePartialTiles = true, bool debug = false)
     {
         BlendLeft(topTileID: topTileID, blendDistance: blendDistance, fillTileID: fillTileID,
-            canUsePartialTiles: canUsePartialTiles, reverseDirection: true, debug: debug);
+            canUsePartialTiles: canUsePartialTiles, reverseDirection: true, maxFillCount: maxFillCount, debug: debug);
     }
 
     public ConnectPoint Clone()

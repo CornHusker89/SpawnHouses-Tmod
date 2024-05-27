@@ -1,4 +1,6 @@
-Version 0.2.2
+Version 0.2.3
 Minor Changes
-- Removed StructureHelper as a dependency because the mod now uses a modified version of it.
-- Added credit to ScalarVector1 in the description
+- Fixed main house generation on Don't Dig Up seed
+- Fixed other bugs related to main house generation
+- Fixed issues related to the beach house not properly generating on the surface of the world
+- Reduced mod size
