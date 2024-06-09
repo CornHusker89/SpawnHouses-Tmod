@@ -31,13 +31,14 @@ public class StructureChain
         List<BoundingBox> boundingBoxes = new List<BoundingBox>();
         
         CustomChainStructure rootStructure = NewStructure(null, (ushort)entryPos.X, (ushort)entryPos.Y);
+        Console.WriteLine(rootStructure.X + ", " + rootStructure.Y);
         boundingBoxes.Add(rootStructure.StructureBoundingBox);
-        for (byte direction = 0; direction < 4; direction++) {
+        for (byte direction = 0; direction < 4; direction++)
+        {
             for (byte index = 1; index < rootStructure.ConnectPoints[direction].Length; index++)
                 CalculateChildrenStructures(rootStructure.ConnectPoints[direction][index], rootStructure.StructureXSize, direction, 1);
         }
-
-
+        
         GenerateChildren(rootStructure);
         Console.WriteLine();
         Console.WriteLine();
@@ -46,7 +47,7 @@ public class StructureChain
         // functions
         void GenerateChildren(CustomChainStructure structure, int branchLength = 0)
         {
-            if (branchLength > maxBranchLength) return;
+            Console.WriteLine("generating struct");
             structure.Generate();
             for (byte direction = 0; direction < 4; direction++)
             {
@@ -57,7 +58,8 @@ public class StructureChain
                     
                     bridge.Point1 = connectPoint;
                     bridge.Point2 = connectPoint.ChildConnectPoint;
-                    bridge.Generate();
+                    Console.WriteLine("bridge point X's: " + connectPoint.X + ", " + connectPoint.ChildConnectPoint.X);
+                    //bridge.Generate();
                     
                     //recursive call
                     GenerateChildren(connectPoint.ChildStructure, branchLength + 1);
@@ -65,7 +67,7 @@ public class StructureChain
             }
         }
         
-        CustomChainStructure NewStructure(ChainConnectPoint parentConnectPoint, ushort x = 100, ushort y = 100)
+        CustomChainStructure NewStructure(ChainConnectPoint parentConnectPoint, ushort x = 300, ushort y = 300)
         {
             byte structureIndex = (byte)Terraria.WorldGen.genRand.Next(0, structureList.Count);
             CustomChainStructure structure = structureList[structureIndex].Clone();
@@ -83,51 +85,59 @@ public class StructureChain
         
         void CalculateChildrenStructures(ChainConnectPoint connectPoint, ushort structureXSize, byte targetDirection, byte currentBranchLength)
         {
-            if (Terraria.WorldGen.genRand.Next(0, maxBranchLength - currentBranchLength) == 0 || currentCost + averageCost >= maxCost) return;
+            if (Terraria.WorldGen.genRand.Next(0, maxBranchLength - currentBranchLength) == 0 ||
+                currentCost + averageCost >= maxCost) return;
             
             bool validLocation = false;
             byte validLocationCount = 0;
             
-            CustomChainStructure structure = NewStructure(connectPoint);
+            CustomChainStructure newStructure = NewStructure(connectPoint);
             ChainConnectPoint targetConnectPoint = null;
             
             while (!validLocation && validLocationCount < 20)
             {
+                // randomly pick either the top or bottom side
                 byte randomSide = (byte)Terraria.WorldGen.genRand.Next(0, 2);
-                ushort structureX, structureY;
+                ushort newStructureConnectPointX, newStructureConnectPointY;
                 if (targetDirection == CPDirection.Left || targetDirection == CPDirection.Right)
                 {
                     if (connectPoint.FacingLeft)
-                        structureX = (ushort)(connectPoint.X +
+                        newStructureConnectPointX = (ushort)(connectPoint.X +
                                                 structureXSize * Terraria.WorldGen.genRand.Next(7, 13) / 10.0);
                     else
-                        structureX = (ushort)(connectPoint.X +
+                        newStructureConnectPointX = (ushort)(connectPoint.X -
                                                 structureXSize * Terraria.WorldGen.genRand.Next(7, 13) / 10.0);
         
                     // ensure that the bridge like actually fits right lol
-                    structureX += (ushort)((Math.Abs(connectPoint.X - structureX) - 1) % structure.ChildBridgeType.StructureLength);
+                    newStructureConnectPointX += 12; //(ushort)((Math.Abs(connectPoint.X - structureX) - 1) % newStructure.ChildBridgeType.StructureLength);
 
-                    structureY = (ushort)(connectPoint.Y + Terraria.WorldGen.genRand.Next(-100, 101) / 100.0 * structure.ChildBridgeType.MaxDeltaY);
+                    newStructureConnectPointY = (ushort)(connectPoint.Y + Terraria.WorldGen.genRand.Next(-100, 101) / 100.0 * newStructure.ChildBridgeType.MaxDeltaY);
                 }
                 else
                 {
-                    structureX = connectPoint.X;
+                    newStructureConnectPointX = connectPoint.X;
 
                     if (targetDirection == CPDirection.Up)
-                        structureY = (ushort)(connectPoint.Y - 1);
+                        newStructureConnectPointY = (ushort)(connectPoint.Y - 1);
                     else
-                        structureY = (ushort)(connectPoint.Y + 1);
+                        newStructureConnectPointY = (ushort)(connectPoint.Y + 1);
                 }
 
-                ChainConnectPoint[] targetConnectPointList = structure.ConnectPoints[CPDirection.flipDirection(targetDirection)];
-                targetConnectPoint = targetConnectPointList[targetConnectPointList.Length * randomSide];
+                ChainConnectPoint[] targetConnectPointList = newStructure.ConnectPoints[CPDirection.flipDirection(targetDirection)];
+                if (targetConnectPointList.Length != 0)
+                    targetConnectPoint = targetConnectPointList[(targetConnectPointList.Length - 1) * randomSide];
+                else
+                    return;
 
-                MoveStructureConnectPoint(structure, targetConnectPoint, structureX, structureY);
+                MoveStructureConnectPoint(newStructure, targetConnectPoint, newStructureConnectPointX, newStructureConnectPointY);
+                
+                Console.WriteLine(newStructure.X + ", " + newStructure.Y);
                 
                 validLocation = true;
                 foreach (var boundingBox in boundingBoxes)
                 {
-                    if (structure.StructureBoundingBox.IsBoundingBoxColliding(boundingBox))
+                    // test for the first bounding box that does collide
+                    if (newStructure.StructureBoundingBox.IsBoundingBoxColliding(boundingBox))
                     {
                         validLocationCount++;
                         validLocation = false;
@@ -142,16 +152,20 @@ public class StructureChain
                 return;
             }
             
-            boundingBoxes.Add(structure.StructureBoundingBox);
+            boundingBoxes.Add(newStructure.StructureBoundingBox);
             
-            connectPoint.ChildStructure = structure;
+            connectPoint.ChildStructure = newStructure;
             connectPoint.ChildConnectPoint = targetConnectPoint;
-            currentCost += (ushort)structure.Cost;
+            
+            currentCost += (ushort)newStructure.Cost;
             
             for (byte direction = 0; direction < 4; direction++)
-                foreach (var nextConnectPoint in structure.ConnectPoints[direction])
+                foreach (var nextConnectPoint in newStructure.ConnectPoints[direction])
+                {
                     // recursive
-                    CalculateChildrenStructures(nextConnectPoint, structure.StructureXSize, CPDirection.flipDirection(direction), (byte)(currentBranchLength + 1));
+                    CalculateChildrenStructures(nextConnectPoint, newStructure.StructureXSize,
+                        direction, (byte)(currentBranchLength + 1));
+                }
         }
     }
 }

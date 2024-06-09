@@ -1,6 +1,4 @@
-Version 0.2.3
+Version 0.2.4
 Minor Changes
-- Fixed main house generation on Don't Dig Up seed
-- Fixed other bugs related to main house generation
-- Fixed issues related to the beach house not properly generating on the surface of the world
-- Reduced mod size
+- Changed description
+- Slightly changed Main House to better accommodate chests and other practical furniture
