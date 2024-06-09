@@ -236,7 +236,7 @@ public class CPDirection {
 
     public static byte flipDirection(byte direction)
     {
-        if (direction != 1 || direction != 3)
+        if (direction == 1 || direction == 3)
             return (byte)(direction - 1);
         else
             return (byte)(direction + 1);

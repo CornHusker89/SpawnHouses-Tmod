@@ -9,7 +9,7 @@ namespace SpawnHouses.Structures.Structures;
 
 public class MainHouseStructure : CustomStructure
 {
-    public override string FilePath => "Structures/StructureFiles/mainHouse";
+    public override string FilePath => "Structures/StructureFiles/mainHouse_v2";
     public override ushort StructureXSize => 63;
     public override ushort StructureYSize => 33;
 

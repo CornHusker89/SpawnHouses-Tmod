@@ -65,7 +65,7 @@ public class CustomChainStructure : CustomStructure
         ChainConnectPoint[][] newConnectPoints = (ChainConnectPoint[][])connectPoints.Clone();
         for (byte direction = 0; direction < 4; direction++)
         {
-            newConnectPoints[direction] = (ChainConnectPoint[])connectPoints.Clone();
+            newConnectPoints[direction] = ((ChainConnectPoint[][])connectPoints.Clone())[direction];
             for (byte j = 0; j < newConnectPoints[direction].Length; j++)
                 newConnectPoints[direction] = (ChainConnectPoint[])newConnectPoints[direction].Clone();
         }
