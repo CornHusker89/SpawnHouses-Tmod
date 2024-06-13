@@ -1,4 +1,5 @@
-Version 0.2.4
+Version 0.3.0
+Major Changes
+
 Minor Changes
-- Changed description
-- Slightly changed Main House to better accommodate chests and other practical furniture
+- Beach house has a 75% chance to spawn on the non-dungeon side of the world

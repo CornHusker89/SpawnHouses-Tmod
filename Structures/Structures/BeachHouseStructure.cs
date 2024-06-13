@@ -11,48 +11,78 @@ namespace SpawnHouses.Structures.Structures;
 
 public class BeachHouseStructure : CustomStructure
 {
-    public override string FilePath => "Structures/StructureFiles/beachHouse";
-    public override ushort StructureXSize => 35;
-    public override ushort StructureYSize => 26;
-
     public readonly bool Reverse;
     
-    public BeachHouseStructure(ushort x = 0, ushort y = 0, bool reverse = false)
+    // constants
+    private static readonly string _filePath = "Structures/StructureFiles/beachHouse";
+    private static readonly ushort _structureXSize = 35;
+    private static readonly ushort _structureYSize = 26;
+    
+    private static readonly Floor[] _floors = 
+    [
+        new Floor(0, 30, 30)
+    ];
+
+    private static readonly ConnectPoint[][] _connectPoints =
+    [
+        // top
+        [],
+        
+        // bottom
+        [],
+        
+        // left
+        [],
+        
+        // right
+        [
+            new ConnectPoint(34, 31, false)
+        ]
+    ];
+    
+    private static readonly Floor[] _floors_r = 
+    [
+        new Floor(5, 30, 30)
+    ];
+
+    private static readonly ConnectPoint[][] _connectPoints_r =
+    [
+        // top
+        [],
+        
+        // bottom
+        [],
+        
+        // left
+        [
+            new ConnectPoint(0, 31, true)
+        ],
+        
+        // right
+        []
+    ];
+    
+    public override string FilePath => _filePath;
+    public sealed override ushort StructureXSize => _structureXSize;
+    public sealed override ushort StructureYSize => _structureYSize;
+    
+    public BeachHouseStructure(ushort x = 500, ushort y = 500, bool reverse = false)
     {
-        Reverse = reverse;
         if (!reverse)
         {
-            Floors =
-            [
-                new Floor(0, 30, 30)
-            ];
-
-            ConnectPoints =
-            [
-                new ConnectPoint(34, 31, false)
-            ];
-
-            X = x;
-            Y = y;
-            SetSubstructurePositions();
+            Floors = _floors;
+            ConnectPoints = _connectPoints;
         }
         else
         {
-            Floors =
-            [
-                new Floor(5, 30, 30)
-            ];
-
-            ConnectPoints =
-            [
-                new ConnectPoint(0, 31, true)
-            ];
-
-            X = x;
-            Y = y;
-            SetSubstructurePositions();
+            Floors = _floors_r;
+            ConnectPoints = _connectPoints_r;
         }
-
+        
+        X = x;
+        Y = y;
+        Reverse = reverse;
+        SetSubstructurePositions();
     }
 
     public override void Generate()
@@ -61,13 +91,13 @@ public class BeachHouseStructure : CustomStructure
         
         if (!Reverse)
         {
-            ConnectPoints[0].BlendRight(TileID.Sand, 8);
+            ConnectPoints[3][0].BlendRight(TileID.Sand, 8);
             Floors[0].GenerateBeams(TileID.RichMahoganyBeam, 4, 3, tileColor: PaintID.BrownPaint, 1);
             Floors[0].GenerateFoundation(TileID.Sand, 11, 8, 4);
         }
         else
         {
-            ConnectPoints[0].BlendLeft(TileID.Sand, 8);
+            ConnectPoints[2][0].BlendLeft(TileID.Sand, 8);
             Floors[0].GenerateBeams(TileID.RichMahoganyBeam, 4, 3, tileColor: PaintID.BrownPaint, 20);
             Floors[0].GenerateFoundation(TileID.Sand, 11, -8, 4);
         }

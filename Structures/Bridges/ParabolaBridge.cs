@@ -15,8 +15,10 @@ public class ParabolaBridge : Bridge
     private double AttemptSlope;
     
     public ParabolaBridge(string structureFilePath, ushort structureLength,
-        short structureYOffset, ushort maxDeltaY, double attemptSlope, ConnectPoint point1 = null, ConnectPoint point2 = null) : 
-        base(structureFilePath, structureLength, structureYOffset, maxDeltaY, point1, point2)
+        short structureYOffset, ushort minDeltaX, ushort maxDeltaX, ushort minDeltaY, ushort maxDeltaY,
+        byte deltaXMultiple, byte deltaYMultiple, double attemptSlope, ConnectPoint point1 = null, ConnectPoint point2 = null) : 
+        base(structureFilePath, structureLength, structureYOffset, 
+            minDeltaX, maxDeltaX, minDeltaY, maxDeltaY, deltaXMultiple, deltaYMultiple, point1, point2)
     {
         AttemptSlope = attemptSlope;
     }
@@ -53,14 +55,10 @@ public class ParabolaBridge : Bridge
     public override void Generate()
     {
         if (Point1 == null || Point2 == null)
-        {
             throw new Exception("bridge point 1 or 2 is invalid");
-        }
         
         if ((Math.Abs(Point1.X - Point2.X) - 1) % StructureLength != 0)
-        {
             throw new Exception($"Bridge length cannot be resolved with the given BridgeStructure's length, p1: {Point1.X}, p2 {Point2.X}, width - 1: {Math.Abs(Point1.X - Point2.X) - 1}, structureLength: {StructureLength}");
-        }
 
         var parabola = _CalculateParabolaBridge(AttemptSlope);
         double a = parabola.Item1;
@@ -92,7 +90,14 @@ public class ParabolaBridge : Bridge
 
     public override ParabolaBridge Clone()
     {
-        return new ParabolaBridge(StructureFilePath, StructureLength, StructureYOffset, MaxDeltaY, 
-            AttemptSlope, Point1, Point2);
+        return new ParabolaBridge(StructureFilePath, StructureLength, StructureYOffset, 
+            MinDeltaX, MaxDeltaX, MinDeltaY, MaxDeltaY, DeltaXMultiple, DeltaYMultiple, AttemptSlope, Point1, Point2);
     }
+    
+    
+    
+    
+    // bridge presets
+    
+    public static ParabolaBridge TestBridge = new ParabolaBridge("Structures/StructureFiles/woodBridge", 2, -2, 5, 8, 0, 15, 2, 1, 0.4);
 }

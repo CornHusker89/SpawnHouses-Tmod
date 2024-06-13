@@ -13,6 +13,8 @@ public class TestChainStructure : CustomChainStructure
     private static readonly string _filePath = "Structures/StructureFiles/chainTest";
     private static readonly ushort _structureXSize = 15;
     private static readonly ushort _structureYSize = 13;
+
+    private static readonly byte _boundingBoxMargin = 3;
     
     private static readonly Floor[] _floors = [];
 
@@ -47,8 +49,20 @@ public class TestChainStructure : CustomChainStructure
         X = x;
         Y = y;
         Cost = cost;
-        StructureBoundingBox = new BoundingBox(x - 3, y - 3, x + StructureXSize + 3, y + StructureYSize + 3);
+        BoundingBoxMargin = _boundingBoxMargin;
+        
+        StructureBoundingBoxes =
+        [
+            new BoundingBox(x - _boundingBoxMargin, y - _boundingBoxMargin, x + StructureXSize + _boundingBoxMargin, y + StructureYSize + _boundingBoxMargin)
+        ];
+            
         SetSubstructurePositions();
+    }
+    
+    public override void Generate()
+    {
+        _GenerateStructure();
+        FrameTiles();
     }
 
     public override TestChainStructure Clone()
