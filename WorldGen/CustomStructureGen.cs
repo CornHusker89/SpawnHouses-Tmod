@@ -166,7 +166,15 @@ namespace SpawnHouses.WorldGen
 					return FindLeft(true, force);
 				}
 
-				bool leftSide = Terraria.WorldGen.genRand.Next(0, 2) == 0;
+				bool dungeonIsLeftSide = Main.dungeonX < Main.maxTilesX / 2;
+
+				bool spawnDungeonSide = Terraria.WorldGen.genRand.Next(0, 4) == 0; // 1 out of 4
+
+				// initally set it to the same side, then swap it if we aren't spawning on the DungeonSide
+				bool leftSide = dungeonIsLeftSide;
+				if (!spawnDungeonSide)
+					leftSide = !leftSide;
+				
 				if (leftSide)
 				{
 					if (!FindLeft())

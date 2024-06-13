@@ -61,6 +61,7 @@ namespace SpawnHouses.Items
 			structure1._GenerateStructure();
 
 
+			// make the 2nd structure
 
 			short xOffset = (short)34; //Terraria.WorldGen.genRand.Next(25, 35);
 			foundLocation = false;
@@ -87,7 +88,9 @@ namespace SpawnHouses.Items
 			structure2._GenerateStructure();
 			
 			
-			ParabolaBridge bridge = new ParabolaBridge("Structures/StructureFiles/WoodBridge", 2, -2, 6, 0.6, structure1.ConnectPoints[1], structure2.ConnectPoints[0]);
+			ParabolaBridge bridge = new ParabolaBridge("Structures/StructureFiles/woodBridge",
+				2, -2, 0, 15, 0, 6,
+				2, 1, 0.6, structure1.ConnectPoints[3][0], structure2.ConnectPoints[2][0]);
 			bridge.Generate();
 			
 			return true;

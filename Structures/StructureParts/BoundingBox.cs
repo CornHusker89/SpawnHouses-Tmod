@@ -1,9 +1,11 @@
+using System.Collections;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.DataStructures;
+using System.Collections.Generic;
 
-namespace SpawnHouses.Structures;
+namespace SpawnHouses.Structures.StructureParts;
 
 public class BoundingBox
 {
@@ -22,16 +24,34 @@ public class BoundingBox
         Point1 = new Point16(x1, y1);
         Point2 = new Point16(x2, y2);
     }
-
-    public bool IsBoundingBoxColliding(BoundingBox other)
+    
+    public static bool IsBoundingBoxColliding(BoundingBox structureBoundingBox, BoundingBox other)
     {
         // see if they aren't colliding
-        if (Point1.X > other.Point2.X || Point2.X < other.Point1.X ||
-            Point1.Y > other.Point2.Y || Point2.Y < other.Point1.Y)
+        if (structureBoundingBox.Point1.X > other.Point2.X || structureBoundingBox.Point2.X < other.Point1.X ||
+            structureBoundingBox.Point1.Y > other.Point2.Y || structureBoundingBox.Point2.Y < other.Point1.Y)
         {
             return false;
         }
 
         return true;
+    }
+
+    public static bool IsAnyBoundingBoxesColliding(BoundingBox[] structureBoundingBoxes, BoundingBox[] otherBoundingBoxes)
+    {
+        foreach (BoundingBox structureBoundingBox in structureBoundingBoxes)
+        {
+            foreach (BoundingBox otherBoundingBox in otherBoundingBoxes)
+            {
+                if (IsBoundingBoxColliding(structureBoundingBox, otherBoundingBox))
+                    return true;
+            }
+        }
+        return false;
+    }
+    
+    public static bool IsAnyBoundingBoxesColliding(BoundingBox[] structureBoundingBoxes, List<BoundingBox> otherBoundingBoxes)
+    {
+        return IsAnyBoundingBoxesColliding(structureBoundingBoxes, otherBoundingBoxes.ToArray());
     }
 }

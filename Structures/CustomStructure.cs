@@ -24,16 +24,19 @@ public class CustomStructure {
     public ushort Y { get; set; } = 10;
 
     public Floor[] Floors { get; set; } = Array.Empty<Floor>();
-    public virtual ConnectPoint[] ConnectPoints { get; set; } = Array.Empty<ConnectPoint>();
+
+    public ConnectPoint[][] ConnectPoints { get; set; } = [ [], [], [], [] ];
+    
     
     protected CustomStructure() {}
-
+    
     protected virtual void SetSubstructurePositions()
     {
-        foreach (Floor floor in Floors)
+        foreach (var floor in Floors)
             floor.SetPosition(mainStructureX: X, mainStructureY: Y);
-        foreach (ConnectPoint connectPoint in ConnectPoints)
-            connectPoint.SetPosition(mainStructureX: X, mainStructureY: Y);
+        for (byte direction = 0; direction < 4; direction++)
+            foreach (var connectPoint in ConnectPoints[direction])
+                connectPoint.SetPosition(mainStructureX: X, mainStructureY: Y);
     }
 
     public virtual void SetPosition(ushort x, ushort y)
@@ -56,7 +59,31 @@ public class CustomStructure {
         WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(radius), new Actions.SetFrames());
     }
     
-    public virtual void Generate() {}
+    protected static Floor[] CopyFloors(Floor[] floors)
+    {
+        Floor[] newFloors = (Floor[])floors.Clone();
+        for (byte i = 0; i < newFloors.Length; i++)
+            newFloors[i] = newFloors[i].Clone();
+        return newFloors;
+    }
+    
+    protected static ConnectPoint[][] CopyConnectPoints(ConnectPoint[][] connectPoints)
+    {
+        ConnectPoint[][] newConnectPoints = (ConnectPoint[][])connectPoints.Clone();
+        
+        for (byte direction = 0; direction < 4; direction++)
+        {
+            newConnectPoints[direction] = (ConnectPoint[]) connectPoints[direction].Clone();
+            for (byte j = 0; j < newConnectPoints[direction].Length; j++)
+                newConnectPoints[direction][j] = newConnectPoints[direction][j].Clone();
+        }
+        return newConnectPoints;
+    }
+
+    public virtual void Generate()
+    {
+        throw new Exception("Generate() was called on a CustomStructure, this does not do anything and should never happen");
+    }
 
     [NoJIT]
     // Generates structure file, nothing else

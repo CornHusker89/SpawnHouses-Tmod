@@ -13,18 +13,42 @@ namespace SpawnHouses.Structures.Structures;
 
 public class FirepitStructure : CustomStructure
 {
-    public override string FilePath => "Structures/StructureFiles/firepit";
-    public override ushort StructureXSize => 7;
-    public override ushort StructureYSize => 3;
+    
+    // constants
+    private static readonly string _filePath = "Structures/StructureFiles/firepit";
+    private static readonly ushort _structureXSize = 7;
+    private static readonly ushort _structureYSize = 3;
+    
+    private static readonly Floor[] _floors = [];
+
+    private static readonly ConnectPoint[][] _connectPoints =
+    [
+        // top
+        [],
+        
+        // bottom
+        [],
+        
+        // left
+        [
+            new ConnectPoint(-1, 2, true)
+        ],
+        
+        // right
+        [
+            new ConnectPoint(7, 2, false)
+        ]
+    ];
+    
+    public override string FilePath => _filePath;
+    public sealed override ushort StructureXSize => _structureXSize;
+    public sealed override ushort StructureYSize => _structureYSize;
 
     public FirepitStructure(ushort x = 0, ushort y = 0)
     {
-        Floors = [];
-        ConnectPoints = 
-        [
-            new ConnectPoint(-1, 2, true),
-            new ConnectPoint(7, 2, false)
-        ];
+        Floors = _floors;
+        ConnectPoints = _connectPoints;
+        
         X = x;
         Y = y;
         SetSubstructurePositions();
@@ -39,8 +63,8 @@ public class FirepitStructure : CustomStructure
         if (blendTileID == TileID.ShellPile)
             blendTileID = TileID.Sand;
         
-        ConnectPoints[0].BlendLeft(topTileID: blendTileID, blendDistance: 5);
-        ConnectPoints[1].BlendRight(topTileID: blendTileID, blendDistance: 5);
+        ConnectPoints[2][0].BlendLeft(topTileID: blendTileID, blendDistance: 5);
+        ConnectPoints[3][0].BlendRight(topTileID: blendTileID, blendDistance: 5);
 
         // make sure that blending doesn't fuck up the tiles next to the chairs
         Tile tile = Main.tile[X - 1, Y + 2];
