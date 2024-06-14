@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Terraria.ID;
 using Terraria;
@@ -14,10 +15,10 @@ public class TestChainStructure : CustomChainStructure
     private static readonly ushort _structureXSize = 15;
     private static readonly ushort _structureYSize = 13;
 
-    private static readonly byte _boundingBoxMargin = 3;
+    private static readonly byte _boundingBoxMargin = 0;
     
     private static readonly Floor[] _floors = [];
-
+    
     private static readonly ChainConnectPoint[][] _connectPoints =
     [
         // top
@@ -28,7 +29,7 @@ public class TestChainStructure : CustomChainStructure
         
         // left
         [
-            new ChainConnectPoint(0, 6, true)
+            new ChainConnectPoint(0, 6, true, true)
         ],
         
         // right
@@ -42,9 +43,9 @@ public class TestChainStructure : CustomChainStructure
     public sealed override ushort StructureXSize => _structureXSize;
     public sealed override ushort StructureYSize => _structureYSize;
     
-    public TestChainStructure(sbyte cost, Bridge childBridgeType, ushort x = 1, ushort y = 1) : 
+    public TestChainStructure(sbyte cost, Bridge[] childBridgeType, ushort x = 1, ushort y = 1) : 
         base(_filePath,  _structureXSize,  _structureYSize, CopyFloors(_floors), 
-            CopyConnectPoints(_connectPoints), childBridgeType, x, y, cost)
+            CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost)
     {
         X = x;
         Y = y;
@@ -53,7 +54,7 @@ public class TestChainStructure : CustomChainStructure
         
         StructureBoundingBoxes =
         [
-            new BoundingBox(x - _boundingBoxMargin, y - _boundingBoxMargin, x + StructureXSize + _boundingBoxMargin, y + StructureYSize + _boundingBoxMargin)
+            new BoundingBox(x - _boundingBoxMargin, y - _boundingBoxMargin, x + StructureXSize + _boundingBoxMargin - 1, y + StructureYSize + _boundingBoxMargin - 1)
         ];
             
         SetSubstructurePositions();
@@ -67,6 +68,6 @@ public class TestChainStructure : CustomChainStructure
 
     public override TestChainStructure Clone()
     {
-        return new TestChainStructure(Cost, ChildBridgeType, X, Y);
+        return new TestChainStructure(Cost, ChildBridgeTypes, X, Y);
     }
 }

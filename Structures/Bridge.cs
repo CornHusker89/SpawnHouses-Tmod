@@ -2,20 +2,19 @@ using SpawnHouses.Structures.StructureParts;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.DataStructures;
-using Microsoft.Xna.Framework;
 using Terraria.WorldBuilding;
+using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
 namespace SpawnHouses.Structures;
 
 public class Bridge
 {
-    public readonly string StructureFilePath;
-    public readonly ushort StructureLength;
-    public readonly short StructureYOffset;
+    public readonly byte[] InputDirections;
     public readonly ushort MinDeltaX;
     public readonly ushort MaxDeltaX;
     public readonly ushort MinDeltaY;
@@ -24,14 +23,15 @@ public class Bridge
     public readonly byte DeltaYMultiple;
     public ConnectPoint Point1;
     public ConnectPoint Point2;
+
+    public BoundingBox[] BoundingBoxes;
     
-    public Bridge(string structureFilePath, ushort structureLength, short structureYOffset, 
+    
+    public Bridge(byte[] inputDirections,
         ushort minDeltaX, ushort maxDeltaX, ushort minDeltaY, ushort maxDeltaY, byte deltaXMultiple = 1, byte deltaYMultiple = 1,
-        ConnectPoint point1 = null, ConnectPoint point2 = null)
+        ConnectPoint point1 = null, ConnectPoint point2 = null, BoundingBox[] boundingBoxes = null)
     {
-        StructureFilePath = structureFilePath;
-        StructureLength = structureLength;
-        StructureYOffset = structureYOffset;
+        InputDirections = inputDirections;
         MinDeltaX = minDeltaX;
         MaxDeltaX = maxDeltaX;
         MinDeltaY = minDeltaY;
@@ -40,16 +40,22 @@ public class Bridge
         DeltaYMultiple = deltaYMultiple;
         Point1 = point1;
         Point2 = point2;
+        BoundingBoxes = boundingBoxes;
     }
 
     public virtual void Generate()
     {
         throw new Exception("Generate() was called on the Bridge class, this does nothing and should never happen");
     }
+
+    public virtual void SetPoints(ConnectPoint point1, ConnectPoint point2)
+    {
+        throw new Exception("SetPoints() was called on the Bridge class, this should never happen because it won't make bounding boxes");
+    }
     
     public virtual Bridge Clone()
     {
-        return new Bridge(StructureFilePath, StructureLength, StructureYOffset, 
-            MinDeltaX, MaxDeltaX, MinDeltaY, MaxDeltaY, DeltaXMultiple, DeltaYMultiple, Point1, Point2);
+        return new Bridge(InputDirections, MinDeltaX, MaxDeltaX, MinDeltaY, MaxDeltaY, 
+            DeltaXMultiple, DeltaYMultiple, Point1, Point2, BoundingBoxes);
     }
 }
