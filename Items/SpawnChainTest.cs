@@ -43,10 +43,10 @@ namespace SpawnHouses.Items
 			Point16 point = (Main.MouseWorld / 16).ToPoint16();
 			List<CustomChainStructure> costList = new List<CustomChainStructure>();
 			Bridge bridge = ParabolaBridge.TestBridge.Clone();
-			costList.Add(new TestChainStructure(10, bridge));
+			costList.Add(new TestChainStructure(10, [bridge] ));
 			
 
-			StructureChain chain = new StructureChain(100, costList, point, 7);
+			StructureChain chain = new StructureChain(100, costList, point, 7, false);
 			
 			
 			

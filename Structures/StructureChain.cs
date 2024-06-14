@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using SpawnHouses.Structures.StructureParts;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace SpawnHouses.Structures;
@@ -13,7 +15,7 @@ public class StructureChain
      * @summary makes a chain of CustomStructures and Bridges
      * 
      */
-    public StructureChain(ushort maxCost, List<CustomChainStructure> structureList, Point16 entryPos, byte maxBranchLength, bool keepEntryPointClear = true)
+    public StructureChain(ushort maxCost, List<CustomChainStructure> structureList, Point16 entryPos, byte maxBranchLength, bool keepRootPointClear = true)
     {
         foreach (var structure in structureList)
             if (structure.Cost == -1)
@@ -22,26 +24,29 @@ public class StructureChain
         if (structureList.Count == 0)
             throw new Exception("structureList had no valid options");
         
-        ushort currentCost = 0;
-        ushort averageCost = 1;
+        int currentCost = 0;
+        int averageCost = 1;
         foreach (var structure in structureList)
-            averageCost += (ushort)structure.Cost;
-        averageCost /= (ushort)structureList.Count;
+            averageCost += structure.Cost;
+        averageCost /= structureList.Count;
 
         List<BoundingBox> boundingBoxes = new List<BoundingBox>();
         
-        CustomChainStructure rootStructure = NewStructure(null, (ushort)entryPos.X, (ushort)entryPos.Y);
+        CustomChainStructure rootStructure = NewStructure(null, entryPos.X, entryPos.Y);
+        
+        ChainConnectPoint rootConnectPoint = rootStructure.GetRootConnectPoint();
+        if (rootConnectPoint != null)
+            MoveConnectPointAndStructure(rootStructure, rootConnectPoint, entryPos.X, entryPos.Y);
         
         boundingBoxes.AddRange(rootStructure.StructureBoundingBoxes);
         for (byte direction = 0; direction < 4; direction++)
         {
             for (byte index = 0; index < rootStructure.ConnectPoints[direction].Length; index++)
             {
-                if (keepEntryPointClear && rootStructure.ConnectPoints[direction][index].X == entryPos.X &&
-                    rootStructure.ConnectPoints[direction][index].Y == entryPos.Y) continue;
-
-                CalculateChildrenStructures(rootStructure.ConnectPoints[direction][index],
-                    rootStructure.StructureXSize, direction, 1);
+                if (keepRootPointClear && rootStructure.ConnectPoints[direction][index] == rootConnectPoint)
+                    continue;
+                
+                CalculateChildrenStructures(rootStructure.ConnectPoints[direction][index], rootStructure, direction, 1);
             }
         }
         
@@ -57,8 +62,9 @@ public class StructureChain
                 foreach (ChainConnectPoint connectPoint in structure.ConnectPoints[direction])
                 {
                     if (connectPoint.ChildStructure is null) continue;
-                    
-                    Bridge bridge = structure.ChildBridgeType.Clone();
+
+                    int bridgeIndex = Terraria.WorldGen.genRand.Next(0, structure.ChildBridgeTypes.Length);
+                    Bridge bridge = structure.ChildBridgeTypes[bridgeIndex].Clone();
                     
                     bridge.Point1 = connectPoint;
                     bridge.Point2 = connectPoint.ChildConnectPoint;
@@ -70,23 +76,36 @@ public class StructureChain
             }
         }
         
-        CustomChainStructure NewStructure(ChainConnectPoint parentConnectPoint, ushort x = 500, ushort y = 500)
+        CustomChainStructure NewStructure(ChainConnectPoint parentConnectPoint, int x = 500, int y = 500)
         {
-            byte structureIndex = (byte)Terraria.WorldGen.genRand.Next(0, structureList.Count);
+            int structureIndex = Terraria.WorldGen.genRand.Next(0, structureList.Count);
             CustomChainStructure structure = structureList[structureIndex].Clone();
             structure.ParentChainConnectPoint = parentConnectPoint;
             structure.SetPosition(x, y);
             return structure;
         }
 
-        void MoveStructureConnectPoint(CustomChainStructure structure, ChainConnectPoint connectPoint, ushort x, ushort y)
+        void MoveConnectPointAndStructure(CustomChainStructure structure, ChainConnectPoint connectPoint, int x, int y)
         {
             int deltaX = connectPoint.X - x;
             int deltaY = connectPoint.Y - y;
-            structure.SetPosition((ushort)(structure.X - deltaX), (ushort)(structure.Y - deltaY));
+            structure.SetPosition(structure.X - deltaX, structure.Y - deltaY);
+        }
+
+        Bridge GetBridgeOfDirection(Bridge[] bridges, byte direction)
+        {
+            for (ushort i = 0; i < 5000; i++)
+            {
+                int index = Terraria.WorldGen.genRand.Next(0, bridges.Length);
+                if (bridges[index].InputDirections.Contains(direction))
+                    return bridges[index];
+            }
+
+            throw new Exception($"bridge of direction {direction} was not found in this structure's ChildBridgeTypes");
         }
         
-        void CalculateChildrenStructures(ChainConnectPoint connectPoint, ushort structureXSize, byte targetDirection, byte currentBranchLength)
+        void CalculateChildrenStructures(ChainConnectPoint connectPoint, CustomChainStructure connectPointParentStructure, 
+            byte targetDirection, int currentBranchLength)
         {
             if (Terraria.WorldGen.genRand.Next(0, maxBranchLength - currentBranchLength) == 0 ||
                 currentCost + averageCost >= maxCost) return;
@@ -96,46 +115,59 @@ public class StructureChain
             
             CustomChainStructure newStructure = NewStructure(connectPoint);
             ChainConnectPoint targetConnectPoint = null;
+            Bridge connectPointBridge = null;
             
-            while (!validLocation && findLocationAttempts < 40)
+            
+            while (!validLocation && findLocationAttempts < 50)
             {
                 // randomly pick either the top or bottom side
-                byte randomSide = (byte)Terraria.WorldGen.genRand.Next(0, 2);
-                ushort newStructureConnectPointX, newStructureConnectPointY;
-                if (targetDirection == CPDirection.Left || targetDirection == CPDirection.Right)
+                int randomSide = Terraria.WorldGen.genRand.Next(0, 2);
+                int newStructureConnectPointX, newStructureConnectPointY;
+                
+                connectPointBridge = GetBridgeOfDirection(connectPointParentStructure.ChildBridgeTypes, targetDirection);
+                if (targetDirection == Directions.Left || targetDirection == Directions.Right)
                 {
-                    if (targetDirection == CPDirection.Right)
-                        newStructureConnectPointX = (ushort)(connectPoint.X + 
-                                                structureXSize * Terraria.WorldGen.genRand.Next(7, 13) / 10.0);
+                    int deltaX, deltaY;
+                    int minRangeX = connectPointBridge.MinDeltaX / connectPointBridge.DeltaXMultiple;
+                    int maxRangeX = connectPointBridge.MaxDeltaX / connectPointBridge.DeltaXMultiple;
+                    deltaX = Terraria.WorldGen.genRand.Next(minRangeX, maxRangeX + 1) * connectPointBridge.DeltaXMultiple;
+                    int minRangeY = connectPointBridge.MinDeltaY / connectPointBridge.DeltaYMultiple;
+                    int maxRangeY = connectPointBridge.MaxDeltaY / connectPointBridge.DeltaYMultiple;
+                    deltaY = Terraria.WorldGen.genRand.Next(minRangeY, maxRangeY + 1) * connectPointBridge.DeltaYMultiple;
+                    
+                    // note: the +/-1 is because connect points have no space between them even when the deltaX is 1
+                    if (targetDirection == Directions.Right)
+                        newStructureConnectPointX = connectPoint.X + deltaX + 1;
                     else
-                        newStructureConnectPointX = (ushort)(connectPoint.X - structureXSize -
-                                                structureXSize * Terraria.WorldGen.genRand.Next(7, 13) / 10.0);
-        
-                    // ensure that the bridge like actually fits right lol
-                    newStructureConnectPointX += (ushort)((Math.Abs(connectPoint.X - newStructureConnectPointX) - 1) % newStructure.ChildBridgeType.StructureLength);
+                        newStructureConnectPointX = connectPoint.X - deltaX - 1;
 
-                    newStructureConnectPointY = (ushort)(connectPoint.Y + Terraria.WorldGen.genRand.Next(-100, 101) / 100.0 * newStructure.ChildBridgeType.MaxDeltaY);
+                    if (Terraria.WorldGen.genRand.NextBool())
+                        newStructureConnectPointY = connectPoint.Y + deltaY + 1;
+                    else
+                        newStructureConnectPointY = connectPoint.Y - deltaY - 1;
                 }
                 else
                 {
                     newStructureConnectPointX = connectPoint.X;
 
-                    if (targetDirection == CPDirection.Up)
-                        newStructureConnectPointY = (ushort)(connectPoint.Y - 1);
+                    if (targetDirection == Directions.Up)
+                        newStructureConnectPointY = connectPoint.Y - 1;
                     else
-                        newStructureConnectPointY = (ushort)(connectPoint.Y + 1);
+                        newStructureConnectPointY = connectPoint.Y + 1;
                 }
 
-                ChainConnectPoint[] targetConnectPointList = newStructure.ConnectPoints[CPDirection.flipDirection(targetDirection)];
+                ChainConnectPoint[] targetConnectPointList = newStructure.ConnectPoints[Directions.flipDirection(targetDirection)];
                 if (targetConnectPointList.Length != 0)
                     targetConnectPoint = targetConnectPointList[(targetConnectPointList.Length - 1) * randomSide];
                 else
                     return;
                 
-                MoveStructureConnectPoint(newStructure, targetConnectPoint, newStructureConnectPointX, newStructureConnectPointY);
+                MoveConnectPointAndStructure(newStructure, targetConnectPoint, newStructureConnectPointX, newStructureConnectPointY);
+                connectPointBridge.SetPoints(connectPoint, targetConnectPoint);
                 
                 validLocation = true;
-                if (BoundingBox.IsAnyBoundingBoxesColliding(newStructure.StructureBoundingBoxes, boundingBoxes))
+                if (BoundingBox.IsAnyBoundingBoxesColliding(newStructure.StructureBoundingBoxes, boundingBoxes) || 
+                    BoundingBox.IsAnyBoundingBoxesColliding(connectPointBridge.BoundingBoxes, boundingBoxes))
                 {
                     findLocationAttempts++;
                     validLocation = false;
@@ -146,11 +178,13 @@ public class StructureChain
                 return;
             
             boundingBoxes.AddRange(newStructure.StructureBoundingBoxes);
+            boundingBoxes.AddRange(connectPointBridge.BoundingBoxes);
             
             connectPoint.ChildStructure = newStructure;
             connectPoint.ChildConnectPoint = targetConnectPoint;
+            connectPoint.ChildBridge = connectPointBridge;
             
-            currentCost += (ushort)newStructure.Cost;
+            currentCost += newStructure.Cost;
             
             for (byte direction = 0; direction < 4; direction++)
                 foreach (var nextConnectPoint in newStructure.ConnectPoints[direction])
@@ -160,8 +194,8 @@ public class StructureChain
                         continue;
                     
                     // recursive
-                    CalculateChildrenStructures(nextConnectPoint, newStructure.StructureXSize,
-                        direction, (byte)(currentBranchLength + 1));
+                    CalculateChildrenStructures(nextConnectPoint, newStructure,
+                        direction, currentBranchLength + 1);
                 }
         }
     }

@@ -54,4 +54,58 @@ public class BoundingBox
     {
         return IsAnyBoundingBoxesColliding(structureBoundingBoxes, otherBoundingBoxes.ToArray());
     }
+    
+    public static void Visualize(BoundingBox[] boundingBoxes, ushort tileID)
+    {
+        foreach (var boundingBox in boundingBoxes)
+        {
+            for (int x = boundingBox.Point1.X; x <= boundingBox.Point2.X; x++)
+            {
+                for (int y = boundingBox.Point1.Y; y <= boundingBox.Point2.Y; y++)
+                {
+                    Tile tile = Main.tile[x, y];
+                    tile.HasTile = true;
+                    tile.Slope = SlopeType.Solid;
+                    tile.IsHalfBlock = false;
+                    tile.TileType = tileID;
+                }
+            }
+        }
+    }
+
+    public static void VisualizeCollision(BoundingBox[] boundingBoxes1, BoundingBox[] boundingBoxes2, ushort tileID1, ushort tileID2, ushort collisionTileID)
+    {
+        foreach (var boundingBox in boundingBoxes1)
+        {
+            for (int x = boundingBox.Point1.X; x <= boundingBox.Point2.X; x++)
+            {
+                for (int y = boundingBox.Point1.Y; y <= boundingBox.Point2.Y; y++)
+                {
+                    Tile tile = Main.tile[x, y];
+                    tile.HasTile = true;
+                    tile.Slope = SlopeType.Solid;
+                    tile.IsHalfBlock = false;
+                    tile.TileType = tileID1;
+                }
+            }
+        }
+        foreach (var boundingBox in boundingBoxes2)
+        {
+            for (int x = boundingBox.Point1.X; x <= boundingBox.Point2.X; x++)
+            {
+                for (int y = boundingBox.Point1.Y; y <= boundingBox.Point2.Y; y++)
+                {
+                    Tile tile = Main.tile[x, y];
+                    tile.HasTile = true;
+                    tile.Slope = SlopeType.Solid;
+                    tile.IsHalfBlock = false;
+
+                    if (tile.TileType == tileID1)
+                        tile.TileType = collisionTileID;
+                    else
+                        tile.TileType = tileID2;
+                }
+            }
+        }
+    }
 }

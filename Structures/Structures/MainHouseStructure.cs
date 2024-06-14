@@ -10,7 +10,7 @@ namespace SpawnHouses.Structures.Structures;
 public class MainHouseStructure : CustomStructure
 {
     // constants
-    private static readonly string _filePath = "Structures/StructureFiles/mainHouse_v2";
+    private static readonly string _filePath = "Structures/StructureFiles/mainHouse/mainHouse_v2";
     private static readonly ushort _structureXSize = 63;
     private static readonly ushort _structureYSize = 33;
     

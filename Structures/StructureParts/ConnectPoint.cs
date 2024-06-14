@@ -11,13 +11,13 @@ public class ConnectPoint {
     public bool FacingLeft { get; set; } = true;
     public ushort X { get; set; }
     public ushort Y { get; set; }
-    protected short _YOffset { get; set; }
-    protected short _XOffset { get; set; }
+    public short YOffset { get; set; }
+    public short XOffset { get; set; }
     
     public ConnectPoint(short xOffset, short yOffset, bool facingLeft = true)
     {
-        _XOffset = xOffset;
-        _YOffset = yOffset;
+        XOffset = xOffset;
+        YOffset = yOffset;
         FacingLeft = facingLeft;
     }
     
@@ -26,15 +26,15 @@ public class ConnectPoint {
     {
         X = x;
         Y = y;
-        _XOffset = xOffset;
-        _YOffset = yOffset;
+        XOffset = xOffset;
+        YOffset = yOffset;
         FacingLeft = facingLeft;
     }
     
     public void SetPosition(int mainStructureX, int mainStructureY)
     {
-        X = Convert.ToUInt16(mainStructureX + _XOffset);
-        Y = Convert.ToUInt16(mainStructureY + _YOffset);
+        X = Convert.ToUInt16(mainStructureX + XOffset);
+        Y = Convert.ToUInt16(mainStructureY + YOffset);
     }
     
     public void BlendLeft(ushort topTileID, ushort blendDistance, ushort fillTileID = 0, ushort maxFillCount = 999,
@@ -223,22 +223,6 @@ public class ConnectPoint {
 
     public ConnectPoint Clone()
     {
-        return new ConnectPoint(X, Y, _XOffset, _YOffset, FacingLeft);
-    }
-}
-
-
-public class CPDirection {
-    public static byte Up = 0;
-    public static byte Down = 1;
-    public static byte Left = 2;
-    public static byte Right = 3;
-
-    public static byte flipDirection(byte direction)
-    {
-        if (direction == 1 || direction == 3)
-            return (byte)(direction - 1);
-        else
-            return (byte)(direction + 1);
+        return new ConnectPoint(X, Y, XOffset, YOffset, FacingLeft);
     }
 }

@@ -39,10 +39,10 @@ public class CustomStructure {
                 connectPoint.SetPosition(mainStructureX: X, mainStructureY: Y);
     }
 
-    public virtual void SetPosition(ushort x, ushort y)
+    public virtual void SetPosition(int x, int y)
     {
-        X = x;
-        Y = y;
+        X = (ushort)x;
+        Y = (ushort)y;
         SetSubstructurePositions();
     }
 
@@ -61,7 +61,7 @@ public class CustomStructure {
     
     protected static Floor[] CopyFloors(Floor[] floors)
     {
-        Floor[] newFloors = (Floor[])floors.Clone();
+        Floor[] newFloors = (Floor[]) floors.Clone();
         for (byte i = 0; i < newFloors.Length; i++)
             newFloors[i] = newFloors[i].Clone();
         return newFloors;

@@ -9,7 +9,7 @@ namespace SpawnHouses.Structures;
 public class CustomChainStructure : CustomStructure
 {
     public new ChainConnectPoint[][] ConnectPoints { get; set; }
-    public Bridge ChildBridgeType { get; set; }
+    public Bridge[] ChildBridgeTypes { get; set; }
     public sbyte Cost { get; set; }
     public BoundingBox[] StructureBoundingBoxes { get; set; }
     public ChainConnectPoint ParentChainConnectPoint { get; set; }
@@ -17,7 +17,7 @@ public class CustomChainStructure : CustomStructure
     
     // you're not really intended to make a base customChainStructure, so this is private. It's used for cloning
     protected CustomChainStructure(String filePath, ushort structureXSize, ushort structureYSize, Floor[] floors,
-        ChainConnectPoint[][] connectPoints, Bridge childBridge,
+        ChainConnectPoint[][] connectPoints, Bridge[] childBridges,
         ushort x = 1, ushort y = 1, sbyte cost = -1, byte boundingBoxMargin = 0)
     {
         FilePath = filePath;
@@ -27,7 +27,7 @@ public class CustomChainStructure : CustomStructure
         Y = y;
         Floors = floors;
         ConnectPoints = connectPoints;
-        ChildBridgeType = childBridge;
+        ChildBridgeTypes = childBridges;
         Cost = cost;
         BoundingBoxMargin = boundingBoxMargin;
         SetSubstructurePositions();
@@ -44,18 +44,27 @@ public class CustomChainStructure : CustomStructure
         StructureBoundingBoxes =
         [
             new BoundingBox(X - BoundingBoxMargin, Y - BoundingBoxMargin,
-                X + StructureXSize + BoundingBoxMargin, Y + StructureYSize + BoundingBoxMargin)
+                X + StructureXSize + BoundingBoxMargin - 1, Y + StructureYSize + BoundingBoxMargin - 1)
         ];
     }
     
-    public override void SetPosition(ushort x, ushort y)
+    public override void SetPosition(int x, int y)
     {
-        X = x;
-        Y = y;
+        X = (ushort)x;
+        Y = (ushort)y;
         SetSubstructurePositions();
     }
+
+    public ChainConnectPoint GetRootConnectPoint()
+    {
+        for (byte direction = 0; direction < 4; direction++)
+            foreach (var connectPoint in ConnectPoints[direction])
+                if (connectPoint.RootPoint)
+                    return connectPoint;
+        return null;
+    }
     
-    protected static ChainConnectPoint[][] CopyConnectPoints(ChainConnectPoint[][] connectPoints)
+    protected static ChainConnectPoint[][] CopyChainConnectPoints(ChainConnectPoint[][] connectPoints)
     {
         ChainConnectPoint[][] newConnectPoints = (ChainConnectPoint[][])connectPoints.Clone();
         
@@ -67,6 +76,14 @@ public class CustomChainStructure : CustomStructure
         }
         return newConnectPoints;
     }
+
+    protected static Bridge[] CopyBridges(Bridge[] bridges)
+    {
+        Bridge[] newBridges = (Bridge[]) bridges.Clone();
+        for (byte i = 0; i < newBridges.Length; i++)
+            newBridges[i] = newBridges[i].Clone();
+        return newBridges;
+    }
     
     public virtual CustomChainStructure Clone()
     {
@@ -76,8 +93,8 @@ public class CustomChainStructure : CustomStructure
             StructureXSize = StructureXSize,
             StructureYSize = StructureYSize,
             Floors = CopyFloors(Floors),
-            ConnectPoints = CopyConnectPoints(ConnectPoints),
-            ChildBridgeType = ChildBridgeType,
+            ConnectPoints = CopyChainConnectPoints(ConnectPoints),
+            ChildBridgeTypes = CopyBridges(ChildBridgeTypes),
             X = X,
             Y = Y,
             Cost = Cost

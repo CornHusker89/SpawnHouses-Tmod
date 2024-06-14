@@ -86,11 +86,10 @@ namespace SpawnHouses.Items
 			
 			BridgeTestStructure structure2 = new BridgeTestStructure(x, y);
 			structure2._GenerateStructure();
-			
-			
-			ParabolaBridge bridge = new ParabolaBridge("Structures/StructureFiles/woodBridge",
-				2, -2, 0, 15, 0, 6,
-				2, 1, 0.6, structure1.ConnectPoints[3][0], structure2.ConnectPoints[2][0]);
+
+
+			ParabolaBridge bridge = ParabolaBridge.TestBridge.Clone();
+			bridge.SetPoints(structure1.ConnectPoints[3][0], structure2.ConnectPoints[2][0]);
 			bridge.Generate();
 			
 			return true;
