@@ -13,7 +13,5 @@
 <!--  </ItemGroup>-->
   <ItemGroup>
     <Folder Include="Localization\" />
-    <Folder Include="Structures\StructureChains\" />
-    <Folder Include="Structures\StructureFiles\mainHouseBasement\" />
   </ItemGroup>
 </Project>

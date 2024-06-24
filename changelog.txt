@@ -3,3 +3,4 @@ Major Changes
 
 Minor Changes
 - Beach house has a 75% chance to spawn on the non-dungeon side of the world
+- Minor changes to main house platform placement

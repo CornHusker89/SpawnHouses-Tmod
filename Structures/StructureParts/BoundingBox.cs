@@ -55,7 +55,7 @@ public class BoundingBox
         return IsAnyBoundingBoxesColliding(structureBoundingBoxes, otherBoundingBoxes.ToArray());
     }
     
-    public static void Visualize(BoundingBox[] boundingBoxes, ushort tileID)
+    public static void Visualize(BoundingBox[] boundingBoxes, ushort tileID = TileID.Adamantite)
     {
         foreach (var boundingBox in boundingBoxes)
         {
@@ -73,7 +73,8 @@ public class BoundingBox
         }
     }
 
-    public static void VisualizeCollision(BoundingBox[] boundingBoxes1, BoundingBox[] boundingBoxes2, ushort tileID1, ushort tileID2, ushort collisionTileID)
+    public static void VisualizeCollision(BoundingBox[] boundingBoxes1, BoundingBox[] boundingBoxes2,
+        ushort tileID1 = TileID.Adamantite, ushort tileID2 = TileID.Cobalt, ushort collisionTileID = TileID.Dirt)
     {
         foreach (var boundingBox in boundingBoxes1)
         {

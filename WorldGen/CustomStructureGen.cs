@@ -9,6 +9,7 @@ using Terraria.IO;
 using Terraria.Localization;
 using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Structures;
 using SpawnHouses.Structures.Structures;
 
 
@@ -103,8 +104,10 @@ namespace SpawnHouses.WorldGen
 				// set initialY to the average y pos of the raycasts
 				initialY = (ushort) Math.Round(sum / 7.0);
 			
-				MainHouseStructure houseStructure = new MainHouseStructure(Convert.ToUInt16(initialX - 31), Convert.ToUInt16(initialY - 24));
+				MainHouseBStructure houseStructure = new MainHouseBStructure(Convert.ToUInt16(initialX - 31), Convert.ToUInt16(initialY - 24));
 				houseStructure.Generate();
+				
+				StructureChain.MainBasementChain chain = new StructureChain.MainBasementChain(new Point16(initialX - 31 + 42, initialY - 24 + 35));
 			}
 			
 		}

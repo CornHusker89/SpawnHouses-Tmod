@@ -8,12 +8,12 @@ using SpawnHouses.Structures.StructureParts;
 
 namespace SpawnHouses.Structures.ChainStructures;
 
-public class TestChainStructure : CustomChainStructure
+public class TestChainStructure2 : CustomChainStructure
 {
     // constants
-    private static readonly string _filePath = "Structures/StructureFiles/chainTest";
+    private static readonly string _filePath = "Structures/StructureFiles/chainTest2";
     private static readonly ushort _structureXSize = 15;
-    private static readonly ushort _structureYSize = 13;
+    private static readonly ushort _structureYSize = 8;
 
     private static readonly byte _boundingBoxMargin = 0;
     
@@ -22,20 +22,23 @@ public class TestChainStructure : CustomChainStructure
     private static readonly ChainConnectPoint[][] _connectPoints =
     [
         // top
-        [],
+        [
+            new ChainConnectPoint(7, 0, true)
+        ],
         
         // bottom
-        [],
+        [
+            new ChainConnectPoint(7, 7, true)
+        ],
         
         // left
         [
-            new ChainConnectPoint(0, 6, true, true)
+            new ChainConnectPoint(0, 7, true, true)
         ],
         
         // right
         [
-            new ChainConnectPoint(14, 6, false),
-            new ChainConnectPoint(14, 12, false)
+            new ChainConnectPoint(14, 7, false)
         ]
     ];
     
@@ -43,7 +46,7 @@ public class TestChainStructure : CustomChainStructure
     public sealed override ushort StructureXSize => _structureXSize;
     public sealed override ushort StructureYSize => _structureYSize;
     
-    public TestChainStructure(sbyte cost, Bridge[] childBridgeType, ushort x = 1, ushort y = 1) : 
+    public TestChainStructure2(sbyte cost, Bridge[] childBridgeType, ushort x = 1, ushort y = 1) : 
         base(_filePath,  _structureXSize,  _structureYSize, CopyFloors(_floors), 
             CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost)
     {
@@ -66,8 +69,8 @@ public class TestChainStructure : CustomChainStructure
         FrameTiles();
     }
 
-    public override TestChainStructure Clone()
+    public override TestChainStructure2 Clone()
     {
-        return new TestChainStructure(Cost, ChildBridgeTypes, X, Y);
+        return new TestChainStructure2(Cost, ChildBridgeTypes, X, Y);
     }
 }

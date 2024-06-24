@@ -15,12 +15,12 @@ namespace SpawnHouses.Structures;
 public class Bridge
 {
     public readonly byte[] InputDirections;
-    public readonly ushort MinDeltaX;
-    public readonly ushort MaxDeltaX;
-    public readonly ushort MinDeltaY;
-    public readonly ushort MaxDeltaY;
-    public readonly byte DeltaXMultiple;
-    public readonly byte DeltaYMultiple;
+    public readonly short MinDeltaX;
+    public readonly short MaxDeltaX;
+    public readonly short MinDeltaY;
+    public readonly short MaxDeltaY;
+    public readonly sbyte DeltaXMultiple;
+    public readonly sbyte DeltaYMultiple;
     public ConnectPoint Point1;
     public ConnectPoint Point2;
 
@@ -28,7 +28,7 @@ public class Bridge
     
     
     public Bridge(byte[] inputDirections,
-        ushort minDeltaX, ushort maxDeltaX, ushort minDeltaY, ushort maxDeltaY, byte deltaXMultiple = 1, byte deltaYMultiple = 1,
+        short minDeltaX, short maxDeltaX, short minDeltaY, short maxDeltaY, sbyte deltaXMultiple = 1, sbyte deltaYMultiple = 1,
         ConnectPoint point1 = null, ConnectPoint point2 = null, BoundingBox[] boundingBoxes = null)
     {
         InputDirections = inputDirections;
@@ -51,6 +51,21 @@ public class Bridge
     public virtual void SetPoints(ConnectPoint point1, ConnectPoint point2)
     {
         throw new Exception("SetPoints() was called on the Bridge class, this should never happen because it won't make bounding boxes");
+    }
+
+    public void ShowConnectPoints()
+    {
+        Tile tile = Main.tile[Point1.X, Point1.Y];
+        tile.HasTile = true;
+        tile.Slope = SlopeType.Solid;
+        tile.IsHalfBlock = false;
+        tile.TileType = TileID.Adamantite;
+        
+        tile = Main.tile[Point2.X, Point2.Y];
+        tile.HasTile = true;
+        tile.Slope = SlopeType.Solid;
+        tile.IsHalfBlock = false;
+        tile.TileType = TileID.Cobalt;
     }
     
     public virtual Bridge Clone()

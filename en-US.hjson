@@ -52,6 +52,11 @@ Mods: {
 				DisplayName: Spawn Firepit
 				Tooltip: ""
 			}
+
+			SpawnMainBasementChain: {
+				DisplayName: Spawn Main Basement Chain
+				Tooltip: ""
+			}
 		}
 
 		Configs: {
