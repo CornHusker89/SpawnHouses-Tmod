@@ -6,14 +6,14 @@ using Terraria;
 using SpawnHouses.Structures;
 using SpawnHouses.Structures.StructureParts;
 
-namespace SpawnHouses.Structures.ChainStructures;
+namespace SpawnHouses.Structures.ChainStructures.MainBasement;
 
-public class TestChainStructure : CustomChainStructure
+public class MainBasement_Hallway4 : CustomChainStructure
 {
     // constants
-    private static readonly string _filePath = "Structures/StructureFiles/chainTest";
-    private static readonly ushort _structureXSize = 15;
-    private static readonly ushort _structureYSize = 13;
+    private static readonly string _filePath = "Structures/StructureFiles/mainBasement/mainBasement_Hallway4";
+    private static readonly ushort _structureXSize = 6;
+    private static readonly ushort _structureYSize = 11;
 
     private static readonly byte _boundingBoxMargin = 0;
     
@@ -29,13 +29,12 @@ public class TestChainStructure : CustomChainStructure
         
         // left
         [
-            new ChainConnectPoint(0, 6, true, true)
+            new ChainConnectPoint(0, 10, true, false)
         ],
         
         // right
         [
-            new ChainConnectPoint(14, 6, false),
-            new ChainConnectPoint(14, 12, false)
+            new ChainConnectPoint(5, 10, false, false),
         ]
     ];
     
@@ -43,7 +42,7 @@ public class TestChainStructure : CustomChainStructure
     public sealed override ushort StructureXSize => _structureXSize;
     public sealed override ushort StructureYSize => _structureYSize;
     
-    public TestChainStructure(sbyte cost, Bridge[] childBridgeType, ushort x = 1, ushort y = 1) : 
+    public MainBasement_Hallway4(sbyte cost, Bridge[] childBridgeType, ushort x = 1, ushort y = 1) : 
         base(_filePath,  _structureXSize,  _structureYSize, CopyFloors(_floors), 
             CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost)
     {
@@ -66,8 +65,8 @@ public class TestChainStructure : CustomChainStructure
         FrameTiles();
     }
 
-    public override TestChainStructure Clone()
+    public override MainBasement_Hallway4 Clone()
     {
-        return new TestChainStructure(Cost, ChildBridgeTypes, X, Y);
+        return new MainBasement_Hallway4(Cost, ChildBridgeTypes, X, Y);
     }
 }

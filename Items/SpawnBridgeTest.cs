@@ -88,7 +88,7 @@ namespace SpawnHouses.Items
 			structure2._GenerateStructure();
 
 
-			ParabolaBridge bridge = ParabolaBridge.TestBridge.Clone();
+			ParabolaBridge bridge = new ParabolaBridge.TestBridge();
 			bridge.SetPoints(structure1.ConnectPoints[3][0], structure2.ConnectPoints[2][0]);
 			bridge.Generate();
 			

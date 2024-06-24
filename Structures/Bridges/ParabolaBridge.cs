@@ -22,7 +22,7 @@ public class ParabolaBridge : Bridge
     private byte BoundingBoxYMargin;
     
     public ParabolaBridge(string structureFilePath, ushort structureLength, ushort structureHeight, short structureYOffset, double attemptSlope, byte boundingBoxYMargin,
-        ushort minDeltaX, ushort maxDeltaX, ushort minDeltaY, ushort maxDeltaY, byte deltaXMultiple, byte deltaYMultiple, 
+        short minDeltaX, short maxDeltaX, short minDeltaY, short maxDeltaY, sbyte deltaXMultiple, sbyte deltaYMultiple, 
         ConnectPoint point1 = null, ConnectPoint point2 = null) 
         : 
         base([Directions.Left, Directions.Right], minDeltaX, maxDeltaX, minDeltaY, maxDeltaY, 
@@ -110,7 +110,7 @@ public class ParabolaBridge : Bridge
     public override void Generate()
     {
         if (Point1 == null || Point2 == null)
-            throw new Exception("bridge point 1 or 2 is invalid");
+            throw new Exception("bridge point 1 or 2 is null");
         
         if ((Math.Abs(Point1.X - Point2.X) - 1) % StructureLength != 0)
             throw new Exception($"Bridge length cannot be resolved with the given BridgeStructure's length, p1: {Point1.X}, p2 {Point2.X}, distance: {Math.Abs(Point1.X - Point2.X) - 1}, structureLength: {StructureLength}");
@@ -152,8 +152,10 @@ public class ParabolaBridge : Bridge
     
     
     
-    // bridge presets
-    
-    public static readonly ParabolaBridge TestBridge = new ParabolaBridge("Structures/StructureFiles/woodBridge", 
-        2, 3, -2, 0.4, 2, 10, 12, 0, 12, 2, 1);
+    // --- bridge presets --
+    public class TestBridge : ParabolaBridge
+    {
+        public TestBridge() : base("Structures/StructureFiles/woodBridge", 
+            2, 3, -2, 0.4, 2, 10, 12, 0, 12, 2, 1) {}
+    } 
 }

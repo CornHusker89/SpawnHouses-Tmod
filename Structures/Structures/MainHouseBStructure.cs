@@ -7,12 +7,12 @@ using SpawnHouses.Structures.StructureParts;
 
 namespace SpawnHouses.Structures.Structures;
 
-public class MainHouseStructure : CustomStructure
+public class MainHouseBStructure : CustomStructure
 {
     // constants
-    private static readonly string _filePath = "Structures/StructureFiles/mainHouse/mainHouse_v2";
+    private static readonly string _filePath = "Structures/StructureFiles/mainHouse/mainHouse_B_v3";
     private static readonly ushort _structureXSize = 63;
-    private static readonly ushort _structureYSize = 33;
+    private static readonly ushort _structureYSize = 40;
     
     private static readonly Floor[] _floors = 
     [
@@ -42,7 +42,7 @@ public class MainHouseStructure : CustomStructure
     public sealed override ushort StructureXSize => _structureXSize;
     public sealed override ushort StructureYSize => _structureYSize;
     
-    public MainHouseStructure(ushort x = 0, ushort y = 0)
+    public MainHouseBStructure(ushort x = 0, ushort y = 0)
     {
         Floors = _floors;
         ConnectPoints = _connectPoints;
