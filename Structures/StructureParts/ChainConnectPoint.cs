@@ -1,38 +1,55 @@
 using System;
-using Terraria;
-using Terraria.ID;
+using System.Collections.Generic;
 using Terraria.WorldBuilding;
 using Terraria.DataStructures;
+using SpawnHouses.Structures.StructureParts;
+using Terraria.ModLoader;
 using Microsoft.Xna.Framework;
+using Terraria;
+using Terraria.ID;
 
 namespace SpawnHouses.Structures.StructureParts;
 
-public class ChainConnectPoint : ConnectPoint {
+
+public class ChainConnectPoint : ConnectPoint 
+{
+    private readonly Mod _mod = ModContent.GetInstance<SpawnHouses>();
+    
     public bool RootPoint { get; set; }
+    public byte GenerateChance { get; set; }
     public Bridge ChildBridge { get; set; }
+    public byte BranchLength { get; set; }
+    public Seal SealObj { get; set; }
     public CustomChainStructure ChildStructure { get; set; }
     public ChainConnectPoint ChildConnectPoint { get; set; }
     
-    public ChainConnectPoint(short xOffset, short yOffset, bool facingLeft = true, bool rootPoint = false,
-        Bridge childBridge = null, CustomChainStructure childStructure = null, ChainConnectPoint childConnectPoint = null) :
-        base(xOffset, yOffset, facingLeft)
+    public ChainConnectPoint(short xOffset, short yOffset, byte direction, Seal sealObj = null, bool rootPoint = false,
+        byte generateChance = GenerateChances.Neutral, Bridge childBridge = null, byte branchLength = 0,
+        CustomChainStructure childStructure = null, ChainConnectPoint childConnectPoint = null) :
+        base(xOffset, yOffset, direction)
     {
         XOffset = xOffset;
         YOffset = yOffset;
-        FacingLeft = facingLeft;
+        Direction = direction;
+        SealObj = sealObj;
         ChildBridge = childBridge;
+        BranchLength = branchLength;
+        GenerateChance = generateChance;
         ChildStructure = childStructure;
         ChildConnectPoint = childConnectPoint;
         RootPoint = rootPoint;
     }
     
     // for cloning
-    private ChainConnectPoint(ushort x, ushort y, short xOffset, short yOffset, bool facingLeft, bool rootPoint,
-        Bridge childBridge, CustomChainStructure childStructure, ChainConnectPoint childConnectPoint) :
-        base(xOffset, yOffset, facingLeft)
+    private ChainConnectPoint(ushort x, ushort y, short xOffset, short yOffset, byte direction, Seal sealObj, bool rootPoint,
+        byte generateChance, Bridge childBridge, byte branchLength, CustomChainStructure childStructure, ChainConnectPoint childConnectPoint) :
+        base(xOffset, yOffset, direction)
     {
-        FacingLeft = facingLeft;
+        Direction = direction;
+        SealObj = sealObj;
         ChildBridge = childBridge;
+        BranchLength = branchLength;
+        GenerateChance = generateChance;
         X = x;
         Y = y;
         XOffset = xOffset;
@@ -42,8 +59,18 @@ public class ChainConnectPoint : ConnectPoint {
         RootPoint = rootPoint;
     }
     
+    [NoJIT]
+    public void GenerateSeal()
+    {
+        if (SealObj != null)
+        {
+            StructureHelper.Generator.GenerateStructure(SealObj.FilePath, new Point16(X + SealObj.XOffset, Y + SealObj.YOffset), _mod);
+            WorldUtils.Gen(new Point(X, Y), new Shapes.Circle(10), new Actions.SetFrames());
+        }
+    }
+    
     public new ChainConnectPoint Clone()
     {
-        return new ChainConnectPoint(X, Y, XOffset, YOffset, FacingLeft, RootPoint, ChildBridge, ChildStructure, ChildConnectPoint);
+        return new ChainConnectPoint(X, Y, XOffset, YOffset, Direction, SealObj, RootPoint, GenerateChance, ChildBridge, BranchLength, ChildStructure, ChildConnectPoint);
     }
 }

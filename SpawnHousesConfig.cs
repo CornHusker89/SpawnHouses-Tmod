@@ -13,5 +13,9 @@ public class SpawnHousesConfig : ModConfig
 	
 	[DefaultValue(true)]
 	[ReloadRequired]
+	public bool EnableMainBasement { get; set; }
+	
+	[DefaultValue(true)]
+	[ReloadRequired]
 	public bool EnableBeachHouse { get; set; }
 }

@@ -31,12 +31,12 @@ public class FirepitStructure : CustomStructure
         
         // left
         [
-            new ConnectPoint(-1, 2, true)
+            new ConnectPoint(-1, 2, Directions.Left)
         ],
         
         // right
         [
-            new ConnectPoint(7, 2, false)
+            new ConnectPoint(7, 2, Directions.Right)
         ]
     ];
     

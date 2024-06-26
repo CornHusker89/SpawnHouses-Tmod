@@ -8,10 +8,10 @@ using SpawnHouses.Structures.StructureParts;
 
 namespace SpawnHouses.Structures.ChainStructures.MainBasement;
 
-public class MainBasement_Room1 : CustomChainStructure
+public class MainBasement_Room1_WithFloor : CustomChainStructure
 {
     // constants
-    private static readonly string _filePath = "Structures/StructureFiles/mainBasement/mainBasement_Room1";
+    private static readonly string _filePath = "Structures/StructureFiles/mainBasement/mainBasement_Room1_WithFloor";
     private static readonly ushort _structureXSize = 22;
     private static readonly ushort _structureYSize = 9;
 
@@ -25,16 +25,18 @@ public class MainBasement_Room1 : CustomChainStructure
         [],
         
         // bottom
-        [],
+        [
+            new ChainConnectPoint(10, 8, Directions.Down, new Seal.MainBasement_SealFloor(), false),
+        ],
         
         // left
         [
-            new ChainConnectPoint(0, 8, true, true),
+            new ChainConnectPoint(0, 8, Directions.Left, new Seal.MainBasement_SealWall(), true),
         ],
         
         // right
         [
-            new ChainConnectPoint(21, 8, false, false),
+            new ChainConnectPoint(21, 8, Directions.Right, new Seal.MainBasement_SealWall(), false),
         ]
     ];
     
@@ -42,20 +44,16 @@ public class MainBasement_Room1 : CustomChainStructure
     public sealed override ushort StructureXSize => _structureXSize;
     public sealed override ushort StructureYSize => _structureYSize;
     
-    public MainBasement_Room1(sbyte cost, Bridge[] childBridgeType, ushort x = 1, ushort y = 1) : 
+    public MainBasement_Room1_WithFloor(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1, ushort y = 1) : 
         base(_filePath,  _structureXSize,  _structureYSize, CopyFloors(_floors), 
-            CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost)
+            CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost, weight)
     {
         X = x;
         Y = y;
         Cost = cost;
+        Weight = weight;
         BoundingBoxMargin = (byte)_boundingBoxMargin;
         
-        StructureBoundingBoxes =
-        [
-            new BoundingBox(x - _boundingBoxMargin, y - _boundingBoxMargin, x + StructureXSize + _boundingBoxMargin - 1, y + StructureYSize + _boundingBoxMargin - 1)
-        ];
-            
         SetSubstructurePositions();
     }
     
@@ -65,8 +63,8 @@ public class MainBasement_Room1 : CustomChainStructure
         FrameTiles();
     }
 
-    public override MainBasement_Room1 Clone()
+    public override MainBasement_Room1_WithFloor Clone()
     {
-        return new MainBasement_Room1(Cost, ChildBridgeTypes, X, Y);
+        return new MainBasement_Room1_WithFloor(Cost, Weight, ChildBridgeTypes, X, Y);
     }
 }

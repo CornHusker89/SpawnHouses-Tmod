@@ -29,12 +29,12 @@ public class BridgeTestStructure : CustomStructure
         
         // left
         [
-            new ConnectPoint(0, 0, true)
+            new ConnectPoint(0, 0, Directions.Left)
         ],
         
         // right
         [
-            new ConnectPoint(7, 0, false)
+            new ConnectPoint(7, 0, Directions.Right)
         ]
     ];
     

@@ -36,7 +36,7 @@ public class BeachHouseStructure : CustomStructure
         
         // right
         [
-            new ConnectPoint(34, 31, false)
+            new ConnectPoint(34, 31, Directions.Right)
         ]
     ];
     
@@ -55,7 +55,7 @@ public class BeachHouseStructure : CustomStructure
         
         // left
         [
-            new ConnectPoint(0, 31, true)
+            new ConnectPoint(0, 31, Directions.Left)
         ],
         
         // right

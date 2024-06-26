@@ -1,3 +1,4 @@
+using System;
 using Terraria.ID;
 using SpawnHouses.Structures;
 
@@ -29,12 +30,12 @@ public class MainHouseBStructure : CustomStructure
         
         // left
         [
-            new ConnectPoint(0, 26, true)
+            new ConnectPoint(0, 26, Directions.Left)
         ],
         
         // right
         [
-            new ConnectPoint(62, 26, false)
+            new ConnectPoint(62, 26, Directions.Right)
         ]
     ];
     
@@ -59,6 +60,12 @@ public class MainHouseBStructure : CustomStructure
         ConnectPoints[3][0].BlendRight(topTileID: TileID.Grass, blendDistance: 20, maxFillCount: 25);
 
         _GenerateStructure();
+        
+        // int signIndex = Terraria.Sign.ReadSign(X, Y);
+        // Console.WriteLine(signIndex);
+        // if (signIndex != -1)
+        //     Terraria.Sign.TextSign(signIndex, "aaa");
+        
         FrameTiles();
     }
 }   

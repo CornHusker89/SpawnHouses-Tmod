@@ -1,6 +1,8 @@
 Version 0.3.0
 Major Changes
+- Main House has a randomly generated basement
 
 Minor Changes
+- Main house's sign has text
 - Beach house has a 75% chance to spawn on the non-dungeon side of the world
 - Minor changes to main house platform placement

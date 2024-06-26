@@ -23,22 +23,22 @@ public class TestChainStructure2 : CustomChainStructure
     [
         // top
         [
-            new ChainConnectPoint(7, 0, true)
+            new ChainConnectPoint(7, 0, Directions.Up)
         ],
         
         // bottom
         [
-            new ChainConnectPoint(7, 7, true)
+            new ChainConnectPoint(7, 7, Directions.Down)
         ],
         
         // left
         [
-            new ChainConnectPoint(0, 7, true, true)
+            new ChainConnectPoint(0, 7, Directions.Left, null, true)
         ],
         
         // right
         [
-            new ChainConnectPoint(14, 7, false)
+            new ChainConnectPoint(14, 7, Directions.Right)
         ]
     ];
     
@@ -46,20 +46,16 @@ public class TestChainStructure2 : CustomChainStructure
     public sealed override ushort StructureXSize => _structureXSize;
     public sealed override ushort StructureYSize => _structureYSize;
     
-    public TestChainStructure2(sbyte cost, Bridge[] childBridgeType, ushort x = 1, ushort y = 1) : 
+    public TestChainStructure2(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1, ushort y = 1) : 
         base(_filePath,  _structureXSize,  _structureYSize, CopyFloors(_floors), 
-            CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost)
+            CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost, weight)
     {
         X = x;
         Y = y;
         Cost = cost;
+        Weight = weight;
         BoundingBoxMargin = _boundingBoxMargin;
         
-        StructureBoundingBoxes =
-        [
-            new BoundingBox(x - _boundingBoxMargin, y - _boundingBoxMargin, x + StructureXSize + _boundingBoxMargin - 1, y + StructureYSize + _boundingBoxMargin - 1)
-        ];
-            
         SetSubstructurePositions();
     }
     
@@ -71,6 +67,6 @@ public class TestChainStructure2 : CustomChainStructure
 
     public override TestChainStructure2 Clone()
     {
-        return new TestChainStructure2(Cost, ChildBridgeTypes, X, Y);
+        return new TestChainStructure2(Cost, Weight,  ChildBridgeTypes, X, Y);
     }
 }
