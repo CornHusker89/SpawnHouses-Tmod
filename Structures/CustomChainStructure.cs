@@ -8,9 +8,18 @@ namespace SpawnHouses.Structures;
 
 public class CustomChainStructure : CustomStructure
 {
+
+    public static readonly String[] BranchingHallwayIDs =
+    [
+        "Structures/StructureFiles/mainBasement/mainBasement_Hallway4",
+        "Structures/StructureFiles/mainBasement/mainBasement_Hallway5"
+    ];
+    
+    
     public new ChainConnectPoint[][] ConnectPoints { get; set; }
     public Bridge[] ChildBridgeTypes { get; set; }
     public sbyte Cost { get; set; }
+    public ushort Weight { get; set; }
     public BoundingBox[] StructureBoundingBoxes { get; set; }
     public ChainConnectPoint ParentChainConnectPoint { get; set; }
     public byte BoundingBoxMargin;
@@ -18,7 +27,7 @@ public class CustomChainStructure : CustomStructure
     // you're not really intended to make a base customChainStructure, so this is private. It's used for cloning
     protected CustomChainStructure(String filePath, ushort structureXSize, ushort structureYSize, Floor[] floors,
         ChainConnectPoint[][] connectPoints, Bridge[] childBridges,
-        ushort x = 1, ushort y = 1, sbyte cost = -1, byte boundingBoxMargin = 0)
+        ushort x = 1, ushort y = 1, sbyte cost = -1, ushort weight = 10, byte boundingBoxMargin = 0)
     {
         FilePath = filePath;
         StructureXSize = structureXSize;
@@ -29,6 +38,7 @@ public class CustomChainStructure : CustomStructure
         ConnectPoints = connectPoints;
         ChildBridgeTypes = childBridges;
         Cost = cost;
+        Weight = weight;
         BoundingBoxMargin = boundingBoxMargin;
         SetSubstructurePositions();
     }
@@ -43,8 +53,7 @@ public class CustomChainStructure : CustomStructure
         
         StructureBoundingBoxes =
         [
-            new BoundingBox(X - BoundingBoxMargin, Y - BoundingBoxMargin,
-                X + StructureXSize + BoundingBoxMargin - 1, Y + StructureYSize + BoundingBoxMargin - 1)
+            new BoundingBox(X - BoundingBoxMargin, Y - BoundingBoxMargin, X + StructureXSize + BoundingBoxMargin - 1, Y + StructureYSize + BoundingBoxMargin - 1)
         ];
     }
     

@@ -6,16 +6,16 @@ using Terraria;
 using SpawnHouses.Structures;
 using SpawnHouses.Structures.StructureParts;
 
-namespace SpawnHouses.Structures.ChainStructures;
+namespace SpawnHouses.Structures.ChainStructures.MainBasement;
 
-public class TestChainStructure : CustomChainStructure
+public class MainBasement_Room3 : CustomChainStructure
 {
     // constants
-    private static readonly string _filePath = "Structures/StructureFiles/chainTest";
-    private static readonly ushort _structureXSize = 15;
-    private static readonly ushort _structureYSize = 13;
+    private static readonly string _filePath = "Structures/StructureFiles/mainBasement/mainBasement_Room3";
+    private static readonly ushort _structureXSize = 10;
+    private static readonly ushort _structureYSize = 7;
 
-    private static readonly byte _boundingBoxMargin = 0;
+    private static readonly sbyte _boundingBoxMargin = 0;
     
     private static readonly Floor[] _floors = [];
     
@@ -29,13 +29,12 @@ public class TestChainStructure : CustomChainStructure
         
         // left
         [
-            new ChainConnectPoint(0, 6, Directions.Left, null, true)
+            new ChainConnectPoint(0, 6, Directions.Left, new Seal.MainBasement_SealWall(), true),
         ],
         
         // right
         [
-            new ChainConnectPoint(14, 6, Directions.Right),
-            new ChainConnectPoint(14, 12, Directions.Right)
+            new ChainConnectPoint(9, 6, Directions.Right, new Seal.MainBasement_SealWall(), false),
         ]
     ];
     
@@ -43,15 +42,15 @@ public class TestChainStructure : CustomChainStructure
     public sealed override ushort StructureXSize => _structureXSize;
     public sealed override ushort StructureYSize => _structureYSize;
     
-    public TestChainStructure(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1, ushort y = 1) : 
-        base(_filePath,  _structureXSize,  _structureYSize, CopyFloors(_floors), 
+    public MainBasement_Room3(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1, ushort y = 1) : 
+        base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors), 
             CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost, weight)
     {
         X = x;
         Y = y;
         Cost = cost;
         Weight = weight;
-        BoundingBoxMargin = _boundingBoxMargin;
+        BoundingBoxMargin = (byte)_boundingBoxMargin;
             
         SetSubstructurePositions();
     }
@@ -62,8 +61,8 @@ public class TestChainStructure : CustomChainStructure
         FrameTiles();
     }
 
-    public override TestChainStructure Clone()
+    public override MainBasement_Room3 Clone()
     {
-        return new TestChainStructure(Cost, Weight, ChildBridgeTypes, X, Y);
+        return new MainBasement_Room3(Cost, Weight, ChildBridgeTypes, X, Y);
     }
 }

@@ -8,27 +8,27 @@ using Microsoft.Xna.Framework;
 namespace SpawnHouses.Structures.StructureParts;
 
 public class ConnectPoint {
-    public bool FacingLeft { get; set; } = true;
+    public byte Direction { get; set; } = 0;
     public ushort X { get; set; }
     public ushort Y { get; set; }
     public short YOffset { get; set; }
     public short XOffset { get; set; }
     
-    public ConnectPoint(short xOffset, short yOffset, bool facingLeft = true)
+    public ConnectPoint(short xOffset, short yOffset, byte direction)
     {
         XOffset = xOffset;
         YOffset = yOffset;
-        FacingLeft = facingLeft;
+        Direction = direction;
     }
     
     // for cloning
-    private ConnectPoint(ushort x, ushort y, short xOffset, short yOffset, bool facingLeft)
+    private ConnectPoint(ushort x, ushort y, short xOffset, short yOffset, byte direction)
     {
         X = x;
         Y = y;
         XOffset = xOffset;
         YOffset = yOffset;
-        FacingLeft = facingLeft;
+        Direction = direction;
     }
     
     public void SetPosition(int mainStructureX, int mainStructureY)
@@ -206,9 +206,8 @@ public class ConnectPoint {
             lowestTile.HasTile = true;
             lowestTile.BlockType = BlockType.Solid;
             if (overwriteTileType)
-            {
                 lowestTile.TileType = fillTileID;
-            }
+            
             
         }
         WorldUtils.Gen(new Point(frameCenterX, frameCenterY), new Shapes.Circle(radius: (int)(blendDistance * 6)), new Actions.SetFrames());
@@ -223,6 +222,6 @@ public class ConnectPoint {
 
     public ConnectPoint Clone()
     {
-        return new ConnectPoint(X, Y, XOffset, YOffset, FacingLeft);
+        return new ConnectPoint(X, Y, XOffset, YOffset, Direction);
     }
 }
