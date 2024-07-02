@@ -201,7 +201,7 @@ public class SingleStructureBridge : Bridge
     public class MainHouseBasementHallway8 : SingleStructureBridge
     {
         public MainHouseBasementHallway8() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway8",
-            6, 11, -3, 0, -1, 9, [Directions.Down, Directions.Up]) {}
+            6, 11, -3, -1, -1, 9, [Directions.Down, Directions.Up]) {}
     }
     public class MainHouseBasementHallway8AltGen : SingleStructureBridge
     {

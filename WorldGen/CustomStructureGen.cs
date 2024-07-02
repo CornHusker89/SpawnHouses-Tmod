@@ -52,64 +52,97 @@ namespace SpawnHouses.WorldGen
 		protected override void ApplyPass(GenerationProgress progress, GameConfiguration configuration) {
 			
 			// 9. Finally, we do the actual world generation code.
-
+			
 			if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointHouse)
 			{
-				ushort initialX = 1;
-				ushort initialY = 1;
+				bool spawnUnderworld = Main.ActiveWorldFileData.SeedText.ToLower() == "dont dig up" || Main.ActiveWorldFileData.ForTheWorthy;
+				
+				int initialX = 1;
+				int initialY = 1;
 				ushort counts = 500;
 
 				short yModifier = 0; //used when the generation is much taller than we thought
 
 				while (Terraria.WorldGen.SolidTile(
-					    (Terraria.WorldGen.genRand.Next(
-						    Main.spawnTileX - (counts / 10), Main.spawnTileX + (counts / 10))),
-					    (ushort)(Main.worldSurface * 2 / 3 - yModifier)))
-				{
+					       (Terraria.WorldGen.genRand.Next(Main.spawnTileX - (counts / 10), Main.spawnTileX + (counts / 10))),
+					       (int)(Main.worldSurface * 2 / 3 - yModifier)) && !spawnUnderworld)
 					yModifier -= 85;
-				}
 
 				while ((!Main.tile[initialX, initialY].HasTile || Main.tile[initialX, initialY].TileType != TileID.Grass) && counts < 700)
 				{
 					counts++;
-					initialX = (ushort)( Terraria.WorldGen.genRand.Next(Main.spawnTileX - (counts / 10), Main.spawnTileX + (counts / 10)) );
-					initialY = (ushort)(Main.worldSurface * 2 / 3 - yModifier);
+					initialX = Terraria.WorldGen.genRand.Next(Main.spawnTileX - (counts / 10), Main.spawnTileX + (counts / 10));
+
+					if (!spawnUnderworld)
+						initialY = (int)(Main.worldSurface * 2 / 3 - yModifier);
+					else
+						initialY = Main.spawnTileY - 15;
+					
 					while (initialY < Main.worldSurface + 20)
 					{
-						if (Terraria.WorldGen.SolidTile(initialX, initialY)) {
+						if (Terraria.WorldGen.SolidTile(initialX, initialY))
 							break;
-						}
+						
 						initialY++;
 					}
 				}
 				
 				// just in case something above got fucked up
-				if (!Main.tile[initialX, initialY].HasTile) return;
+				if (!Main.tile[initialX, initialY].HasTile && !spawnUnderworld) return;
 			
 				int sum = 0;
 				for (int i = -3; i <= 3; i++)
 				{
-					int x = (i * 10) + (initialX);
-					int y = (ushort)(Main.worldSurface * 2 / 3 - yModifier);
+					int x = i * 10 + initialX;
+					int y;
+
+					if (!spawnUnderworld)
+						y = (int)(Main.worldSurface * 2 / 3 - yModifier);
+					else
+						y = initialY - 14;
 				
 					
 					while (!Terraria.WorldGen.SolidTile(x, y))
-					{
 						y++;
-					}
-
+					
 					sum += y;
 				}
 
 				// set initialY to the average y pos of the raycasts
-				initialY = (ushort) Math.Round(sum / 7.0);
-			
-				MainHouseBStructure houseStructure = new MainHouseBStructure(Convert.ToUInt16(initialX - 31), Convert.ToUInt16(initialY - 24));
-				houseStructure.Generate();
+				initialY = (int) Math.Round(sum / 7.0);
 				
-				StructureChain.MainBasementChain chain = new StructureChain.MainBasementChain(new Point16(initialX - 31 + 42, initialY - 24 + 35));
-			}
+				if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement)
+				{
+					MainHouseBStructure houseStructure = new MainHouseBStructure(Convert.ToUInt16(initialX - 31), Convert.ToUInt16(initialY - 24));
+					houseStructure.Generate();
+				
+					StructureChain.MainBasementChain chain = new StructureChain.MainBasementChain(new Point16(initialX - 31 + 42, initialY - 24 + 35));
+				}
+				else
+				{
+					MainHouseStructure houseStructure = new MainHouseStructure(Convert.ToUInt16(initialX - 31), Convert.ToUInt16(initialY - 24));
+					houseStructure.Generate();
+				}
 			
+				// replace all dirt with ash if we're in the underworld
+				if (spawnUnderworld)
+					WorldUtils.Gen(new Point(initialX, initialY), new Shapes.Circle(150, 100), Actions.Chain(
+						new Actions.Custom((i, j, args) =>
+						{
+							if (Main.tile[i, j].HasTile && Main.tile[i, j].TileType == TileID.Dirt)
+							{
+								Tile tile = Main.tile[i, j];
+								tile.TileType = TileID.Ash;
+							}
+							if (Main.tile[i, j].HasTile && Main.tile[i, j].TileType == TileID.Grass)
+							{
+								Tile tile = Main.tile[i, j];
+								tile.TileType = TileID.AshGrass;
+							}
+							return true;
+						})
+					));
+			}
 		}
 	}
 	
