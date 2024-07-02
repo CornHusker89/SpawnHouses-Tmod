@@ -82,6 +82,11 @@ Mods: {
 					Label: Enable Main Basement
 					Tooltip: ""
 				}
+
+				EnableSpawnPointBasement: {
+					Label: Enable Spawn Point Basement
+					Tooltip: ""
+				}
 			}
 		}
 	}

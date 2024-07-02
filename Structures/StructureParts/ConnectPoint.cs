@@ -38,7 +38,7 @@ public class ConnectPoint {
     }
     
     public void BlendLeft(ushort topTileID, ushort blendDistance, ushort fillTileID = 0, ushort maxFillCount = 999,
-        bool canUsePartialTiles = true, bool removeWalls = true, bool reverseDirection = false, bool debug = false)
+        bool canUsePartialTiles = true, bool removeWalls = true, ushort maxHeight = 38, bool reverseDirection = false, bool debug = false)
     {
         int startX;
         int startY;
@@ -52,7 +52,7 @@ public class ConnectPoint {
             endY = Y;
             
             startX = endX + blendDistance;
-            startY = endY - 38; // to make sure that it starts outside the terrain
+            startY = endY - maxHeight; // to make sure that it starts outside the terrain
             
             while (!Terraria.WorldGen.SolidTile(startX, startY)) 
                 startY++;
@@ -63,7 +63,7 @@ public class ConnectPoint {
             startY = Y;
 
             endX = startX - blendDistance;
-            endY = startY - 38; // to make sure that it starts outside the terrain
+            endY = startY - maxHeight; // to make sure that it starts outside the terrain
             
             while (!Terraria.WorldGen.SolidTile(endX, endY))
                 endY++;
@@ -214,10 +214,9 @@ public class ConnectPoint {
     }
 
     public void BlendRight(ushort topTileID, ushort blendDistance, ushort fillTileID = 0,
-        ushort maxFillCount = 999, bool canUsePartialTiles = true, bool debug = false)
+        ushort maxFillCount = 999, bool canUsePartialTiles = true, bool removeWalls = true, ushort maxHeight = 38, bool debug = false)
     {
-        BlendLeft(topTileID: topTileID, blendDistance: blendDistance, fillTileID: fillTileID,
-            canUsePartialTiles: canUsePartialTiles, reverseDirection: true, maxFillCount: maxFillCount, debug: debug);
+        BlendLeft(topTileID, blendDistance, fillTileID,  maxFillCount, canUsePartialTiles, removeWalls, maxHeight, true, debug);
     }
 
     public ConnectPoint Clone()
