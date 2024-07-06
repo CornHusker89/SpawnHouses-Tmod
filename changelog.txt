@@ -1,10 +1,10 @@
-Version 0.3.0
+Version 0.2.5
 Major Changes
-- Changed display name from "Spawn Houses" to "Generated Houses"
-- Main House has a randomly generated basement
+- Changed mod display name from "Spawn Houses" to "Generated Houses"
 
 Minor Changes
-- Main house's sign has text -------------------------
+- Main house's sign has text
 - Main house will spawn in the underworld in Don't Dig Up and For The Worthy
 - Beach house has a 75% chance to spawn on the non-dungeon side of the world
 - Minor changes to main house platform placement
+- Bug fix for a rare case of the main house not generating

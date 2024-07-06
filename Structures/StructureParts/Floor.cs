@@ -120,7 +120,7 @@ public class Floor {
             new Actions.SetTile(type: tileID));
     }
 
-    public void GenerateCobwebs(ushort height, ushort xOffset = 0, ushort lengthOverride = 0, short wallFilterID = -1)
+    public void GenerateCobwebs(ushort height, ushort xOffset = 0, ushort lengthOverride = 0, short wallWhitelistID = -1)
     {
         ushort length = FloorLength;
         if (lengthOverride != 0) 
@@ -132,10 +132,10 @@ public class Floor {
             for (ushort cobwebY = 0; cobwebY < height; cobwebY++)
             {
                 Tile tile = Main.tile[X + cobwebX + xOffset, Y + cobwebY];
-                if (!tile.HasTile && (tile.WallType == wallFilterID || wallFilterID == -1))
+                if (!tile.HasTile && (wallWhitelistID == -1 || tile.WallType == wallWhitelistID))
                 {
                     tile.HasTile = true;
-                    tile.WallType = TileID.Cobweb;
+                    tile.TileType = TileID.Cobweb;
                 }
             }
         }
