@@ -55,7 +55,7 @@ namespace SpawnHouses.WorldGen
 			
 			if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointHouse)
 			{
-				bool spawnUnderworld = Main.ActiveWorldFileData.SeedText.ToLower() == "dont dig up" || Main.ActiveWorldFileData.ForTheWorthy;
+				bool spawnUnderworld = Main.ActiveWorldFileData.SeedText.ToLower() == "dont dig up" || Main.ActiveWorldFileData.SeedText.ToLower() == "get fixed boi";
 				
 				int initialX = 1;
 				int initialY = 1;
