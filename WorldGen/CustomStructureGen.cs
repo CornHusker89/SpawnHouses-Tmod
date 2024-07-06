@@ -59,37 +59,67 @@ namespace SpawnHouses.WorldGen
 				
 				int initialX = 1;
 				int initialY = 1;
-				ushort counts = 500;
+				
+				bool foundValidSpot = false;
 
-				short yModifier = 0; //used when the generation is much taller than we thought
-
-				while (Terraria.WorldGen.SolidTile(
-					       (Terraria.WorldGen.genRand.Next(Main.spawnTileX - (counts / 10), Main.spawnTileX + (counts / 10))),
-					       (int)(Main.worldSurface * 2 / 3 - yModifier)) && !spawnUnderworld)
-					yModifier -= 85;
-
-				while ((!Main.tile[initialX, initialY].HasTile || Main.tile[initialX, initialY].TileType != TileID.Grass) && counts < 700)
+				for (ushort counts = 500; counts < 800; counts++)
 				{
-					counts++;
-					initialX = Terraria.WorldGen.genRand.Next(Main.spawnTileX - (counts / 10), Main.spawnTileX + (counts / 10));
-
+					int xVal = Terraria.WorldGen.genRand.Next(Main.spawnTileX - (counts / 8), Main.spawnTileX + (counts / 8));
 					if (!spawnUnderworld)
-						initialY = (int)(Main.worldSurface * 2 / 3 - yModifier);
+						initialY = (int)(Main.worldSurface / 2);
 					else
 						initialY = Main.spawnTileY - 15;
+						
+					//make sure we're not under the surface
+					while (!Is40AboveTilesClear(xVal, initialY) && !spawnUnderworld)
+						initialY -= 30;
+
+					bool Is40AboveTilesClear(int x, int y)
+					{
+						for (byte i = 1; i < 41; i++)
+							if (Terraria.WorldGen.SolidTile(x, y - i))
+								return false;
+						
+						return true;
+					}
 					
-					while (initialY < Main.worldSurface + 20)
+					initialX = xVal;
+					
+					// move down to the surface
+					while (initialY < Main.worldSurface + 50)
 					{
 						if (Terraria.WorldGen.SolidTile(initialX, initialY))
 							break;
 						
 						initialY++;
 					}
+
+					// if we found a good spot, break search loop
+					if (!spawnUnderworld)
+					{
+						if (Terraria.WorldGen.SolidTile(initialX, initialY) && Main.tile[initialX, initialY].TileType == TileID.Grass)
+						{
+							foundValidSpot = true;
+							break;
+						}
+					}
+					else
+					{
+						if (initialY >= Main.spawnTileY - 50)
+						{
+							foundValidSpot = true;
+							break;
+						}
+					}
 				}
 				
 				// just in case something above got fucked up
-				if (!Main.tile[initialX, initialY].HasTile && !spawnUnderworld) return;
-			
+				if (!foundValidSpot)
+				{
+					ModContent.GetInstance<SpawnHouses>().Logger.Error("Failed to generate SpawnPointHouse. Please report this world seed to the mod's author");
+					return;
+				}
+				
 				int sum = 0;
 				for (int i = -3; i <= 3; i++)
 				{
@@ -97,7 +127,7 @@ namespace SpawnHouses.WorldGen
 					int y;
 
 					if (!spawnUnderworld)
-						y = (int)(Main.worldSurface * 2 / 3 - yModifier);
+						y = initialY;
 					else
 						y = initialY - 14;
 				
@@ -111,18 +141,18 @@ namespace SpawnHouses.WorldGen
 				// set initialY to the average y pos of the raycasts
 				initialY = (int) Math.Round(sum / 7.0);
 				
-				if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement)
-				{
-					MainHouseBStructure houseStructure = new MainHouseBStructure(Convert.ToUInt16(initialX - 31), Convert.ToUInt16(initialY - 24));
+				// if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement)
+				// {
+				// 	MainHouseBStructure houseStructure = new MainHouseBStructure(Convert.ToUInt16(initialX - 31), Convert.ToUInt16(initialY - 24), spawnUnderworld);
+				// 	houseStructure.Generate();
+				//
+				// 	StructureChain.MainBasementChain chain = new StructureChain.MainBasementChain(new Point16(initialX - 31 + 42, initialY - 24 + 34));
+				// }
+				// else
+				// {
+					MainHouseStructure houseStructure = new MainHouseStructure(Convert.ToUInt16(initialX - 31), Convert.ToUInt16(initialY - 24), spawnUnderworld);
 					houseStructure.Generate();
-				
-					StructureChain.MainBasementChain chain = new StructureChain.MainBasementChain(new Point16(initialX - 31 + 42, initialY - 24 + 35));
-				}
-				else
-				{
-					MainHouseStructure houseStructure = new MainHouseStructure(Convert.ToUInt16(initialX - 31), Convert.ToUInt16(initialY - 24));
-					houseStructure.Generate();
-				}
+				// }
 			
 				// replace all dirt with ash if we're in the underworld
 				if (spawnUnderworld)

@@ -18,6 +18,11 @@ Mods: {
 				Tooltip: ""
 			}
 
+			SpawnTest: {
+				DisplayName: Spawn Test
+				Tooltip: ""
+			}
+
 			SpawnBeachHouse: {
 				DisplayName: Spawn Beach House
 				Tooltip: ""

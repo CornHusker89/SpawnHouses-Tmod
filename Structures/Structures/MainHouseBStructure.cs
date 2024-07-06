@@ -1,4 +1,5 @@
 using System;
+using Terraria;
 using Terraria.ID;
 using SpawnHouses.Structures;
 
@@ -70,14 +71,12 @@ public class MainHouseBStructure : CustomStructure
             ConnectPoints[2][0].BlendLeft(topTileID: TileID.Grass, blendDistance: 20, maxFillCount: 25, maxHeight: 10);
             ConnectPoints[3][0].BlendRight(topTileID: TileID.Grass, blendDistance: 20, maxFillCount: 25, maxHeight: 10);
         }
-
+        
         _GenerateStructure();
-        
-        // int signIndex = Terraria.Sign.ReadSign(X, Y);
-        // Console.WriteLine(signIndex);
-        // if (signIndex != -1)
-        //     Terraria.Sign.TextSign(signIndex, "aaa");
-        
         FrameTiles();
+        
+        int signIndex = Sign.ReadSign(X + 7, Y + 21);
+        if (signIndex != -1)
+            Sign.TextSign(signIndex, "All good adventures start in a tavern...To bad this isn't a tavern :(");
     }
 }   

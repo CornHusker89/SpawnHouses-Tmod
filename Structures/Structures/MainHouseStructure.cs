@@ -1,3 +1,4 @@
+using Terraria;
 using Terraria.ID;
 using System;
 using SpawnHouses.Structures;
@@ -11,7 +12,7 @@ namespace SpawnHouses.Structures.Structures;
 public class MainHouseStructure : CustomStructure
 {
     // constants
-    private static readonly string _filePath = "Structures/StructureFiles/mainHouse/mainHouse_v2";
+    private static readonly string _filePath = "Structures/StructureFiles/mainHouse/mainHouse_v3";
     private static readonly ushort _structureXSize = 63;
     private static readonly ushort _structureYSize = 33;
     
@@ -72,12 +73,10 @@ public class MainHouseStructure : CustomStructure
         }
         
         _GenerateStructure();
-
-        // int signIndex = Terraria.Sign.ReadSign(X, Y);
-        // Console.WriteLine(signIndex);
-        // if (signIndex != -1)
-        //     Terraria.Sign.TextSign(signIndex, "aaa");
-        
         FrameTiles();
+        
+        int signIndex = Sign.ReadSign(X + 7, Y + 21);
+        if (signIndex != -1)
+            Sign.TextSign(signIndex, "All good adventures start in a tavern...To bad this isn't a tavern :(");
     }
 }   
