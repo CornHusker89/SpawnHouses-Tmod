@@ -10,7 +10,9 @@ using Terraria.Localization;
 using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Structures;
+using SpawnHouses.Structures.StructureChains;
 using SpawnHouses.Structures.Structures;
+using Terraria.ModLoader.IO;
 
 
 namespace SpawnHouses.WorldGen
@@ -141,18 +143,27 @@ namespace SpawnHouses.WorldGen
 				// set initialY to the average y pos of the raycasts
 				initialY = (int) Math.Round(sum / 7.0);
 				
-				// if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement)
-				// {
-				// 	MainHouseBStructure houseStructure = new MainHouseBStructure(Convert.ToUInt16(initialX - 31), Convert.ToUInt16(initialY - 24), spawnUnderworld);
-				// 	houseStructure.Generate();
-				//
-				// 	StructureChain.MainBasementChain chain = new StructureChain.MainBasementChain(new Point16(initialX - 31 + 42, initialY - 24 + 34));
-				// }
-				// else
-				// {
-					MainHouseStructure houseStructure = new MainHouseStructure(Convert.ToUInt16(initialX - 31), Convert.ToUInt16(initialY - 24), spawnUnderworld);
+				if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement)
+				{
+					MainHouseStructure houseStructure = new MainHouseStructure(Convert.ToUInt16(initialX - 31), Convert.ToUInt16(initialY - 24), hasBasement: true, inUnderworld: spawnUnderworld);
 					houseStructure.Generate();
-				// }
+					
+					SpawnHousesSystem.MainHouse = houseStructure;
+					
+					MainBasementChain chain = new MainBasementChain((ushort)(initialX - 31 + 42), (ushort)(initialY - 24 + 34));
+					chain.Generate();
+					
+					SpawnHousesSystem.MainBasement = chain;
+				}
+				else
+				{
+					MainHouseStructure houseStructure = new MainHouseStructure(Convert.ToUInt16(initialX - 31), Convert.ToUInt16(initialY - 24), hasBasement: false, inUnderworld: spawnUnderworld);
+					houseStructure.Generate();
+
+					SpawnHousesSystem.MainHouse = houseStructure;
+				}
+				
+				
 			
 				// replace all dirt with ash if we're in the underworld
 				if (spawnUnderworld)
@@ -262,8 +273,10 @@ namespace SpawnHouses.WorldGen
 				{
 					BeachHouseStructure houseStructure = leftSide ? 
 						new BeachHouseStructure(Convert.ToUInt16(tileX - 9), Convert.ToUInt16(tileY - 32)) : 
-						new BeachHouseStructure(Convert.ToUInt16(tileX - 23), Convert.ToUInt16(tileY - 32), true);
+						new BeachHouseStructure(Convert.ToUInt16(tileX - 23), Convert.ToUInt16(tileY - 32), reverse: true);
 					houseStructure.Generate();
+
+					SpawnHousesSystem.BeachHouse = houseStructure;
 					
 					// firepit generation
 					if (Terraria.WorldGen.genRand.Next(0, 3) != 0) // 2/3 chance

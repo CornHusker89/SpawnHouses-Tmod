@@ -15,13 +15,13 @@ public class FirepitStructure : CustomStructure
 {
     
     // constants
-    private static readonly string _filePath = "Structures/StructureFiles/firepit";
-    private static readonly ushort _structureXSize = 7;
-    private static readonly ushort _structureYSize = 3;
+    public static readonly string _filePath = "Structures/StructureFiles/firepit";
+    public static readonly ushort _structureXSize = 7;
+    public static readonly ushort _structureYSize = 3;
     
-    private static readonly Floor[] _floors = [];
+    public static readonly Floor[] _floors = [];
 
-    private static readonly ConnectPoint[][] _connectPoints =
+    public static readonly ConnectPoint[][] _connectPoints =
     [
         // top
         [],
@@ -40,20 +40,20 @@ public class FirepitStructure : CustomStructure
         ]
     ];
     
-    public override string FilePath => _filePath;
-    public sealed override ushort StructureXSize => _structureXSize;
-    public sealed override ushort StructureYSize => _structureYSize;
-
     public FirepitStructure(ushort x = 0, ushort y = 0)
     {
         Floors = _floors;
         ConnectPoints = _connectPoints;
+
+        FilePath = _filePath;
+        StructureXSize = _structureXSize;
+        StructureYSize = _structureYSize;
         
         X = x;
         Y = y;
         SetSubstructurePositions();
     }
-
+    
     public override void Generate()
     {
         WorldUtils.Gen(new Point(X, Y - 9), new Shapes.Rectangle(7, 9),

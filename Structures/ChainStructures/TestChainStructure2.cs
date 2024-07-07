@@ -41,15 +41,15 @@ public class TestChainStructure2 : CustomChainStructure
             new ChainConnectPoint(14, 7, Directions.Right)
         ]
     ];
-    
-    public override string FilePath => _filePath;
-    public sealed override ushort StructureXSize => _structureXSize;
-    public sealed override ushort StructureYSize => _structureYSize;
-    
+
     public TestChainStructure2(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1, ushort y = 1) : 
         base(_filePath,  _structureXSize,  _structureYSize, CopyFloors(_floors), 
             CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost, weight)
     {
+        FilePath = _filePath;
+        StructureXSize = _structureXSize;
+        StructureYSize = _structureYSize;
+        
         X = x;
         Y = y;
         Cost = cost;

@@ -12,16 +12,17 @@ namespace SpawnHouses.Structures.Structures;
 public class MainHouseStructure : CustomStructure
 {
     // constants
-    private static readonly string _filePath = "Structures/StructureFiles/mainHouse/mainHouse_v3";
-    private static readonly ushort _structureXSize = 63;
-    private static readonly ushort _structureYSize = 33;
+    public static readonly string _filePath1 = "Structures/StructureFiles/mainHouse/mainHouse_v3";
+    public static readonly string _filePath2 = "Structures/StructureFiles/mainHouse/mainHouse_B_v3";
+    public static readonly ushort _structureXSize = 63;
+    public static readonly ushort _structureYSize = 40;
     
-    private static readonly Floor[] _floors = 
+    public static readonly Floor[] _floors = 
     [
         new Floor(11, 26, 42)
     ];
 
-    private static readonly ConnectPoint[][] _connectPoints =
+    public static readonly ConnectPoint[][] _connectPoints =
     [
         // top
         [], 
@@ -40,22 +41,29 @@ public class MainHouseStructure : CustomStructure
         ]
     ];
     
-    public override string FilePath => _filePath;
-    public sealed override ushort StructureXSize => _structureXSize;
-    public sealed override ushort StructureYSize => _structureYSize;
-    public bool InUnderworld;
+    public readonly bool InUnderworld;
+    public readonly bool HasBasement;
     
-    public MainHouseStructure(ushort x = 0, ushort y = 0, bool inUnderworld = false)
+    public MainHouseStructure(ushort x = 500, ushort y = 500, byte status = StructureStatus.NotGenerated, bool hasBasement = false, bool inUnderworld = false)
     {
+        InUnderworld = inUnderworld;
+        HasBasement = hasBasement;
+        
         Floors = _floors;
         ConnectPoints = _connectPoints;
+        
+        FilePath = !HasBasement ? _filePath1 : _filePath2;
 
-        InUnderworld = inUnderworld;
+        StructureXSize = _structureXSize;
+        StructureYSize = _structureYSize;
         
         X = x;
         Y = y;
+        Status = status;
         SetSubstructurePositions();
     }
+
+    public override void OnFound() {}
 
     public override void Generate()
     {
@@ -78,5 +86,7 @@ public class MainHouseStructure : CustomStructure
         int signIndex = Sign.ReadSign(X + 7, Y + 21);
         if (signIndex != -1)
             Sign.TextSign(signIndex, "All good adventures start in a tavern...To bad this isn't a tavern :(");
+        
+        Status = StructureStatus.GeneratedAndFound;
     }
 }   

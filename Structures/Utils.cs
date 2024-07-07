@@ -1,6 +1,7 @@
 namespace SpawnHouses.Structures;
 
-public class Directions {
+public class Directions 
+{
     public const byte Up = 0;
     public const byte Down = 1;
     public const byte Left = 2;
@@ -13,4 +14,11 @@ public class Directions {
         else
             return (byte)(direction + 1);
     }
+}
+
+public class StructureStatus
+{
+    public const byte NotGenerated = 0;
+    public const byte GeneratedButNotFound = 1;
+    public const byte GeneratedAndFound = 2;
 }

@@ -16,12 +16,12 @@ namespace SpawnHouses.Structures;
 public class CustomStructure {
     private readonly Mod _mod = ModContent.GetInstance<SpawnHouses>();
     
-    public virtual string FilePath { get; set; } = "Structures/_";
-    public virtual ushort StructureXSize { get; set; } = 1;
-    public virtual ushort StructureYSize { get; set; } = 1;
-    
+    public string FilePath { get; set; } = "Structures/_";
+    public ushort StructureXSize { get; set; } = 1;
+    public ushort StructureYSize { get; set; } = 1;
     public ushort X { get; set; } = 10;
     public ushort Y { get; set; } = 10;
+    public byte Status { get; set; } = global::SpawnHouses.Structures.StructureStatus.NotGenerated;
 
     public Floor[] Floors { get; set; } = Array.Empty<Floor>();
 
@@ -82,7 +82,12 @@ public class CustomStructure {
 
     public virtual void Generate()
     {
-        throw new Exception("Generate() was called on a CustomStructure, this does not do anything and should never happen");
+        throw new Exception("Generate() was called on a base CustomStructure, this does not do anything and should never happen");
+    }
+
+    public virtual void OnFound()
+    {
+        throw new Exception("OnFound() was called on a base CustomStructure, this does not do anything and should never happen");
     }
 
     [NoJIT]

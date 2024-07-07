@@ -11,6 +11,7 @@ using SpawnHouses.Structures.Bridges;
 using Terraria.Chat;
 using Terraria.WorldBuilding;
 using SpawnHouses.Structures.ChainStructures;
+using SpawnHouses.Structures.StructureChains;
 using SpawnHouses.Structures.Structures;
 using Terraria.Utilities;
 
@@ -39,7 +40,7 @@ namespace SpawnHouses.Items
 		{
 			Point16 point = (Main.MouseWorld / 16).ToPoint16();
 
-			StructureChain.MainBasementChain chain = new StructureChain.MainBasementChain(point);
+			MainBasementChain chain = new MainBasementChain((ushort)point.X, (ushort)point.Y);
 				
 			return true;
 		}

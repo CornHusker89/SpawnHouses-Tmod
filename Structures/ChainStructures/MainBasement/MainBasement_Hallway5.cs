@@ -11,15 +11,15 @@ namespace SpawnHouses.Structures.ChainStructures.MainBasement;
 public class MainBasement_Hallway5 : CustomChainStructure
 {
     // constants
-    private static readonly string _filePath = "Structures/StructureFiles/mainBasement/mainBasement_Hallway5";
-    private static readonly ushort _structureXSize = 8;
-    private static readonly ushort _structureYSize = 22;
+    public static readonly string _filePath = "Structures/StructureFiles/mainBasement/mainBasement_Hallway5";
+    public static readonly ushort _structureXSize = 8;
+    public static readonly ushort _structureYSize = 22;
 
-    private static readonly byte _boundingBoxMargin = 0;
+    public static readonly byte _boundingBoxMargin = 0;
     
-    private static readonly Floor[] _floors = [];
+    public static readonly Floor[] _floors = [];
     
-    private static readonly ChainConnectPoint[][] _connectPoints =
+    public static readonly ChainConnectPoint[][] _connectPoints =
     [
         // top
         [],
@@ -40,14 +40,14 @@ public class MainBasement_Hallway5 : CustomChainStructure
         ]
     ];
     
-    public override string FilePath => _filePath;
-    public sealed override ushort StructureXSize => _structureXSize;
-    public sealed override ushort StructureYSize => _structureYSize;
-    
     public MainBasement_Hallway5(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1, ushort y = 1) : 
         base(_filePath,  _structureXSize,  _structureYSize, CopyFloors(_floors), 
             CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost, weight)
     {
+        FilePath = _filePath;
+        StructureXSize = _structureXSize;
+        StructureYSize = _structureYSize;
+        
         X = x;
         Y = y;
         Cost = cost;
@@ -59,11 +59,7 @@ public class MainBasement_Hallway5 : CustomChainStructure
     
     protected override void SetSubstructurePositions()
     {
-        foreach (var floor in Floors)
-            floor.SetPosition(mainStructureX: X, mainStructureY: Y);
-        for (byte direction = 0; direction < 4; direction++)
-            foreach (var connectPoint in ConnectPoints[direction])
-                connectPoint.SetPosition(mainStructureX: X, mainStructureY: Y);
+        base.SetSubstructurePositions();
         
         StructureBoundingBoxes =
         [

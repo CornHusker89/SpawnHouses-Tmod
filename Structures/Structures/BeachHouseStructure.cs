@@ -11,19 +11,17 @@ namespace SpawnHouses.Structures.Structures;
 
 public class BeachHouseStructure : CustomStructure
 {
-    public readonly bool Reverse;
-    
     // constants
-    private static readonly string _filePath = "Structures/StructureFiles/beachHouse";
-    private static readonly ushort _structureXSize = 35;
-    private static readonly ushort _structureYSize = 26;
+    public static readonly string _filePath = "Structures/StructureFiles/beachHouse";
+    public static readonly ushort _structureXSize = 35;
+    public static readonly ushort _structureYSize = 26;
     
-    private static readonly Floor[] _floors = 
+    public static readonly Floor[] _floors = 
     [
         new Floor(0, 30, 30)
     ];
 
-    private static readonly ConnectPoint[][] _connectPoints =
+    public static readonly ConnectPoint[][] _connectPoints =
     [
         // top
         [],
@@ -40,12 +38,12 @@ public class BeachHouseStructure : CustomStructure
         ]
     ];
     
-    private static readonly Floor[] _floors_r = 
+    public static readonly Floor[] _floors_r = 
     [
         new Floor(5, 30, 30)
     ];
 
-    private static readonly ConnectPoint[][] _connectPoints_r =
+    public static readonly ConnectPoint[][] _connectPoints_r =
     [
         // top
         [],
@@ -62,12 +60,13 @@ public class BeachHouseStructure : CustomStructure
         []
     ];
     
-    public override string FilePath => _filePath;
-    public sealed override ushort StructureXSize => _structureXSize;
-    public sealed override ushort StructureYSize => _structureYSize;
     
-    public BeachHouseStructure(ushort x = 500, ushort y = 500, bool reverse = false)
+    public readonly bool Reverse;
+    
+    public BeachHouseStructure(ushort x = 500, ushort y = 500, byte status = StructureStatus.NotGenerated, bool reverse = false)
     {
+        Reverse = reverse;
+        
         if (!reverse)
         {
             Floors = _floors;
@@ -79,10 +78,19 @@ public class BeachHouseStructure : CustomStructure
             ConnectPoints = _connectPoints_r;
         }
         
+        FilePath = _filePath;
+        StructureXSize = _structureXSize;
+        StructureYSize = _structureYSize;
+        
         X = x;
         Y = y;
-        Reverse = reverse;
+        Status = status;
         SetSubstructurePositions();
+    }
+    
+    public override void OnFound()
+    {
+        Status = StructureStatus.GeneratedAndFound;
     }
 
     public override void Generate()
@@ -116,5 +124,8 @@ public class BeachHouseStructure : CustomStructure
         }
         
         FrameTiles();
+        
+        Status = StructureStatus.GeneratedButNotFound;
+        
     }
 }
