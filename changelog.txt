@@ -1,3 +1,3 @@
-Version 0.2.6
-Minor Changes
-- Main house will spawn in the underworld in Get Fixed Boi (oops)
+Version 0.3.0
+Major Changes
+- Main house has a procedurally generated basement

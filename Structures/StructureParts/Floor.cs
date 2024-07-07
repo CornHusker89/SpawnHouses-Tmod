@@ -126,19 +126,38 @@ public class Floor {
         if (lengthOverride != 0) 
             length = lengthOverride;
 
-
-        for (ushort cobwebX = 0; cobwebX < length; cobwebX++)
-        {
-            for (ushort cobwebY = 0; cobwebY < height; cobwebY++)
-            {
-                Tile tile = Main.tile[X + cobwebX + xOffset, Y + cobwebY];
-                if (!tile.HasTile && (wallWhitelistID == -1 || tile.WallType == wallWhitelistID))
+        WorldUtils.Gen(new Point(X + xOffset, Y - height + 1), new Shapes.Rectangle(length, height),
+            Actions.Chain(
+                new Modifiers.Dither(0.5),
+                new Actions.Custom((i, j, args) =>
                 {
-                    tile.HasTile = true;
-                    tile.TileType = TileID.Cobweb;
-                }
-            }
-        }
+                    if (!Main.tile[i, j].HasTile)
+                    {
+                        if (wallWhitelistID != -1) // if whitelist mode is on
+                        {
+                            if (Main.tile[i, j].WallType == wallWhitelistID)
+                            {
+                                Tile tile = Main.tile[i, j];
+                                tile.HasTile = true;
+                                tile.TileType = TileID.Cobweb;
+                                tile.Slope = SlopeType.Solid;
+                                tile.IsHalfBlock = false;
+                            }
+                        }
+                        else
+                        {
+                            Tile tile = Main.tile[i, j];
+                            tile.HasTile = true;
+                            tile.TileType = TileID.Cobweb;
+                            tile.Slope = SlopeType.Solid;
+                            tile.IsHalfBlock = false;
+                        }
+                    }
+                    return true;
+                }),
+                new Actions.SetFrames()
+            ));
+
     }
 
     public Floor Clone()

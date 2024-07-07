@@ -10,16 +10,16 @@ namespace SpawnHouses.Structures.Structures;
 public class BridgeTestStructure : CustomStructure
 {
     // constants
-    private static readonly string _filePath = "Structures/StructureFiles/bridgeTest";
-    private static readonly ushort _structureXSize = 8;
-    private static readonly ushort _structureYSize = 9;
+    public static readonly string _filePath = "Structures/StructureFiles/bridgeTest";
+    public static readonly ushort _structureXSize = 8;
+    public static readonly ushort _structureYSize = 9;
     
-    private static readonly Floor[] _floors = 
+    public static readonly Floor[] _floors = 
     [
         new Floor(0, 8, 8)
     ];
 
-    private static readonly ConnectPoint[][] _connectPoints =
+    public static readonly ConnectPoint[][] _connectPoints =
     [
         // top
         [], 
@@ -37,15 +37,15 @@ public class BridgeTestStructure : CustomStructure
             new ConnectPoint(7, 0, Directions.Right)
         ]
     ];
-    
-    public override string FilePath => _filePath;
-    public sealed override ushort StructureXSize => _structureXSize;
-    public sealed override ushort StructureYSize => _structureYSize;
 
     public BridgeTestStructure(ushort x = 0, ushort y = 0)
     {
         Floors = _floors;
         ConnectPoints = _connectPoints;
+        
+        FilePath = _filePath;
+        StructureXSize = _structureXSize;
+        StructureYSize = _structureYSize;
         
         X = x;
         Y = y;

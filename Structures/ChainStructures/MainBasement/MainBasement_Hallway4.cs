@@ -11,15 +11,15 @@ namespace SpawnHouses.Structures.ChainStructures.MainBasement;
 public class MainBasement_Hallway4 : CustomChainStructure
 {
     // constants
-    private static readonly string _filePath = "Structures/StructureFiles/mainBasement/mainBasement_Hallway4";
-    private static readonly ushort _structureXSize = 6;
-    private static readonly ushort _structureYSize = 11;
+    public static readonly string _filePath = "Structures/StructureFiles/mainBasement/mainBasement_Hallway4";
+    public static readonly ushort _structureXSize = 6;
+    public static readonly ushort _structureYSize = 11;
 
-    private static readonly byte _boundingBoxMargin = 0;
+    public static readonly byte _boundingBoxMargin = 0;
     
-    private static readonly Floor[] _floors = [];
+    public static readonly Floor[] _floors = [];
     
-    private static readonly ChainConnectPoint[][] _connectPoints =
+    public static readonly ChainConnectPoint[][] _connectPoints =
     [
         // top
         [
@@ -40,14 +40,14 @@ public class MainBasement_Hallway4 : CustomChainStructure
         ]
     ];
     
-    public override string FilePath => _filePath;
-    public sealed override ushort StructureXSize => _structureXSize;
-    public sealed override ushort StructureYSize => _structureYSize;
-    
     public MainBasement_Hallway4(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1, ushort y = 1) : 
         base(_filePath,  _structureXSize,  _structureYSize, CopyFloors(_floors), 
             CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost, weight)
     {
+        FilePath = _filePath;
+        StructureXSize = _structureXSize;
+        StructureYSize = _structureYSize;
+        
         X = x;
         Y = y;
         Cost = cost;
