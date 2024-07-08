@@ -92,13 +92,9 @@ public class CustomStructure {
 
     [NoJIT]
     // Generates structure file, nothing else
-    public void _GenerateStructure(bool reverse = false)
+    public void _GenerateStructure()
     {
-        String reverseString = "";
-        if (reverse)
-            reverseString = "_r";
-        
-        StructureHelper.Generator.GenerateStructure(FilePath + reverseString, new Point16(X:X, Y:Y), _mod);
+        StructureHelper.Generator.GenerateStructure(FilePath, new Point16(X:X, Y:Y), _mod);
         FrameTiles();
     }
 }

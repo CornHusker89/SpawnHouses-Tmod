@@ -1,6 +1,6 @@
 using SpawnHouses.Structures.Bridges;
 using SpawnHouses.Structures.ChainStructures.MainBasement;
-using Terraria.DataStructures;
+using Terraria;
 
 namespace SpawnHouses.Structures.StructureChains;
 
@@ -52,12 +52,18 @@ public class MainBasementChain : StructureChain
     ];
 
 
-    public MainBasementChain(ushort x, ushort y, int seed = -1) :
-        base(75, 40, _structureList, x, y, 1, 3, _rootStructure, true, true, seed) {}
+    public MainBasementChain(ushort x, ushort y, int seed = -1, byte status = StructureStatus.NotGenerated) :
+        base(75, 40, _structureList, x, y, 1, 3, _rootStructure, true, true, seed, status) {}
 
+    public override void OnFound()
+    {
+        Wiring.TripWire(EntryPosX + 2, EntryPosY + 11, 1, 1);
+        Status = StructureStatus.GeneratedAndFound;
+    }
+    
     public override void Generate()
     {
         base.Generate();
-        Status = StructureStatus.GeneratedAndFound;
+        Status = StructureStatus.GeneratedButNotFound;
     }
 }

@@ -38,10 +38,7 @@ namespace SpawnHouses.Items
 			int x = (Main.MouseWorld / 16).ToPoint16().X;
 			int y = (Main.MouseWorld / 16).ToPoint16().Y;
 			
-			int signIndex = Sign.ReadSign(x, y, true);
-			Console.WriteLine(signIndex);
-			if (signIndex != -1)
-			    Sign.TextSign(signIndex, "aaa");
+			Terraria.WorldGen.PlaceTile(x, y, TileID.Chairs, true, true, style: 0);
 			
 			return true;
 		}

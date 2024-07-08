@@ -12,9 +12,9 @@ namespace SpawnHouses;
 
 internal class SpawnHousesSystem : ModSystem
 {
-    public static CustomStructure MainHouse { get; set; }
-    public static StructureChain MainBasement { get; set; }
-    public static CustomStructure BeachHouse { get; set; }
+    public static MainHouseStructure MainHouse { get; set; }
+    public static MainBasementChain MainBasement { get; set; }
+    public static BeachHouseStructure BeachHouse { get; set; }
     
     
     public override void SaveWorldData(TagCompound tag) {
@@ -24,9 +24,12 @@ internal class SpawnHousesSystem : ModSystem
     }
 
     public override void LoadWorldData(TagCompound tag) {
-        MainHouse = tag.Get<MainHouseStructure>("MainHouse");
-        MainBasement = tag.Get<MainBasementChain>("MainBasement");
-        BeachHouse = tag.Get<BeachHouseStructure>("BeachHouse");
+        if (tag.ContainsKey("MainHouse"))
+            MainHouse = tag.Get<MainHouseStructure>("MainHouse");
+        if (tag.ContainsKey("MainBasement"))
+            MainBasement = tag.Get<MainBasementChain>("MainBasement");
+        if (tag.ContainsKey("BeachHouse"))
+            BeachHouse = tag.Get<BeachHouseStructure>("BeachHouse");
     }
 }
 
@@ -45,7 +48,7 @@ internal class MainHouseStructureSerializer : TagSerializer<MainHouseStructure, 
 
     public override MainHouseStructure Deserialize(TagCompound tag) => new MainHouseStructure(
         tag.Get<ushort>("X"),
-        tag.Get<ushort>("X"),
+        tag.Get<ushort>("Y"),
         tag.GetByte("Status"),
         tag.GetBool("HasBasement"),
         tag.GetBool("InUnderworld")
@@ -65,7 +68,8 @@ internal class MainBasementChainSerializer : TagSerializer<MainBasementChain, Ta
     public override MainBasementChain Deserialize(TagCompound tag) => new MainBasementChain(
         tag.Get<ushort>("X"),
         tag.Get<ushort>("Y"),
-        tag.GetInt("Seed")
+        tag.GetInt("Seed"),
+        tag.GetByte("Status")
     );
 }
 
@@ -75,12 +79,13 @@ internal class BeachHouseStructureSerializer : TagSerializer<BeachHouseStructure
     {
         ["X"] = structure.X,
         ["Y"] = structure.Y,
+        ["Status"] = structure.Status,
         ["Reverse"] = structure.Reverse,
     };
 
     public override BeachHouseStructure Deserialize(TagCompound tag) => new BeachHouseStructure(
         tag.Get<ushort>("X"),
-        tag.Get<ushort>("X"),
+        tag.Get<ushort>("Y"),
         tag.GetByte("Status"),
         tag.GetBool("Reverse")
     );

@@ -26,11 +26,12 @@ public class StructureChain
     public StructureChain(ushort maxCost, ushort minCost, CustomChainStructure[] structureList, ushort entryPosX, ushort entryPosY,
         byte minBranchLength, byte maxBranchLength, 
         CustomChainStructure rootStructure = null, bool keepRootPointClear = true, bool ignoreInvalidDirections = false,
-        int seed = -1)
+        int seed = -1, byte status = StructureStatus.NotGenerated)
     {
         Seed = seed == -1 ? Terraria.WorldGen.genRand.Next(0, int.MaxValue) : seed;
         EntryPosX = entryPosX;
         EntryPosY = entryPosY;
+        Status = status;
         _randomNumberGen = new UnifiedRandom(Seed);
         
         foreach (var structure in structureList)
@@ -302,6 +303,10 @@ public class StructureChain
         }
     }
 
+    public virtual void OnFound()
+    {
+        throw new Exception("OnFound() was called on a base StructureChain, this does not do anything and should never happen");
+    }
 
     public virtual void Generate()
     {
