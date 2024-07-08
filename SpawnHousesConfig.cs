@@ -11,9 +11,9 @@ public class SpawnHousesConfig : ModConfig
 	[ReloadRequired]
 	public bool EnableSpawnPointHouse { get; set; }
 	
-	[DefaultValue(true)]
-	[ReloadRequired]
-	public bool EnableSpawnPointBasement { get; set; }
+	// [DefaultValue(true)]
+	// [ReloadRequired]
+	// public bool EnableSpawnPointBasement { get; set; }
 	
 	[DefaultValue(true)]
 	[ReloadRequired]

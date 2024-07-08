@@ -51,7 +51,7 @@ public class CustomStructureGen : ModSystem
 		    foreach (var npc in Main.npc)
 			    if (npc.type == NPCID.Guide)
 			    {
-				    npc.position.X = (SpawnHousesSystem.MainHouse.X + 32) * 16; // tiles to pixels
+				    npc.position.X = (SpawnHousesSystem.MainHouse.X + 32 + Terraria.WorldGen.genRand.Next(-12, 13)) * 16; // tiles to pixels
 				    npc.position.Y = (SpawnHousesSystem.MainHouse.Y + 15 + 7) * 16;
 				    break;
 			    }
@@ -79,7 +79,7 @@ public class CustomHousesPass : GenPass
 			
 			bool foundValidSpot = false;
 
-			for (ushort counts = 500; counts < 800; counts++)
+			for (ushort counts = 0; counts < 400; counts++)
 			{
 				int xVal = Terraria.WorldGen.genRand.Next(Main.spawnTileX - (counts / 8), Main.spawnTileX + (counts / 8));
 				if (!spawnUnderworld)
@@ -158,25 +158,25 @@ public class CustomHousesPass : GenPass
 			// set initialY to the average y pos of the raycasts
 			initialY = (int) Math.Round(sum / 7.0);
 			
-			if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement)
-			{
-				MainHouseStructure houseStructure = new MainHouseStructure((ushort)(initialX - 31), (ushort)(initialY - 28), hasBasement: true, inUnderworld: spawnUnderworld);
-				houseStructure.Generate();
-				
-				SpawnHousesSystem.MainHouse = houseStructure;
-				
-				MainBasementChain chain = new MainBasementChain((ushort)(initialX - 31 + 42), (ushort)(initialY - 28 + 34));
-				chain.Generate();
-				
-				SpawnHousesSystem.MainBasement = chain;
-			}
-			else
-			{
+			// if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement)
+			// {
+			// 	MainHouseStructure houseStructure = new MainHouseStructure((ushort)(initialX - 31), (ushort)(initialY - 28), hasBasement: true, inUnderworld: spawnUnderworld);
+			// 	houseStructure.Generate();
+			// 	
+			// 	SpawnHousesSystem.MainHouse = houseStructure;
+			// 	
+			// 	MainBasementChain chain = new MainBasementChain((ushort)(initialX - 31 + 42), (ushort)(initialY - 28 + 34));
+			// 	chain.Generate();
+			// 	
+			// 	SpawnHousesSystem.MainBasement = chain;
+			// }
+			// else
+			// {
 				MainHouseStructure houseStructure = new MainHouseStructure((ushort)(initialX - 31), (ushort)(initialY - 28), hasBasement: false, inUnderworld: spawnUnderworld);
 				houseStructure.Generate();
 
 				SpawnHousesSystem.MainHouse = houseStructure;
-			}
+			// }
 			
 			// move the spawn point to the upper floor of the house
 			Main.spawnTileX = initialX - 31 + 32;
@@ -286,6 +286,8 @@ public class CustomBeachHousePass : GenPass
 				}
 			}
 
+			Console.WriteLine(leftSide);
+			
 			if (tileX != 0 && tileY != 0)
 			{
 				BeachHouseStructure beachHouseStructure = leftSide ? 

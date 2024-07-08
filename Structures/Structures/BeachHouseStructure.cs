@@ -95,8 +95,6 @@ public class BeachHouseStructure : CustomStructure
 
         if (!Reverse)
         {
-            Console.WriteLine((X + 17) + ", " + (Y + 20));
-            
             Terraria.WorldGen.PlaceTile(X + 16, Y + 20, TileID.Beds, true, true, style: 22);
             NetMessage.SendTileSquare(-1, X + 15, Y + 19, 4, 2);
             

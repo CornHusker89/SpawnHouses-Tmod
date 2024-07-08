@@ -1,2 +1,4 @@
 - Fix automation (magic storage?) spawning in main house wall
-- Fixed naturally generating structures conflicting with the basement
+- Fix naturally generating structures conflicting with the basement
+- Add weird stair platforms
+- Make custom names for the gen passes and display them
