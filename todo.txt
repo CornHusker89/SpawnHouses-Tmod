@@ -1,0 +1,2 @@
+- Fix automation (magic storage?) spawning in main house wall
+- Fixed naturally generating structures conflicting with the basement
