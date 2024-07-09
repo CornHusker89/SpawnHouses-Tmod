@@ -30,13 +30,21 @@ public class CustomStructureGen : ModSystem
     public override void ModifyWorldGenTasks(List<GenPass> tasks, ref double totalWeight) {
         // 5. We use FindIndex to locate the index of the vanilla world generation task called "Sunflowers". This ensures our code runs at the correct step.
         int sunflowersIndex = tasks.FindIndex(genpass => genpass.Name.Equals("Sunflowers"));
-        
         if (sunflowersIndex != -1) 
             // 6. We register our world generation pass by passing in an instance of our custom GenPass class below. The GenPass class will execute our world generation code.
             tasks.Insert(sunflowersIndex + 1, new CustomHousesPass("Generate Custom Houses Pass", 100f));
         else
         {
-            tasks.Insert(tasks.Count - 2, new CustomHousesPass("Generate Custom Houses Pass", 100f));
+            tasks.Insert(tasks.Count - 8, new CustomHousesPass("Generate Custom Houses Pass", 100f));
+        }
+        
+        int iceIndex = tasks.FindIndex(genpass => genpass.Name.Equals("Ice"));
+        if (iceIndex != -1) 
+	        // 6. We register our world generation pass by passing in an instance of our custom GenPass class below. The GenPass class will execute our world generation code.
+	        tasks.Insert(iceIndex + 1, new ClearSpawnPointPass("Generate Custom Houses Pass", 100f));
+        else
+        {
+	        tasks.Insert(tasks.Count - 40, new ClearSpawnPointPass("Generate Custom Houses Pass", 100f));
         }
 
 
@@ -49,14 +57,81 @@ public class CustomStructureGen : ModSystem
 	    if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointHouse)
 	    {
 		    foreach (var npc in Main.npc)
+		    {
 			    if (npc.type == NPCID.Guide)
 			    {
 				    npc.position.X = (SpawnHousesSystem.MainHouse.X + 32 + Terraria.WorldGen.genRand.Next(-12, 13)) * 16; // tiles to pixels
 				    npc.position.Y = (SpawnHousesSystem.MainHouse.Y + 15 + 7) * 16;
-				    break;
 			    }
+			    if (npc.type == 688) // magic storage's automation
+			    {
+				    npc.position.X = (SpawnHousesSystem.MainHouse.X + 32 + Terraria.WorldGen.genRand.Next(-12, 13)) * 16; // tiles to pixels
+				    npc.position.Y = (SpawnHousesSystem.MainHouse.Y + 15 + 7) * 16;
+
+			    }
+		    }
+	    }
+	    
+	    if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement)
+	    {
+		    if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointHouse)
+		    {
+			    MainBasementChain chain = new MainBasementChain((ushort)(SpawnHousesSystem.MainHouse.X + 42), (ushort)(SpawnHousesSystem.MainHouse.Y + 34));
+			    chain.Generate();
+				
+			    SpawnHousesSystem.MainBasement = chain;
+		    }
+		    else
+		    {
+			    MainBasementChain chain = new MainBasementChain((ushort)Main.spawnTileX, (ushort)Main.spawnTileY);
+			    chain.Generate();
+				
+			    SpawnHousesSystem.MainBasement = chain;
+		    }
 	    }
     }
+}
+
+
+public class ClearSpawnPointPass : GenPass
+{
+	public ClearSpawnPointPass(string name, float loadWeight) : base(name, loadWeight) {
+	}
+
+	// 8. The ApplyPass method is where the actual world generation code is placed.
+	protected override void ApplyPass(GenerationProgress progress, GameConfiguration configuration) {
+		
+		// 9. Finally, we do the actual world generation code.
+
+		if (ModContent.GetInstance<SpawnHousesConfig>().EnableBeachHouse)
+		{
+			int x = Main.maxTilesX / 2;
+			int y = (int)(Main.worldSurface / 2);
+				
+			//make sure we're not under the surface
+			while (!Is40AboveTilesClear(x, y))
+				y -= 30;
+
+			bool Is40AboveTilesClear(int startX, int startY)
+			{
+				for (byte i = 1; i < 41; i++)
+					if (Terraria.WorldGen.SolidTile(startX, startY - i))
+						return false;
+				
+				return true;
+			}
+			
+			// move down to the surface
+			while (y < Main.worldSurface + 50)
+			{
+				if (Terraria.WorldGen.SolidTile(x, y))
+					break;
+				
+				y++;
+			}
+			GenVars.structures.AddProtectedStructure(new Rectangle(x - 50, y - 50, 100, 100));
+		}
+	}
 }
 
 // 7. Make sure to inherit from the GenPass class.
@@ -158,25 +233,11 @@ public class CustomHousesPass : GenPass
 			// set initialY to the average y pos of the raycasts
 			initialY = (int) Math.Round(sum / 7.0);
 			
-			// if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement)
-			// {
-			// 	MainHouseStructure houseStructure = new MainHouseStructure((ushort)(initialX - 31), (ushort)(initialY - 28), hasBasement: true, inUnderworld: spawnUnderworld);
-			// 	houseStructure.Generate();
-			// 	
-			// 	SpawnHousesSystem.MainHouse = houseStructure;
-			// 	
-			// 	MainBasementChain chain = new MainBasementChain((ushort)(initialX - 31 + 42), (ushort)(initialY - 28 + 34));
-			// 	chain.Generate();
-			// 	
-			// 	SpawnHousesSystem.MainBasement = chain;
-			// }
-			// else
-			// {
-				MainHouseStructure houseStructure = new MainHouseStructure((ushort)(initialX - 31), (ushort)(initialY - 28), hasBasement: false, inUnderworld: spawnUnderworld);
-				houseStructure.Generate();
-
-				SpawnHousesSystem.MainHouse = houseStructure;
-			// }
+			MainHouseStructure houseStructure = new MainHouseStructure((ushort)(initialX - 31), (ushort)(initialY - 26), hasBasement: ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement, inUnderworld: spawnUnderworld);
+			houseStructure.Generate();
+			
+			SpawnHousesSystem.MainHouse = houseStructure;
+			
 			
 			// move the spawn point to the upper floor of the house
 			Main.spawnTileX = initialX - 31 + 32;
@@ -285,8 +346,6 @@ public class CustomBeachHousePass : GenPass
 					FindLeft(force: true);
 				}
 			}
-
-			Console.WriteLine(leftSide);
 			
 			if (tileX != 0 && tileY != 0)
 			{
@@ -298,7 +357,7 @@ public class CustomBeachHousePass : GenPass
 				SpawnHousesSystem.BeachHouse = beachHouseStructure;
 				
 				// firepit generation
-				if (Terraria.WorldGen.genRand.Next(0, 3) != 0) // 2/3 chance
+				if (Terraria.WorldGen.genRand.Next(0, 2) == 0) // 1/2 chance
 				{
 					bool foundLocation = false;
 					ushort x;

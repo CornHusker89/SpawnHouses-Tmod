@@ -10,7 +10,7 @@ using SpawnHouses.Structures.Structures;
 using SpawnHouses.WorldGen;
 
 
-namespace SpawnHouses.Items
+namespace SpawnHouses.Items.Debug
 {
 	public class SpawnIceCave : ModItem
 	{

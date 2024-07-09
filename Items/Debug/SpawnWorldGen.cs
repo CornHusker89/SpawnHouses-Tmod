@@ -1,24 +1,18 @@
 using System;
-using System.Collections.Generic;
-using System.Threading;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Structures;
-using SpawnHouses.Structures.Bridges;
-using Terraria.Chat;
+using ReLogic.Utilities;
 using Terraria.WorldBuilding;
-using SpawnHouses.Structures.ChainStructures;
-using SpawnHouses.Structures.StructureChains;
 using SpawnHouses.Structures.Structures;
-using Terraria.Utilities;
+using SpawnHouses.WorldGen;
 
 
-namespace SpawnHouses.Items
+namespace SpawnHouses.Items.Debug
 {
-	public class SpawnMainBasementChain : ModItem
+	public class SpawnWorldGen : ModItem
 	{
 		
 		public override void SetDefaults()
@@ -29,19 +23,23 @@ namespace SpawnHouses.Items
 			Item.rare = ItemRarityID.Blue;
 		}
 
-		public override void AddRecipes() {}
+		public override void AddRecipes()
+		{
+		}
 
 		public override bool AltFunctionUse(Player player)
 		{
 			return true;
 		}
-
+		
 		public override bool? UseItem(Player player)
 		{
 			Point16 point = (Main.MouseWorld / 16).ToPoint16();
+			int x = point.X;
+			int y = point.Y;
 
-			MainBasementChain chain = new MainBasementChain((ushort)point.X, (ushort)point.Y);
-				
+			Terraria.WorldGen.digTunnel(x, y, 1.2, 0, 140, 4);
+		
 			return true;
 		}
 

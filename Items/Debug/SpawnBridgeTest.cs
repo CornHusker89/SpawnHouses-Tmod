@@ -13,7 +13,7 @@ using SpawnHouses.Structures.Structures;
 using Terraria.Utilities;
 
 
-namespace SpawnHouses.Items
+namespace SpawnHouses.Items.Debug
 {
 	public class SpawnBridgeTest : ModItem
 	{

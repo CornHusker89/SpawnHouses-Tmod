@@ -1,4 +1,5 @@
-- Fix automation (magic storage?) spawning in main house wall
-- Fix naturally generating structures conflicting with the basement
+- Cloose doors on structures
+- Make chainstructure's weights change each time a structure is made
 - Add weird stair platforms
 - Make custom names for the gen passes and display them
+- Add config to change spawn point to any house
