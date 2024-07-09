@@ -9,7 +9,7 @@ using SpawnHouses.Structures.Structures;
 using SpawnHouses;
 
 
-namespace SpawnHouses.Items
+namespace SpawnHouses.Items.Debug
 {
 	public class FlipRegion : ModItem
 	{

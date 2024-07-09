@@ -4,15 +4,15 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
-using ReLogic.Utilities;
+using Terraria.Chat;
 using Terraria.WorldBuilding;
 using SpawnHouses.Structures.Structures;
-using SpawnHouses.WorldGen;
+using SpawnHouses;
 
 
-namespace SpawnHouses.Items
+namespace SpawnHouses.Items.Debug
 {
-	public class SpawnWorldGen : ModItem
+	public class SpawnTest : ModItem
 	{
 		
 		public override void SetDefaults()
@@ -32,14 +32,14 @@ namespace SpawnHouses.Items
 			return true;
 		}
 		
+
 		public override bool? UseItem(Player player)
 		{
-			Point16 point = (Main.MouseWorld / 16).ToPoint16();
-			int x = point.X;
-			int y = point.Y;
-
-			Terraria.WorldGen.digTunnel(x, y, 1.2, 0, 140, 4);
-		
+			int x = (Main.MouseWorld / 16).ToPoint16().X;
+			int y = (Main.MouseWorld / 16).ToPoint16().Y;
+			
+			Terraria.WorldGen.PlaceTile(x, y, TileID.Chairs, true, true, style: 0);
+			
 			return true;
 		}
 

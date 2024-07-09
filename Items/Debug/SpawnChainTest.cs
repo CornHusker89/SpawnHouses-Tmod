@@ -1,18 +1,24 @@
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Structures;
+using SpawnHouses.Structures.Bridges;
 using Terraria.Chat;
 using Terraria.WorldBuilding;
+using SpawnHouses.Structures.ChainStructures;
+using SpawnHouses.Structures.StructureChains;
 using SpawnHouses.Structures.Structures;
-using SpawnHouses;
+using Terraria.Utilities;
 
 
-namespace SpawnHouses.Items
+namespace SpawnHouses.Items.Debug
 {
-	public class SpawnTest : ModItem
+	public class SpawnChainTest : ModItem
 	{
 		
 		public override void SetDefaults()
@@ -23,23 +29,19 @@ namespace SpawnHouses.Items
 			Item.rare = ItemRarityID.Blue;
 		}
 
-		public override void AddRecipes()
-		{
-		}
+		public override void AddRecipes() {}
 
 		public override bool AltFunctionUse(Player player)
 		{
 			return true;
 		}
-		
 
 		public override bool? UseItem(Player player)
 		{
-			int x = (Main.MouseWorld / 16).ToPoint16().X;
-			int y = (Main.MouseWorld / 16).ToPoint16().Y;
-			
-			Terraria.WorldGen.PlaceTile(x, y, TileID.Chairs, true, true, style: 0);
-			
+			Point16 point = (Main.MouseWorld / 16).ToPoint16();
+
+			TestStructureChain chain = new TestStructureChain((ushort)point.X, (ushort)point.Y);
+			chain.Generate();
 			return true;
 		}
 

@@ -1,6 +1,4 @@
-Version 0.2.7
+Version 0.2.8
 Minor Changes
-- Fixed issue where Main House could spawn underground
-- Sets world spawn point to the upper floor of the Main House (if it's in the world)
-- Fixed bug where npcs move into a house before it's discovered by the player (only applies to worlds made in v0.2.7)
-- Fixed bug where guide gets stuck in the Main House's walls/floor
+- Minor generation fixes
+- Magic Storage's Automation NPC also won't get stuck in the floor

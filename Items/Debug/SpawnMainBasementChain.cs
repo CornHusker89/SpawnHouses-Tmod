@@ -16,9 +16,9 @@ using SpawnHouses.Structures.Structures;
 using Terraria.Utilities;
 
 
-namespace SpawnHouses.Items
+namespace SpawnHouses.Items.Debug
 {
-	public class SpawnChainTest : ModItem
+	public class SpawnMainBasementChain : ModItem
 	{
 		
 		public override void SetDefaults()
@@ -40,10 +40,9 @@ namespace SpawnHouses.Items
 		{
 			Point16 point = (Main.MouseWorld / 16).ToPoint16();
 
-			TestStructureChain chain = new TestStructureChain((ushort)point.X, (ushort)point.Y);
-				
+			MainBasementChain chain = new MainBasementChain((ushort)point.X, (ushort)point.Y);
+			chain.Generate();
 			return true;
 		}
-
 	}
 }

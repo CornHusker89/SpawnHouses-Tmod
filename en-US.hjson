@@ -62,6 +62,16 @@ Mods: {
 				DisplayName: Spawn Main Basement Chain
 				Tooltip: ""
 			}
+
+			SlopedWoodPlatform: {
+				DisplayName: Sloped Wood Platform
+				Tooltip: ""
+			}
+
+			FrameableBorealPlatform: {
+				DisplayName: Frameable Boreal Platform
+				Tooltip: ""
+			}
 		}
 
 		Configs: {

@@ -8,9 +8,9 @@ using Terraria.WorldBuilding;
 using SpawnHouses.Structures.Structures;
 
 
-namespace SpawnHouses.Items
+namespace SpawnHouses.Items.Debug
 {
-	public class SpawnFirepit : ModItem
+	public class SpawnMainHouse : ModItem
 	{
 		
 		public override void SetDefaults()
@@ -49,11 +49,11 @@ namespace SpawnHouses.Items
 				foundLocation = true;
 			}
 
-			y = (ushort)(y - 2);
-			x = (ushort)(x - 3);
+			y = (ushort)(y - 27); //the structure spawning has an offset + we want it to be a little off the ground
+			x = (ushort)(x - 31); //center the struct
 			
-			FirepitStructure structure = new FirepitStructure(x, y);
-			structure.Generate();
+			MainHouseStructure structure = new MainHouseStructure(x, y);
+			structure._GenerateStructure();
 
 			return true;
 		}

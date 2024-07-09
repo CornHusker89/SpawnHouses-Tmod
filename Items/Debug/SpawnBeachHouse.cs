@@ -1,3 +1,4 @@
+using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -6,11 +7,12 @@ using Microsoft.Xna.Framework;
 using Terraria.Chat;
 using Terraria.WorldBuilding;
 using SpawnHouses.Structures.Structures;
+using SpawnHouses;
 
 
-namespace SpawnHouses.Items
+namespace SpawnHouses.Items.Debug
 {
-	public class SpawnMainHouse : ModItem
+	public class SpawnBeachHouse : ModItem
 	{
 		
 		public override void SetDefaults()
@@ -49,12 +51,13 @@ namespace SpawnHouses.Items
 				foundLocation = true;
 			}
 
-			y = (ushort)(y - 27); //the structure spawning has an offset + we want it to be a little off the ground
-			x = (ushort)(x - 31); //center the struct
+			y = (ushort)(y - 29); //the structure spawning has an offset + we want it to be a little off the ground
+			x = (ushort)(x - 18); //center the struct
 			
-			MainHouseStructure structure = new MainHouseStructure(x, y);
+			BeachHouseStructure structure = new BeachHouseStructure(x, y);	
+			//structure.Generate();
 			structure._GenerateStructure();
-
+			
 			return true;
 		}
 

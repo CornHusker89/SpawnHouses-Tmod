@@ -161,23 +161,30 @@ public class ConnectPoint {
 
             //remove the tiles above. start at 1 because we don't want to remove the top tile itself
             ushort dYUp = 1;
+            byte airCounter = 0;
             if (removeWalls)
             {
-                while (Main.tile[startX - dX, topTileY - dYUp].HasTile || Main.tile[startX - dX, topTileY - dYUp].WallType != 0) 
+                while (airCounter < 10 || Main.tile[startX - dX, topTileY - dYUp].WallType != 0) 
                 {
                     Tile upperTile = Main.tile[startX - dX, topTileY - dYUp];
                     upperTile.HasTile = false;
                     upperTile.WallType = WallID.None;
                     dYUp++;
+
+                    if (!Main.tile[startX - dX, topTileY - dYUp].HasTile)
+                        airCounter++;
                 }
             }
             else
             {
-                while (Main.tile[startX - dX, topTileY - dYUp].HasTile)
+                while (airCounter < 10)
                 {
                     Tile upperTile = Main.tile[startX - dX, topTileY - dYUp];
                     upperTile.HasTile = false;
                     dYUp++;
+                    
+                    if (!Main.tile[startX - dX, topTileY - dYUp].HasTile)
+                        airCounter++;
                 }
             }
 
