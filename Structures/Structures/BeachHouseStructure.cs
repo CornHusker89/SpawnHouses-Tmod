@@ -63,7 +63,7 @@ public class BeachHouseStructure : CustomStructure
 
     public readonly bool Reverse;
     
-    public BeachHouseStructure(ushort x = 500, ushort y = 500, byte status = StructureStatus.NotGenerated, bool reverse = false)
+    public BeachHouseStructure(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, bool reverse = false)
     {
         Reverse = reverse;
         

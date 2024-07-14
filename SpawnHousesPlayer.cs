@@ -19,7 +19,7 @@ public class SpawnHousesPlayer : ModPlayer
             int x = (int)Player.Center.X / 16;
             int y = (int)Player.Center.Y / 16;
             
-            if (SpawnHousesSystem.MainBasement is not null && SpawnHousesSystem.MainBasement.Status == StructureStatus.GeneratedButNotFound)
+            if (SpawnHousesSystem.MainBasement.Status == StructureStatus.GeneratedButNotFound)
             {
                 if (
                     x > SpawnHousesSystem.MainBasement.EntryPosX - 5
@@ -32,8 +32,7 @@ public class SpawnHousesPlayer : ModPlayer
                 }
             }
 
-            if (SpawnHousesSystem.BeachHouse is not null && 
-                SpawnHousesSystem.BeachHouse.Status == StructureStatus.GeneratedButNotFound)
+            if (SpawnHousesSystem.BeachHouse.Status == StructureStatus.GeneratedButNotFound)
             {
                 int houseCenterX = SpawnHousesSystem.BeachHouse.X + BeachHouseStructure._structureXSize / 2;
                 int houseCenterY = SpawnHousesSystem.BeachHouse.Y + BeachHouseStructure._structureYSize / 2;

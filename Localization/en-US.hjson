@@ -1,0 +1,108 @@
+Mods: {
+	SpawnHouses: {
+		WorldGen.WorldGenCustomHousesPassMessage: Mods.SpawnHouses.WorldGen.WorldGenCustomHousesPassMessage
+
+		Items: {
+			SpawnMainHouse: {
+				DisplayName: Spawn Main House
+				Tooltip: Testing item, no guarantees it won't crash the game
+			}
+
+			SpawnTestHouse: {
+				DisplayName: Spawn Test House
+				Tooltip: Testing item, no guarantees it won't crash the game
+			}
+
+			SpawnTest: {
+				DisplayName: Spawn Test
+				Tooltip: Testing item, no guarantees it won't crash the game
+			}
+
+			SpawnBeachHouse: {
+				DisplayName: Spawn Beach House
+				Tooltip: Testing item, no guarantees it won't crash the game
+			}
+
+			SpawnBridgeTest: {
+				DisplayName: Spawn Bridge Test
+				Tooltip: Testing item, no guarantees it won't crash the game
+			}
+
+			SpawnChainTest: {
+				DisplayName: Spawn Chain Test
+				Tooltip: Testing item, no guarantees it won't crash the game
+			}
+
+			SpawnWorldGen: {
+				DisplayName: Spawn World Gen
+				Tooltip: Testing item, no guarantees it won't crash the game
+			}
+
+			SpawnIceCave: {
+				DisplayName: Spawn Ice Cave
+				Tooltip: Testing item, no guarantees it won't crash the game
+			}
+
+			FlipRegion: {
+				DisplayName: Flip Region
+				Tooltip: Testing item, no guarantees it won't crash the game
+			}
+
+			SpawnFirepit: {
+				DisplayName: Spawn Firepit
+				Tooltip: Testing item, no guarantees it won't crash the game
+			}
+
+			SpawnMainBasementChain: {
+				DisplayName: Spawn Main Basement Chain
+				Tooltip: Testing item, no guarantees it won't crash the game
+			}
+
+			FrameableBorealPlatform: {
+				DisplayName: Frameable Boreal Platform
+				Tooltip: ""
+			}
+		}
+
+		Configs: {
+			SpawnHousesConfig: {
+				DisplayName: Generated Houses Config
+
+				Headers: {
+					SizeHeader: Structure Sizes -----------------
+					StructuresHeader: Enabled Structures --------------
+				}
+
+				UserNpcCount: {
+					Label: Size
+					Tooltip: Determines the overall size of each house. Number corresponds to approximately how many NPCs can live in the world with all structures active
+				}
+
+				AutoSetSize: {
+					Label: Automatically Set Size
+					Tooltip: If ON, the mod will automatically set 'Size' to the number of NPCs in enabled mods
+				}
+
+				EnableSpawnPointHouse: {
+					Label: Enable Spawn Point House
+					Tooltip: If ON, a starter house will generate directly on the spawn point.
+				}
+
+				EnableSpawnPointBasement: {
+					Label: Enable Spawn Point Basement
+					Tooltip: If ON, a random basement will generate under the spawn point house. If there isn't a house, it will generate in the ground.
+				}
+
+				EnableBeachHouse: {
+					Label: Enable Beach House
+					Tooltip: If ON, a house will generate on the end of one beach, sometimes with a firepit.
+				}
+
+				Size: {
+					Label: Size
+					Tooltip: ""
+				}
+			}
+		}
+	}
+}

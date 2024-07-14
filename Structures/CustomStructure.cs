@@ -13,7 +13,7 @@ using SpawnHouses.Structures;
 
 namespace SpawnHouses.Structures;
 
-public class CustomStructure {
+public abstract class CustomStructure {
     private readonly Mod _mod = ModContent.GetInstance<SpawnHouses>();
     
     public string FilePath { get; set; } = "Structures/_";

@@ -34,6 +34,10 @@ public class StructureChain
         Status = status;
         _randomNumberGen = new UnifiedRandom(Seed);
         
+        // assume it's a blank object and just return
+        if (entryPosX == 0 && entryPosY == 0)
+            return;
+        
         foreach (var structure in structureList)
             if (structure.Cost < 0)
                 throw new Exception("invalid item cost in structureList");
@@ -42,14 +46,8 @@ public class StructureChain
             throw new Exception("structureList had no valid options");
         
         int currentCost = 0;
-        
-        //make the weights in structureList cumulative, and make the starting weight 0
-        for (byte i = 1; i < structureList.Length; i++)
-            structureList[i].Weight = (ushort)(structureList[i].Weight + structureList[i - 1].Weight);
-
-        for (byte i = 0; i < structureList.Length; i++)
-            structureList[i].Weight -= structureList[0].Weight;
-        ushort structureListWeightSum = structureList[^1].Weight;
+        ushort structureListWeightSum;
+        CalculateWeights();
 
         if (rootStructure == null)
             rootStructure = NewStructure(null, false, entryPosX, entryPosY);
@@ -70,7 +68,7 @@ public class StructureChain
 
         bool foundValidStructureChain = false;
         // try to find a configuration that satisfies the minCost
-        for (byte attempts = 0; attempts < 10; attempts++)
+        for (byte attempts = 0; attempts < 30; attempts++)
         {
             currentCost = rootStructure.Cost;
             queuedConnectPoints = [];
@@ -103,10 +101,10 @@ public class StructureChain
             }
         }
 
-        // if we didn't find what we needed in 10 tries, abort
+        // if we didn't find what we needed in 30 tries, abort
         if (!foundValidStructureChain)
         {
-            ModContent.GetInstance<SpawnHouses>().Logger.Error("Failed to generate StructureChain. Please report this world seed to the mod's author");
+            ModContent.GetInstance<SpawnHouses>().Logger.Error($"Failed to generate StructureChain of type {this.ToString()} with seed {Seed}. Please report this error and it's information to the mod's author");
             return;
         }
         
@@ -118,14 +116,25 @@ public class StructureChain
         
         
         // functions
+
+        void CalculateWeights()
+        {
+            //make the weights in structureList cumulative, and make the starting weight 0
+            for (byte i = 1; i < structureList.Length; i++)
+                structureList[i].Weight = (ushort)(structureList[i].Weight + structureList[i - 1].Weight);
+
+            for (byte i = 0; i < structureList.Length; i++)
+                structureList[i].Weight -= structureList[0].Weight;
+            structureListWeightSum = structureList[^1].Weight;
+        }
        
         CustomChainStructure NewStructure(ChainConnectPoint parentConnectPoint, bool closeToMaxBranchLength = false, int x = 500, int y = 500)
         {
             CustomChainStructure structure = null;
             for (int i = 0; i < 5000; i++)
             {
-                double value = _randomNumberGen.NextDouble() * structureListWeightSum;
-                structure = structureList.Last(curStructure => curStructure.Weight <= value).Clone();
+                double randomValue = _randomNumberGen.NextDouble() * structureListWeightSum;
+                structure = structureList.Last(curStructure => curStructure.Weight <= randomValue).Clone();
 
                 // don't generate a branching hallway right after another one :)
                 if (parentConnectPoint.GenerateChance == GenerateChances.Guaranteed &&
@@ -182,10 +191,13 @@ public class StructureChain
                     failedConnectPointList.Add(connectPoint);
                     return;
                 }
+            if (connectPoint.GenerateChance == GenerateChances.Rejected)
+            {
+                failedConnectPointList.Add(connectPoint);
+                return;
+            }
             
-            if (connectPoint.GenerateChance == GenerateChances.Rejected) return;
-            
-            // try to find a structure that wont result in a cost overrun
+            // try to find a structure that won't result in a cost overrun
             bool foundStructure = false;
             CustomChainStructure newStructure = null;
             for (int attempts = 0; attempts < 20; attempts++)
@@ -211,10 +223,8 @@ public class StructureChain
             
             for (int findLocationAttempts = 0; findLocationAttempts < 20; findLocationAttempts++)
             {
-                
                 // randomly pick either the top or bottom side
                 int randomSide = 0; //Terraria.WorldGen.genRand.Next(0, 2);
-                int newStructureConnectPointX, newStructureConnectPointY;
                 
                 connectPointBridge = GetBridgeOfDirection(connectPointParentStructure.ChildBridgeTypes, targetDirection);
                 if (connectPointBridge == null)
@@ -244,8 +254,8 @@ public class StructureChain
                 
                 // note: the +/-1 is because connect points have no space between them even when the deltaX is 1
                 
-                newStructureConnectPointX = connectPoint.X + deltaX + 1;
-                newStructureConnectPointY = connectPoint.Y + deltaY + 1;
+                int newStructureConnectPointX = connectPoint.X + deltaX + 1;
+                int newStructureConnectPointY = connectPoint.Y + deltaY + 1;
                 
                 byte secondConnectPointDirection;
                 if (connectPointBridge.InputDirections[0] == targetDirection)
@@ -288,6 +298,10 @@ public class StructureChain
             connectPoint.ChildBridge = connectPointBridge;
             
             currentCost += newStructure.Cost;
+            
+            // reduce the weighting of the chosen structure so that we don't get 5 in a row 
+            structureList.First(curStructure => curStructure.FilePath == newStructure.FilePath).Weight /= 2;
+            CalculateWeights();
             
             for (byte direction = 0; direction < 4; direction++)
                 foreach (ChainConnectPoint nextConnectPoint in newStructure.ConnectPoints[direction])
