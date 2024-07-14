@@ -44,7 +44,7 @@ public class MainHouseStructure : CustomStructure
     public readonly bool InUnderworld;
     public readonly bool HasBasement;
     
-    public MainHouseStructure(ushort x = 500, ushort y = 500, byte status = StructureStatus.NotGenerated, bool hasBasement = false, bool inUnderworld = false)
+    public MainHouseStructure(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, bool hasBasement = false, bool inUnderworld = false)
     {
         InUnderworld = inUnderworld;
         HasBasement = hasBasement;

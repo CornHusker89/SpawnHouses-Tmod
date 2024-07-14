@@ -1,5 +1,4 @@
-- Cloose doors on structures
-- Make chainstructure's weights change each time a structure is made
-- Add weird stair platforms
 - Make custom names for the gen passes and display them
-- Add config to change spawn point to any house
+- Add config to change spawn point to any house (and have cool ui thing??)
+- Un-scuff the world gen passes cuz of the wiring thing for the basement
+- Add 3 furniture levels (high, normal, none)??

@@ -1,4 +1,4 @@
-When making a world, a house with a few chests will spawn near the spawn point, and another will spawn on a beach.
+When making a world, a house with a few chests will spawn at the spawn point, and another will spawn on a beach.
 
 Use Mod Configs to enable/disable generation of any house.
 

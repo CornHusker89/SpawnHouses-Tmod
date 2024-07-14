@@ -1,6 +1,10 @@
+using System;
 using SpawnHouses.Structures.Bridges;
 using SpawnHouses.Structures.ChainStructures.MainBasement;
 using Terraria;
+using Terraria.ModLoader;
+
+
 
 namespace SpawnHouses.Structures.StructureChains;
 
@@ -42,18 +46,24 @@ public class MainBasementChain : StructureChain
         new MainBasement_Room1_WithFloor  (14, 90, _bridgeList),
         new MainBasement_Room2            (13, 40, _bridgeList),
         new MainBasement_Room2_WithRoof   (15, 90, _bridgeList),
-        new MainBasement_Room3            (8, 100, _bridgeList),
-        new MainBasement_Room4            (11, 8, _bridgeList),
-        new MainBasement_Room5            (10, 100, _bridgeList),
-        new MainBasement_Room6            (14, 100, _bridgeList),
+        new MainBasement_Room3            (8, 115, _bridgeList),
+        new MainBasement_Room4            (11, 6, _bridgeList),
+        new MainBasement_Room5            (10, 115, _bridgeList),
+        new MainBasement_Room6            (14, 115, _bridgeList),
+        new MainBasement_Room7            (14, 95, _bridgeList),
         new MainBasement_Hallway4         (7, 90, _bridgeList),
         new MainBasement_Hallway5         (9, 90, _bridgeList),
         new MainBasement_Hallway9         (7, 90, _bridgeList)
     ];
-
-
-    public MainBasementChain(ushort x, ushort y, int seed = -1, byte status = StructureStatus.NotGenerated) :
-        base(75, 40, _structureList, x, y, 1, 3, _rootStructure, true, true, seed, status) {}
+    
+    
+    public MainBasementChain(ushort x = 0, ushort y = 0, int seed = -1, byte status = StructureStatus.NotGenerated) :
+        base((ushort)(75 * ModContent.GetInstance<SpawnHousesConfig>().SizeMultiplier), 
+            (ushort)(40 * ModContent.GetInstance<SpawnHousesConfig>().SizeMultiplier),
+            _structureList, x, y,
+            (byte)Math.Round(1 * ModContent.GetInstance<SpawnHousesConfig>().SizeMultiplier), 
+            (byte)Math.Round(3 * ModContent.GetInstance<SpawnHousesConfig>().SizeMultiplier),
+            _rootStructure, true, true, seed, status) {}
 
     public override void OnFound()
     {

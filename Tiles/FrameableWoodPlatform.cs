@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -22,6 +23,8 @@ public class FrameableWoodPlatform : ModTile
         Main.tileNoSunLight[Type] = true;
         
         TileID.Sets.CanBeSloped[Type] = true;
+        TileID.Sets.Platforms[Type] = true;
+        TileID.Sets.HasSlopeFrames[Type] = true;
         
         
         DustType = DustID.BorealWood_Small;
@@ -29,6 +32,9 @@ public class FrameableWoodPlatform : ModTile
         // Set other values here
         
         TileObjectData.newTile.FullCopyFrom(TileID.Platforms);
+        TileObjectData.newTile.StyleMultiplier = 31;
+        TileObjectData.newTile.StyleWrapLimit = 31;
+        
         TileObjectData.addTile(Type);
     }
     
@@ -36,9 +42,9 @@ public class FrameableWoodPlatform : ModTile
         int style = Main.LocalPlayer.HeldItem.placeStyle;
         Tile tile = Main.tile[i, j];
         tile.TileFrameY = (short)(style * 18);
-        if (Main.netMode == NetmodeID.MultiplayerClient) {
+        if (Main.netMode == NetmodeID.MultiplayerClient) 
             NetMessage.SendTileSquare(-1, Player.tileTargetX, Player.tileTargetY, 1, TileChangeType.None);
-        }
+        
     }
     
     public override IEnumerable<Item> GetItemDrops(int i, int j) {
@@ -50,10 +56,11 @@ public class FrameableWoodPlatform : ModTile
     
     public override bool Slope(int i, int j) {
         Tile tile = Framing.GetTileSafely(i, j);
-        tile.TileFrameX = (short)((tile.TileFrameX + 18) % 486); //27 * 18
-        if (Main.netMode == NetmodeID.MultiplayerClient) {
+        tile.TileFrameX = (short)((tile.TileFrameX + 18) % 558); //31 * 18
+        tile.IsHalfBlock = tile.TileFrameX is 540 or 522 or 504 or 486;
+        if (Main.netMode == NetmodeID.MultiplayerClient) 
             NetMessage.SendTileSquare(-1, Player.tileTargetX, Player.tileTargetY, 1, TileChangeType.None);
-        }
+        
         SoundEngine.PlaySound(SoundID.MenuTick);
         return false;
     }

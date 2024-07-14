@@ -12,9 +12,9 @@ namespace SpawnHouses;
 
 internal class SpawnHousesSystem : ModSystem
 {
-    public static MainHouseStructure MainHouse { get; set; }
-    public static MainBasementChain MainBasement { get; set; }
-    public static BeachHouseStructure BeachHouse { get; set; }
+    public static MainHouseStructure MainHouse = new MainHouseStructure();
+    public static MainBasementChain MainBasement = new MainBasementChain();
+    public static BeachHouseStructure BeachHouse = new BeachHouseStructure();
     
     
     public override void SaveWorldData(TagCompound tag) {
@@ -22,22 +22,19 @@ internal class SpawnHousesSystem : ModSystem
         tag["MainBasement"] = MainBasement;
         tag["BeachHouse"] = BeachHouse;
     }
-
-    public override void LoadWorldData(TagCompound tag) {
-        if (tag.ContainsKey("MainHouse"))
-            MainHouse = tag.Get<MainHouseStructure>("MainHouse");
-        if (tag.ContainsKey("MainBasement"))
-            MainBasement = tag.Get<MainBasementChain>("MainBasement");
-        if (tag.ContainsKey("BeachHouse"))
-            BeachHouse = tag.Get<BeachHouseStructure>("BeachHouse");
+    public override void LoadWorldData(TagCompound tag)
+    {
+        MainHouse = tag.ContainsKey("MainHouse") ? tag.Get<MainHouseStructure>("MainHouse") : new MainHouseStructure();
+        MainBasement = tag.ContainsKey("MainBasement") ? tag.Get<MainBasementChain>("MainBasement") : new MainBasementChain();
+        BeachHouse = tag.ContainsKey("BeachHouse") ? tag.Get<BeachHouseStructure>("BeachHouse") : new BeachHouseStructure();
     }
 }
 
 
-
 internal class MainHouseStructureSerializer : TagSerializer<MainHouseStructure, TagCompound>
 {
-    public override TagCompound Serialize(MainHouseStructure structure) => new TagCompound
+    public override TagCompound Serialize(MainHouseStructure structure) => 
+        new TagCompound
     {
         ["X"] = structure.X,
         ["Y"] = structure.Y,

@@ -1,4 +1,8 @@
 Version 0.2.8
+Major Changes
+- Config overhaul. Now with presets!
+
 Minor Changes
 - Minor generation fixes
-- Magic Storage's Automation NPC also won't get stuck in the floor
+- Magic Storage's Automation NPC won't get stuck in the floor
+- Changed description
