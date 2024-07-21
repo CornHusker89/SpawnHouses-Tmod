@@ -40,7 +40,9 @@ internal class MainHouseStructureSerializer : TagSerializer<MainHouseStructure, 
         ["Y"] = structure.Y,
         ["Status"] = structure.Status,
         ["HasBasement"] = structure.HasBasement,
-        ["InUnderworld"] = structure.InUnderworld
+        ["InUnderworld"] = structure.InUnderworld,
+        ["LeftType"] = structure.LeftType,
+        ["RightType"] = structure.RightType
     };
 
     public override MainHouseStructure Deserialize(TagCompound tag) => new MainHouseStructure(
@@ -48,7 +50,9 @@ internal class MainHouseStructureSerializer : TagSerializer<MainHouseStructure, 
         tag.Get<ushort>("Y"),
         tag.GetByte("Status"),
         tag.GetBool("HasBasement"),
-        tag.GetBool("InUnderworld")
+        tag.GetBool("InUnderworld"),
+        tag.GetByte("LeftType") != 0? tag.GetByte("LeftType") : (byte)1, // if its 0 (which only happens if it's a <= 2.7 world) set to default 
+        tag.GetByte("RightType") != 0? tag.GetByte("RightType") : (byte)1
     );
 }
 

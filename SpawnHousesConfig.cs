@@ -8,12 +8,10 @@ namespace SpawnHouses;
 public class SpawnHousesConfig : ModConfig
 {
 	// values values
-	private const byte NpcBase = 11;
-	
-	
+	private const byte NpcBase = 6;
 	
 	private bool _doesAutoSetSize;
-	[JsonIgnore] public float SizeMultiplier => (float)Size / NpcBase;
+	[JsonIgnore] public float SizeMultiplier => (float)NpcEstimate / NpcBase;
 	
 	public override ConfigScope Mode => ConfigScope.ServerSide;
 	
@@ -27,7 +25,7 @@ public class SpawnHousesConfig : ModConfig
 	{
 		get
 		{
-			if (_doesAutoSetSize && Size == NpcBase)
+			if (_doesAutoSetSize && NpcEstimate == NpcBase)
 				return true;
 			
 			else
@@ -39,7 +37,7 @@ public class SpawnHousesConfig : ModConfig
 		set 
 		{
 			if (value) {
-				Size = NpcBase;
+				NpcEstimate = NpcBase;
 				_doesAutoSetSize = true;
 			}
 			else
@@ -49,7 +47,9 @@ public class SpawnHousesConfig : ModConfig
 	}
 	
 	[DefaultValue(NpcBase)]
-	public byte Size { get; set; }
+	[Terraria.ModLoader.Config.Range(4, 6)]
+	[Slider]
+	public int NpcEstimate { get; set; }
 	
 
 	
@@ -58,14 +58,12 @@ public class SpawnHousesConfig : ModConfig
 
 	
 	[DefaultValue(true)]
-	[ReloadRequired]
 	public bool EnableSpawnPointHouse { get; set; }
 	
-	[DefaultValue(true)]
-	[ReloadRequired]
+	[DefaultValue(false)]
+	[JsonIgnore]
 	public bool EnableSpawnPointBasement { get; set; }
 	
 	[DefaultValue(true)]
-	[ReloadRequired]
 	public bool EnableBeachHouse { get; set; }
 }

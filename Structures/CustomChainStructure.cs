@@ -27,7 +27,7 @@ public class CustomChainStructure : CustomStructure
     // you're not really intended to make a base customChainStructure, so this is private. It's used for cloning
     protected CustomChainStructure(String filePath, ushort structureXSize, ushort structureYSize, Floor[] floors,
         ChainConnectPoint[][] connectPoints, Bridge[] childBridges,
-        ushort x = 1, ushort y = 1, sbyte cost = -1, ushort weight = 10, byte boundingBoxMargin = 0)
+        ushort x = 1000, ushort y = 1000, sbyte cost = -1, ushort weight = 10, byte boundingBoxMargin = 0)
     {
         FilePath = filePath;
         StructureXSize = structureXSize;
