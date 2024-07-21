@@ -5,6 +5,7 @@ using Terraria;
 
 using SpawnHouses.Structures;
 using SpawnHouses.Structures.StructureParts;
+using Terraria.ModLoader;
 
 namespace SpawnHouses.Structures.ChainStructures.MainBasement;
 
@@ -12,6 +13,8 @@ public class MainBasement_Room5 : CustomChainStructure
 {
     // constants
     public static readonly string _filePath = "Structures/StructureFiles/mainBasement/mainBasement_Room5";
+    public static readonly string _filePath_MagicStorage = "Structures/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage";
+    
     public static readonly ushort _structureXSize = 22;
     public static readonly ushort _structureYSize = 9;
 
@@ -41,11 +44,12 @@ public class MainBasement_Room5 : CustomChainStructure
         ]
     ];
     
-    public MainBasement_Room5(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1, ushort y = 1) : 
-        base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors), 
+    public MainBasement_Room5(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1000, ushort y = 1000) : 
+        base(ModLoader.HasMod("MagicStorage")? _filePath_MagicStorage : _filePath, 
+            _structureXSize, _structureYSize, CopyFloors(_floors), 
             CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost, weight)
     {
-        FilePath = _filePath;
+        FilePath = ModLoader.HasMod("MagicStorage")? _filePath_MagicStorage : _filePath;
         StructureXSize = _structureXSize;
         StructureYSize = _structureYSize;
         

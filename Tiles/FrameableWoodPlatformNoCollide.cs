@@ -9,20 +9,17 @@ using Terraria.ObjectData;
 
 namespace SpawnHouses.Tiles;
 
-public class FrameableWoodPlatform : ModTile
+public class FrameableWoodPlatformNoCollide : ModTile
 {
     public override void SetStaticDefaults()
     {
         Main.tileFrameImportant[Type] = true;
-        Main.tileSolidTop[Type] = true;
-        Main.tileSolid[Type] = true;
         Main.tileNoAttach[Type] = true;
-        Main.tileTable[Type] = true;
         Main.tileLavaDeath[Type] = true;
         Main.tileNoSunLight[Type] = true;
         
         TileID.Sets.CanBeSloped[Type] = true;
-        TileID.Sets.Platforms[Type] = true;
+        TileID.Sets.HasSlopeFrames[Type] = true;
         
         DustType = DustID.BorealWood_Small;
         AddMapEntry(new Color(191, 142, 111));
@@ -38,7 +35,6 @@ public class FrameableWoodPlatform : ModTile
         int style = Main.LocalPlayer.HeldItem.placeStyle;
         Tile tile = Main.tile[i, j];
         tile.TileFrameY = (short)(style * 18);
-        tile.TileFrameX = 0;
         
         if (Main.netMode == NetmodeID.MultiplayerClient) 
             NetMessage.SendTileSquare(-1, Player.tileTargetX, Player.tileTargetY, 1, TileChangeType.None);
@@ -55,13 +51,7 @@ public class FrameableWoodPlatform : ModTile
         Tile tile = Framing.GetTileSafely(i, j);
         tile.TileFrameX = (short)((tile.TileFrameX + 18) % 630); //33 * 18
         tile.IsHalfBlock = tile.TileFrameX is 540 or 522 or 504 or 486;
-        if (tile.TileFrameX is 144 or 342 or 378 or 414 or 450)
-            tile.Slope = SlopeType.SlopeDownRight;
-        else if (tile.TileFrameX is 180 or 360 or 396 or 432 or 468)
-            tile.Slope = SlopeType.SlopeDownLeft;
-        else
-            tile.Slope = SlopeType.Solid;
-        
+   
         if (Main.netMode == NetmodeID.MultiplayerClient) 
             NetMessage.SendTileSquare(-1, Player.tileTargetX, Player.tileTargetY, 1, TileChangeType.None);
         

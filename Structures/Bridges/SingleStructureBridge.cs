@@ -22,10 +22,11 @@ public class SingleStructureBridge : Bridge
     public readonly short StructureOffsetY;
     
     private BoundingBox[] BoundingBoxOverride;
+    private bool HasBoundingBox;
     
     public SingleStructureBridge(string structureFilePath, ushort structureLength, ushort structureHeight,
         short structureOffsetX, short structureOffsetY, short deltaX, short deltaY, 
-        byte[] inputDirections, BoundingBox[] boundingBoxOverride = null,
+        byte[] inputDirections, BoundingBox[] boundingBoxOverride = null, bool hasBoundingBox = true,
         ConnectPoint point1 = null, ConnectPoint point2 = null) 
         : 
         base(inputDirections, deltaX, deltaX, deltaY, deltaY, 
@@ -36,7 +37,9 @@ public class SingleStructureBridge : Bridge
         StructureHeight = structureHeight;
         StructureOffsetX = structureOffsetX;
         StructureOffsetY = structureOffsetY;
+        HasBoundingBox = hasBoundingBox;
         
+        // BoundingBoxOverride represents an offset from the normal position, not an absolute value
         if (boundingBoxOverride == null)
             BoundingBoxOverride = [new BoundingBox(0, 0, 0, 0)];
         else
@@ -54,17 +57,22 @@ public class SingleStructureBridge : Bridge
         int startX = point1.X + StructureOffsetX + 1;
         int startY = point1.Y + StructureOffsetY + 1;
         
-        BoundingBoxes = new BoundingBox[BoundingBoxOverride.Length];
-        for (int i = 0; i < BoundingBoxOverride.Length; i++)
+        if (HasBoundingBox)
         {
-            BoundingBoxes[i] = new BoundingBox
-            (
-                startX + BoundingBoxOverride[i].Point1.X,
-                startY + BoundingBoxOverride[i].Point1.Y,
-                startX + BoundingBoxOverride[i].Point2.X + StructureLength - 1,
-                startY + BoundingBoxOverride[i].Point2.Y + StructureHeight - 1
-            );
+            BoundingBoxes = new BoundingBox[BoundingBoxOverride.Length];
+            for (int i = 0; i < BoundingBoxOverride.Length; i++)
+            {
+                BoundingBoxes[i] = new BoundingBox
+                (
+                    startX + BoundingBoxOverride[i].Point1.X,
+                    startY + BoundingBoxOverride[i].Point1.Y,
+                    startX + BoundingBoxOverride[i].Point2.X + StructureLength - 1,
+                    startY + BoundingBoxOverride[i].Point2.Y + StructureHeight - 1
+                );
+            }
         }
+        else
+            BoundingBoxes = [];
     }
     
     
@@ -93,7 +101,7 @@ public class SingleStructureBridge : Bridge
     {
         return new SingleStructureBridge(StructureFilePath, StructureLength, StructureHeight, 
             StructureOffsetX, StructureOffsetY, DeltaXMultiple, DeltaYMultiple, 
-            InputDirections, BoundingBoxOverride, Point1, Point2);
+            InputDirections, BoundingBoxOverride, HasBoundingBox, Point1, Point2);
     }
     
     
@@ -103,6 +111,30 @@ public class SingleStructureBridge : Bridge
     
     // Note that bridge directions have the directions in point order, so point1 of the bridge should be inputDirections.[0]
     // use AltGen designation to allow for flipped point order
+    
+    
+    // empty
+    public class EmptyBridgeHorizontal : SingleStructureBridge
+    {
+        public EmptyBridgeHorizontal() : base("Structures/StructureFiles/empty",
+            0, 0, 0, 0, -1, -1, [Directions.Right, Directions.Left], hasBoundingBox: false) {}
+    }
+    public class EmptyBridgeHorizontalAltGen : SingleStructureBridge
+    {
+        public EmptyBridgeHorizontalAltGen() : base("Structures/StructureFiles/empty",
+            0, 0, 0, 0, -1, -1, [Directions.Left, Directions.Right], hasBoundingBox: false) {}
+    }
+    
+    public class EmptyBridgeVertical : SingleStructureBridge
+    {
+        public EmptyBridgeVertical() : base("Structures/StructureFiles/empty",
+            0, 0, 0, 0, -1, -1, [Directions.Down, Directions.Up], hasBoundingBox: false) {}
+    }
+    public class EmptyBridgeVerticalAltGen : SingleStructureBridge
+    {
+        public EmptyBridgeVerticalAltGen() : base("Structures/StructureFiles/empty",
+            0, 0, 0, 0, -1, -1, [Directions.Up, Directions.Down], hasBoundingBox: false) {}
+    }
     
     
     // straight

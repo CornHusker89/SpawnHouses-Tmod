@@ -60,13 +60,13 @@ public class CustomStructureGen : ModSystem
 		    {
 			    if (npc.type == NPCID.Guide)
 			    {
-				    npc.position.X = (SpawnHousesSystem.MainHouse.X + 32 + Terraria.WorldGen.genRand.Next(-12, 13)) * 16; // tiles to pixels
-				    npc.position.Y = (SpawnHousesSystem.MainHouse.Y + 15 + 7) * 16;
+				    npc.position.X = (SpawnHousesSystem.MainHouse.X + SpawnHousesSystem.MainHouse.LeftSize - 1 + Terraria.WorldGen.genRand.Next(-8, 9)) * 16; // tiles to pixels
+				    npc.position.Y = (SpawnHousesSystem.MainHouse.Y + 13) * 16;
 			    }
 			    if (npc.type == 688) // magic storage's automation
 			    {
-				    npc.position.X = (SpawnHousesSystem.MainHouse.X + 32 + Terraria.WorldGen.genRand.Next(-12, 13)) * 16; // tiles to pixels
-				    npc.position.Y = (SpawnHousesSystem.MainHouse.Y + 15 + 7) * 16;
+				    npc.position.X = (SpawnHousesSystem.MainHouse.X + SpawnHousesSystem.MainHouse.LeftSize - 1 + Terraria.WorldGen.genRand.Next(-8, 9)) * 16; // tiles to pixels
+				    npc.position.Y = (SpawnHousesSystem.MainHouse.Y + 13) * 16;
 
 			    }
 		    }
@@ -233,15 +233,15 @@ public class CustomHousesPass : GenPass
 			// set initialY to the average y pos of the raycasts
 			initialY = (int) Math.Round(sum / 7.0);
 			
-			MainHouseStructure houseStructure = new MainHouseStructure((ushort)(initialX - 31), (ushort)(initialY - 26), hasBasement: ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement, inUnderworld: spawnUnderworld);
+			MainHouseStructure houseStructure = new MainHouseStructure((ushort)(initialX - 31), (ushort)(initialY - 16), hasBasement: ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement, inUnderworld: spawnUnderworld);
 			houseStructure.Generate();
 			
 			SpawnHousesSystem.MainHouse = houseStructure;
 			
 			
 			// move the spawn point to the upper floor of the house
-			Main.spawnTileX = initialX - 31 + 32;
-			Main.spawnTileY = initialY - 28 + 15;
+			Main.spawnTileX = initialX + houseStructure.LeftSize - 1 - 31;
+			Main.spawnTileY = initialY + 5 - 15;
 		
 			// replace all dirt with ash if we're in the underworld
 			if (spawnUnderworld)

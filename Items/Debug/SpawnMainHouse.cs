@@ -3,6 +3,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Structures.StructureChains;
 using Terraria.Chat;
 using Terraria.WorldBuilding;
 using SpawnHouses.Structures.Structures;
@@ -49,11 +50,11 @@ namespace SpawnHouses.Items.Debug
 				foundLocation = true;
 			}
 
-			y = (ushort)(y - 27); //the structure spawning has an offset + we want it to be a little off the ground
+			y = (ushort)(y - 16); //the structure spawning has an offset + we want it to be a little off the ground
 			x = (ushort)(x - 31); //center the struct
 			
 			MainHouseStructure structure = new MainHouseStructure(x, y);
-			structure._GenerateStructure();
+			structure.Generate();
 
 			return true;
 		}

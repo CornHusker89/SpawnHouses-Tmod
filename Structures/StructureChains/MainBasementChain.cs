@@ -37,8 +37,10 @@ public class MainBasementChain : StructureChain
         new SingleStructureBridge.MainHouseBasementHallway8(),
         new SingleStructureBridge.MainHouseBasementHallway8AltGen()
     ];
-        
-    public static CustomChainStructure _rootStructure = new MainBasement_Entry1(10, 100, _bridgeList);
+    
+    public static CustomChainStructure _rootStructure = ModLoader.HasMod("MagicStorage")? 
+        new MainBasement_Entry2(10, 100, _bridgeList) : 
+        new MainBasement_Entry1(10, 100, _bridgeList);
         
     public static CustomChainStructure[] _structureList = 
     [
@@ -58,7 +60,7 @@ public class MainBasementChain : StructureChain
     
     
     public MainBasementChain(ushort x = 0, ushort y = 0, int seed = -1, byte status = StructureStatus.NotGenerated) :
-        base((ushort)(75 * ModContent.GetInstance<SpawnHousesConfig>().SizeMultiplier), 
+        base((ushort)(80 * ModContent.GetInstance<SpawnHousesConfig>().SizeMultiplier), 
             (ushort)(40 * ModContent.GetInstance<SpawnHousesConfig>().SizeMultiplier),
             _structureList, x, y,
             (byte)Math.Round(1 * ModContent.GetInstance<SpawnHousesConfig>().SizeMultiplier), 

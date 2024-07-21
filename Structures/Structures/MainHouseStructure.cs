@@ -6,20 +6,37 @@ using SpawnHouses.Structures;
 
 
 using SpawnHouses.Structures.StructureParts;
+using Terraria.DataStructures;
+using Terraria.ModLoader;
 
 namespace SpawnHouses.Structures.Structures;
 
 public class MainHouseStructure : CustomStructure
 {
     // constants
-    public static readonly string _filePath1 = "Structures/StructureFiles/mainHouse/mainHouse_v3";
-    public static readonly string _filePath2 = "Structures/StructureFiles/mainHouse/mainHouse_B_v3";
+    public static readonly string _filePath_left = "Structures/StructureFiles/mainHouse/mainHouse_Left_v4"; // 1
+    private const ushort length_left = 33;
+    public static readonly string _filePath_small_left = "Structures/StructureFiles/mainHouse/mainHouse_Small_Left_v4"; // 2
+    private const ushort length_small_left = 20;
+    public static readonly string _filePath_small_basement_left = "Structures/StructureFiles/mainHouse/mainHouse_Small_Basement_Left_v4"; // 3
+    private const ushort length_small_basement_left = 20;
+    
+    public static readonly string _filePath_right = "Structures/StructureFiles/mainHouse/mainHouse_Right_v4"; // 1
+    private const ushort length_right = 30;
+    public static readonly string _filePath_basement_right = "Structures/StructureFiles/mainHouse/mainHouse_Basement_Right_v4"; // 2
+    private const ushort length_basement_right = 30;
+    public static readonly string _filePath_small_right = "Structures/StructureFiles/mainHouse/mainHouse_Small_Right_v4"; // 3
+    private const ushort length_small_right = 21;
+    
+    public static readonly string _filePath_top = "Structures/StructureFiles/mainHouse/mainHouse_Top_v4"; // 1
+    
     public static readonly ushort _structureXSize = 63;
-    public static readonly ushort _structureYSize = 40;
+    public static readonly ushort _structureYSize = 36;
+    
     
     public static readonly Floor[] _floors = 
     [
-        new Floor(11, 26, 42)
+        new Floor(0, 16, 42)
     ];
 
     public static readonly ConnectPoint[][] _connectPoints =
@@ -32,27 +49,162 @@ public class MainHouseStructure : CustomStructure
         
         // left
         [
-            new ConnectPoint(0, 26, Directions.Left)
+            new ConnectPoint(0, 16, Directions.Left)
         ],
         
         // right
         [
-            new ConnectPoint(62, 26, Directions.Right)
+            new ConnectPoint(62, 16, Directions.Right)
         ]
     ];
     
     public readonly bool InUnderworld;
     public readonly bool HasBasement;
+    public readonly string LeftFilePath;
+    public readonly string RightFilePath;
+    public readonly string TopFilePath;
+    public readonly ushort LeftSize;
+    public readonly ushort RightSize;
     
-    public MainHouseStructure(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, bool hasBasement = false, bool inUnderworld = false)
+    public readonly byte LeftType;
+    public readonly byte RightType;
+
+    private readonly bool LeftSmall = false;
+    private readonly bool RightSmall = false;
+    private readonly bool generatedBasement = false;
+    
+    public MainHouseStructure(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, 
+        bool hasBasement = false, bool inUnderworld = false, byte leftType = 0, byte rightType = 0)
     {
         InUnderworld = inUnderworld;
         HasBasement = hasBasement;
         
         Floors = _floors;
         ConnectPoints = _connectPoints;
+
+        // calculate what sides should be small (if we need to)
+        if (leftType == 0 && rightType == 0)
+        {
+            double size = ModContent.GetInstance<SpawnHousesConfig>().SizeMultiplier;
+            if (size < 0.7)
+            {
+                LeftSmall = true;
+                RightSmall = true;
+            }
+            else if (size < 0.85)
+            {
+                if (Terraria.WorldGen.genRand.NextBool())
+                    LeftSmall = true;
+                else
+                    RightSmall = true;
+            }
+        }
         
-        FilePath = !HasBasement ? _filePath1 : _filePath2;
+        
+        // set left and right side generation varibles
+        if (leftType == 0)
+        {
+            if (LeftSmall)
+            {
+                if (hasBasement && (RightSmall || Terraria.WorldGen.genRand.NextBool() ))
+                {
+                    LeftFilePath = _filePath_small_basement_left;
+                    LeftSize = length_small_basement_left;
+                    LeftType = 3;
+                    LeftSmall = true;
+                    generatedBasement = true;
+                }
+                else
+                {
+                    LeftFilePath = _filePath_small_left;
+                    LeftSize = length_small_left;
+                    LeftType = 2;
+                    LeftSmall = true;
+                }
+            }
+            else
+            {
+                LeftFilePath = _filePath_left;
+                LeftSize = length_left;
+                LeftType = 1;
+            }
+        }
+        else
+        {
+            LeftType = leftType;
+            switch (leftType)
+            {
+                case 1: 
+                    LeftFilePath = _filePath_left; 
+                    LeftSize = length_left;
+                    break;
+                case 2: 
+                    LeftFilePath = _filePath_small_left;
+                    LeftSize = length_small_left;
+                    LeftSmall = true;
+                    break;
+                case 3: 
+                    LeftFilePath = _filePath_small_basement_left;
+                    LeftSize = length_small_basement_left;
+                    LeftSmall = true;
+                    break;
+            }
+        }
+
+
+        if (rightType == 0)
+        {
+            if (RightSmall)
+            {
+                RightFilePath = _filePath_small_right;
+                RightSize = length_small_right;
+                RightType = 3;
+                RightSmall = true;
+            }
+            else
+            {
+                if (hasBasement && !generatedBasement)
+                {
+                    RightFilePath = _filePath_basement_right;
+                    RightSize = length_basement_right;
+                    RightType = 2;
+                    generatedBasement = true;
+                }
+                else
+                {
+                    RightFilePath = _filePath_right;
+                    RightSize = length_right;
+                    RightType = 1;
+                }
+            }
+        }
+        else
+        {
+            RightType = rightType;
+            switch (rightType)
+            {
+                case 1: 
+                    RightFilePath = _filePath_right;
+                    RightSize = length_right;
+                    break;
+                case 2: 
+                    RightFilePath = _filePath_basement_right;
+                    RightSize = length_basement_right;
+                    break;
+                case 3: 
+                    RightFilePath = _filePath_small_right;
+                    RightSize = length_small_right;
+                    RightSmall = true;
+                    break;
+            }
+        }
+
+        TopFilePath = _filePath_top;
+        
+        FilePath = LeftFilePath;
+
+        ConnectPoints[3][0].XOffset = (short)(LeftSize + RightSize - 1);
+        Floors[0].FloorLength = (ushort)(LeftSize + RightSize);
 
         StructureXSize = _structureXSize;
         StructureYSize = _structureYSize;
@@ -65,9 +217,10 @@ public class MainHouseStructure : CustomStructure
 
     public override void OnFound() {}
 
+    [NoJIT]
     public override void Generate()
     {
-        Floors[0].GenerateFoundation(TileID.Dirt, foundationRadius: 31, foundationYOffset: 5);
+        Floors[0].GenerateFoundation(TileID.Dirt, foundationYOffset: 13);
 
         if (!InUnderworld)
         {
@@ -81,11 +234,15 @@ public class MainHouseStructure : CustomStructure
         }
         
         _GenerateStructure();
-        FrameTiles();
+        StructureHelper.Generator.GenerateStructure(RightFilePath, new Point16(X + LeftSize, Y), _mod);
+        StructureHelper.Generator.GenerateStructure(TopFilePath, new Point16(X + LeftSize - 14, Y - 10), _mod);
+        FrameTiles(X + LeftSize, Y + 4, 40);
         
         int signIndex = Sign.ReadSign(X + 7, Y + 21);
         if (signIndex != -1)
             Sign.TextSign(signIndex, "All good adventures start in a tavern...To bad this isn't a tavern :(");
+        
+        Terraria.WorldGen.PlaceTile(X + LeftSize - 1, Y + 14, TileID.WorkBenches, true, true, style: 0);
         
         Status = StructureStatus.GeneratedAndFound;
     }

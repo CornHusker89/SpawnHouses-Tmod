@@ -10,11 +10,12 @@ using Terraria.WorldBuilding;
 
 using SpawnHouses.Structures.StructureParts;
 using SpawnHouses.Structures;
+using Terraria.GameContent.Drawing;
 
 namespace SpawnHouses.Structures;
 
 public abstract class CustomStructure {
-    private readonly Mod _mod = ModContent.GetInstance<SpawnHouses>();
+    protected readonly Mod _mod = ModContent.GetInstance<SpawnHouses>();
     
     public string FilePath { get; set; } = "Structures/_";
     public ushort StructureXSize { get; set; } = 1;
@@ -54,9 +55,16 @@ public abstract class CustomStructure {
         WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(StructureXSize + StructureYSize ), new Actions.SetFrames());
     }
     
-    protected void FrameTiles(int centerX, int centerY, int radius)    
+    protected void FrameTiles(int centerX, int centerY, int radius)
     {
-        WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(radius), new Actions.SetFrames());
+        WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(radius), Actions.Chain(
+            new Actions.SetFrames(),
+            new Actions.Custom((i, j, args) =>
+            {
+                Framing.WallFrame(i, j);
+                return true;
+            })
+        ));
     }
     
     protected static Floor[] CopyFloors(Floor[] floors)

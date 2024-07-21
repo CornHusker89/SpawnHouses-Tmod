@@ -1,8 +1,9 @@
 Version 0.2.8
 Major Changes
-- Config overhaul. Now with presets!
+- Config overhaul, added structure sizes
+- Main House now has small variants
 
 Minor Changes
 - Minor generation fixes
-- Magic Storage's Automation NPC won't get stuck in the floor
+- Magic Storage's Automaton NPC won't get stuck in the floor
 - Changed description

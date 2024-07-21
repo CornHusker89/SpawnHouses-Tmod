@@ -38,7 +38,8 @@ namespace SpawnHouses.Items.Debug
 			int x = (Main.MouseWorld / 16).ToPoint16().X;
 			int y = (Main.MouseWorld / 16).ToPoint16().Y;
 			
-			Terraria.WorldGen.PlaceTile(x, y, TileID.Chairs, true, true, style: 0);
+			Terraria.WorldGen.PlaceTile(x, y, TileID.WorkBenches, true, true, style: 0);
+			Console.WriteLine(x + ", " + y);
 			
 			return true;
 		}

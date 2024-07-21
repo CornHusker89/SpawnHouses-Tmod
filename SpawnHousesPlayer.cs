@@ -9,7 +9,7 @@ namespace SpawnHouses;
 public class SpawnHousesPlayer : ModPlayer
 {
     private int frameCounter = 0;
-
+    
     public override void PostUpdate()
     {
         frameCounter++;

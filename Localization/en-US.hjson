@@ -62,6 +62,11 @@ Mods: {
 				DisplayName: Frameable Boreal Platform
 				Tooltip: ""
 			}
+
+			FrameableBorealPlatformNoCollide: {
+				DisplayName: Frameable Boreal Platform No Collide
+				Tooltip: ""
+			}
 		}
 
 		Configs: {
@@ -71,11 +76,6 @@ Mods: {
 				Headers: {
 					SizeHeader: Structure Sizes -----------------
 					StructuresHeader: Enabled Structures --------------
-				}
-
-				UserNpcCount: {
-					Label: Size
-					Tooltip: Determines the overall size of each house. Number corresponds to approximately how many NPCs can live in the world with all structures active
 				}
 
 				AutoSetSize: {
@@ -98,9 +98,9 @@ Mods: {
 					Tooltip: If ON, a house will generate on the end of one beach, sometimes with a firepit.
 				}
 
-				Size: {
+				NpcEstimate: {
 					Label: Size
-					Tooltip: ""
+					Tooltip: Number corresponds to approximately how many NPCs can live in the world with all structures active. Determines the overall size of each house
 				}
 			}
 		}
