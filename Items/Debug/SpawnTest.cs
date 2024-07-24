@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -12,7 +13,7 @@ using SpawnHouses;
 
 namespace SpawnHouses.Items.Debug
 {
-	public class SpawnTest : ModItem
+	public class SpawnTest : ModItem	
 	{
 		
 		public override void SetDefaults()
@@ -22,26 +23,33 @@ namespace SpawnHouses.Items.Debug
 			Item.useAnimation = 20;
 			Item.rare = ItemRarityID.Blue;
 		}
-
-		public override void AddRecipes()
-		{
-		}
-
+		
 		public override bool AltFunctionUse(Player player)
 		{
 			return true;
 		}
 		
-
 		public override bool? UseItem(Player player)
 		{
 			int x = (Main.MouseWorld / 16).ToPoint16().X;
 			int y = (Main.MouseWorld / 16).ToPoint16().Y;
+
+			Terraria.WorldGen.PlaceTile(x, y, SpawnHousesModHelper.RemoteAccessTileID);
+			TileEntity.PlaceEntityNet(x - 1, y - 1, SpawnHousesModHelper.RemoteAccessTileEntityID);
+			//
+			// Console.WriteLine(x + ", " + y);
+			// Console.WriteLine(SpawnHousesSystem.MainHouse.StorageHeartPos);
 			
-			Terraria.WorldGen.PlaceTile(x, y, TileID.WorkBenches, true, true, style: 0);
-			Console.WriteLine(x + ", " + y);
+			Point16 remotePos = new Point16(x - 1, y - 1);
+			Point16 heartPos = SpawnHousesSystem.MainHouse.StorageHeartPos;
+			
+			Console.WriteLine(SpawnHousesModHelper.LinkRemoteStorage(remotePos, heartPos));
+			
+			
 			
 			return true;
+
+			
 		}
 
 	}

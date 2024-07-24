@@ -60,12 +60,12 @@ Mods: {
 
 			FrameableBorealPlatform: {
 				DisplayName: Frameable Boreal Platform
-				Tooltip: ""
+				Tooltip: A platform that can be hammered through all frames of vanilla platforms
 			}
 
 			FrameableBorealPlatformNoCollide: {
 				DisplayName: Frameable Boreal Platform No Collide
-				Tooltip: ""
+				Tooltip: A platform that can be hammered through all frames of vanilla platforms, but player cannot stand on it
 			}
 		}
 
@@ -74,13 +74,19 @@ Mods: {
 				DisplayName: Generated Houses Config
 
 				Headers: {
-					SizeHeader: Structure Sizes -----------------
-					StructuresHeader: Enabled Structures --------------
+					SizeHeader: Structure Sizes
+					ModifiersHeader: Structure Modifiers
+					StructuresHeader: Enabled Structures
 				}
 
 				AutoSetSize: {
 					Label: Automatically Set Size
 					Tooltip: If ON, the mod will automatically set 'Size' to the number of NPCs in enabled mods
+				}
+
+				DisableMagicStorageIntegrations: {
+					Label: Disable Magic Storage Integrations
+					Tooltip: If ON, Magic Storage features within Generated Houses will be disabled. Only has an effect when Magic Storage (the mod) is enabled
 				}
 
 				EnableSpawnPointHouse: {

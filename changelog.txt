@@ -1,9 +1,6 @@
-Version 0.2.8
+Version 0.2.9
 Major Changes
-- Config overhaul, added structure sizes
-- Main House now has small variants
+- Added Magic Storage integration! A starter setup will come with the Main House if Magic Storage is enabled. Can be disabled in Mod Configs
 
 Minor Changes
-- Minor generation fixes
-- Magic Storage's Automaton NPC won't get stuck in the floor
-- Changed description
+- Fixed sign having no text

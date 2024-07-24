@@ -6,7 +6,7 @@ using SpawnHouses.Structures.StructureParts;
 
 namespace SpawnHouses.Structures;
 
-public class CustomChainStructure : CustomStructure
+public abstract class CustomChainStructure : CustomStructure
 {
 
     public static readonly String[] BranchingHallwayIDs =
@@ -96,17 +96,18 @@ public class CustomChainStructure : CustomStructure
     
     public virtual CustomChainStructure Clone()
     {
-        return new CustomChainStructure
-        (
-            FilePath = FilePath,
-            StructureXSize = StructureXSize,
-            StructureYSize = StructureYSize,
-            Floors = CopyFloors(Floors),
-            ConnectPoints = CopyChainConnectPoints(ConnectPoints),
-            ChildBridgeTypes = CopyBridges(ChildBridgeTypes),
-            X = X,
-            Y = Y,
-            Cost = Cost
-        );
+        // return new CustomChainStructure
+        // (
+        //     FilePath = FilePath,
+        //     StructureXSize = StructureXSize,
+        //     StructureYSize = StructureYSize,
+        //     Floors = CopyFloors(Floors),
+        //     ConnectPoints = CopyChainConnectPoints(ConnectPoints),
+        //     ChildBridgeTypes = CopyBridges(ChildBridgeTypes),
+        //     X = X,
+        //     Y = Y,
+        //     Cost = Cost
+        // );
+        return null;
     }
 }

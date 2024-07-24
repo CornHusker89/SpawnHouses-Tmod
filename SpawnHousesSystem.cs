@@ -51,7 +51,7 @@ internal class MainHouseStructureSerializer : TagSerializer<MainHouseStructure, 
         tag.GetByte("Status"),
         tag.GetBool("HasBasement"),
         tag.GetBool("InUnderworld"),
-        tag.GetByte("LeftType") != 0? tag.GetByte("LeftType") : (byte)1, // if its 0 (which only happens if it's a <= 2.7 world) set to default 
+        tag.GetByte("LeftType") != 0? tag.GetByte("LeftType") : (byte)1, // if its 0 (which only happens if it's a <= v2.7 world) set to default (large) 
         tag.GetByte("RightType") != 0? tag.GetByte("RightType") : (byte)1
     );
 }
