@@ -76,7 +76,7 @@ public class CustomStructureGen : ModSystem
 	    {
 		    if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointHouse)
 		    {
-			    MainBasementChain chain = new MainBasementChain((ushort)(SpawnHousesSystem.MainHouse.X + 42), (ushort)(SpawnHousesSystem.MainHouse.Y + 34));
+			    MainBasementChain chain = new MainBasementChain((ushort)SpawnHousesSystem.MainHouse.BasementEntryPos.X, (ushort)SpawnHousesSystem.MainHouse.BasementEntryPos.Y);
 			    chain.Generate();
 				
 			    SpawnHousesSystem.MainBasement = chain;
@@ -103,7 +103,7 @@ public class ClearSpawnPointPass : GenPass
 		
 		// 9. Finally, we do the actual world generation code.
 
-		if (ModContent.GetInstance<SpawnHousesConfig>().EnableBeachHouse)
+		if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement)
 		{
 			int x = Main.maxTilesX / 2;
 			int y = (int)(Main.worldSurface / 2);

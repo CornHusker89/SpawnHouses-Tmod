@@ -14,21 +14,44 @@ namespace SpawnHouses.Structures.Structures;
 public class MainHouseStructure : CustomStructure
 {
     // constants
-    public static readonly string _filePath_left = "Structures/StructureFiles/mainHouse/mainHouse_Left_v4"; // 1
-    private const ushort length_left = 33;
-    public static readonly string _filePath_small_left = "Structures/StructureFiles/mainHouse/mainHouse_Small_Left_v4"; // 2
-    private const ushort length_small_left = 20;
-    public static readonly string _filePath_small_basement_left = "Structures/StructureFiles/mainHouse/mainHouse_Small_Basement_Left_v4"; // 3
-    private const ushort length_small_basement_left = 20;
+    private const byte _type_not_generated = 0;
     
-    public static readonly string _filePath_right = "Structures/StructureFiles/mainHouse/mainHouse_Right_v4"; // 1
-    private const ushort length_right = 30;
-    public static readonly string _filePath_basement_right = "Structures/StructureFiles/mainHouse/mainHouse_Basement_Right_v4"; // 2
-    private const ushort length_basement_right = 30;
-    public static readonly string _filePath_small_right = "Structures/StructureFiles/mainHouse/mainHouse_Small_Right_v4"; // 3
-    private const ushort length_small_right = 21;
+    public static readonly string _filePath_left = "Structures/StructureFiles/mainHouse/mainHouse_Left_v4";
+    private const byte _type_left = 1;
+    
+    public static readonly string _filePath_small_left = "Structures/StructureFiles/mainHouse/mainHouse_Small_Left_v4";
+    private const byte _type_small_left = 2;
+    
+    public static readonly string _filePath_small_basement_left = "Structures/StructureFiles/mainHouse/mainHouse_Small_Basement_Left_v4";
+    private const byte _type_small_basement_left = 3;
+    
+    public static readonly string _filePath_magicstorage_left = "Structures/StructureFiles/mainHouse/mainHouse_MagicStorage_Left_v4";
+    private const byte _type_magicstorage_left = 4;
+    
+    public static readonly string _filePath_basement_left = "Structures/StructureFiles/mainHouse/mainHouse_Basement_Left_v4";
+    private const byte _type_basement_left = 5;
+    
+    
+    
+    public static readonly string _filePath_right = "Structures/StructureFiles/mainHouse/mainHouse_Right_v4";
+    private const byte _type_right = 1;
+    
+    public static readonly string _filePath_basement_right = "Structures/StructureFiles/mainHouse/mainHouse_Basement_Right_v4";
+    private const byte _type_basement_right = 2;
+    
+    public static readonly string _filePath_small_right = "Structures/StructureFiles/mainHouse/mainHouse_Small_Right_v4";
+    private const byte _type_small_right = 3;
+    
+    public static readonly string _filePath_small_magicstorage_right = "Structures/StructureFiles/mainHouse/mainHouse_Small_MagicStorage_Right_v4";
+    private const byte _type_small_magicstorage_right = 4;
+    
+    public static readonly string _filePath_magicstorage_right = "Structures/StructureFiles/mainHouse/mainHouse_MagicStorage_Right_v4";
+    private const byte _type_magicstorage_right = 5;
+    
+    
     
     public static readonly string _filePath_top = "Structures/StructureFiles/mainHouse/mainHouse_Top_v4"; // 1
+    
     
     public static readonly ushort _structureXSize = 63;
     public static readonly ushort _structureYSize = 36;
@@ -60,11 +83,16 @@ public class MainHouseStructure : CustomStructure
     
     public readonly bool InUnderworld;
     public readonly bool HasBasement;
+    public readonly bool HasMagicStorage;
+    
     public readonly string LeftFilePath;
     public readonly string RightFilePath;
     public readonly string TopFilePath;
     public readonly ushort LeftSize;
     public readonly ushort RightSize;
+    public readonly Point16 StorageHeartPos = new Point16(1000, 1000);
+    public readonly Point16 BasementEntryPos = new Point16(1000, 1000);
+    public readonly Point16 SignPos = new Point16(1000, 1000);
     
     public readonly byte LeftType;
     public readonly byte RightType;
@@ -74,8 +102,11 @@ public class MainHouseStructure : CustomStructure
     private readonly bool generatedBasement = false;
     
     public MainHouseStructure(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, 
-        bool hasBasement = false, bool inUnderworld = false, byte leftType = 0, byte rightType = 0)
+        bool hasBasement = false, bool inUnderworld = false, byte leftType = _type_not_generated, byte rightType = _type_not_generated)
     {
+        X = x;
+        Y = y;
+        
         InUnderworld = inUnderworld;
         HasBasement = hasBasement;
         
@@ -83,7 +114,7 @@ public class MainHouseStructure : CustomStructure
         ConnectPoints = _connectPoints;
 
         // calculate what sides should be small (if we need to)
-        if (leftType == 0 && rightType == 0)
+        if (leftType == _type_not_generated && rightType == _type_not_generated)
         {
             double size = ModContent.GetInstance<SpawnHousesConfig>().SizeMultiplier;
             if (size < 0.7)
@@ -102,102 +133,123 @@ public class MainHouseStructure : CustomStructure
         
         
         // set left and right side generation varibles
-        if (leftType == 0)
+        if (leftType != _type_not_generated)
+            LeftType = leftType;
+        else
         {
             if (LeftSmall)
-            {
-                if (hasBasement && (RightSmall || Terraria.WorldGen.genRand.NextBool() ))
+                if (hasBasement && (RightSmall || Terraria.WorldGen.genRand.NextBool()))
                 {
-                    LeftFilePath = _filePath_small_basement_left;
-                    LeftSize = length_small_basement_left;
-                    LeftType = 3;
-                    LeftSmall = true;
+                    LeftType = _type_small_basement_left;
+                    generatedBasement = true;
+                }
+                else if (hasBasement && SpawnHousesModHelper.IsMSEnabled && !RightSmall)
+                {
+                    LeftType = _type_small_basement_left;
                     generatedBasement = true;
                 }
                 else
-                {
-                    LeftFilePath = _filePath_small_left;
-                    LeftSize = length_small_left;
-                    LeftType = 2;
-                    LeftSmall = true;
-                }
-            }
+                    LeftType = _type_small_left;
+
+            else if (SpawnHousesModHelper.IsMSEnabled && RightSmall)
+                LeftType = _type_basement_left;
+            else if (SpawnHousesModHelper.IsMSEnabled)
+                LeftType = _type_magicstorage_left;
+            else if (hasBasement && (RightSmall || Terraria.WorldGen.genRand.NextBool()))
+                LeftType = _type_basement_left;
             else
-            {
-                LeftFilePath = _filePath_left;
-                LeftSize = length_left;
-                LeftType = 1;
-            }
+                LeftType = _type_left;
         }
-        else
+
+        switch (LeftType)
         {
-            LeftType = leftType;
-            switch (leftType)
-            {
-                case 1: 
-                    LeftFilePath = _filePath_left; 
-                    LeftSize = length_left;
-                    break;
-                case 2: 
-                    LeftFilePath = _filePath_small_left;
-                    LeftSize = length_small_left;
-                    LeftSmall = true;
-                    break;
-                case 3: 
-                    LeftFilePath = _filePath_small_basement_left;
-                    LeftSize = length_small_basement_left;
-                    LeftSmall = true;
-                    break;
-            }
+            case _type_left: 
+                LeftFilePath = _filePath_left; 
+                LeftSize = 33;
+                SignPos = new Point16(X + 7, Y + 10);
+                break;
+            case _type_small_left: 
+                LeftFilePath = _filePath_small_left;
+                LeftSize = 20;
+                LeftSmall = true;
+                SignPos = new Point16(X + 1, Y + 10);
+                break;
+            case _type_small_basement_left: 
+                LeftFilePath = _filePath_small_basement_left;
+                LeftSize = 20;
+                LeftSmall = true;
+                BasementEntryPos = new Point16(X + 10, Y + 24);
+                SignPos = new Point16(X + 1, Y + 10);
+                break;
+            case _type_magicstorage_left:
+                LeftFilePath = _filePath_magicstorage_left;
+                LeftSize = 33;
+                HasMagicStorage = true;
+                StorageHeartPos = new Point16(X + LeftSize + 25, Y + 17);
+                SignPos = new Point16(X + 7, Y + 10);
+                break;
+            case _type_basement_left:
+                LeftFilePath = _filePath_basement_left;
+                LeftSize = 33;
+                BasementEntryPos = new Point16(X + 22, Y + 24);
+                SignPos = new Point16(X + 7, Y + 10);
+                break;
         }
 
-
-        if (rightType == 0)
+        
+        if (rightType != _type_not_generated)
+            RightType = rightType;
+        else
         {
             if (RightSmall)
-            {
-                RightFilePath = _filePath_small_right;
-                RightSize = length_small_right;
-                RightType = 3;
-                RightSmall = true;
-            }
+                if (SpawnHousesModHelper.IsMSEnabled && LeftType != _type_magicstorage_left)
+                    RightType = _type_small_magicstorage_right;
+                else
+                    RightType = _type_small_right;
+            
             else
-            {
                 if (hasBasement && !generatedBasement)
                 {
-                    RightFilePath = _filePath_basement_right;
-                    RightSize = length_basement_right;
-                    RightType = 2;
+                    RightType = _type_basement_right;
                     generatedBasement = true;
                 }
+                else if (SpawnHousesModHelper.IsMSEnabled && LeftSmall)
+                    RightType = _type_magicstorage_right;
                 else
-                {
-                    RightFilePath = _filePath_right;
-                    RightSize = length_right;
-                    RightType = 1;
-                }
-            }
+                    RightType = _type_right;
         }
-        else
+        
+        switch (RightType)
         {
-            RightType = rightType;
-            switch (rightType)
-            {
-                case 1: 
-                    RightFilePath = _filePath_right;
-                    RightSize = length_right;
-                    break;
-                case 2: 
-                    RightFilePath = _filePath_basement_right;
-                    RightSize = length_basement_right;
-                    break;
-                case 3: 
-                    RightFilePath = _filePath_small_right;
-                    RightSize = length_small_right;
-                    RightSmall = true;
-                    break;
-            }
+            case _type_right: 
+                RightFilePath = _filePath_right;
+                RightSize = 30;
+                break;
+            case _type_basement_right: 
+                RightFilePath = _filePath_basement_right;
+                RightSize = 30;
+                BasementEntryPos = new Point16(X + LeftSize + 9, Y + 24);
+                break;
+            case _type_small_right: 
+                RightFilePath = _filePath_small_right;
+                RightSize = 21;
+                RightSmall = true;
+                break;
+            case _type_small_magicstorage_right:
+                RightFilePath = _filePath_small_magicstorage_right;
+                RightSize = 21;
+                RightSmall = true;
+                HasMagicStorage = true;
+                StorageHeartPos = new Point16(X + LeftSize + 4, Y + 17);
+                break; 
+            case _type_magicstorage_right:
+                RightFilePath = _filePath_magicstorage_right;
+                RightSize = 30;
+                HasMagicStorage = true;
+                StorageHeartPos = new Point16(X + LeftSize + 4, Y + 17);
+                break; 
         }
+        
 
         TopFilePath = _filePath_top;
         
@@ -209,8 +261,6 @@ public class MainHouseStructure : CustomStructure
         StructureXSize = _structureXSize;
         StructureYSize = _structureYSize;
         
-        X = x;
-        Y = y;
         Status = status;
         SetSubstructurePositions();
     }
@@ -238,7 +288,7 @@ public class MainHouseStructure : CustomStructure
         StructureHelper.Generator.GenerateStructure(TopFilePath, new Point16(X + LeftSize - 14, Y - 10), _mod);
         FrameTiles(X + LeftSize, Y + 4, 40);
         
-        int signIndex = Sign.ReadSign(X + 7, Y + 21);
+        int signIndex = Sign.ReadSign(this.SignPos.X, this.SignPos.Y);
         if (signIndex != -1)
             Sign.TextSign(signIndex, "All good adventures start in a tavern...To bad this isn't a tavern :(");
         

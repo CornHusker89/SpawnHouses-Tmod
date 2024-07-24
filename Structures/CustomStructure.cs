@@ -52,7 +52,14 @@ public abstract class CustomStructure {
         int centerX = X + (StructureXSize / 2);
         int centerY = Y + (StructureXSize / 2);
         
-        WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(StructureXSize + StructureYSize ), new Actions.SetFrames());
+        WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(StructureXSize + StructureYSize), Actions.Chain(
+            new Actions.SetFrames(),
+            new Actions.Custom((i, j, args) =>
+            {
+                Framing.WallFrame(i, j);
+                return true;
+            })
+        ));
     }
     
     protected void FrameTiles(int centerX, int centerY, int radius)
@@ -95,7 +102,7 @@ public abstract class CustomStructure {
 
     public virtual void OnFound()
     {
-        throw new Exception("OnFound() was called on a base CustomStructure, this does not do anything and should never happen");
+        //throw new Exception("OnFound() was called on a base CustomStructure, this does not do anything and should never happen");
     }
 
     [NoJIT]

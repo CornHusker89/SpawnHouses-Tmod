@@ -10,7 +10,7 @@ using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
 namespace SpawnHouses.Structures;
 
-public class StructureChain
+public abstract class StructureChain
 {
     public readonly ushort EntryPosX;
     public readonly ushort EntryPosY;
@@ -24,8 +24,7 @@ public class StructureChain
     
 
     public StructureChain(ushort maxCost, ushort minCost, CustomChainStructure[] structureList, ushort entryPosX, ushort entryPosY,
-        byte minBranchLength, byte maxBranchLength, 
-        CustomChainStructure rootStructure = null, bool keepRootPointClear = true, bool ignoreInvalidDirections = false,
+        byte minBranchLength, byte maxBranchLength, CustomChainStructure[] rootStructureList = null, string requiredStructureID = null, bool keepRootPointClear = true, bool ignoreInvalidDirections = false,
         int seed = -1, byte status = StructureStatus.NotGenerated)
     {
         Seed = seed == -1 ? Terraria.WorldGen.genRand.Next(0, int.MaxValue) : seed;
@@ -44,32 +43,39 @@ public class StructureChain
 
         if (structureList.Length == 0)
             throw new Exception("structureList had no valid options");
-        
+
+        CustomChainStructure[] UseableStructureList = (CustomChainStructure[])structureList.Clone();
+        for (byte i = 0; i < structureList.Length; i++)
+            UseableStructureList[i] = structureList[i].Clone();
+            
         int currentCost = 0;
         ushort structureListWeightSum;
         CalculateWeights();
-
-        if (rootStructure == null)
-            rootStructure = NewStructure(null, false, entryPosX, entryPosY);
         
-        else
-        {
-            rootStructure = rootStructure.Clone();
-            rootStructure.SetPosition(entryPosX, entryPosY);
-        }
-        
-        ChainConnectPoint rootConnectPoint = rootStructure.GetRootConnectPoint();
-        if (rootConnectPoint != null)
-            MoveConnectPointAndStructure(rootStructure, rootConnectPoint, entryPosX, entryPosY);
+        CustomChainStructure rootStructure = null;
+        ChainConnectPoint rootConnectPoint = null;
         
         List<BoundingBox> boundingBoxes;
         List<ChainConnectPoint> queuedConnectPoints;
         List<ChainConnectPoint> failedConnectPointList = [];
 
         bool foundValidStructureChain = false;
+        const ushort maxAttempts = 250;
         // try to find a configuration that satisfies the minCost
-        for (byte attempts = 0; attempts < 30; attempts++)
+        for (byte attempts = 0; attempts < maxAttempts; attempts++)
         {
+            if (rootStructureList == null)
+                rootStructure = NewStructure(null, false, entryPosX, entryPosY);
+            else
+            {
+                int index = _randomNumberGen.Next(0, rootStructureList.Length);
+                rootStructure = rootStructureList[index].Clone();
+                rootStructure.SetPosition(entryPosX, entryPosY);
+            }
+            rootConnectPoint = rootStructure.GetRootConnectPoint();
+            if (rootConnectPoint != null)
+                MoveConnectPointAndStructure(rootStructure, rootConnectPoint, entryPosX, entryPosY);
+            
             currentCost = rootStructure.Cost;
             queuedConnectPoints = [];
             failedConnectPointList = [];
@@ -96,12 +102,33 @@ public class StructureChain
 
             if (currentCost >= minCost)
             {
+                if (requiredStructureID is not null)
+                {
+                    bool found = false;
+                    void SearchFilePathRecursive(CustomChainStructure structure)
+                    {
+                        if (found) return;
+                        if (structure.FilePath == requiredStructureID)
+                            found = true;
+                        else
+                            for (byte direction = 0; direction < 4; direction++)
+                                foreach (var connectPoint in structure.ConnectPoints[direction])
+                                {
+                                    if (connectPoint.ChildStructure is null) continue;
+                                    SearchFilePathRecursive(connectPoint.ChildStructure);
+                                }
+                    }
+                    SearchFilePathRecursive(rootStructure);
+                    if (!found && attempts < maxAttempts * 0.7)
+                        continue;
+                }
+                
                 foundValidStructureChain = true;
                 break;
             }
         }
 
-        // if we didn't find what we needed in 30 tries, abort
+        // if we didn't find what we needed in 200 tries, abort
         if (!foundValidStructureChain)
         {
             ModContent.GetInstance<SpawnHouses>().Logger.Error($"Failed to generate StructureChain of type {this.ToString()} with seed {Seed}. Please report this error and it's information to the mod's author");
@@ -119,13 +146,13 @@ public class StructureChain
 
         void CalculateWeights()
         {
-            //make the weights in structureList cumulative, and make the starting weight 0
-            for (byte i = 1; i < structureList.Length; i++)
-                structureList[i].Weight = (ushort)(structureList[i].Weight + structureList[i - 1].Weight);
+            //make the weights in useableStructureList cumulative, and make the starting weight 0
+            for (byte i = 1; i < UseableStructureList.Length; i++)
+                UseableStructureList[i].Weight = (ushort)(UseableStructureList[i].Weight + UseableStructureList[i - 1].Weight);
 
-            for (byte i = 0; i < structureList.Length; i++)
-                structureList[i].Weight -= structureList[0].Weight;
-            structureListWeightSum = structureList[^1].Weight;
+            for (byte i = 0; i < UseableStructureList.Length; i++)
+                UseableStructureList[i].Weight -= UseableStructureList[0].Weight;
+            structureListWeightSum = UseableStructureList[^1].Weight;
         }
        
         CustomChainStructure NewStructure(ChainConnectPoint parentConnectPoint, bool closeToMaxBranchLength = false, int x = 500, int y = 500)
@@ -134,7 +161,7 @@ public class StructureChain
             for (int i = 0; i < 5000; i++)
             {
                 double randomValue = _randomNumberGen.NextDouble() * structureListWeightSum;
-                structure = structureList.Last(curStructure => curStructure.Weight <= randomValue).Clone();
+                structure = UseableStructureList.Last(curStructure => curStructure.Weight <= randomValue).Clone();
 
                 // don't generate a branching hallway right after another one :)
                 if (parentConnectPoint.GenerateChance == GenerateChances.Guaranteed &&
@@ -300,7 +327,7 @@ public class StructureChain
             currentCost += newStructure.Cost;
             
             // reduce the weighting of the chosen structure so that we don't get 5 in a row 
-            structureList.First(curStructure => curStructure.FilePath == newStructure.FilePath).Weight /= 2;
+            UseableStructureList.First(curStructure => curStructure.FilePath == newStructure.FilePath).Weight /= 2;
             CalculateWeights();
             
             for (byte direction = 0; direction < 4; direction++)
@@ -319,7 +346,22 @@ public class StructureChain
 
     public virtual void OnFound()
     {
-        throw new Exception("OnFound() was called on a base StructureChain, this does not do anything and should never happen");
+        //recusively call onfound() on every structure in the chain
+        void OnFoundRecursive(CustomChainStructure structure)
+        {
+            structure.OnFound();
+
+            for (byte direction = 0; direction < 4; direction++)
+            {
+                foreach (ChainConnectPoint connectPoint in structure.ConnectPoints[direction])
+                {
+                    if (connectPoint.ChildStructure == null) continue;
+                    OnFoundRecursive(connectPoint.ChildStructure);
+                }
+            }
+        }
+        
+        OnFoundRecursive(_rootStructure);
     }
 
     public virtual void Generate()

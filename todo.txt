@@ -1,4 +1,11 @@
+additions
 - Make custom names for the gen passes and display them
-- Add config to change spawn point to any house (and have cool ui thing??)
+- Add config to change spawn point to any house (and have cool ui thing??)  
+- un-fuck the config
 - Un-scuff the world gen passes cuz of the wiring thing for the basement
 - Add 3 furniture levels (high, normal, none)??
+- spawn dirt circle around basement structures, only on tiles with no tile and a dirt bg wall
+- make the rose item frame spawn in the center of the main house cuz im dum
+
+bugs
+- thing not linked bug in 1.1.1.135516775

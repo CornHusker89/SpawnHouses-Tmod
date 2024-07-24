@@ -2,12 +2,20 @@ using System;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Structures;
 using SpawnHouses.Structures.Structures;
+using Terraria;
 using Terraria.ModLoader;
 
 namespace SpawnHouses;
 
 public class SpawnHousesPlayer : ModPlayer
 {
+    public override void OnEnterWorld()
+    {
+        if (SpawnHousesModHelper.ErrorLoadingMS)
+            Main.NewText("Generated Houses had an issue loading Magic Storage content, so Magic Storage features in Generated Houses are disabled. Please contact the author about this issue!", Color.Red);
+    }
+
+
     private int frameCounter = 0;
     
     public override void PostUpdate()

@@ -51,7 +51,18 @@ public class SpawnHousesConfig : ModConfig
 	[Slider]
 	public int NpcEstimate { get; set; }
 	
+	
+	
+	
+	
+	[Header("ModifiersHeader")]
+	
+	[ReloadRequired]
+	[DefaultValue(false)]
+	public bool DisableMagicStorageIntegrations { get; set; }
 
+	
+	
 	
 	
 	[Header("StructuresHeader")]
@@ -60,8 +71,7 @@ public class SpawnHousesConfig : ModConfig
 	[DefaultValue(true)]
 	public bool EnableSpawnPointHouse { get; set; }
 	
-	[DefaultValue(false)]
-	[JsonIgnore]
+	[DefaultValue(true)]
 	public bool EnableSpawnPointBasement { get; set; }
 	
 	[DefaultValue(true)]
