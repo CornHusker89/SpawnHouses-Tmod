@@ -4,3 +4,4 @@ Major Changes
 
 Minor Changes
 - Fixed sign having no text
+- Minor changes to Main House's furniture

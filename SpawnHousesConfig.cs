@@ -71,7 +71,8 @@ public class SpawnHousesConfig : ModConfig
 	[DefaultValue(true)]
 	public bool EnableSpawnPointHouse { get; set; }
 	
-	[DefaultValue(true)]
+	[DefaultValue(false)]
+	[JsonIgnore]
 	public bool EnableSpawnPointBasement { get; set; }
 	
 	[DefaultValue(true)]
