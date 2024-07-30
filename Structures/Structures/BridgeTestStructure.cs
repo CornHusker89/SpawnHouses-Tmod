@@ -56,7 +56,6 @@ public class BridgeTestStructure : CustomStructure
     {
         Floors[0].GenerateFoundation(TileID.Dirt, 4, 0, 1);
 
-        _GenerateStructure();
-        FrameTiles();
+        base.Generate();
     }
 }

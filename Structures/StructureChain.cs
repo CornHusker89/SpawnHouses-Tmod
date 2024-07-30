@@ -131,7 +131,7 @@ public abstract class StructureChain
         // if we didn't find what we needed in 200 tries, abort
         if (!foundValidStructureChain)
         {
-            ModContent.GetInstance<SpawnHouses>().Logger.Error($"Failed to generate StructureChain of type {this.ToString()} with seed {Seed}. Please report this error and it's information to the mod's author");
+            ModContent.GetInstance<SpawnHouses>().Logger.Error($"Failed to generate StructureChain of type {this.ToString()} with seed {Seed}. Please report this error your client.log to the mod's author\n" + SpawnHousesSystem.WorldConfig);
             return;
         }
         

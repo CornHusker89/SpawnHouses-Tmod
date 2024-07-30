@@ -1,7 +1,2 @@
-Version 0.2.9
+Version 0.2.10
 Major Changes
-- Added Magic Storage integration! A starter setup will come with the Main House if Magic Storage is enabled. Can be disabled in Mod Configs
-
-Minor Changes
-- Fixed sign having no text
-- Minor changes to Main House's furniture

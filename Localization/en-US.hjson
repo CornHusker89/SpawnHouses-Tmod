@@ -79,14 +79,24 @@ Mods: {
 					StructuresHeader: Enabled Structures
 				}
 
-				AutoSetSize: {
-					Label: Automatically Set Size
-					Tooltip: If ON, the mod will automatically set 'Size' to the number of NPCs in enabled mods
+				SpawnPointHouseSize: {
+					Label: Spawn Point House Size
+					Tooltip: Size of the Spawn Point House. Number corresponds to the approximate amount of NPCs that can be housed here.
 				}
+				
+                SpawnPointBasementSize: {
+                    Label: Spawn Point Basement Size
+                    Tooltip: Size of the Spawn Point Basement. Number corresponds to the approximate amount of NPCs that can be housed here.
+                }
+                
+                BeachHouseSize: {
+                    Label: Beach House Size
+                    Tooltip: Size of the Beach House. Number corresponds to the approximate amount of NPCs that can be housed here.
+                }
 
 				DisableMagicStorageIntegrations: {
 					Label: Disable Magic Storage Integrations
-					Tooltip: If ON, Magic Storage features within Generated Houses will be disabled. Only has an effect when Magic Storage (the mod) is enabled
+					Tooltip: If ON, Magic Storage features within Generated Houses will be disabled. Only has an effect when Magic Storage (the mod) is enabled.
 				}
 
 				EnableSpawnPointHouse: {
@@ -102,11 +112,6 @@ Mods: {
 				EnableBeachHouse: {
 					Label: Enable Beach House
 					Tooltip: If ON, a house will generate on the end of one beach, sometimes with a firepit.
-				}
-
-				NpcEstimate: {
-					Label: Size
-					Tooltip: Number corresponds to approximately how many NPCs can live in the world with all structures active. Determines the overall size of each house
 				}
 			}
 		}

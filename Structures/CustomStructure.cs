@@ -97,7 +97,7 @@ public abstract class CustomStructure {
 
     public virtual void Generate()
     {
-        throw new Exception("Generate() was called on a base CustomStructure, this does not do anything and should never happen");
+        _GenerateStructure();
     }
 
     public virtual void OnFound()
