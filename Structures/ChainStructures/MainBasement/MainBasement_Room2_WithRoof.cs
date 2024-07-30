@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
+using Microsoft.Xna.Framework;
 using Terraria.ID;
 using Terraria;
 
 using SpawnHouses.Structures;
 using SpawnHouses.Structures.StructureParts;
+using Terraria.WorldBuilding;
 
 namespace SpawnHouses.Structures.ChainStructures.MainBasement;
 
@@ -62,8 +64,16 @@ public class MainBasement_Room2_WithRoof : CustomChainStructure
     
     public override void Generate()
     {
-        _GenerateStructure();
+        base.Generate();
         Floors[0].GenerateCobwebs(StructureYSize);
+        
+        int centerX = X + (StructureXSize / 2);
+        int centerY = Y + (StructureXSize / 2);
+        WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(StructureXSize + StructureYSize), Actions.Chain(
+            new Modifiers.OnlyWalls(WallID.DirtUnsafe, WallID.GrassUnsafe),
+            new Actions.PlaceTile(TileID.Dirt)
+        ));
+        
         FrameTiles();
     }
 

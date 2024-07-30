@@ -116,18 +116,18 @@ public class MainHouseStructure : CustomStructure
         // calculate what sides should be small (if we need to)
         if (leftType == _type_not_generated && rightType == _type_not_generated)
         {
-            double size = ModContent.GetInstance<SpawnHousesConfig>().SizeMultiplier;
-            if (size < 0.7)
-            {
-                LeftSmall = true;
-                RightSmall = true;
-            }
-            else if (size < 0.85)
+            double size = ModContent.GetInstance<SpawnHousesConfig>().SpawnPointHouseSize;
+            if (size is 3)
             {
                 if (Terraria.WorldGen.genRand.NextBool())
                     LeftSmall = true;
                 else
                     RightSmall = true;
+            }
+            else if (size is 2)
+            {
+                LeftSmall = true;
+                RightSmall = true;
             }
         }
         
@@ -185,7 +185,7 @@ public class MainHouseStructure : CustomStructure
                 LeftFilePath = _filePath_magicstorage_left;
                 LeftSize = 33;
                 HasMagicStorage = true;
-                StorageHeartPos = new Point16(X + LeftSize + 25, Y + 17);
+                StorageHeartPos = new Point16(X + 25, Y + 17);
                 SignPos = new Point16(X + 7, Y + 10);
                 break;
             case _type_basement_left:

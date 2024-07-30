@@ -62,13 +62,14 @@ public class MainBasementChain : StructureChain
     
     
     public MainBasementChain(ushort x = 1000, ushort y = 1000, int seed = -1, byte status = StructureStatus.NotGenerated) :
-        base((ushort)(80 * ModContent.GetInstance<SpawnHousesConfig>().SizeMultiplier), 
-            (ushort)(48 * ModContent.GetInstance<SpawnHousesConfig>().SizeMultiplier),
+        base((ushort)(80 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier), 
+            (ushort)(48 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier),
             _structureList, x, y,
-            (byte)Math.Round(1 * ModContent.GetInstance<SpawnHousesConfig>().SizeMultiplier), 
-            (byte)Math.Round(3 * ModContent.GetInstance<SpawnHousesConfig>().SizeMultiplier),
+            (byte)Math.Round(1 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier), 
+            (byte)Math.Round(3 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier),
             _rootStructures, 
-            requiredStructureID: SpawnHousesModHelper.IsMSEnabled? MainBasement_Room5._filePath_magicstorage : null,
+            requiredStructureID: SpawnHousesModHelper.IsMSEnabled && ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier > 0.60 ?
+                MainBasement_Room5._filePath_magicstorage : null,
             true, true, seed, status) {}
 
     public override void OnFound()

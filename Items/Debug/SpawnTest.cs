@@ -33,19 +33,11 @@ namespace SpawnHouses.Items.Debug
 		{
 			int x = (Main.MouseWorld / 16).ToPoint16().X;
 			int y = (Main.MouseWorld / 16).ToPoint16().Y;
-
-			Terraria.WorldGen.PlaceTile(x, y, SpawnHousesModHelper.RemoteAccessTileID);
-			TileEntity.PlaceEntityNet(x - 1, y - 1, SpawnHousesModHelper.RemoteAccessTileEntityID);
-			//
+			
 			// Console.WriteLine(x + ", " + y);
 			// Console.WriteLine(SpawnHousesSystem.MainHouse.StorageHeartPos);
-			
-			Point16 remotePos = new Point16(x - 1, y - 1);
-			Point16 heartPos = SpawnHousesSystem.MainHouse.StorageHeartPos;
-			
-			Console.WriteLine(SpawnHousesModHelper.LinkRemoteStorage(remotePos, heartPos));
-			
-			
+
+			SpawnHousesModHelper.LinkRemoteStorage(new Point16(x, y), SpawnHousesSystem.MainHouse.StorageHeartPos);
 			
 			return true;
 

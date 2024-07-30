@@ -1,61 +1,111 @@
+using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
+using Terraria;
+using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
+using Terraria.UI;
 
 namespace SpawnHouses;
 
 public class SpawnHousesConfig : ModConfig
 {
-	// values values
-	private const byte NpcBase = 6;
-	
-	private bool _doesAutoSetSize;
-	[JsonIgnore] public float SizeMultiplier => (float)NpcEstimate / NpcBase;
-	
 	public override ConfigScope Mode => ConfigScope.ServerSide;
+
 	
 	
+	// [JsonIgnore]
+	// [ShowDespiteJsonIgnore]
+	// public int TotalNpcs { get; set; }
 	
+	void SetTotalNpcs()
+	{
+		// Console.WriteLine(_enableSpawnPointHouse);
+		// int size = 0;
+		// if (_enableSpawnPointHouse)
+		// {
+		// 	Console.WriteLine("adding spawn point house");
+		// 	size += _spawnPointHouseSize;
+		// }
+		// Console.WriteLine(size);
+		// if (_enableSpawnPointBasement)
+		// 	size += _spawnPointBasementSize;
+		// if (_enableBeachHouse)
+		// 	size += BeachHouseSize;
+		// Console.WriteLine(size);
+		// TotalNpcs = size;
+		// Console.WriteLine(TotalNpcs);
+	
+	
+		
+		// Console.WriteLine(Main.MenuUI.CurrentState);
+		// Terraria.ModLoader.Config.UI.
+		
+		// foreach (UIElement element in ))
+		// {
+		// 	if (element is UICheckbox checkbox && checkbox.Text == "Enable Feature")
+		// 	{
+		// 		return checkbox;
+		// 	}
+		// }
+	}
+
+	
+
+	private int _spawnPointHouseSize = 4;
 	[Header("SizeHeader")]
 	
 	
-	[DefaultValue(true)]
-	public bool AutoSetSize
+	
+	[DefaultValue(4)]
+	[Terraria.ModLoader.Config.Range(2, 4)]
+	[Slider]
+	public int SpawnPointHouseSize
 	{
-		get
+		get => _spawnPointHouseSize;
+		set
 		{
-			if (_doesAutoSetSize && NpcEstimate == NpcBase)
-				return true;
-			
-			else
-			{
-				_doesAutoSetSize = false;
-				return false;
-			}
-		}
-		set 
-		{
-			if (value) {
-				NpcEstimate = NpcBase;
-				_doesAutoSetSize = true;
-			}
-			else
-				_doesAutoSetSize = false;
-			
+			_spawnPointHouseSize = value;
+			SetTotalNpcs();
 		}
 	}
+
 	
-	[DefaultValue(NpcBase)]
-	[Terraria.ModLoader.Config.Range(4, 6)]
+	private int _spawnPointBasementSize = 6;
+	[DefaultValue(6)]
+	[Terraria.ModLoader.Config.Range(3, 15)]
 	[Slider]
-	public int NpcEstimate { get; set; }
+	public int SpawnPointBasementSize
+	{
+		get => _spawnPointBasementSize;
+		set
+		{
+			_spawnPointBasementSize = value;
+			SpawnPointBasementMultiplier = value / 6f;
+			SetTotalNpcs();
+		}
+	}
+	[JsonIgnore] public float SpawnPointBasementMultiplier { get; private set; } = 1;
+
+
+	[DefaultValue(2)]
+	[Terraria.ModLoader.Config.Range(2, 2)]
+	[Slider]
+	[JsonIgnore]
+	[ShowDespiteJsonIgnore]
+	public int BeachHouseSize { get; set; } = 2;
+	
+	
+	
 	
 	
 	
 	
 	
 	[Header("ModifiersHeader")]
+	
 	
 	[ReloadRequired]
 	[DefaultValue(false)]
@@ -65,16 +115,51 @@ public class SpawnHousesConfig : ModConfig
 	
 	
 	
-	[Header("StructuresHeader")]
+	
+	
+	
 
 	
-	[DefaultValue(true)]
-	public bool EnableSpawnPointHouse { get; set; }
 	
-	[DefaultValue(false)]
-	[JsonIgnore]
-	public bool EnableSpawnPointBasement { get; set; }
+	private bool _enableSpawnPointHouse = true; //this is in the StructuresHeader
+	[Header("StructuresHeader")]
+	
+	
 	
 	[DefaultValue(true)]
-	public bool EnableBeachHouse { get; set; }
+	public bool EnableSpawnPointHouse
+	{
+		get => _enableSpawnPointHouse;
+		set
+		{
+			_enableSpawnPointHouse = value;
+			SetTotalNpcs();
+		}
+	}
+	
+	
+	private bool _enableSpawnPointBasement  = true;
+	[DefaultValue(true)]
+	public bool EnableSpawnPointBasement 	
+	{
+		get => _enableSpawnPointBasement;
+		set
+		{
+			_enableSpawnPointBasement = value;
+			SetTotalNpcs();
+		}
+	}
+	
+	
+	private bool _enableBeachHouse  = true;
+	[DefaultValue(true)]
+	public bool EnableBeachHouse 
+	{
+		get => _enableBeachHouse;
+		set
+		{
+			_enableBeachHouse = value;
+			SetTotalNpcs();
+		}
+	}
 }

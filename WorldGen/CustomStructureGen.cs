@@ -51,6 +51,19 @@ public class CustomStructureGen : ModSystem
         tasks.Insert(tasks.Count - 2, item: new CustomBeachHousePass("Custom Beach House Pass", 100f));
     }
 
+    public override void PreWorldGen()
+    {
+	    // set the world's configs
+	    string configString = $"SpawnPointHouse: {ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointHouse}\n";
+	    configString += $"SpawnPointBasement: {ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement}\n";
+	    configString += $"BeachHouse: {ModContent.GetInstance<SpawnHousesConfig>().EnableBeachHouse}\n";
+	    configString += $"MagicStorage: {SpawnHousesModHelper.IsMSEnabled}\n";
+	    configString += $"SpawnPointHouseSize: {ModContent.GetInstance<SpawnHousesConfig>().SpawnPointHouseSize}\n";
+	    configString += $"SpawnPointBasementSize: {ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementSize}\n";
+	    configString += $"BeachHouseSize: {ModContent.GetInstance<SpawnHousesConfig>().BeachHouseSize}";
+	    SpawnHousesSystem.WorldConfig = configString;
+    }
+
     public override void PostWorldGen()
     {
 	    // move guide into the main house (if it's there)
@@ -129,7 +142,7 @@ public class ClearSpawnPointPass : GenPass
 				
 				y++;
 			}
-			GenVars.structures.AddProtectedStructure(new Rectangle(x - 50, y - 50, 100, 100));
+			GenVars.structures.AddProtectedStructure(new Rectangle(x - 75, y - 75, 150, 150));
 		}
 	}
 }
@@ -156,7 +169,7 @@ public class CustomHousesPass : GenPass
 
 			for (ushort counts = 0; counts < 400; counts++)
 			{
-				int xVal = Terraria.WorldGen.genRand.Next(Main.spawnTileX - (counts / 8), Main.spawnTileX + (counts / 8));
+				int xVal = Terraria.WorldGen.genRand.Next(Main.spawnTileX - (counts / 12), Main.spawnTileX + (counts / 12));
 				if (!spawnUnderworld)
 					initialY = (int)(Main.worldSurface / 2);
 				else
@@ -208,7 +221,7 @@ public class CustomHousesPass : GenPass
 			// just in case something above got fucked up
 			if (!foundValidSpot)
 			{
-				ModContent.GetInstance<SpawnHouses>().Logger.Error("Failed to generate SpawnPointHouse. Please report this world seed to the mod's author");
+				ModContent.GetInstance<SpawnHouses>().Logger.Error("Failed to generate SpawnPointHouse. Please report this world seed and your client.log to the mod's author\n" + SpawnHousesSystem.WorldConfig);
 				return;
 			}
 			

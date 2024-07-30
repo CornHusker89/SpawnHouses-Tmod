@@ -15,18 +15,23 @@ internal class SpawnHousesSystem : ModSystem
     public static MainHouseStructure MainHouse = new MainHouseStructure();
     public static MainBasementChain MainBasement = new MainBasementChain();
     public static BeachHouseStructure BeachHouse = new BeachHouseStructure();
-    
+
+    public static string WorldConfig = "";
     
     public override void SaveWorldData(TagCompound tag) {
         tag["MainHouse"] = MainHouse;
         tag["MainBasement"] = MainBasement;
         tag["BeachHouse"] = BeachHouse;
+        
+        tag["WorldConfig"] = WorldConfig;
     }
     public override void LoadWorldData(TagCompound tag)
     {
         MainHouse = tag.ContainsKey("MainHouse") ? tag.Get<MainHouseStructure>("MainHouse") : new MainHouseStructure();
         MainBasement = tag.ContainsKey("MainBasement") ? tag.Get<MainBasementChain>("MainBasement") : new MainBasementChain();
         BeachHouse = tag.ContainsKey("BeachHouse") ? tag.Get<BeachHouseStructure>("BeachHouse") : new BeachHouseStructure();
+        
+        WorldConfig = tag.ContainsKey("WorldConfig") ? tag.GetString("WorldConfig") : "";
     }
 }
 

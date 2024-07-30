@@ -128,7 +128,7 @@ public class Floor {
 
         WorldUtils.Gen(new Point(X + xOffset, Y - height + 1), new Shapes.Rectangle(length, height),
             Actions.Chain(
-                new Modifiers.Dither(0.5),
+                new Modifiers.Dither(0.35),
                 new Actions.Custom((i, j, args) =>
                 {
                     if (!Main.tile[i, j].HasTile)

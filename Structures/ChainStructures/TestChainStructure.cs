@@ -56,12 +56,6 @@ public class TestChainStructure : CustomChainStructure
         SetSubstructurePositions();
     }
     
-    public override void Generate()
-    {
-        _GenerateStructure();
-        FrameTiles();
-    }
-
     public override TestChainStructure Clone()
     {
         return new TestChainStructure(Cost, Weight, ChildBridgeTypes, X, Y);
