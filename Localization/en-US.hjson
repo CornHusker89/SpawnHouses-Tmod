@@ -94,9 +94,9 @@ Mods: {
 					Tooltip: Size of the Beach House. Number corresponds to the approximate amount of NPCs that can be housed here.
 				}
 
-				DisableMagicStorageIntegrations: {
-					Label: Disable Magic Storage Integrations
-					Tooltip: If ON, Magic Storage features within Generated Houses will be disabled. Only has an effect when Magic Storage (the mod) is enabled.
+				MagicStorageIntegrations: {
+					Label: Magic Storage Integrations
+					Tooltip: If ON, Magic Storage features within Generated Houses will be enabled. Only has an effect when Magic Storage (the mod) is enabled.
 				}
 
 				EnableSpawnPointHouse: {

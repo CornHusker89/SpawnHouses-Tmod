@@ -1,8 +1,6 @@
-Version 0.2.10
+Version 0.3.0
 Major Changes
-- Another config overhaul! (lets be real it was hella confusing last time)
+- Added procedurally generated basement underneath the Main House. Feedback on this would be appreciated!
 
 Minor Changes
-- Added more pictures
-- Changed description
-- Fixed tax collector spawning in the ground on Don't Dig Up
+- Moved around a few config options, replaced "Disable Magic Storage Integrations" with "Magic Storage Integrations"

@@ -108,8 +108,8 @@ public class SpawnHousesConfig : ModConfig
 	
 	
 	[ReloadRequired]
-	[DefaultValue(false)]
-	public bool DisableMagicStorageIntegrations { get; set; }
+	[DefaultValue(true)]
+	public bool MagicStorageIntegrations { get; set; }
 
 	
 	
@@ -138,9 +138,8 @@ public class SpawnHousesConfig : ModConfig
 	}
 	
 	
-	private bool _enableSpawnPointBasement = false;
-	[DefaultValue(false)]
-	[JsonIgnore]
+	private bool _enableSpawnPointBasement = true;
+	[DefaultValue(true)]
 	public bool EnableSpawnPointBasement 	
 	{
 		get => _enableSpawnPointBasement;

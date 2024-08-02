@@ -90,7 +90,7 @@ public class SpawnHousesModHelper : ModSystem
 
     public override void OnModLoad()
     {
-        if (ModLoader.HasMod("MagicStorage") && !ModContent.GetInstance<SpawnHousesConfig>().DisableMagicStorageIntegrations)
+        if (ModLoader.HasMod("MagicStorage") && ModContent.GetInstance<SpawnHousesConfig>().MagicStorageIntegrations)
             GetMagicStorage();
     }
 }
