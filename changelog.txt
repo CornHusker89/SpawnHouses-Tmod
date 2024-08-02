@@ -1,2 +1,8 @@
 Version 0.2.10
 Major Changes
+- Another config overhaul! (lets be real it was hella confusing last time)
+
+Minor Changes
+- Added more pictures
+- Changed description
+- Fixed tax collector spawning in the ground on Don't Dig Up
