@@ -1,4 +1,4 @@
-When making a world, a house with a few chests will spawn at the spawn point, and another will spawn on a beach.
+When making a world, a house with a few chests and a basement will spawn at the spawn point, and another will spawn on a beach.
 
 This mod has Magic Storage integration! A starter setup will spawn with the main house (can be turned off in configs).
 
