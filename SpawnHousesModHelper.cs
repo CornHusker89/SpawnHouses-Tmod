@@ -45,6 +45,8 @@ public class SpawnHousesModHelper : ModSystem
             StorageUnitTileEntityID = ModContent.TileEntityType<MagicStorage.Components.TEStorageUnit>();
             EnviromentAccessTileID = ModContent.TileType<MagicStorage.Components.EnvironmentAccess>();
             EnviromentAccessTileEntityID = ModContent.TileEntityType<MagicStorage.Components.TEEnvironmentAccess>();
+            
+            //AutomatonEntityID = ModContent.NPCType<MagicStorage.NPCs.Golem>()
         }
         catch (Exception)
         {

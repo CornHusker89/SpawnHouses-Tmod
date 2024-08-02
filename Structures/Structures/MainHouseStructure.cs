@@ -293,6 +293,7 @@ public class MainHouseStructure : CustomStructure
             Sign.TextSign(signIndex, "All good adventures start in a tavern...To bad this isn't a tavern :(");
         
         Terraria.WorldGen.PlaceTile(X + LeftSize - 1, Y + 14, TileID.WorkBenches, true, true, style: 0);
+        StructureHelper.Generator.GenerateStructure("Structures/StructureFiles/mainHouse/mainHouse_Rose", new Point16(X + LeftSize - 1, Y + 8), _mod);
         
         Status = StructureStatus.GeneratedAndFound;
     }

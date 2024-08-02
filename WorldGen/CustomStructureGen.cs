@@ -71,16 +71,11 @@ public class CustomStructureGen : ModSystem
 	    {
 		    foreach (var npc in Main.npc)
 		    {
-			    if (npc.type == NPCID.Guide)
+			    // 441 is tax collector, 688 is magic storage's automaton
+			    if (npc.type is NPCID.Guide or 441 or 688)
 			    {
 				    npc.position.X = (SpawnHousesSystem.MainHouse.X + SpawnHousesSystem.MainHouse.LeftSize - 1 + Terraria.WorldGen.genRand.Next(-8, 9)) * 16; // tiles to pixels
 				    npc.position.Y = (SpawnHousesSystem.MainHouse.Y + 13) * 16;
-			    }
-			    if (npc.type == 688) // magic storage's automation
-			    {
-				    npc.position.X = (SpawnHousesSystem.MainHouse.X + SpawnHousesSystem.MainHouse.LeftSize - 1 + Terraria.WorldGen.genRand.Next(-8, 9)) * 16; // tiles to pixels
-				    npc.position.Y = (SpawnHousesSystem.MainHouse.Y + 13) * 16;
-
 			    }
 		    }
 	    }
@@ -169,7 +164,7 @@ public class CustomHousesPass : GenPass
 
 			for (ushort counts = 0; counts < 400; counts++)
 			{
-				int xVal = Terraria.WorldGen.genRand.Next(Main.spawnTileX - (counts / 12), Main.spawnTileX + (counts / 12));
+				int xVal = Terraria.WorldGen.genRand.Next(Main.spawnTileX - (counts / 8), Main.spawnTileX + (counts / 8));
 				if (!spawnUnderworld)
 					initialY = (int)(Main.worldSurface / 2);
 				else

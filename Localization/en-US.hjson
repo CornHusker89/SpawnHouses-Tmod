@@ -83,16 +83,16 @@ Mods: {
 					Label: Spawn Point House Size
 					Tooltip: Size of the Spawn Point House. Number corresponds to the approximate amount of NPCs that can be housed here.
 				}
-				
-                SpawnPointBasementSize: {
-                    Label: Spawn Point Basement Size
-                    Tooltip: Size of the Spawn Point Basement. Number corresponds to the approximate amount of NPCs that can be housed here.
-                }
-                
-                BeachHouseSize: {
-                    Label: Beach House Size
-                    Tooltip: Size of the Beach House. Number corresponds to the approximate amount of NPCs that can be housed here.
-                }
+
+				SpawnPointBasementSize: {
+					Label: Spawn Point Basement Size
+					Tooltip: Size of the Spawn Point Basement. Number corresponds to the approximate amount of NPCs that can be housed here.
+				}
+
+				BeachHouseSize: {
+					Label: Beach House Size
+					Tooltip: Size of the Beach House. Number corresponds to the approximate amount of NPCs that can be housed here.
+				}
 
 				DisableMagicStorageIntegrations: {
 					Label: Disable Magic Storage Integrations
