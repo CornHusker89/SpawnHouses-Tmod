@@ -1,6 +1,0 @@
-additions
-- Make custom names for the gen passes and display them
-- Add config to change spawn point to any house (and have cool ui thing??)  
-- Un-scuff the world gen passes cuz of the wiring thing for the basement
-- make ruined structures (and have paintings of the full structure??)
-- mention roomates mod?
