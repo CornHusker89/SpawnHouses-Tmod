@@ -23,6 +23,8 @@ public class SpawnHousesModHelper : ModSystem
     public static int StorageUnitTileEntityID;
     public static int EnviromentAccessTileID;
     public static int EnviromentAccessTileEntityID;
+
+    public static bool IsRemnantsEnabled;
     
     
     
@@ -88,9 +90,19 @@ public class SpawnHousesModHelper : ModSystem
     }
 
 
+    [JITWhenModsEnabled("Remnants")]
+    public static void GetRemnants()
+    {
+        IsRemnantsEnabled = true;
+    }
+    
+
     public override void OnModLoad()
     {
         if (ModLoader.HasMod("MagicStorage") && ModContent.GetInstance<SpawnHousesConfig>().MagicStorageIntegrations)
             GetMagicStorage();
+        if (ModLoader.HasMod("Remnants"))
+            GetRemnants();
+        
     }
 }
