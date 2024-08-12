@@ -165,6 +165,11 @@ public class CustomHousesPass : GenPass
 			for (ushort counts = 0; counts < 400; counts++)
 			{
 				int xVal = Terraria.WorldGen.genRand.Next(Main.spawnTileX - (counts / 8), Main.spawnTileX + (counts / 8));
+				
+				// Move out of the way of the big spawn tree
+				if (SpawnHousesModHelper.IsRemnantsEnabled)
+					xVal -= 70;
+				
 				if (!spawnUnderworld)
 					initialY = (int)(Main.worldSurface / 2);
 				else

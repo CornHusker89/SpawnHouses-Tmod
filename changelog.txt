@@ -1,6 +1,7 @@
-Version 0.3.0
+Version 0.3.1
 Major Changes
-- Added procedurally generated basement underneath the Main House. Feedback on this would be appreciated!
+- Added compatability with Remnants Mod
 
 Minor Changes
-- Moved around a few config options, replaced "Disable Magic Storage Integrations" with "Magic Storage Integrations"
+- Nerfed basement storage room, removed iron crate and replaced with wooden one
+- Fixed rare case of Magic Storage heart not linking to basement storage room
