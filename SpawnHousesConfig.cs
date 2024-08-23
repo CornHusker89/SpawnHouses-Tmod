@@ -94,7 +94,7 @@ public class SpawnHousesConfig : ModConfig
 	[Terraria.ModLoader.Config.Range(2, 2)]
 	[Slider]
 	[JsonIgnore]
-	[ShowDespiteJsonIgnore]
+	//[ShowDespiteJsonIgnore]
 	public int BeachHouseSize { get; set; } = 2;
 	
 	
