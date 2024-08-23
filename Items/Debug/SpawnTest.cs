@@ -33,11 +33,10 @@ namespace SpawnHouses.Items.Debug
 		{
 			int x = (Main.MouseWorld / 16).ToPoint16().X;
 			int y = (Main.MouseWorld / 16).ToPoint16().Y;
-			
-			// Console.WriteLine(x + ", " + y);
-			// Console.WriteLine(SpawnHousesSystem.MainHouse.StorageHeartPos);
 
-			SpawnHousesModHelper.LinkRemoteStorage(new Point16(x, y), SpawnHousesSystem.MainHouse.StorageHeartPos);
+			// Terraria.WorldGen.digTunnel(x, y, 0, 4, 20, 11);
+			
+			Terraria.WorldGen.Lakinater(x, y, 1.6);
 			
 			return true;
 
