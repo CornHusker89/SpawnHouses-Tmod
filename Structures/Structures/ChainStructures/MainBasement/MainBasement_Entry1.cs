@@ -1,22 +1,17 @@
-using System;
-using System.Collections;
 using Microsoft.Xna.Framework;
-using Terraria.ID;
-using Terraria;
-
-using SpawnHouses.Structures;
 using SpawnHouses.Structures.StructureParts;
+using Terraria.ID;
 using Terraria.WorldBuilding;
 using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
-namespace SpawnHouses.Structures.ChainStructures.MainBasement;
+namespace SpawnHouses.Structures.Structures.ChainStructures.MainBasement;
 
-public class MainBasement_Hallway5 : CustomChainStructure
+public class MainBasement_Entry1 : CustomChainStructure
 {
     // constants
-    public static readonly string _filePath = "Structures/StructureFiles/mainBasement/mainBasement_Hallway5";
-    public static readonly ushort _structureXSize = 8;
-    public static readonly ushort _structureYSize = 22;
+    public static readonly string _filePath = "Structures/StructureFiles/mainBasement/mainBasement_Entry1";
+    public static readonly ushort _structureXSize = 10;
+    public static readonly ushort _structureYSize = 16;
 
     public static readonly byte _boundingBoxMargin = 0;
     
@@ -25,25 +20,25 @@ public class MainBasement_Hallway5 : CustomChainStructure
     public static readonly ChainConnectPoint[][] _connectPoints =
     [
         // top
-        [],
+        [
+            new ChainConnectPoint(4, 0, Directions.Up, null, true),
+        ],
         
         // bottom
         [],
         
         // left
         [
-            new ChainConnectPoint(0, 6, Directions.Left, new Seal.MainBasement_SealWall(), true, GenerateChances.Guaranteed),
-            new ChainConnectPoint(1, 21, Directions.Left, new Seal.MainBasement_SealWall(), false, GenerateChances.Guaranteed)
+            new ChainConnectPoint(0, 15, Directions.Left, new Seal.MainBasement_SealWall(), false),
         ],
         
         // right
         [
-            new ChainConnectPoint(7, 6, Directions.Right, new Seal.MainBasement_SealWall(), false, GenerateChances.Guaranteed),
-            new ChainConnectPoint(6, 21, Directions.Right, new Seal.MainBasement_SealWall(), false, GenerateChances.Guaranteed),
+            new ChainConnectPoint(9, 15, Directions.Right, new Seal.MainBasement_SealWall(), false),
         ]
     ];
     
-    public MainBasement_Hallway5(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1000, ushort y = 1000) : 
+    public MainBasement_Entry1(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1000, ushort y = 1000) : 
         base(_filePath,  _structureXSize,  _structureYSize, CopyFloors(_floors), 
             CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost, weight)
     {
@@ -66,8 +61,8 @@ public class MainBasement_Hallway5 : CustomChainStructure
         
         StructureBoundingBoxes =
         [
-            new BoundingBox(X - _boundingBoxMargin, Y - _boundingBoxMargin, X + StructureXSize + _boundingBoxMargin - 1, Y + 7 + _boundingBoxMargin - 1),
-            new BoundingBox(X + 1 - _boundingBoxMargin, Y + 7 - _boundingBoxMargin, X - 1 + StructureXSize + _boundingBoxMargin - 1, Y + StructureYSize + _boundingBoxMargin - 1)
+            new BoundingBox(X - BoundingBoxMargin - 100, Y - BoundingBoxMargin, X + StructureXSize + 100 + BoundingBoxMargin - 1, Y + 6 + BoundingBoxMargin - 1),
+            new BoundingBox(X - BoundingBoxMargin, Y + 7, X + StructureXSize + BoundingBoxMargin - 1, Y + StructureYSize + BoundingBoxMargin - 1)
         ];
     }
     
@@ -85,8 +80,8 @@ public class MainBasement_Hallway5 : CustomChainStructure
         FrameTiles();
     }
 
-    public override MainBasement_Hallway5 Clone()
+    public override MainBasement_Entry1 Clone()
     {
-        return new MainBasement_Hallway5(Cost, Weight, ChildBridgeTypes, X, Y);
+        return new MainBasement_Entry1(Cost, Weight, ChildBridgeTypes, X, Y);
     }
 }

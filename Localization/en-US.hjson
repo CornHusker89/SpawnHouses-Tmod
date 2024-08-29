@@ -67,6 +67,11 @@ Mods: {
 				DisplayName: Frameable Boreal Platform No Collide
 				Tooltip: A platform that can be hammered through all frames of vanilla platforms, but player cannot stand on it
 			}
+
+			SpawnCaveTown1: {
+				DisplayName: Spawn Cave Town1
+				Tooltip: ""
+			}
 		}
 
 		Configs: {

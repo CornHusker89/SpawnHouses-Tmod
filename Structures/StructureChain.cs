@@ -44,12 +44,13 @@ public abstract class StructureChain
         if (structureList.Length == 0)
             throw new Exception("structureList had no valid options");
 
-        CustomChainStructure[] UseableStructureList = (CustomChainStructure[])structureList.Clone();
+        CustomChainStructure[] UseableStructureList;
+        CustomChainStructure[] CopiedStructureList = (CustomChainStructure[])structureList.Clone();
         for (byte i = 0; i < structureList.Length; i++)
-            UseableStructureList[i] = structureList[i].Clone();
+            CopiedStructureList[i] = structureList[i].Clone();
             
         int currentCost = 0;
-        ushort structureListWeightSum;
+        int structureListWeightSum;
         CalculateWeights();
         
         CustomChainStructure rootStructure = null;
@@ -146,13 +147,25 @@ public abstract class StructureChain
 
         void CalculateWeights()
         {
+            UseableStructureList = (CustomChainStructure[])CopiedStructureList.Clone();
+            for (byte i = 0; i < CopiedStructureList.Length; i++)
+                UseableStructureList[i] = CopiedStructureList[i].Clone();
+            
+            structureListWeightSum = CopiedStructureList.Sum(curStructure => curStructure.Weight);
+            
             //make the weights in useableStructureList cumulative, and make the starting weight 0
-            for (byte i = 1; i < UseableStructureList.Length; i++)
-                UseableStructureList[i].Weight = (ushort)(UseableStructureList[i].Weight + UseableStructureList[i - 1].Weight);
-
+            UseableStructureList[0].Weight = 0;
+            
+            for (int i = 1; i < CopiedStructureList.Length; i++)
+                UseableStructureList[i].Weight = (ushort)(UseableStructureList[i - 1].Weight + CopiedStructureList[i - 1].Weight);
+            
             for (byte i = 0; i < UseableStructureList.Length; i++)
-                UseableStructureList[i].Weight -= UseableStructureList[0].Weight;
-            structureListWeightSum = UseableStructureList[^1].Weight;
+                Console.WriteLine(UseableStructureList[i].Weight + " [" + UseableStructureList[i].ToString() + "]");
+            
+            for (byte i = 0; i < CopiedStructureList.Length; i++)
+                Console.WriteLine("--------" + CopiedStructureList[i].Weight + " [" + CopiedStructureList[i].ToString() + "]");
+            
+            Console.WriteLine(structureListWeightSum);
         }
        
         CustomChainStructure NewStructure(ChainConnectPoint parentConnectPoint, bool closeToMaxBranchLength = false, int x = 500, int y = 500)
@@ -161,10 +174,15 @@ public abstract class StructureChain
             for (int i = 0; i < 5000; i++)
             {
                 double randomValue = _randomNumberGen.NextDouble() * structureListWeightSum;
+                
+                Console.WriteLine($"random val: {randomValue}");
+                
                 structure = UseableStructureList.Last(curStructure => curStructure.Weight <= randomValue).Clone();
-
+                
+                Console.WriteLine(structure.ToString());
+                
                 // don't generate a branching hallway right after another one :)
-                if (parentConnectPoint.GenerateChance == GenerateChances.Guaranteed &&
+                if (parentConnectPoint is not null && parentConnectPoint.GenerateChance == GenerateChances.Guaranteed &&
                     CustomChainStructure.BranchingHallwayIDs.Contains(structure.FilePath))
                 {
                     structure = null;
@@ -306,6 +324,7 @@ public abstract class StructureChain
                     !BoundingBox.IsAnyBoundingBoxesColliding(newStructure.StructureBoundingBoxes, boundingBoxes) &&
                     !BoundingBox.IsAnyBoundingBoxesColliding(connectPointBridge.BoundingBoxes, boundingBoxes)
                 ) {
+                    //BoundingBox.VisualizeCollision();
                     validLocation = true;
                     break;
                 }
@@ -327,7 +346,7 @@ public abstract class StructureChain
             currentCost += newStructure.Cost;
             
             // reduce the weighting of the chosen structure so that we don't get 5 in a row 
-            UseableStructureList.First(curStructure => curStructure.FilePath == newStructure.FilePath).Weight /= 2;
+            CopiedStructureList.First(curStructure => curStructure.FilePath == newStructure.FilePath).Weight /= 2;
             CalculateWeights();
             
             for (byte direction = 0; direction < 4; direction++)

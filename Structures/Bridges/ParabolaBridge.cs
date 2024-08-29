@@ -20,13 +20,14 @@ public class ParabolaBridge : Bridge
     public readonly short StructureYOffset;
     private double AttemptSlope;
     private byte BoundingBoxYMargin;
+    private bool BackwardsGeneration;
     
     public ParabolaBridge(string structureFilePath, ushort structureLength, ushort structureHeight, short structureYOffset, double attemptSlope, byte boundingBoxYMargin,
-        short minDeltaX, short maxDeltaX, short minDeltaY, short maxDeltaY, sbyte deltaXMultiple, sbyte deltaYMultiple, 
+        short minDeltaX, short maxDeltaX, short minDeltaY, short maxDeltaY, sbyte deltaXMultiple, sbyte deltaYMultiple, bool backwardsGeneration,
         ConnectPoint point1 = null, ConnectPoint point2 = null) 
         : 
-        base([Directions.Left, Directions.Right], minDeltaX, maxDeltaX, minDeltaY, maxDeltaY, 
-            deltaXMultiple, deltaYMultiple, point1, point2)
+        base(backwardsGeneration ? [Directions.Left, Directions.Right] : [Directions.Right, Directions.Left],
+            minDeltaX, maxDeltaX, minDeltaY, maxDeltaY, deltaXMultiple, deltaYMultiple, point1, point2)
     {
         StructureFilePath = structureFilePath;
         StructureLength = structureLength;
@@ -34,6 +35,7 @@ public class ParabolaBridge : Bridge
         StructureYOffset = structureYOffset;
         AttemptSlope = attemptSlope;
         BoundingBoxYMargin = boundingBoxYMargin;
+        BackwardsGeneration = backwardsGeneration;
         
         if (point1 != null && point2 != null)
             SetPoints(point1, point2);
@@ -146,7 +148,7 @@ public class ParabolaBridge : Bridge
     public override ParabolaBridge Clone()
     {
         return new ParabolaBridge(StructureFilePath, StructureLength, StructureHeight, StructureYOffset, AttemptSlope, BoundingBoxYMargin,
-            MinDeltaX, MaxDeltaX, MinDeltaY, MaxDeltaY, DeltaXMultiple, DeltaYMultiple, Point1, Point2);
+            MinDeltaX, MaxDeltaX, MinDeltaY, MaxDeltaY, DeltaXMultiple, DeltaYMultiple, BackwardsGeneration, Point1, Point2);
     }
     
     
@@ -156,6 +158,11 @@ public class ParabolaBridge : Bridge
     public class TestBridge : ParabolaBridge
     {
         public TestBridge() : base("Structures/StructureFiles/woodBridge", 
-            2, 3, -2, 0.4, 2, 10, 12, 0, 12, 2, 1) {}
+            2, 3, -2, 0.4, 2, 10, 12, 0, 12, 2, 1, false) {}
+    } 
+    public class TestBridgeAltGen : ParabolaBridge
+    {
+        public TestBridgeAltGen() : base("Structures/StructureFiles/woodBridge", 
+            2, 3, -2, 0.4, 2, -12, -14, 0, 12, 2, 1, true) {}
     } 
 }

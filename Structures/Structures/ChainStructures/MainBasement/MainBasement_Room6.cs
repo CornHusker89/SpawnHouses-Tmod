@@ -1,15 +1,10 @@
-using System;
-using System.Collections;
 using Microsoft.Xna.Framework;
-using Terraria.ID;
-using Terraria;
-
-using SpawnHouses.Structures;
 using SpawnHouses.Structures.StructureParts;
+using Terraria.ID;
 using Terraria.WorldBuilding;
 using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
-namespace SpawnHouses.Structures.ChainStructures.MainBasement;
+namespace SpawnHouses.Structures.Structures.ChainStructures.MainBasement;
 
 public class MainBasement_Room6 : CustomChainStructure
 {

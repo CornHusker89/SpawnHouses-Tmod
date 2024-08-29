@@ -1,27 +1,22 @@
-using System;
-using System.Collections;
 using Microsoft.Xna.Framework;
-using Terraria.ID;
-using Terraria;
-
-using SpawnHouses.Structures;
 using SpawnHouses.Structures.StructureParts;
+using Terraria.ID;
 using Terraria.WorldBuilding;
 
-namespace SpawnHouses.Structures.ChainStructures.MainBasement;
+namespace SpawnHouses.Structures.Structures.ChainStructures.MainBasement;
 
-public class MainBasement_Room2 : CustomChainStructure
+public class MainBasement_Room1 : CustomChainStructure
 {
     // constants
-    public static readonly string _filePath = "Structures/StructureFiles/mainBasement/mainBasement_Room2";
-    public static readonly ushort _structureXSize = 23;
-    public static readonly ushort _structureYSize = 7;
+    public static readonly string _filePath = "Structures/StructureFiles/mainBasement/mainBasement_Room1";
+    public static readonly ushort _structureXSize = 22;
+    public static readonly ushort _structureYSize = 9;
 
     public static readonly sbyte _boundingBoxMargin = 0;
     
     public static readonly Floor[] _floors = 
     [
-        new Floor(0, 6, 23)
+        new Floor(0, 8, 22)
     ];
     
     public static readonly ChainConnectPoint[][] _connectPoints =
@@ -34,17 +29,17 @@ public class MainBasement_Room2 : CustomChainStructure
         
         // left
         [
-            new ChainConnectPoint(0, 6, Directions.Left, new Seal.MainBasement_SealWall(), true),
+            new ChainConnectPoint(0, 8, Directions.Left, new Seal.MainBasement_SealWall(), true),
         ],
         
         // right
         [
-            new ChainConnectPoint(22, 6, Directions.Right, new Seal.MainBasement_SealWall(), false),
+            new ChainConnectPoint(21, 8, Directions.Right, new Seal.MainBasement_SealWall(), false),
         ]
     ];
-
-    public MainBasement_Room2(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1000, ushort y = 1000) : 
-        base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors), 
+    
+    public MainBasement_Room1(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1000, ushort y = 1000) : 
+        base(_filePath,  _structureXSize,  _structureYSize, CopyFloors(_floors), 
             CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost, weight)
     {
         FilePath = _filePath;
@@ -75,8 +70,8 @@ public class MainBasement_Room2 : CustomChainStructure
         FrameTiles();
     }
 
-    public override MainBasement_Room2 Clone()
+    public override MainBasement_Room1 Clone()
     {
-        return new MainBasement_Room2(Cost, Weight, ChildBridgeTypes, X, Y);
+        return new MainBasement_Room1(Cost, Weight, ChildBridgeTypes, X, Y);
     }
 }
