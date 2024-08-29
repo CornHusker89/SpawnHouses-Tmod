@@ -1,6 +1,6 @@
 using System;
 using SpawnHouses.Structures.Bridges;
-using SpawnHouses.Structures.ChainStructures.MainBasement;
+using SpawnHouses.Structures.Structures.ChainStructures.MainBasement;
 using Terraria;
 using Terraria.ModLoader;
 

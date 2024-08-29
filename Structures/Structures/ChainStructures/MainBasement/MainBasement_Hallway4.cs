@@ -1,50 +1,44 @@
-using System;
-using System.Collections;
 using Microsoft.Xna.Framework;
-using Terraria.ID;
-using Terraria;
-
-using SpawnHouses.Structures;
 using SpawnHouses.Structures.StructureParts;
+using Terraria.ID;
 using Terraria.WorldBuilding;
 
-namespace SpawnHouses.Structures.ChainStructures.MainBasement;
+namespace SpawnHouses.Structures.Structures.ChainStructures.MainBasement;
 
-public class MainBasement_Room4 : CustomChainStructure
+public class MainBasement_Hallway4 : CustomChainStructure
 {
     // constants
-    public static readonly string _filePath = "Structures/StructureFiles/mainBasement/mainBasement_Room4";
-    public static readonly ushort _structureXSize = 13;
+    public static readonly string _filePath = "Structures/StructureFiles/mainBasement/mainBasement_Hallway4";
+    public static readonly ushort _structureXSize = 6;
     public static readonly ushort _structureYSize = 11;
 
-    public static readonly sbyte _boundingBoxMargin = 0;
+    public static readonly byte _boundingBoxMargin = 0;
     
-    public static readonly Floor[] _floors = 
-    [
-        new Floor(0, 10, 13)
-    ];
+    public static readonly Floor[] _floors = [];
     
     public static readonly ChainConnectPoint[][] _connectPoints =
     [
         // top
-        [],
+        [
+            new ChainConnectPoint(2, 0, Directions.Down, new Seal.MainBasement_SealFloor(), true, GenerateChances.Guaranteed)
+        ],
         
         // bottom
         [],
         
         // left
         [
-            new ChainConnectPoint(0, 10, Directions.Left, new Seal.MainBasement_SealWall(), true),
+            new ChainConnectPoint(0, 10, Directions.Left, new Seal.MainBasement_SealWall(), false, GenerateChances.Guaranteed)
         ],
         
         // right
         [
-            new ChainConnectPoint(12, 10, Directions.Right, new Seal.MainBasement_SealWall(), false),
+            new ChainConnectPoint(5, 10, Directions.Right, new Seal.MainBasement_SealWall(), false, GenerateChances.Guaranteed),
         ]
     ];
     
-    public MainBasement_Room4(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1000, ushort y = 1000) : 
-        base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors), 
+    public MainBasement_Hallway4(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1000, ushort y = 1000) : 
+        base(_filePath,  _structureXSize,  _structureYSize, CopyFloors(_floors), 
             CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost, weight)
     {
         FilePath = _filePath;
@@ -55,15 +49,14 @@ public class MainBasement_Room4 : CustomChainStructure
         Y = y;
         Cost = cost;
         Weight = weight;
-        BoundingBoxMargin = (byte)_boundingBoxMargin;
-            
+        BoundingBoxMargin = _boundingBoxMargin;
+        
         SetSubstructurePositions();
     }
     
     public override void Generate()
     {
         base.Generate();
-        Floors[0].GenerateCobwebs(StructureYSize);
         
         int centerX = X + (StructureXSize / 2);
         int centerY = Y + (StructureXSize / 2);
@@ -75,8 +68,8 @@ public class MainBasement_Room4 : CustomChainStructure
         FrameTiles();
     }
 
-    public override MainBasement_Room4 Clone()
+    public override MainBasement_Hallway4 Clone()
     {
-        return new MainBasement_Room4(Cost, Weight, ChildBridgeTypes, X, Y);
+        return new MainBasement_Hallway4(Cost, Weight, ChildBridgeTypes, X, Y);
     }
 }
