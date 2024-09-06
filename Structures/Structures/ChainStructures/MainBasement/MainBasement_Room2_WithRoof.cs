@@ -5,15 +5,13 @@ using Terraria.WorldBuilding;
 
 namespace SpawnHouses.Structures.Structures.ChainStructures.MainBasement;
 
-public class MainBasement_Room2_WithRoof : CustomChainStructure
+public sealed class MainBasement_Room2_WithRoof : CustomChainStructure
 {
     // constants
     public static readonly string _filePath = "Structures/StructureFiles/mainBasement/mainBasement_Room2_WithRoof";
     public static readonly ushort _structureXSize = 23;
     public static readonly ushort _structureYSize = 7;
 
-    public static readonly sbyte _boundingBoxMargin = 0;
-    
     public static readonly Floor[] _floors = 
     [
         new Floor(0, 6, 23)
@@ -39,21 +37,12 @@ public class MainBasement_Room2_WithRoof : CustomChainStructure
             new ChainConnectPoint(22, 6, Directions.Right, new Seal.MainBasement_SealWall(), false),
         ]
     ];
-    
-    public MainBasement_Room2_WithRoof(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1000, ushort y = 1000) : 
-        base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors), 
+
+    public MainBasement_Room2_WithRoof(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1000,
+        ushort y = 1000) :
+        base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors),
             CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost, weight)
     {
-        FilePath = _filePath;
-        StructureXSize = _structureXSize;
-        StructureYSize = _structureYSize;
-        
-        X = x;
-        Y = y;
-        Cost = cost;
-        Weight = weight;
-        BoundingBoxMargin = (byte)_boundingBoxMargin;
-        
         SetSubstructurePositions();
     }
     

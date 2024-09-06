@@ -97,7 +97,11 @@ public abstract class StructureChain
             
             while (queuedConnectPoints.Count > 0)
             {
-                CalculateChildrenStructures(queuedConnectPoints[0], rootStructure);
+                ChainConnectPoint connectPoint = queuedConnectPoints[0];
+                
+                if (connectPoint.ParentStructure.IsConnectPointValid(connectPoint))
+                    CalculateChildrenStructures(connectPoint, rootStructure);
+                
                 queuedConnectPoints.RemoveAt(0);
             }
 
@@ -158,14 +162,6 @@ public abstract class StructureChain
             
             for (int i = 1; i < CopiedStructureList.Length; i++)
                 UseableStructureList[i].Weight = (ushort)(UseableStructureList[i - 1].Weight + CopiedStructureList[i - 1].Weight);
-            
-            for (byte i = 0; i < UseableStructureList.Length; i++)
-                Console.WriteLine(UseableStructureList[i].Weight + " [" + UseableStructureList[i].ToString() + "]");
-            
-            for (byte i = 0; i < CopiedStructureList.Length; i++)
-                Console.WriteLine("--------" + CopiedStructureList[i].Weight + " [" + CopiedStructureList[i].ToString() + "]");
-            
-            Console.WriteLine(structureListWeightSum);
         }
        
         CustomChainStructure NewStructure(ChainConnectPoint parentConnectPoint, bool closeToMaxBranchLength = false, int x = 500, int y = 500)
@@ -174,12 +170,7 @@ public abstract class StructureChain
             for (int i = 0; i < 5000; i++)
             {
                 double randomValue = _randomNumberGen.NextDouble() * structureListWeightSum;
-                
-                Console.WriteLine($"random val: {randomValue}");
-                
                 structure = UseableStructureList.Last(curStructure => curStructure.Weight <= randomValue).Clone();
-                
-                Console.WriteLine(structure.ToString());
                 
                 // don't generate a branching hallway right after another one :)
                 if (parentConnectPoint is not null && parentConnectPoint.GenerateChance == GenerateChances.Guaranteed &&
@@ -340,6 +331,8 @@ public abstract class StructureChain
             boundingBoxes.AddRange(connectPointBridge.BoundingBoxes);
             
             connectPoint.ChildStructure = newStructure;
+            connectPoint.ChildStructure.BridgeDirectionHistory = CustomChainStructure.CloneBridgeDirectionHistory(connectPoint.ParentStructure);
+            connectPoint.ChildStructure.BridgeDirectionHistory.Add(connectPoint.Direction);
             connectPoint.ChildConnectPoint = targetConnectPoint;
             connectPoint.ChildBridge = connectPointBridge;
             

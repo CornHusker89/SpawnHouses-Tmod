@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Terraria.ModLoader;
 using Terraria.DataStructures;
 using Terraria.WorldBuilding;
@@ -6,7 +7,7 @@ using SpawnHouses.Structures.StructureParts;
 
 namespace SpawnHouses.Structures;
 
-public abstract class CustomChainStructure : CustomStructure
+public class CustomChainStructure : CustomStructure
 {
 
     public static readonly String[] BranchingHallwayIDs =
@@ -23,8 +24,9 @@ public abstract class CustomChainStructure : CustomStructure
     public BoundingBox[] StructureBoundingBoxes { get; set; }
     public ChainConnectPoint ParentChainConnectPoint { get; set; }
     public byte BoundingBoxMargin;
+    public List<byte> BridgeDirectionHistory { get; set; } = [];
     
-    // you're not really intended to make a base customChainStructure, so this is private. It's used for cloning
+    // used in the factory method
     protected CustomChainStructure(String filePath, ushort structureXSize, ushort structureYSize, Floor[] floors,
         ChainConnectPoint[][] connectPoints, Bridge[] childBridges,
         ushort x = 1000, ushort y = 1000, sbyte cost = -1, ushort weight = 10, byte boundingBoxMargin = 0)
@@ -40,7 +42,10 @@ public abstract class CustomChainStructure : CustomStructure
         Cost = cost;
         Weight = weight;
         BoundingBoxMargin = boundingBoxMargin;
-        SetSubstructurePositions();
+        
+        for (byte direction = 0; direction < 4; direction++)
+            foreach (ChainConnectPoint connectPoint in ConnectPoints[direction])
+                connectPoint.ParentStructure = this;
     }
     
     protected override void SetSubstructurePositions()
@@ -86,6 +91,16 @@ public abstract class CustomChainStructure : CustomStructure
         return newConnectPoints;
     }
 
+    public static List<byte> CloneBridgeDirectionHistory(CustomChainStructure structure)
+    {
+        List<byte> newHistory = [];
+        
+        foreach (byte direction in structure.BridgeDirectionHistory)
+            newHistory.Add(direction);
+
+        return newHistory;
+    }
+
     protected static Bridge[] CopyBridges(Bridge[] bridges)
     {
         Bridge[] newBridges = (Bridge[]) bridges.Clone();
@@ -96,18 +111,11 @@ public abstract class CustomChainStructure : CustomStructure
     
     public virtual CustomChainStructure Clone()
     {
-        // return new CustomChainStructure
-        // (
-        //     FilePath = FilePath,
-        //     StructureXSize = StructureXSize,
-        //     StructureYSize = StructureYSize,
-        //     Floors = CopyFloors(Floors),
-        //     ConnectPoints = CopyChainConnectPoints(ConnectPoints),
-        //     ChildBridgeTypes = CopyBridges(ChildBridgeTypes),
-        //     X = X,
-        //     Y = Y,
-        //     Cost = Cost
-        // );
         return null;
+    }
+
+    public virtual bool IsConnectPointValid(ChainConnectPoint connectPoint)
+    {
+        return true;
     }
 }

@@ -6,15 +6,13 @@ using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
 namespace SpawnHouses.Structures.Structures.ChainStructures.MainBasement;
 
-public class MainBasement_Entry2 : CustomChainStructure
+public sealed class MainBasement_Entry2 : CustomChainStructure
 {
     // constants
     public static readonly string _filePath = "Structures/StructureFiles/mainBasement/mainBasement_Entry2";
     public static readonly ushort _structureXSize = 15;
     public static readonly ushort _structureYSize = 15;
 
-    public static readonly byte _boundingBoxMargin = 0;
-    
     public static readonly Floor[] _floors = [];
     
     public static readonly ChainConnectPoint[][] _connectPoints =
@@ -37,21 +35,11 @@ public class MainBasement_Entry2 : CustomChainStructure
             new ChainConnectPoint(14, 14, Directions.Right, new Seal.MainBasement_SealWall(), false),
         ]
     ];
-    
-    public MainBasement_Entry2(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1000, ushort y = 1000) : 
-        base(_filePath,  _structureXSize,  _structureYSize, CopyFloors(_floors), 
+
+    public MainBasement_Entry2(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1000, ushort y = 1000) :
+        base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors),
             CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost, weight)
     {
-        FilePath = _filePath;
-        StructureXSize = _structureXSize;
-        StructureYSize = _structureYSize;
-        
-        X = x;
-        Y = y;
-        Cost = cost;
-        Weight = weight;
-        BoundingBoxMargin = _boundingBoxMargin;
-        
         SetSubstructurePositions();
     }
     
