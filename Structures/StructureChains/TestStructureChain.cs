@@ -6,7 +6,7 @@ namespace SpawnHouses.Structures.StructureChains;
 
 public class TestStructureChain : StructureChain
 {
-    public static Bridge _bridge = new ParabolaBridge.TestBridge();
+    public static Bridge _bridge = new ParabolaBridge.TestBridgeSmall();
     
     public static CustomChainStructure[] _structureList =
     [

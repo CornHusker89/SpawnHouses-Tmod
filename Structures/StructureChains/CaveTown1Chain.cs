@@ -8,18 +8,24 @@ namespace SpawnHouses.Structures.StructureChains;
 
 public class CaveTown1Chain : StructureChain
 {
-    public static Bridge[] _bridgeList =
+    public static Bridge[] _bridgeListLarge =
     [
-        new ParabolaBridge.TestBridge(),
-        new ParabolaBridge.TestBridgeAltGen()
+        new ParabolaBridge.TestBridgeLarge(),
+        new ParabolaBridge.TestBridgeLargeAltGen()
+    ];
+    
+    public static Bridge[] _bridgeListSmall =
+    [
+        new ParabolaBridge.TestBridgeSmall(),
+        new ParabolaBridge.TestBridgeSmallAltGen()
     ];
     
     public static CustomChainStructure[] _structureList =
     [
-        new CaveTown1_Test1(10, 100, _bridgeList),
-        new CaveTown1_Test2(10, 100, _bridgeList)
+        new CaveTown1_Test1(10, 100, _bridgeListSmall),
+        new CaveTown1_Test2(10, 25, _bridgeListLarge)
     ];
 
     public CaveTown1Chain(ushort x, ushort y) :
-        base(100, 10, _structureList, x, y, 1, 3, null, null, false) {}
+        base(100, 40, _structureList, x, y, 2, 5, null, null, false) {}
 }   

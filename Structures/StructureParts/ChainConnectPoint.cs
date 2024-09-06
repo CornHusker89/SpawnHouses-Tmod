@@ -21,11 +21,12 @@ public class ChainConnectPoint : ConnectPoint
     public byte BranchLength { get; set; }
     public Seal SealObj { get; set; }
     public CustomChainStructure ChildStructure { get; set; }
+    public CustomChainStructure ParentStructure { get; set; }
     public ChainConnectPoint ChildConnectPoint { get; set; }
     
     public ChainConnectPoint(short xOffset, short yOffset, byte direction, Seal sealObj = null, bool rootPoint = false,
         byte generateChance = GenerateChances.Neutral, Bridge childBridge = null, byte branchLength = 0,
-        CustomChainStructure childStructure = null, ChainConnectPoint childConnectPoint = null) :
+        CustomChainStructure childStructure = null, CustomChainStructure parentStructure = null, ChainConnectPoint childConnectPoint = null) :
         base(xOffset, yOffset, direction)
     {
         XOffset = xOffset;
@@ -36,13 +37,14 @@ public class ChainConnectPoint : ConnectPoint
         BranchLength = branchLength;
         GenerateChance = generateChance;
         ChildStructure = childStructure;
+        ParentStructure = parentStructure;
         ChildConnectPoint = childConnectPoint;
         RootPoint = rootPoint;
     }
     
     // for cloning
     private ChainConnectPoint(ushort x, ushort y, short xOffset, short yOffset, byte direction, Seal sealObj, bool rootPoint,
-        byte generateChance, Bridge childBridge, byte branchLength, CustomChainStructure childStructure, ChainConnectPoint childConnectPoint) :
+        byte generateChance, Bridge childBridge, byte branchLength, CustomChainStructure childStructure, CustomChainStructure parentStructure, ChainConnectPoint childConnectPoint) :
         base(xOffset, yOffset, direction)
     {
         Direction = direction;
@@ -55,6 +57,7 @@ public class ChainConnectPoint : ConnectPoint
         XOffset = xOffset;
         YOffset = yOffset;
         ChildStructure = childStructure;
+        ParentStructure = parentStructure;
         ChildConnectPoint = childConnectPoint;
         RootPoint = rootPoint;
     }
@@ -71,6 +74,6 @@ public class ChainConnectPoint : ConnectPoint
     
     public new ChainConnectPoint Clone()
     {
-        return new ChainConnectPoint(X, Y, XOffset, YOffset, Direction, SealObj, RootPoint, GenerateChance, ChildBridge, BranchLength, ChildStructure, ChildConnectPoint);
+        return new ChainConnectPoint(X, Y, XOffset, YOffset, Direction, SealObj, RootPoint, GenerateChance, ChildBridge, BranchLength, ChildStructure, ParentStructure, ChildConnectPoint);
     }
 }

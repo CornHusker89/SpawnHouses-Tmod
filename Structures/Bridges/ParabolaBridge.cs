@@ -155,14 +155,26 @@ public class ParabolaBridge : Bridge
     
     
     // --- bridge presets --
-    public class TestBridge : ParabolaBridge
+    public class TestBridgeLarge : ParabolaBridge
     {
-        public TestBridge() : base("Structures/StructureFiles/woodBridge", 
-            2, 3, -2, 0.4, 2, 10, 12, 0, 12, 2, 1, false) {}
+        public TestBridgeLarge() : base("Structures/StructureFiles/woodBridge", 
+            2, 3, -2, 0.4, 2, 40, 40, -27, 27, 2, 1, false) {}
     } 
-    public class TestBridgeAltGen : ParabolaBridge
+    public class TestBridgeLargeAltGen : ParabolaBridge
     {
-        public TestBridgeAltGen() : base("Structures/StructureFiles/woodBridge", 
-            2, 3, -2, 0.4, 2, -12, -14, 0, 12, 2, 1, true) {}
+        public TestBridgeLargeAltGen() : base("Structures/StructureFiles/woodBridge", 
+            2, 3, -2, 0.4, 2, -42, -42, -27, 27, 2, 1, true) {}
+    } 
+    
+    
+    public class TestBridgeSmall : ParabolaBridge
+    {
+        public TestBridgeSmall() : base("Structures/StructureFiles/woodBridge", 
+            2, 3, -2, 0.4, 2, 35, 35, -27, 27, 2, 1, false) {}
+    } 
+    public class TestBridgeSmallAltGen : ParabolaBridge
+    {
+        public TestBridgeSmallAltGen() : base("Structures/StructureFiles/woodBridge", 
+            2, 3, -2, 0.4, 2, -37, -37, -27, 27, 2, 1, true) {}
     } 
 }
