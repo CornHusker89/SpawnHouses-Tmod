@@ -8,15 +8,7 @@ using SpawnHouses.Structures.StructureParts;
 namespace SpawnHouses.Structures;
 
 public class CustomChainStructure : CustomStructure
-{
-
-    public static readonly String[] BranchingHallwayIDs =
-    [
-        "Structures/StructureFiles/mainBasement/mainBasement_Hallway4",
-        "Structures/StructureFiles/mainBasement/mainBasement_Hallway5"
-    ];
-    
-    
+{    
     public new ChainConnectPoint[][] ConnectPoints { get; set; }
     public Bridge[] ChildBridgeTypes { get; set; }
     public sbyte Cost { get; set; }
@@ -26,7 +18,6 @@ public class CustomChainStructure : CustomStructure
     public byte BoundingBoxMargin;
     public List<byte> BridgeDirectionHistory { get; set; } = [];
     
-    // used in the factory method
     protected CustomChainStructure(String filePath, ushort structureXSize, ushort structureYSize, Floor[] floors,
         ChainConnectPoint[][] connectPoints, Bridge[] childBridges,
         ushort x = 1000, ushort y = 1000, sbyte cost = -1, ushort weight = 10, byte boundingBoxMargin = 0)
