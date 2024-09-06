@@ -24,7 +24,7 @@ public abstract class StructureChain
     
 
     public StructureChain(ushort maxCost, ushort minCost, CustomChainStructure[] structureList, ushort entryPosX, ushort entryPosY,
-        byte minBranchLength, byte maxBranchLength, CustomChainStructure[] rootStructureList = null, string requiredStructureID = null, bool keepRootPointClear = true, bool ignoreInvalidDirections = false,
+        byte minBranchLength, byte maxBranchLength, CustomChainStructure[] rootStructureList = null, string requiredStructureID = null, bool keepRootPointClear = true,
         int seed = -1, byte status = StructureStatus.NotGenerated)
     {
         Seed = seed == -1 ? Terraria.WorldGen.genRand.Next(0, int.MaxValue) : seed;
@@ -209,11 +209,7 @@ public abstract class StructureChain
                 if (bridges[index].InputDirections[0] == direction)
                     return bridges[index];
             }
-
-            if (ignoreInvalidDirections)
-                return null;
-            else
-                throw new Exception($"bridge of direction {direction} was not found in this structure's ChildBridgeTypes");
+            return null;
         }
         
         void CalculateChildrenStructures(ChainConnectPoint connectPoint, CustomChainStructure connectPointParentStructure)

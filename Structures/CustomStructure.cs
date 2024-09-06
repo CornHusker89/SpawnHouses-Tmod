@@ -100,10 +100,7 @@ public abstract class CustomStructure {
         _GenerateStructure();
     }
 
-    public virtual void OnFound()
-    {
-        //throw new Exception("OnFound() was called on a base CustomStructure, this does not do anything and should never happen");
-    }
+    public virtual void OnFound() {}
 
     [NoJIT]
     // Generates structure file, nothing else
