@@ -2,7 +2,7 @@ using SpawnHouses.Structures.StructureParts;
 
 namespace SpawnHouses.Structures.Structures.ChainStructures.caveTown1;
 
-public sealed class CaveTown1_Test1 : CaveTown1_CustomChainStructure
+public sealed class CaveTown1_Test1 : CustomChainStructure
 {
     // constants
     private static readonly string _filePath = "Structures/StructureFiles/caveTown1/caveTown1_Test1";
@@ -35,6 +35,7 @@ public sealed class CaveTown1_Test1 : CaveTown1_CustomChainStructure
         base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors),
             CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost, weight)
     {
+        ID = StructureID.CaveTown1_Test1;
         SetSubstructurePositions();
     }
     

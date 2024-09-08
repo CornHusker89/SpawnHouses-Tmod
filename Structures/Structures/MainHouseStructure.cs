@@ -11,7 +11,7 @@ using Terraria.ModLoader;
 
 namespace SpawnHouses.Structures.Structures;
 
-public class MainHouseStructure : CustomStructure
+public sealed class MainHouseStructure : CustomStructure
 {
     // constants
     private const byte _type_not_generated = 0;
@@ -262,6 +262,8 @@ public class MainHouseStructure : CustomStructure
         StructureYSize = _structureYSize;
         
         Status = status;
+        
+        ID = StructureID.MainHouse;
         SetSubstructurePositions();
     }
 
@@ -284,8 +286,8 @@ public class MainHouseStructure : CustomStructure
         }
         
         _GenerateStructure();
-        StructureHelper.Generator.GenerateStructure(RightFilePath, new Point16(X + LeftSize, Y), _mod);
-        StructureHelper.Generator.GenerateStructure(TopFilePath, new Point16(X + LeftSize - 14, Y - 10), _mod);
+        StructureHelper.Generator.GenerateStructure(RightFilePath, new Point16(X + LeftSize, Y), ModInstance.Mod);
+        StructureHelper.Generator.GenerateStructure(TopFilePath, new Point16(X + LeftSize - 14, Y - 10), ModInstance.Mod);
         FrameTiles(X + LeftSize, Y + 4, 40);
         
         int signIndex = Sign.ReadSign(this.SignPos.X, this.SignPos.Y);
@@ -293,7 +295,7 @@ public class MainHouseStructure : CustomStructure
             Sign.TextSign(signIndex, "All good adventures start in a tavern...To bad this isn't a tavern :(");
         
         Terraria.WorldGen.PlaceTile(X + LeftSize - 1, Y + 14, TileID.WorkBenches, true, true, style: 0);
-        StructureHelper.Generator.GenerateStructure("Structures/StructureFiles/mainHouse/mainHouse_Rose", new Point16(X + LeftSize - 1, Y + 8), _mod);
+        StructureHelper.Generator.GenerateStructure("Structures/StructureFiles/mainHouse/mainHouse_Rose", new Point16(X + LeftSize - 1, Y + 8), ModInstance.Mod);
         
         Status = StructureStatus.GeneratedAndFound;
     }

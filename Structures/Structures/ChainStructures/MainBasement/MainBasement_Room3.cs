@@ -40,6 +40,7 @@ public sealed class MainBasement_Room3 : CustomChainStructure
         base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors),
             CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost, weight)
     {
+        ID = StructureID.MainHouseBasement_Room3;
         SetSubstructurePositions();
     }
     

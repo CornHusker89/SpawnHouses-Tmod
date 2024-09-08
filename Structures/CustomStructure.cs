@@ -14,9 +14,9 @@ using Terraria.GameContent.Drawing;
 
 namespace SpawnHouses.Structures;
 
-public abstract class CustomStructure {
-    protected readonly Mod _mod = ModContent.GetInstance<SpawnHouses>();
-    
+public abstract class CustomStructure
+{
+    public short ID { get; init; }= 0;
     public string FilePath { get; set; } = "Structures/_";
     public ushort StructureXSize { get; set; } = 1;
     public ushort StructureYSize { get; set; } = 1;
@@ -106,7 +106,7 @@ public abstract class CustomStructure {
     // Generates structure file, nothing else
     public void _GenerateStructure()
     {
-        StructureHelper.Generator.GenerateStructure(FilePath, new Point16(X:X, Y:Y), _mod);
+        StructureHelper.Generator.GenerateStructure(FilePath, new Point16(X:X, Y:Y), ModInstance.Mod);
         FrameTiles();
     }
 }

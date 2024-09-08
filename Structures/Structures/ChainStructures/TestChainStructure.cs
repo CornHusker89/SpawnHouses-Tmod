@@ -41,6 +41,7 @@ public sealed class TestChainStructure : CustomChainStructure
         base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors),
             CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost, weight)
     {
+        ID = StructureID.TestChainStructure;
         SetSubstructurePositions();
     }
     

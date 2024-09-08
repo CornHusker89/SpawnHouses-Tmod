@@ -7,7 +7,7 @@ using SpawnHouses.Structures.StructureParts;
 
 namespace SpawnHouses.Structures.Structures;
 
-public class BridgeTestStructure : CustomStructure
+public sealed class BridgeTestStructure : CustomStructure
 {
     // constants
     public static readonly string _filePath = "Structures/StructureFiles/bridgeTest";
@@ -49,6 +49,7 @@ public class BridgeTestStructure : CustomStructure
         
         X = x;
         Y = y;
+        ID = StructureID.BridgeTestStructure;
         SetSubstructurePositions();
     }
 
