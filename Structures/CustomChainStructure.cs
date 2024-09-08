@@ -104,9 +104,4 @@ public class CustomChainStructure : CustomStructure
     {
         return null;
     }
-
-    public virtual bool IsConnectPointValid(ChainConnectPoint connectPoint)
-    {
-        return true;
-    }
 }

@@ -8,7 +8,7 @@ using Terraria.WorldBuilding;
 
 namespace SpawnHouses.Structures.Structures;
 
-public class BeachHouseStructure : CustomStructure
+public sealed class BeachHouseStructure : CustomStructure
 {
     // constants
     public static readonly string _filePath = "Structures/StructureFiles/beachHouse/beachHouse_v2";
@@ -86,6 +86,8 @@ public class BeachHouseStructure : CustomStructure
         X = x;
         Y = y;
         Status = status;
+        
+        ID = StructureID.BeachHouse;
         SetSubstructurePositions();
     }
     

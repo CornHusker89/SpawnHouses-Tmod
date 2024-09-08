@@ -67,10 +67,22 @@ public class MainBasementChain : StructureChain
             _structureList, x, y,
             (byte)Math.Round(1 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier), 
             (byte)Math.Round(3 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier),
-            _rootStructures, 
-            requiredStructureID: SpawnHousesModHelper.IsMSEnabled && ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier > 0.60 ?
-                MainBasement_Room5._filePath_magicstorage : null,
-            true, true, seed, status) {}
+            _rootStructures, seed, status) {}
+
+
+    protected override bool IsChainComplete()
+    {
+        if (SpawnHousesModHelper.IsMSEnabled && ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier > 0.60)
+        {
+            bool found = false;
+            ActionOnEachStructure(function: (structure =>
+            {
+                if (structure.FilePath == MainBasement_Room5._filePath_magicstorage) found = true;
+            }));
+            return found;
+        }
+        else return true;
+    }
 
     public override void OnFound()
     {
