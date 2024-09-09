@@ -109,4 +109,11 @@ public abstract class CustomStructure
         StructureHelper.Generator.GenerateStructure(FilePath, new Point16(X:X, Y:Y), ModInstance.Mod);
         FrameTiles();
     }
+
+    public virtual void ActionOnEachConnectPoint(Action<ConnectPoint> function)
+    {
+        for (byte direction = 0; direction < 4; direction++)
+            foreach (ConnectPoint connectPoint in this.ConnectPoints[direction])
+                function(connectPoint);
+    }
 }

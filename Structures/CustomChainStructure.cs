@@ -104,4 +104,12 @@ public class CustomChainStructure : CustomStructure
     {
         return null;
     }
+    
+    public void ActionOnEachConnectPoint(Action<ChainConnectPoint> function)
+    {
+        for (byte direction = 0; direction < 4; direction++)
+            foreach (ChainConnectPoint connectPoint in this.ConnectPoints[direction])
+                function(connectPoint);
+    }
+    
 }

@@ -26,7 +26,7 @@ public abstract class StructureChain
 
     public StructureChain(ushort maxCost, ushort minCost, CustomChainStructure[] structureList, ushort entryPosX, ushort entryPosY,
         byte minBranchLength, byte maxBranchLength, CustomChainStructure[] rootStructureList = null,
-        int seed = -1, byte status = StructureStatus.NotGenerated)
+        int seed = -1, byte status = StructureStatus.NotGenerated, bool empty = false)
     {
         Seed = seed == -1 ? Terraria.WorldGen.genRand.Next(0, int.MaxValue) : seed;
         EntryPosX = entryPosX;
@@ -35,7 +35,7 @@ public abstract class StructureChain
         _randomNumberGen = new UnifiedRandom(Seed);
         
         // assume it's a blank object and just return
-        if (entryPosX == 0 && entryPosY == 0)
+        if (empty)
             return;
         
         foreach (var structure in structureList)
@@ -81,17 +81,16 @@ public abstract class StructureChain
             failedConnectPointList = [];
             boundingBoxes = [];
             boundingBoxes.AddRange(rootStructure.StructureBoundingBoxes);
-            
-            for (byte direction = 0; direction < 4; direction++)
+
+            var points = queuedConnectPoints; // because scope
+            rootStructure.ActionOnEachConnectPoint(connectPoint =>
             {
-                foreach (ChainConnectPoint connectPoint in rootStructure.ConnectPoints[direction])
+                if (IsConnectPointValid(connectPoint))
                 {
-                    if (!IsConnectPointValid(connectPoint)) continue;
-                    
                     connectPoint.BranchLength = 0;
-                    queuedConnectPoints.Add(connectPoint);
+                    points.Add(connectPoint);
                 }
-            }
+            });
             
             while (queuedConnectPoints.Count > 0)
             {
@@ -104,10 +103,11 @@ public abstract class StructureChain
                 
                 queuedConnectPoints.RemoveAt(0);
             }
-
+            
             if (currentCost >= minCost)
             {
-                if (IsChainComplete()) continue;
+                _rootStructure = rootStructure;
+                if (!IsChainComplete()) continue;
                 
                 foundValidStructureChain = true;
                 break;
@@ -117,7 +117,7 @@ public abstract class StructureChain
         // if we didn't find what we needed in 200 tries, abort
         if (!foundValidStructureChain)
         {
-            ModContent.GetInstance<SpawnHouses>().Logger.Error($"Failed to generate StructureChain of type {this.ToString()} with seed {Seed}. Please report this error your client.log to the mod's author\n" + SpawnHousesSystem.WorldConfig);
+            ModContent.GetInstance<SpawnHouses>().Logger.Error($"Failed to generate StructureChain of type {this.ToString()} with seed {Seed}. Please report this error and your client.log to the mod's author\n" + SpawnHousesSystem.WorldConfig);
             return;
         }
         
@@ -318,18 +318,7 @@ public abstract class StructureChain
                 }
         }
     }
-
-    /// <summary>
-    /// Recursively calls OnFound() on every structure in the chain
-    /// </summary>
-    public virtual void OnFound()
-    {
-        ActionOnEachStructure(function: (structure =>
-        {
-            structure.OnFound();
-        }));
-    }
-
+    
     public virtual void Generate()
     {
         // if the initial setup didn't work, don't attempt to generate
@@ -338,14 +327,21 @@ public abstract class StructureChain
         
         List<Bridge> bridgeList = [];
         
-        ActionOnEachConnectPoint(function: (connectPoint =>
+        ActionOnEachStructure(structure =>
         {
-            Bridge bridge = connectPoint.ChildBridge;
+            structure.Generate();
+            structure.ActionOnEachConnectPoint(connectPoint =>
+            {
+                if (connectPoint.ChildBridge is not null)
+                {
+                    Bridge bridge = connectPoint.ChildBridge;
                     
-            bridge.Point1 = connectPoint;
-            bridge.Point2 = connectPoint.ChildConnectPoint;
-            bridgeList.Add(bridge.Clone());
-        }));
+                    bridge.Point1 = connectPoint;
+                    bridge.Point2 = connectPoint.ChildConnectPoint;
+                    bridgeList.Add(bridge.Clone()); 
+                }
+            });
+        });
         
         foreach (var bridge in bridgeList)
             bridge.Generate();
@@ -353,14 +349,25 @@ public abstract class StructureChain
         foreach (var connectPoint in _failedConnectPointList)
             connectPoint.GenerateSeal();
     }
+
+    /// <summary>
+    /// Recursively calls OnFound() on every structure in the chain
+    /// </summary>
+    public virtual void OnFound()
+    {
+        ActionOnEachStructure(structure =>
+        {
+            structure.OnFound();
+        });
+    }
     
     /// <summary>
     /// Calls the function with each structure in the chain.<para/>
     /// Sample Usage:<para/>
-    /// ActionOnEachStructure(function: (structure =>
+    /// ActionOnEachStructure(structure =>
     /// {
     ///     structure.Generate();
-    /// }));
+    /// });
     /// </summary>
     /// <param name="function"></param>
     public void ActionOnEachStructure(Action<CustomChainStructure> function)
@@ -368,37 +375,34 @@ public abstract class StructureChain
         void Recursive(CustomChainStructure structure)
         {
             function(structure);
-            
-            for (byte direction = 0; direction < 4; direction++)
-                foreach (ChainConnectPoint connectPoint in structure.ConnectPoints[direction])
-                {
-                    if (connectPoint.ChildStructure is null) continue;
+            structure.ActionOnEachConnectPoint(connectPoint =>
+            {
+                if (connectPoint.ChildStructure is not null)
                     Recursive(connectPoint.ChildStructure);
-                }
+            });
         }
         Recursive(_rootStructure);
     }
     /// <summary>
     /// Calls the function with each connectPoint in the chain.<para/>
     /// Sample Usage:<para/>
-    /// ActionOnEachConnectPoint(function: (connectPoint =>
+    /// ActionOnEachConnectPoint(connectPoint =>
     /// {
     ///     connectPoint.GenerateSeal();
-    /// }));
+    /// });
     /// </summary>
     /// <param name="function"></param>
     public void ActionOnEachConnectPoint(Action<ChainConnectPoint> function)
     {
         void Recursive(CustomChainStructure structure)
         {
-            for (byte direction = 0; direction < 4; direction++)
-                foreach (ChainConnectPoint connectPoint in structure.ConnectPoints[direction])
-                {
-                    function(connectPoint);
-                    
-                    if (connectPoint.ChildStructure is null) continue;
+            structure.ActionOnEachConnectPoint(connectPoint =>
+            {
+                function(connectPoint);
+                
+                if (connectPoint.ChildStructure is not null)
                     Recursive(connectPoint.ChildStructure);
-                }
+            });
         }
         Recursive(_rootStructure);
     }
@@ -441,15 +445,12 @@ public abstract class StructureChain
     }
 
     /// <summary>
-    /// Called before generating ConnectPoint's children. Defaults to just keeping root point clear
+    /// Called before generating ConnectPoint's children.
     /// </summary>
     /// <param name="connectPoint"></param>
     /// <returns>If true, children will generate</returns>
     protected virtual bool IsConnectPointValid(ChainConnectPoint connectPoint)
     {
-        if (connectPoint.RootPoint && connectPoint.ParentStructure == _rootStructure)
-            return false;
-        
         return true;
     }
 }
