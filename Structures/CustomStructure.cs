@@ -29,7 +29,17 @@ public abstract class CustomStructure
     public ConnectPoint[][] ConnectPoints { get; set; } = [ [], [], [], [] ];
     
     
-    protected CustomStructure() {}
+    protected CustomStructure(String filePath, ushort structureXSize, ushort structureYSize, Floor[] floors,
+        ConnectPoint[][] connectPoints, ushort x = 1000, ushort y = 1000) 
+    {
+        FilePath = filePath;
+        StructureXSize = structureXSize;
+        StructureYSize = structureYSize;
+        X = x;
+        Y = y;
+        Floors = floors;
+        ConnectPoints = connectPoints;
+    }
     
     protected virtual void SetSubstructurePositions()
     {
