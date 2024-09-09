@@ -20,7 +20,7 @@ public class CustomChainStructure : CustomStructure
     
     protected CustomChainStructure(String filePath, ushort structureXSize, ushort structureYSize, Floor[] floors,
         ChainConnectPoint[][] connectPoints, Bridge[] childBridges,
-        ushort x = 1000, ushort y = 1000, sbyte cost = -1, ushort weight = 10, byte boundingBoxMargin = 0)
+        ushort x = 1000, ushort y = 1000, sbyte cost = -1, ushort weight = 10)
     {
         FilePath = filePath;
         StructureXSize = structureXSize;
@@ -32,7 +32,6 @@ public class CustomChainStructure : CustomStructure
         ChildBridgeTypes = childBridges;
         Cost = cost;
         Weight = weight;
-        BoundingBoxMargin = boundingBoxMargin;
         
         for (byte direction = 0; direction < 4; direction++)
             foreach (ChainConnectPoint connectPoint in ConnectPoints[direction])
@@ -49,7 +48,7 @@ public class CustomChainStructure : CustomStructure
         
         StructureBoundingBoxes =
         [
-            new BoundingBox(X - BoundingBoxMargin, Y - BoundingBoxMargin, X + StructureXSize + BoundingBoxMargin - 1, Y + StructureYSize + BoundingBoxMargin - 1)
+            new BoundingBox(X, Y, X + StructureXSize - 1, Y + StructureYSize - 1)
         ];
     }
     

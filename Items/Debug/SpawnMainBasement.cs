@@ -18,7 +18,7 @@ using Terraria.Utilities;
 
 namespace SpawnHouses.Items.Debug
 {
-	public class SpawnMainBasementChain : ModItem
+	public class SpawnMainBasement : ModItem
 	{
 		
 		public override void SetDefaults()
@@ -40,7 +40,7 @@ namespace SpawnHouses.Items.Debug
 		{
 			Point16 point = (Main.MouseWorld / 16).ToPoint16();
 
-			MainBasementChain chain = new MainBasementChain((ushort)point.X, (ushort)point.Y);
+			MainBasement chain = new MainBasementChain((ushort)point.X, (ushort)point.Y);
 			chain.Generate();
 			return true;
 		}
