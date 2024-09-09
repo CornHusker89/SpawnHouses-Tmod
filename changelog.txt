@@ -1,4 +1,7 @@
 Version 0.3.3
+Major Changes
+- Added a Well near the Main House. As always, can be configured in mod config
+
 Minor Changes
 - Changed description
-- Small performance improvements
+- Performance improvements

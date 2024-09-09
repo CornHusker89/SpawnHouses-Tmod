@@ -1,5 +1,6 @@
 using System;
 using SpawnHouses.Structures.Bridges;
+using SpawnHouses.Structures.StructureParts;
 using SpawnHouses.Structures.Structures.ChainStructures.MainBasement;
 using Terraria;
 using Terraria.ModLoader;
@@ -61,13 +62,13 @@ public class MainBasementChain : StructureChain
     ];
     
     
-    public MainBasementChain(ushort x = 1000, ushort y = 1000, int seed = -1, byte status = StructureStatus.NotGenerated) :
+    public MainBasementChain(ushort x = 1000, ushort y = 1000, int seed = -1, byte status = StructureStatus.NotGenerated, bool empty = false) :
         base((ushort)(80 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier), 
             (ushort)(48 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier),
             _structureList, x, y,
             (byte)Math.Round(1 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier), 
             (byte)Math.Round(3 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier),
-            _rootStructures, seed, status) {}
+            _rootStructures, seed, status, empty) {}
 
 
     protected override bool IsChainComplete()
@@ -75,12 +76,20 @@ public class MainBasementChain : StructureChain
         if (SpawnHousesModHelper.IsMSEnabled && ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier > 0.60)
         {
             bool found = false;
-            ActionOnEachStructure(function: (structure =>
+            ActionOnEachStructure(structure =>
             {
                 if (structure.FilePath == MainBasement_Room5._filePath_magicstorage) found = true;
-            }));
+            });
             return found;
         }
+        else return true;
+    }
+
+    protected override bool IsConnectPointValid(ChainConnectPoint connectPoint)
+    {
+        if ((connectPoint.ParentStructure.ID == StructureID.MainHouseBasement_Entry1 || connectPoint.ParentStructure.ID == StructureID.MainHouseBasement_Entry2) &&
+            connectPoint.RootPoint)
+            return false;
         else return true;
     }
 
