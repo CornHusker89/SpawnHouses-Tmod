@@ -17,16 +17,16 @@ namespace SpawnHouses.Structures;
 public abstract class CustomStructure
 {
     public short ID { get; init; }= 0;
-    public string FilePath { get; set; } = "Structures/_";
-    public ushort StructureXSize { get; set; } = 1;
-    public ushort StructureYSize { get; set; } = 1;
-    public ushort X { get; set; } = 10;
-    public ushort Y { get; set; } = 10;
+    public string FilePath { get; set; }
+    public ushort StructureXSize { get; set; }
+    public ushort StructureYSize { get; set; }
+    public ushort X { get; set; }
+    public ushort Y { get; set; }
     public byte Status { get; set; } = global::SpawnHouses.Structures.StructureStatus.NotGenerated;
 
-    public Floor[] Floors { get; set; } = Array.Empty<Floor>();
+    public Floor[] Floors { get; set; }
 
-    public ConnectPoint[][] ConnectPoints { get; set; } = [ [], [], [], [] ];
+    public ConnectPoint[][] ConnectPoints { get; set; }
     
     
     protected CustomStructure(String filePath, ushort structureXSize, ushort structureYSize, Floor[] floors,

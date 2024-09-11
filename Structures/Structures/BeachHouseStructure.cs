@@ -59,34 +59,16 @@ public sealed class BeachHouseStructure : CustomStructure
         // right
         []
     ];
-
-
+    
+    
     public readonly bool Reverse;
     
-    public BeachHouseStructure(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, bool reverse = false)
+    public BeachHouseStructure(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, bool reverse = false) :
+        base(!reverse ? _filePath : _filePath_r, _structureXSize, _structureYSize, 
+            CopyFloors(!reverse ? _floors : _floors_r), CopyConnectPoints(!reverse? _connectPoints : _connectPoints_r), x, y)
     {
         Reverse = reverse;
-        
-        if (!reverse)
-        {
-            FilePath = _filePath;
-            Floors = _floors;
-            ConnectPoints = _connectPoints;
-        }
-        else
-        {
-            FilePath = _filePath_r;
-            Floors = _floors_r;
-            ConnectPoints = _connectPoints_r;
-        }
-        
-        StructureXSize = _structureXSize;
-        StructureYSize = _structureYSize;
-        
-        X = x;
-        Y = y;
         Status = status;
-        
         ID = StructureID.BeachHouse;
         SetSubstructurePositions();
     }

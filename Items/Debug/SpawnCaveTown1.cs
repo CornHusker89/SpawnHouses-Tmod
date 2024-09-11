@@ -40,7 +40,7 @@ namespace SpawnHouses.Items.Debug
 		{
 			Point16 point = (Main.MouseWorld / 16).ToPoint16();
 
-			CaveTown1Chain chain = new CaveTown1Chain((ushort)point.X, (ushort)point.Y);
+			CaveTown1 chain = new CaveTown1((ushort)point.X, (ushort)point.Y);
 			chain.Generate();
 			return true;
 		}

@@ -40,7 +40,7 @@ namespace SpawnHouses.Items.Debug
 		{
 			Point16 point = (Main.MouseWorld / 16).ToPoint16();
 
-			TestStructureChain chain = new TestStructureChain((ushort)point.X, (ushort)point.Y);
+			TestStructure chain = new TestStructure((ushort)point.X, (ushort)point.Y);
 			chain.Generate();
 			return true;
 		}

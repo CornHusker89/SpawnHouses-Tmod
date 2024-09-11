@@ -9,7 +9,7 @@ using Terraria.ModLoader;
 
 namespace SpawnHouses.Structures.StructureChains;
 
-public class MainBasementChain : StructureChain
+public class MainBasement : StructureChain
 {
     // constants
     public static Bridge[] _bridgeList =
@@ -62,7 +62,7 @@ public class MainBasementChain : StructureChain
     ];
     
     
-    public MainBasementChain(ushort x = 1000, ushort y = 1000, int seed = -1, byte status = StructureStatus.NotGenerated, bool empty = false) :
+    public MainBasement(ushort x = 1000, ushort y = 1000, int seed = -1, byte status = StructureStatus.NotGenerated, bool empty = false) :
         base((ushort)(80 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier), 
             (ushort)(48 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier),
             _structureList, x, y,

@@ -38,17 +38,10 @@ public sealed class BridgeTestStructure : CustomStructure
         ]
     ];
 
-    public BridgeTestStructure(ushort x = 0, ushort y = 0)
+    public BridgeTestStructure(ushort x = 0, ushort y = 0) : 
+        base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors), 
+            CopyConnectPoints(_connectPoints), x, y)
     {
-        Floors = _floors;
-        ConnectPoints = _connectPoints;
-        
-        FilePath = _filePath;
-        StructureXSize = _structureXSize;
-        StructureYSize = _structureYSize;
-        
-        X = x;
-        Y = y;
         ID = StructureID.BridgeTestStructure;
         SetSubstructurePositions();
     }

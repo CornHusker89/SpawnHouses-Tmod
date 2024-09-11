@@ -18,7 +18,7 @@ using Terraria.Utilities;
 
 namespace SpawnHouses.Items.Debug
 {
-	public class SpawnWell : ModItem
+	public class SpawnMineshaft : ModItem
 	{
 		
 		public override void SetDefaults()
@@ -56,10 +56,10 @@ namespace SpawnHouses.Items.Debug
 				foundLocation = true;
 			}
 
-			y = (ushort)(y - 2);
-			x = (ushort)(x - 3);
+			y = (ushort)(y - 13);
+			x = (ushort)(x - 10);
 
-			WellStructure structure = new WellStructure(x, y);
+			MineshaftStructure structure = new MineshaftStructure(x, y);
 			structure.Generate();
 
 			return true;

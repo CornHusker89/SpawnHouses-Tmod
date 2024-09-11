@@ -20,15 +20,10 @@ public class CustomChainStructure : CustomStructure
     
     protected CustomChainStructure(String filePath, ushort structureXSize, ushort structureYSize, Floor[] floors,
         ChainConnectPoint[][] connectPoints, Bridge[] childBridges,
-        ushort x = 1000, ushort y = 1000, sbyte cost = -1, ushort weight = 10)
+        ushort x = 1000, ushort y = 1000, sbyte cost = -1, ushort weight = 10) :
+            base(filePath, structureXSize, structureYSize, floors, null, x, y)
     {
-        FilePath = filePath;
-        StructureXSize = structureXSize;
-        StructureYSize = structureYSize;
-        X = x;
-        Y = y;
-        Floors = floors;
-        ConnectPoints = connectPoints;
+        ConnectPoints = connectPoints; // need to overwrite CustomStructure's connectPoints property
         ChildBridgeTypes = childBridges;
         Cost = cost;
         Weight = weight;
