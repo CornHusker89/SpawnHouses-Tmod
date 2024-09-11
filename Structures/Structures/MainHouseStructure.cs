@@ -102,17 +102,13 @@ public sealed class MainHouseStructure : CustomStructure
     private readonly bool generatedBasement = false;
     
     public MainHouseStructure(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, 
-        bool hasBasement = false, bool inUnderworld = false, byte leftType = _type_not_generated, byte rightType = _type_not_generated)
+        bool hasBasement = false, bool inUnderworld = false, byte leftType = _type_not_generated, byte rightType = _type_not_generated) :
+        base("Structures/", _structureXSize, _structureYSize, CopyFloors(_floors), 
+            CopyConnectPoints(_connectPoints), x, y)
     {
-        X = x;
-        Y = y;
-        
         InUnderworld = inUnderworld;
         HasBasement = hasBasement;
         
-        Floors = _floors;
-        ConnectPoints = _connectPoints;
-
         // calculate what sides should be small (if we need to)
         if (leftType == _type_not_generated && rightType == _type_not_generated)
         {

@@ -4,7 +4,7 @@ using Terraria.DataStructures;
 
 namespace SpawnHouses.Structures.StructureChains;
 
-public class TestStructureChain : StructureChain
+public class TestStructure : StructureChain
 {
     public static Bridge _bridge = new ParabolaBridge.TestBridgeSmall();
     
@@ -13,6 +13,6 @@ public class TestStructureChain : StructureChain
         new TestChainStructure(10, 100, [_bridge])
     ];
     
-    public TestStructureChain(ushort x, ushort y) : 
+    public TestStructure(ushort x, ushort y) : 
         base(100, 60, _structureList, x, y, 3, 7) {}
 }

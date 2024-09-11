@@ -84,14 +84,14 @@ public class CustomStructureGen : ModSystem
 	    {
 		    if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointHouse)
 		    {
-			    MainBasementChain chain = new MainBasementChain((ushort)SpawnHousesSystem.MainHouse.BasementEntryPos.X, (ushort)SpawnHousesSystem.MainHouse.BasementEntryPos.Y);
+			    MainBasement chain = new MainBasement((ushort)SpawnHousesSystem.MainHouse.BasementEntryPos.X, (ushort)SpawnHousesSystem.MainHouse.BasementEntryPos.Y);
 			    chain.Generate();
 				
 			    SpawnHousesSystem.MainBasement = chain;
 		    }
 		    else
 		    {
-			    MainBasementChain chain = new MainBasementChain((ushort)Main.spawnTileX, (ushort)Main.spawnTileY);
+			    MainBasement chain = new MainBasement((ushort)Main.spawnTileX, (ushort)Main.spawnTileY);
 			    chain.Generate();
 				
 			    SpawnHousesSystem.MainBasement = chain;

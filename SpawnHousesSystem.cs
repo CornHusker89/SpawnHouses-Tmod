@@ -13,10 +13,11 @@ namespace SpawnHouses;
 internal class SpawnHousesSystem : ModSystem
 {
     public static MainHouseStructure MainHouse = new MainHouseStructure();
-    public static MainBasementChain MainBasement = new MainBasementChain(empty: true);
+    public static MainBasement MainBasement = new MainBasement(empty: true);
     public static BeachHouseStructure BeachHouse = new BeachHouseStructure();
 
     public static string WorldConfig = "";
+    
     
     public override void SaveWorldData(TagCompound tag) {
         tag["MainHouse"] = MainHouse;
@@ -28,10 +29,18 @@ internal class SpawnHousesSystem : ModSystem
     public override void LoadWorldData(TagCompound tag)
     {
         MainHouse = tag.ContainsKey("MainHouse") ? tag.Get<MainHouseStructure>("MainHouse") : new MainHouseStructure();
-        MainBasement = tag.ContainsKey("MainBasement") ? tag.Get<MainBasementChain>("MainBasement") : new MainBasementChain(empty: true);
+        MainBasement = tag.ContainsKey("MainBasement") ? tag.Get<MainBasement>("MainBasement") : new MainBasement(empty: true);
         BeachHouse = tag.ContainsKey("BeachHouse") ? tag.Get<BeachHouseStructure>("BeachHouse") : new BeachHouseStructure();
         
         WorldConfig = tag.ContainsKey("WorldConfig") ? tag.GetString("WorldConfig") : "";
+    }
+
+
+    public override void ClearWorld()
+    {
+        MainHouse = new MainHouseStructure();
+        MainBasement = new MainBasement(empty: true);
+        BeachHouse = new BeachHouseStructure();
     }
 }
 
@@ -61,9 +70,9 @@ internal class MainHouseStructureSerializer : TagSerializer<MainHouseStructure, 
     );
 }
 
-internal class MainBasementChainSerializer : TagSerializer<MainBasementChain, TagCompound>
+internal class MainBasementChainSerializer : TagSerializer<MainBasement, TagCompound>
 {
-    public override TagCompound Serialize(MainBasementChain chain) => new TagCompound
+    public override TagCompound Serialize(MainBasement chain) => new TagCompound
     {
         ["X"] = chain.EntryPosX,
         ["Y"] = chain.EntryPosY,
@@ -71,7 +80,7 @@ internal class MainBasementChainSerializer : TagSerializer<MainBasementChain, Ta
         ["Status"] = chain.Status
     };
 
-    public override MainBasementChain Deserialize(TagCompound tag) => new MainBasementChain(
+    public override MainBasement Deserialize(TagCompound tag) => new MainBasement(
         tag.Get<ushort>("X"),
         tag.Get<ushort>("Y"),
         tag.GetInt("Seed"),

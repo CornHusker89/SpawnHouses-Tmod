@@ -5,71 +5,76 @@ Mods: {
 		Items: {
 			SpawnMainHouse: {
 				DisplayName: Spawn Main House
-				Tooltip: Testing item, no guarantees it won't crash the game
+				Tooltip: Spawns the Main House (with current configs) on the ground underneath the cursor
 			}
 
 			SpawnTestHouse: {
 				DisplayName: Spawn Test House
-				Tooltip: Testing item, no guarantees it won't crash the game
+				Tooltip: --Testing item, no guarantees it won't crash the game--
 			}
 
 			SpawnTest: {
 				DisplayName: Spawn Test
-				Tooltip: Testing item, no guarantees it won't crash the game
+				Tooltip: --Testing item, no guarantees it won't crash the game--
 			}
 
 			SpawnBeachHouse: {
 				DisplayName: Spawn Beach House
-				Tooltip: Testing item, no guarantees it won't crash the game
+				Tooltip: --Testing item, no guarantees it won't crash the game--
 			}
 
 			SpawnBridgeTest: {
 				DisplayName: Spawn Bridge Test
-				Tooltip: Testing item, no guarantees it won't crash the game
+				Tooltip: --Testing item, no guarantees it won't crash the game--
 			}
 
 			SpawnChainTest: {
 				DisplayName: Spawn Chain Test
-				Tooltip: Testing item, no guarantees it won't crash the game
-			}
-
-			SpawnWorldGen: {
-				DisplayName: Spawn World Gen
-				Tooltip: Testing item, no guarantees it won't crash the game
+				Tooltip: --Testing item, no guarantees it won't crash the game--
 			}
 
 			SpawnIceCave: {
 				DisplayName: Spawn Ice Cave
-				Tooltip: Testing item, no guarantees it won't crash the game
+				Tooltip: --Testing item, no guarantees it won't crash the game--
 			}
 
 			FlipRegion: {
 				DisplayName: Flip Region
-				Tooltip: Testing item, no guarantees it won't crash the game
+				Tooltip: --Testing item, no guarantees it won't crash the game--
 			}
 
 			SpawnFirepit: {
 				DisplayName: Spawn Firepit
-				Tooltip: Testing item, no guarantees it won't crash the game
+				Tooltip: Spawns the beach firepit on the ground underneath the cursor
 			}
 
-			SpawnMainBasementChain: {
-				DisplayName: Spawn Main Basement Chain
-				Tooltip: Testing item, no guarantees it won't crash the game
+			SpawnMainBasement: {
+				DisplayName: Spawn Main Basement
+				Tooltip: --Testing item, no guarantees it won't crash the game--
 			}
 
 			FrameableBorealPlatform: {
 				DisplayName: Frameable Boreal Platform
-				Tooltip: A platform that can be hammered through all frames of vanilla platforms
+				Tooltip: A platform that can be hammered through all frames of vanilla platforms (some frames are invisible)
 			}
 
 			FrameableBorealPlatformNoCollide: {
 				DisplayName: Frameable Boreal Platform No Collide
-				Tooltip: A platform that can be hammered through all frames of vanilla platforms, but player cannot stand on it
+				Tooltip: A platform that can be hammered through all frames of vanilla platforms (some frames are invisible), but has no collision
 			}
 
 			SpawnCaveTown1: {
 				DisplayName: Spawn Cave Town1
+				Tooltip: --Testing item, no guarantees it won't crash the game--
+			}
+
+			SpawnWell: {
+				DisplayName: Spawn Mineshaft
+				Tooltip: --Testing item, no guarantees it won't crash the game--
+			}
+
+			SpawnMineshaft: {
+				DisplayName: Spawn Mineshaft
 				Tooltip: ""
 			}
 		}

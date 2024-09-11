@@ -1,7 +1,10 @@
-Version 0.3.3
+Version 0.4.0
 Major Changes
-- Added a Well near the Main House. As always, can be configured in mod config
+- Added a mineshaft near the Main House. As always, can be configured in mod config
+- Fixed critical edge case with loading worlds on mismatched versions of the mod. I don't know if anyone else found this but please tell me if you see any load/save errors!
 
 Minor Changes
-- Changed description
+- Slightly changed description
 - Performance improvements
+- Fix for lights not turning on in specific basement room
+- Changed weighting for basement, it'll be less common to get the same room many times

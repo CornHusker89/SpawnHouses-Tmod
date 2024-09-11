@@ -7,7 +7,7 @@ using Terraria.DataStructures;
 
 namespace SpawnHouses.Structures.StructureChains;
 
-public class CaveTown1Chain : StructureChain
+public class CaveTown1 : StructureChain
 {
     public static Bridge[] _bridgeListLarge =
     [
@@ -27,7 +27,7 @@ public class CaveTown1Chain : StructureChain
         new CaveTown1_Test2(10, 25, _bridgeListLarge)
     ];
 
-    public CaveTown1Chain(ushort x, ushort y) :
+    public CaveTown1(ushort x, ushort y) :
         base(100, 40, _structureList, x, y, 2, 5) {}
 
     // Only lets 1 structure to the left and right of the root structure

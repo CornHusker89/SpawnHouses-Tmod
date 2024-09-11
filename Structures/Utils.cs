@@ -10,6 +10,7 @@ public static class StructureID
     public static readonly short MainHouse = 1;
     public static readonly short BeachHouse = 2;
     public static readonly short Firepit = 3;
+    public static readonly short Well = 20;
     
     // main basement
     public static readonly short MainHouseBasement_Entry1 = 4;
