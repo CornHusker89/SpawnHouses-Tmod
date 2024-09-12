@@ -75,7 +75,7 @@ Mods: {
 
 			SpawnMineshaft: {
 				DisplayName: Spawn Mineshaft
-				Tooltip: ""
+				Tooltip: Spawns the mineshaft on the ground underneath the cursor
 			}
 		}
 
@@ -122,6 +122,11 @@ Mods: {
 				EnableBeachHouse: {
 					Label: Enable Beach House
 					Tooltip: If ON, a house will generate on the end of one beach, sometimes with a firepit.
+				}
+
+				EnableMineshaft: {
+					Label: Enable Mineshaft
+					Tooltip: If ON, a mineshaft will generate near the world spawn.
 				}
 			}
 		}

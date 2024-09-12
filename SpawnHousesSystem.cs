@@ -14,6 +14,7 @@ internal class SpawnHousesSystem : ModSystem
 {
     public static MainHouseStructure MainHouse = new MainHouseStructure();
     public static MainBasement MainBasement = new MainBasement(empty: true);
+    public static MineshaftStructure Mineshaft = new MineshaftStructure();
     public static BeachHouseStructure BeachHouse = new BeachHouseStructure();
 
     public static string WorldConfig = "";
@@ -22,6 +23,7 @@ internal class SpawnHousesSystem : ModSystem
     public override void SaveWorldData(TagCompound tag) {
         tag["MainHouse"] = MainHouse;
         tag["MainBasement"] = MainBasement;
+        tag["Mineshaft"] = Mineshaft;
         tag["BeachHouse"] = BeachHouse;
         
         tag["WorldConfig"] = WorldConfig;
@@ -30,6 +32,7 @@ internal class SpawnHousesSystem : ModSystem
     {
         MainHouse = tag.ContainsKey("MainHouse") ? tag.Get<MainHouseStructure>("MainHouse") : new MainHouseStructure();
         MainBasement = tag.ContainsKey("MainBasement") ? tag.Get<MainBasement>("MainBasement") : new MainBasement(empty: true);
+        Mineshaft = tag.ContainsKey("Mineshaft") ? tag.Get<MineshaftStructure>("Mineshaft") : new MineshaftStructure();
         BeachHouse = tag.ContainsKey("BeachHouse") ? tag.Get<BeachHouseStructure>("BeachHouse") : new BeachHouseStructure();
         
         WorldConfig = tag.ContainsKey("WorldConfig") ? tag.GetString("WorldConfig") : "";
@@ -40,6 +43,7 @@ internal class SpawnHousesSystem : ModSystem
     {
         MainHouse = new MainHouseStructure();
         MainBasement = new MainBasement(empty: true);
+        Mineshaft = new MineshaftStructure();
         BeachHouse = new BeachHouseStructure();
     }
 }
@@ -65,12 +69,12 @@ internal class MainHouseStructureSerializer : TagSerializer<MainHouseStructure, 
         tag.GetByte("Status"),
         tag.GetBool("HasBasement"),
         tag.GetBool("InUnderworld"),
-        tag.GetByte("LeftType") != 0? tag.GetByte("LeftType") : (byte)1, // if its 0 (which only happens if it's a <= v2.7 world) set to default (large) 
+        tag.GetByte("LeftType") != 0? tag.GetByte("LeftType") : (byte)1, // if its 0 (which only happens if it's a <= v0.2.7 world) set to default (large) 
         tag.GetByte("RightType") != 0? tag.GetByte("RightType") : (byte)1
     );
 }
 
-internal class MainBasementChainSerializer : TagSerializer<MainBasement, TagCompound>
+internal class MainBasementSerializer : TagSerializer<MainBasement, TagCompound>
 {
     public override TagCompound Serialize(MainBasement chain) => new TagCompound
     {
@@ -84,6 +88,22 @@ internal class MainBasementChainSerializer : TagSerializer<MainBasement, TagComp
         tag.Get<ushort>("X"),
         tag.Get<ushort>("Y"),
         tag.GetInt("Seed"),
+        tag.GetByte("Status")
+    );
+}
+
+internal class MineshaftSerializer : TagSerializer<MineshaftStructure, TagCompound>
+{
+    public override TagCompound Serialize(MineshaftStructure mineshaft) => new TagCompound
+    {
+        ["X"] = mineshaft.X,
+        ["Y"] = mineshaft.Y,
+        ["Status"] = mineshaft.Status
+    };
+
+    public override MineshaftStructure Deserialize(TagCompound tag) => new MineshaftStructure(
+        tag.Get<ushort>("X"),
+        tag.Get<ushort>("Y"),
         tag.GetByte("Status")
     );
 }

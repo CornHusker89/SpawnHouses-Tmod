@@ -38,10 +38,10 @@ public sealed class MainBasement_Room1_WithFloor : CustomChainStructure
         ]
     ];
 
-    public MainBasement_Room1_WithFloor(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1000,
-        ushort y = 1000) :
+    public MainBasement_Room1_WithFloor(sbyte cost, ushort weight, Bridge[] childBridgeType, byte status = StructureStatus.NotGenerated, 
+        ushort x = 1000, ushort y = 1000) :
         base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors),
-            CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost, weight)
+            CopyChainConnectPoints(_connectPoints), childBridgeType, status, x, y, cost, weight)
     {
         ID = StructureID.MainHouseBasement_Room1_WithFloor;
         SetSubstructurePositions();
@@ -64,6 +64,6 @@ public sealed class MainBasement_Room1_WithFloor : CustomChainStructure
 
     public override MainBasement_Room1_WithFloor Clone()
     {
-        return new MainBasement_Room1_WithFloor(Cost, Weight, ChildBridgeTypes, X, Y);
+        return new MainBasement_Room1_WithFloor(Cost, Weight, ChildBridgeTypes, Status, X, Y);
     }
 }

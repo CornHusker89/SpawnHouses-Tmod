@@ -35,10 +35,10 @@ public sealed class MainBasement_Hallway4 : CustomChainStructure
         ]
     ];
 
-    public MainBasement_Hallway4(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1000,
-        ushort y = 1000) :
+    public MainBasement_Hallway4(sbyte cost, ushort weight, Bridge[] childBridgeType, byte status = StructureStatus.NotGenerated,
+        ushort x = 1000, ushort y = 1000) :
         base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors),
-            CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost, weight)
+            CopyChainConnectPoints(_connectPoints), childBridgeType, status, x, y, cost, weight)
     {
         ID = StructureID.MainHouseBasement_Hallway4;
         SetSubstructurePositions();
@@ -60,6 +60,6 @@ public sealed class MainBasement_Hallway4 : CustomChainStructure
 
     public override MainBasement_Hallway4 Clone()
     {
-        return new MainBasement_Hallway4(Cost, Weight, ChildBridgeTypes, X, Y);
+        return new MainBasement_Hallway4(Cost, Weight, ChildBridgeTypes, Status, X, Y);
     }
 }

@@ -30,9 +30,10 @@ public sealed class CaveTown1_Test2 : CustomChainStructure
         ]
     ];
 
-    public CaveTown1_Test2(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1000, ushort y = 1000) :
+    public CaveTown1_Test2(sbyte cost, ushort weight, Bridge[] childBridgeType, byte status = StructureStatus.NotGenerated,
+        ushort x = 1000, ushort y = 1000) :
         base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors),
-            CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost, weight)
+            CopyChainConnectPoints(_connectPoints), childBridgeType, status, x, y, cost, weight)
     {
         ID = StructureID.CaveTown1_Test2;
         SetSubstructurePositions();
@@ -40,6 +41,6 @@ public sealed class CaveTown1_Test2 : CustomChainStructure
     
     public override CaveTown1_Test2 Clone()
     {
-        return new CaveTown1_Test2(Cost, Weight, ChildBridgeTypes, X, Y);
+        return new CaveTown1_Test2(Cost, Weight, ChildBridgeTypes, Status, X, Y);
     }
 }

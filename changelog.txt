@@ -7,4 +7,4 @@ Minor Changes
 - Slightly changed description
 - Performance improvements
 - Fix for lights not turning on in specific basement room
-- Changed weighting for basement, it'll be less common to get the same room many times
+- Changed weighting for basement, it'll be less common to get the same room many times in the same basement

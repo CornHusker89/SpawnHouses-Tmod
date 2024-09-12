@@ -149,6 +149,10 @@ public class SpawnHousesConfig : ModConfig
 			SetTotalNpcs();
 		}
 	}
+
+
+	[DefaultValue(true)] 
+	public bool EnableMineshaft { get; set; }= true;
 	
 	
 	private bool _enableBeachHouse  = true;

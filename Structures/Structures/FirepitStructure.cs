@@ -40,9 +40,9 @@ public sealed class FirepitStructure : CustomStructure
         ]
     ];
     
-    public FirepitStructure(ushort x = 0, ushort y = 0) : 
+    public FirepitStructure(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated) : 
         base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors), 
-            CopyConnectPoints(_connectPoints), x, y)
+            CopyConnectPoints(_connectPoints), status, x, y)
     {
         ID = StructureID.Firepit;
         SetSubstructurePositions();

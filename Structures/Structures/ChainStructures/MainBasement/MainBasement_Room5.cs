@@ -39,10 +39,11 @@ public sealed class MainBasement_Room5 : CustomChainStructure
         ]
     ];
 
-    public MainBasement_Room5(sbyte cost, ushort weight, Bridge[] childBridgeType, ushort x = 1000, ushort y = 1000) :
+    public MainBasement_Room5(sbyte cost, ushort weight, Bridge[] childBridgeType, byte status = StructureStatus.NotGenerated,
+        ushort x = 1000, ushort y = 1000) :
         base(SpawnHousesModHelper.IsMSEnabled ? _filePath_magicstorage : _filePath,
             _structureXSize, _structureYSize, CopyFloors(_floors),
-            CopyChainConnectPoints(_connectPoints), childBridgeType, x, y, cost, weight)
+            CopyChainConnectPoints(_connectPoints), childBridgeType, status, x, y, cost, weight)
     {
         ID = StructureID.MainHouseBasement_Room5;
         SetSubstructurePositions();
@@ -103,6 +104,6 @@ public sealed class MainBasement_Room5 : CustomChainStructure
 
     public override MainBasement_Room5 Clone()
     {
-        return new MainBasement_Room5(Cost, Weight, ChildBridgeTypes, X, Y);
+        return new MainBasement_Room5(Cost, Weight, ChildBridgeTypes, Status, X, Y);
     }
 }
