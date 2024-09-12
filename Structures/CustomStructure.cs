@@ -30,15 +30,16 @@ public abstract class CustomStructure
     
     
     protected CustomStructure(String filePath, ushort structureXSize, ushort structureYSize, Floor[] floors,
-        ConnectPoint[][] connectPoints, ushort x = 1000, ushort y = 1000) 
+        ConnectPoint[][] connectPoints, byte status, ushort x = 1000, ushort y = 1000) 
     {
         FilePath = filePath;
         StructureXSize = structureXSize;
         StructureYSize = structureYSize;
-        X = x;
-        Y = y;
         Floors = floors;
         ConnectPoints = connectPoints;
+        Status = status;
+        X = x;
+        Y = y;
     }
     
     protected virtual void SetSubstructurePositions()
@@ -108,9 +109,13 @@ public abstract class CustomStructure
     public virtual void Generate()
     {
         _GenerateStructure();
+        Status = StructureStatus.GeneratedButNotFound;
     }
 
-    public virtual void OnFound() {}
+    public virtual void OnFound()
+    {
+        Status = StructureStatus.GeneratedAndFound;
+    }
 
     [NoJIT]
     // Generates structure file, nothing else
@@ -120,7 +125,7 @@ public abstract class CustomStructure
         FrameTiles();
     }
 
-    public virtual void ActionOnEachConnectPoint(Action<ConnectPoint> function)
+    public void ActionOnEachConnectPoint(Action<ConnectPoint> function)
     {
         for (byte direction = 0; direction < 4; direction++)
             foreach (ConnectPoint connectPoint in this.ConnectPoints[direction])

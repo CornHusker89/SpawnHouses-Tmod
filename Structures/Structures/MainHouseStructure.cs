@@ -104,7 +104,7 @@ public sealed class MainHouseStructure : CustomStructure
     public MainHouseStructure(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, 
         bool hasBasement = false, bool inUnderworld = false, byte leftType = _type_not_generated, byte rightType = _type_not_generated) :
         base("Structures/", _structureXSize, _structureYSize, CopyFloors(_floors), 
-            CopyConnectPoints(_connectPoints), x, y)
+            CopyConnectPoints(_connectPoints), status, x, y)
     {
         InUnderworld = inUnderworld;
         HasBasement = hasBasement;

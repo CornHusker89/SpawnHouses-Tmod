@@ -19,9 +19,9 @@ public class CustomChainStructure : CustomStructure
     public List<byte> BridgeDirectionHistory { get; set; } = [];
     
     protected CustomChainStructure(String filePath, ushort structureXSize, ushort structureYSize, Floor[] floors,
-        ChainConnectPoint[][] connectPoints, Bridge[] childBridges,
+        ChainConnectPoint[][] connectPoints, Bridge[] childBridges, byte status = StructureStatus.NotGenerated,
         ushort x = 1000, ushort y = 1000, sbyte cost = -1, ushort weight = 10) :
-            base(filePath, structureXSize, structureYSize, floors, null, x, y)
+            base(filePath, structureXSize, structureYSize, floors, null, status, x, y)
     {
         ConnectPoints = connectPoints; // need to overwrite CustomStructure's connectPoints property
         ChildBridgeTypes = childBridges;

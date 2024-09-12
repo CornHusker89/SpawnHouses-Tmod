@@ -274,6 +274,44 @@ public class CustomHousesPass : GenPass
 						return true;
 					})
 				));
+
+
+			// Mineshaft
+			if (!spawnUnderworld && ModContent.GetInstance<SpawnHousesConfig>().EnableMineshaft)
+			{
+				int x, y;
+
+				bool FindValidLocation(bool left = true)
+				{
+					if (left)
+						x = initialX - 31 - Terraria.WorldGen.genRand.Next(25, 40);
+					else
+						x = initialX - 31 + SpawnHousesSystem.MainHouse.StructureXSize + Terraria.WorldGen.genRand.Next(25, 40);
+
+					y = initialY - 16;
+					for (int i = 0; i < 32; i++)
+					{
+						y++;
+						Tile tile = Main.tile[x, y];
+						if (Terraria.WorldGen.SolidTile(x, y))
+							if (tile.TileType == TileID.Grass)
+								return true;
+							else
+								return false;
+					}
+					return false;
+				}
+				
+				bool startLeftSide = Terraria.WorldGen.genRand.NextBool();
+
+				if (FindValidLocation(startLeftSide) || FindValidLocation(!startLeftSide))
+				{
+					MineshaftStructure mineshaftStructure = new MineshaftStructure((ushort)(x - 13), (ushort)(y - 10));
+					mineshaftStructure.Generate();
+
+					SpawnHousesSystem.Mineshaft = mineshaftStructure;
+				}
+			}
 		}
 	}
 }
@@ -313,7 +351,7 @@ public class CustomBeachHousePass : GenPass
 					while (true) {
 						y++;
 						
-						if (Main.tile[x, y].HasTile)
+						if (Terraria.WorldGen.SolidTile(x, y))
 						{
 							if ((Main.tile[x, y].TileType == TileID.Sand || Main.tile[x, y].TileType == TileID.ShellPile) || force)
 							{
