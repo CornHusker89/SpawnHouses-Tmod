@@ -5,6 +5,12 @@ namespace SpawnHouses.Structures;
 
 public static class GenHelper
 {
+    /// <summary>
+    /// Places a bush (walls) with many variants, from 1x1 to 2x3 at the coordinates given
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="tileID"></param>
     public static void PlaceBush(int x, int y, ushort tileID = WallID.LivingLeaf)
         {
         void PlaceWall(int i, int j)
