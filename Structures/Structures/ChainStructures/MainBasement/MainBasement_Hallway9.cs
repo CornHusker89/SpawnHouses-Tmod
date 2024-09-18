@@ -12,8 +12,6 @@ public sealed class MainBasement_Hallway9 : CustomChainStructure
     public static readonly ushort _structureXSize = 6;
     public static readonly ushort _structureYSize = 11;
     
-    public static readonly Floor[] _floors = [];
-    
     public static readonly ChainConnectPoint[][] _connectPoints =
     [
         // top
@@ -21,7 +19,7 @@ public sealed class MainBasement_Hallway9 : CustomChainStructure
         
         // bottom
         [
-            new ChainConnectPoint(2, 10, Directions.Up, new Seal.MainBasement_SealWall(), false, GenerateChances.Guaranteed)
+            new ChainConnectPoint(2, 10, Directions.Up, new Seal.MainBasement_SealFloor(), false, GenerateChances.Guaranteed)
         ],
         
         // left
@@ -37,7 +35,7 @@ public sealed class MainBasement_Hallway9 : CustomChainStructure
 
     public MainBasement_Hallway9(sbyte cost, ushort weight, Bridge[] childBridgeType, byte status = StructureStatus.NotGenerated, 
         ushort x = 1000, ushort y = 1000) :
-        base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors),
+        base(_filePath, _structureXSize, _structureYSize,
             CopyChainConnectPoints(_connectPoints), childBridgeType, status, x, y, cost, weight)
     {
         ID = StructureID.MainHouseBasement_Hallway9;

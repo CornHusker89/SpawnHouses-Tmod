@@ -16,11 +16,6 @@ public sealed class BeachHouseStructure : CustomStructure
     public static readonly ushort _structureXSize = 35;
     public static readonly ushort _structureYSize = 26;
     
-    public static readonly Floor[] _floors = 
-    [
-        new Floor(0, 30, 30)
-    ];
-
     public static readonly ConnectPoint[][] _connectPoints =
     [
         // top
@@ -36,11 +31,6 @@ public sealed class BeachHouseStructure : CustomStructure
         [
             new ConnectPoint(34, 31, Directions.Right)
         ]
-    ];
-    
-    public static readonly Floor[] _floors_r = 
-    [
-        new Floor(5, 30, 30)
     ];
 
     public static readonly ConnectPoint[][] _connectPoints_r =
@@ -64,8 +54,8 @@ public sealed class BeachHouseStructure : CustomStructure
     public readonly bool Reverse;
     
     public BeachHouseStructure(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, bool reverse = false) :
-        base(!reverse ? _filePath : _filePath_r, _structureXSize, _structureYSize, 
-            CopyFloors(!reverse ? _floors : _floors_r), CopyConnectPoints(!reverse? _connectPoints : _connectPoints_r), status, x, y)
+        base(!reverse ? _filePath : _filePath_r, _structureXSize, _structureYSize,
+            CopyConnectPoints(!reverse? _connectPoints : _connectPoints_r), status, x, y)
     {
         Reverse = reverse;
         Status = status;
@@ -97,34 +87,26 @@ public sealed class BeachHouseStructure : CustomStructure
 
     public override void Generate()
     {
-        ushort bottomTileID = Main.tile[Floors[0].X + Floors[0].FloorLength / 2, Floors[0].Y + 10].TileType;
-        
+        Tile beamTile = new Tile
+        {
+            TileType = TileID.RichMahoganyBeam,
+            TileColor = PaintID.BrownPaint
+        };
+
         if (!Reverse)
         {
             ConnectPoints[3][0].BlendRight(TileID.Sand, 8);
-            Floors[0].GenerateBeams(TileID.RichMahoganyBeam, 4, 3, tileColor: PaintID.BrownPaint, 1);
-            Floors[0].GenerateFoundation(TileID.Sand, 11, 8, 4);
+            GenHelper.GenerateBeams(new Point(X + 1, Y + 30), beamTile, 4, 3);
+            GenHelper.GenerateFoundation(new Point(X + 22, Y + 34), TileID.Sand, 11);
         }
         else
         {
             ConnectPoints[2][0].BlendLeft(TileID.Sand, 8);
-            Floors[0].GenerateBeams(TileID.RichMahoganyBeam, 4, 3, tileColor: PaintID.BrownPaint, 20);
-            Floors[0].GenerateFoundation(TileID.Sand, 11, -8, 4);
+            GenHelper.GenerateBeams(new Point(X + 25, Y + 30), beamTile, 4, 3);
+            GenHelper.GenerateFoundation(new Point(X + 12, Y + 34), TileID.Sand, 11);
         }
 
         _GenerateStructure();
-        
-        if (bottomTileID != TileID.Sand && bottomTileID != TileID.ShellPile)
-        {
-            WorldUtils.Gen(new Point(Floors[0].X + Floors[0].FloorLength / 2, Floors[0].Y),
-                new Shapes.Circle(Floors[0].FloorLength + 16), // +16 for the blendDistance
-                Actions.Chain(
-                    new Modifiers.OnlyTiles(TileID.Sand),
-                    new Actions.Custom((i, j, args) => { Main.tile[i, j].TileType = bottomTileID; return true; })
-                )
-            );
-        }
-        
         FrameTiles();
         
         Status = StructureStatus.GeneratedButNotFound;

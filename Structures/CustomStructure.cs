@@ -24,18 +24,15 @@ public abstract class CustomStructure
     public ushort Y { get; set; }
     public byte Status { get; set; } = global::SpawnHouses.Structures.StructureStatus.NotGenerated;
 
-    public Floor[] Floors { get; set; }
-
     public ConnectPoint[][] ConnectPoints { get; set; }
     
     
-    protected CustomStructure(String filePath, ushort structureXSize, ushort structureYSize, Floor[] floors,
+    protected CustomStructure(String filePath, ushort structureXSize, ushort structureYSize,
         ConnectPoint[][] connectPoints, byte status, ushort x = 1000, ushort y = 1000) 
     {
         FilePath = filePath;
         StructureXSize = structureXSize;
         StructureYSize = structureYSize;
-        Floors = floors;
         ConnectPoints = connectPoints;
         Status = status;
         X = x;
@@ -44,8 +41,6 @@ public abstract class CustomStructure
     
     protected virtual void SetSubstructurePositions()
     {
-        foreach (var floor in Floors)
-            floor.SetPosition(mainStructureX: X, mainStructureY: Y);
         for (byte direction = 0; direction < 4; direction++)
             foreach (var connectPoint in ConnectPoints[direction])
                 connectPoint.SetPosition(mainStructureX: X, mainStructureY: Y);
@@ -85,14 +80,6 @@ public abstract class CustomStructure
         ));
     }
     
-    protected static Floor[] CopyFloors(Floor[] floors)
-    {
-        Floor[] newFloors = (Floor[]) floors.Clone();
-        for (byte i = 0; i < newFloors.Length; i++)
-            newFloors[i] = newFloors[i].Clone();
-        return newFloors;
-    }
-    
     protected static ConnectPoint[][] CopyConnectPoints(ConnectPoint[][] connectPoints)
     {
         ConnectPoint[][] newConnectPoints = (ConnectPoint[][])connectPoints.Clone();
@@ -106,6 +93,9 @@ public abstract class CustomStructure
         return newConnectPoints;
     }
 
+    /// <summary>
+    /// Calls _GenerateStructure and changes structure status
+    /// </summary>
     public virtual void Generate()
     {
         _GenerateStructure();
@@ -117,8 +107,10 @@ public abstract class CustomStructure
         Status = StructureStatus.GeneratedAndFound;
     }
 
+    /// <summary>
+    /// Generates structure file, nothing else
+    /// </summary>
     [NoJIT]
-    // Generates structure file, nothing else
     public void _GenerateStructure()
     {
         StructureHelper.Generator.GenerateStructure(FilePath, new Point16(X:X, Y:Y), ModInstance.Mod);

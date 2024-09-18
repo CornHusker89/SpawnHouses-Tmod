@@ -1,6 +1,7 @@
 using Terraria;
 using Terraria.ID;
 using System;
+using Microsoft.Xna.Framework;
 using SpawnHouses.Structures;
 
 
@@ -55,12 +56,6 @@ public sealed class MainHouseStructure : CustomStructure
     
     public static readonly ushort _structureXSize = 63;
     public static readonly ushort _structureYSize = 36;
-    
-    
-    public static readonly Floor[] _floors = 
-    [
-        new Floor(0, 16, 42)
-    ];
 
     public static readonly ConnectPoint[][] _connectPoints =
     [
@@ -103,7 +98,7 @@ public sealed class MainHouseStructure : CustomStructure
     
     public MainHouseStructure(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, 
         bool hasBasement = false, bool inUnderworld = false, byte leftType = _type_not_generated, byte rightType = _type_not_generated) :
-        base("Structures/", _structureXSize, _structureYSize, CopyFloors(_floors), 
+        base("Structures/", _structureXSize, _structureYSize, 
             CopyConnectPoints(_connectPoints), status, x, y)
     {
         InUnderworld = inUnderworld;
@@ -252,9 +247,8 @@ public sealed class MainHouseStructure : CustomStructure
         FilePath = LeftFilePath;
 
         ConnectPoints[3][0].XOffset = (short)(LeftSize + RightSize - 1);
-        Floors[0].FloorLength = (ushort)(LeftSize + RightSize);
 
-        StructureXSize = _structureXSize;
+        StructureXSize = (ushort)(LeftSize + RightSize);
         StructureYSize = _structureYSize;
         
         Status = status;
@@ -268,7 +262,8 @@ public sealed class MainHouseStructure : CustomStructure
     [NoJIT]
     public override void Generate()
     {
-        Floors[0].GenerateFoundation(TileID.Dirt, foundationYOffset: 13);
+        Console.WriteLine("bush attmpt");
+        GenHelper.GenerateFoundation(new Point(X + StructureXSize / 2, Y + 29), TileID.Dirt, StructureXSize / 2);
 
         if (!InUnderworld)
         {
@@ -281,10 +276,9 @@ public sealed class MainHouseStructure : CustomStructure
             ConnectPoints[3][0].BlendRight(topTileID: TileID.Grass, blendDistance: 20, maxFillCount: 25, maxHeight: 10);
         }
         
-        _GenerateStructure();
+        _GenerateStructure(); // generates the left side
         StructureHelper.Generator.GenerateStructure(RightFilePath, new Point16(X + LeftSize, Y), ModInstance.Mod);
         StructureHelper.Generator.GenerateStructure(TopFilePath, new Point16(X + LeftSize - 14, Y - 10), ModInstance.Mod);
-        FrameTiles(X + LeftSize, Y + 4, 40);
         
         int signIndex = Sign.ReadSign(this.SignPos.X, this.SignPos.Y);
         if (signIndex != -1)
@@ -292,7 +286,22 @@ public sealed class MainHouseStructure : CustomStructure
         
         Terraria.WorldGen.PlaceTile(X + LeftSize - 1, Y + 14, TileID.WorkBenches, true, true, style: 0);
         StructureHelper.Generator.GenerateStructure("Structures/StructureFiles/mainHouse/mainHouse_Rose", new Point16(X + LeftSize - 1, Y + 8), ModInstance.Mod);
+
+        ushort[] blacklistWallIDs = [WallID.StoneSlab, WallID.PearlstoneBrick, WallID.SnowBrick, WallID.RichMaogany];
+        int leftBushCount = Terraria.WorldGen.genRand.Next(2, 5);
+        for (int i = 0; i < leftBushCount; i++)
+        {
+            int xOffset = Terraria.WorldGen.genRand.Next(0, 12);
+            GenHelper.PlaceBush(new Point(X + xOffset, Y + 15 + Terraria.WorldGen.genRand.Next(0, 2)), wallBlacklistIDs: blacklistWallIDs);
+        }
+        int rightBushCount = Terraria.WorldGen.genRand.Next(2, 5);
+        for (int i = 0; i < rightBushCount; i++)
+        {
+            int xOffset = Terraria.WorldGen.genRand.Next(0, 12);
+            GenHelper.PlaceBush(new Point(X + StructureXSize - 1 - xOffset, Y + 15 + Terraria.WorldGen.genRand.Next(0, 2)), wallBlacklistIDs: blacklistWallIDs);
+        }
         
+        FrameTiles(X + LeftSize, Y + 4, 40);
         Status = StructureStatus.GeneratedAndFound;
     }
 }   

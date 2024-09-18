@@ -18,10 +18,10 @@ public class CustomChainStructure : CustomStructure
     public byte BoundingBoxMargin;
     public List<byte> BridgeDirectionHistory { get; set; } = [];
     
-    protected CustomChainStructure(String filePath, ushort structureXSize, ushort structureYSize, Floor[] floors,
+    protected CustomChainStructure(String filePath, ushort structureXSize, ushort structureYSize,
         ChainConnectPoint[][] connectPoints, Bridge[] childBridges, byte status = StructureStatus.NotGenerated,
         ushort x = 1000, ushort y = 1000, sbyte cost = -1, ushort weight = 10) :
-            base(filePath, structureXSize, structureYSize, floors, null, status, x, y)
+            base(filePath, structureXSize, structureYSize, null, status, x, y)
     {
         ConnectPoints = connectPoints; // need to overwrite CustomStructure's connectPoints property
         ChildBridgeTypes = childBridges;
@@ -35,8 +35,7 @@ public class CustomChainStructure : CustomStructure
     
     protected override void SetSubstructurePositions()
     {
-        foreach (var floor in Floors)
-            floor.SetPosition(mainStructureX: X, mainStructureY: Y);
+        // need to have a new one because the ConnectPoint type changes
         for (byte direction = 0; direction < 4; direction++)
             foreach (var connectPoint in ConnectPoints[direction])
                 connectPoint.SetPosition(mainStructureX: X, mainStructureY: Y);

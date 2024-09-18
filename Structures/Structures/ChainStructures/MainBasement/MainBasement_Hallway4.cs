@@ -11,8 +11,6 @@ public sealed class MainBasement_Hallway4 : CustomChainStructure
     public static readonly string _filePath = "Structures/StructureFiles/mainBasement/mainBasement_Hallway4";
     public static readonly ushort _structureXSize = 6;
     public static readonly ushort _structureYSize = 11;
-
-    public static readonly Floor[] _floors = [];
     
     public static readonly ChainConnectPoint[][] _connectPoints =
     [
@@ -37,7 +35,7 @@ public sealed class MainBasement_Hallway4 : CustomChainStructure
 
     public MainBasement_Hallway4(sbyte cost, ushort weight, Bridge[] childBridgeType, byte status = StructureStatus.NotGenerated,
         ushort x = 1000, ushort y = 1000) :
-        base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors),
+        base(_filePath, _structureXSize, _structureYSize,
             CopyChainConnectPoints(_connectPoints), childBridgeType, status, x, y, cost, weight)
     {
         ID = StructureID.MainHouseBasement_Hallway4;

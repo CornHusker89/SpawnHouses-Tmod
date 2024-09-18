@@ -15,8 +15,6 @@ public sealed class TestChainStructure : CustomChainStructure
     private static readonly ushort _structureXSize = 15;
     private static readonly ushort _structureYSize = 13;
 
-    private static readonly Floor[] _floors = [];
-    
     private static readonly ChainConnectPoint[][] _connectPoints =
     [
         // top
@@ -39,7 +37,7 @@ public sealed class TestChainStructure : CustomChainStructure
 
     public TestChainStructure(sbyte cost, ushort weight, Bridge[] childBridgeType, byte status = StructureStatus.NotGenerated,
         ushort x = 1000, ushort y = 1000) :
-        base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors),
+        base(_filePath, _structureXSize, _structureYSize,
             CopyChainConnectPoints(_connectPoints), childBridgeType, status, x, y, cost, weight)
     {
         ID = StructureID.TestChainStructure;

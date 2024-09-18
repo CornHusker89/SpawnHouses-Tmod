@@ -1,4 +1,5 @@
 using System.Collections;
+using Microsoft.Xna.Framework;
 using Terraria.ID;
 using Terraria;
 
@@ -14,11 +15,6 @@ public sealed class BridgeTestStructure : CustomStructure
     public static readonly ushort _structureXSize = 8;
     public static readonly ushort _structureYSize = 9;
     
-    public static readonly Floor[] _floors = 
-    [
-        new Floor(0, 8, 8)
-    ];
-
     public static readonly ConnectPoint[][] _connectPoints =
     [
         // top
@@ -39,7 +35,7 @@ public sealed class BridgeTestStructure : CustomStructure
     ];
 
     public BridgeTestStructure(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated) : 
-        base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors), 
+        base(_filePath, _structureXSize, _structureYSize, 
             CopyConnectPoints(_connectPoints), status, x, y)
     {
         ID = StructureID.BridgeTestStructure;
@@ -48,7 +44,7 @@ public sealed class BridgeTestStructure : CustomStructure
 
     public override void Generate()
     {
-        Floors[0].GenerateFoundation(TileID.Dirt, 4, 0, 1);
+        GenHelper.GenerateFoundation(new Point(X, Y + 9), TileID.Dirt, 4);
 
         base.Generate();
     }
