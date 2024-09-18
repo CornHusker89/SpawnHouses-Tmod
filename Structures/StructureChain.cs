@@ -183,6 +183,12 @@ public abstract class StructureChain
         {
             byte currentBranchLength = connectPoint.BranchLength;
             byte targetDirection = connectPoint.Direction;
+
+            if (currentBranchLength > maxBranchLength) // extra failsafe
+            {
+                failedConnectPointList.Add(connectPoint);
+                return;
+            }
             
             if (connectPoint.GenerateChance != GenerateChances.Guaranteed)
                 if ((_randomNumberGen.Next(0, maxBranchLength - currentBranchLength) == 0 || currentBranchLength >= maxBranchLength) && currentBranchLength >= minBranchLength)

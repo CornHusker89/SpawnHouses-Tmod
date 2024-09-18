@@ -9,8 +9,6 @@ public sealed class CaveTown1_Test2 : CustomChainStructure
     private static readonly ushort _structureXSize = 25;
     private static readonly ushort _structureYSize = 13;
     
-    private static readonly Floor[] _floors = [];
-    
     private static readonly ChainConnectPoint[][] _connectPoints =
     [
         // top
@@ -32,7 +30,7 @@ public sealed class CaveTown1_Test2 : CustomChainStructure
 
     public CaveTown1_Test2(sbyte cost, ushort weight, Bridge[] childBridgeType, byte status = StructureStatus.NotGenerated,
         ushort x = 1000, ushort y = 1000) :
-        base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors),
+        base(_filePath, _structureXSize, _structureYSize,
             CopyChainConnectPoints(_connectPoints), childBridgeType, status, x, y, cost, weight)
     {
         ID = StructureID.CaveTown1_Test2;

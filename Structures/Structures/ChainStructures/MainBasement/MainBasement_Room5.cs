@@ -15,11 +15,6 @@ public sealed class MainBasement_Room5 : CustomChainStructure
     public static readonly ushort _structureXSize = 22;
     public static readonly ushort _structureYSize = 9;
     
-    public static readonly Floor[] _floors = 
-    [
-        new Floor(0, 8, 22)
-    ];
-    
     public static readonly ChainConnectPoint[][] _connectPoints =
     [
         // top
@@ -42,7 +37,7 @@ public sealed class MainBasement_Room5 : CustomChainStructure
     public MainBasement_Room5(sbyte cost, ushort weight, Bridge[] childBridgeType, byte status = StructureStatus.NotGenerated,
         ushort x = 1000, ushort y = 1000) :
         base(SpawnHousesModHelper.IsMSEnabled ? _filePath_magicstorage : _filePath,
-            _structureXSize, _structureYSize, CopyFloors(_floors),
+            _structureXSize, _structureYSize,
             CopyChainConnectPoints(_connectPoints), childBridgeType, status, x, y, cost, weight)
     {
         ID = StructureID.MainHouseBasement_Room5;
@@ -80,7 +75,7 @@ public sealed class MainBasement_Room5 : CustomChainStructure
             Terraria.WorldGen.PlaceTile(X + 13, Y + 7, SpawnHousesModHelper.StorageUnitTileID);
             TileEntity.PlaceEntityNet(X + 12, Y + 6, SpawnHousesModHelper.StorageUnitTileEntityID);
             
-            Floors[0].GenerateCobwebs(StructureYSize);
+            GenHelper.GenerateCobwebs(new Point(X, Y), StructureXSize, _structureYSize);
             FrameTiles();
         }
     }
@@ -90,7 +85,7 @@ public sealed class MainBasement_Room5 : CustomChainStructure
         
         base.Generate();
         if (!SpawnHousesModHelper.IsMSEnabled)
-            Floors[0].GenerateCobwebs(StructureYSize);
+            GenHelper.GenerateCobwebs(new Point(X, Y), StructureXSize, _structureYSize);
         
         int centerX = X + (StructureXSize / 2);
         int centerY = Y + (StructureXSize / 2);

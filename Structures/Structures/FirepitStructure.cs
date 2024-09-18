@@ -18,8 +18,6 @@ public sealed class FirepitStructure : CustomStructure
     public static readonly string _filePath = "Structures/StructureFiles/firepit";
     public static readonly ushort _structureXSize = 7;
     public static readonly ushort _structureYSize = 3;
-    
-    public static readonly Floor[] _floors = [];
 
     public static readonly ConnectPoint[][] _connectPoints =
     [
@@ -41,7 +39,7 @@ public sealed class FirepitStructure : CustomStructure
     ];
     
     public FirepitStructure(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated) : 
-        base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors), 
+        base(_filePath, _structureXSize, _structureYSize, 
             CopyConnectPoints(_connectPoints), status, x, y)
     {
         ID = StructureID.Firepit;

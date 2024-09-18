@@ -18,8 +18,6 @@ public sealed class MineshaftStructure : CustomStructure
     public static readonly string _filePath = "Structures/StructureFiles/mineshaft";
     public static readonly ushort _structureXSize = 21;
     public static readonly ushort _structureYSize = 22;
-    
-    public static readonly Floor[] _floors = [];
 
     public static readonly ConnectPoint[][] _connectPoints =
     [
@@ -41,7 +39,7 @@ public sealed class MineshaftStructure : CustomStructure
     ];
     
     public MineshaftStructure(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated) :
-        base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors), 
+        base(_filePath, _structureXSize, _structureYSize, 
             CopyConnectPoints(_connectPoints), status, x, y)
     {
         ID = StructureID.Well;
@@ -75,13 +73,13 @@ public sealed class MineshaftStructure : CustomStructure
         int surfaceY = Y + 5;
         while (!Terraria.WorldGen.SolidTile(leftBushX, surfaceY))
             surfaceY++;
-        GenHelper.PlaceBush(leftBushX, surfaceY - 1);
+        GenHelper.PlaceBush(new Point(leftBushX, surfaceY - 1));
         
         int rightBushX = X + _structureXSize + Terraria.WorldGen.genRand.Next(-2, 2);
         surfaceY = Y + 5;
         while (!Terraria.WorldGen.SolidTile(rightBushX, surfaceY))
             surfaceY++;
-        GenHelper.PlaceBush(rightBushX, surfaceY - 1);
+        GenHelper.PlaceBush(new Point(rightBushX, surfaceY - 1));
         
         FrameTiles(X + 10, Y + 160, 180);
     }

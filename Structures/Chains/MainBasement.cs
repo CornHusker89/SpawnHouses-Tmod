@@ -48,23 +48,23 @@ public class MainBasement : StructureChain
     public static CustomChainStructure[] _structureList = 
     [
         new MainBasement_Room1            (12, 40, _bridgeList),
-        new MainBasement_Room1_WithFloor  (14, 90, _bridgeList),
+        new MainBasement_Room1_WithFloor  (14, 130, _bridgeList),
         new MainBasement_Room2            (13, 40, _bridgeList),
         new MainBasement_Room2_WithRoof   (15, 90, _bridgeList),
         new MainBasement_Room3            (8, 115, _bridgeList),
-        new MainBasement_Room4            (11, 6, _bridgeList),
+        new MainBasement_Room4            (11, 5, _bridgeList),
         new MainBasement_Room5            (13, 145, _bridgeList),
         new MainBasement_Room6            (14, 115, _bridgeList),
         new MainBasement_Room7            (14, 80, _bridgeList),
-        new MainBasement_Hallway4         (7, 90, _bridgeList),
-        new MainBasement_Hallway5         (9, 90, _bridgeList),
-        new MainBasement_Hallway9         (7, 90, _bridgeList)
+        new MainBasement_Hallway4         (5, 100, _bridgeList),
+        new MainBasement_Hallway5         (5, 100, _bridgeList),
+        new MainBasement_Hallway9         (4, 100, _bridgeList)
     ];
     
     
     public MainBasement(ushort x = 1000, ushort y = 1000, int seed = -1, byte status = StructureStatus.NotGenerated, bool empty = false) :
         base((ushort)(80 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier), 
-            (ushort)(48 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier),
+            (ushort)(58 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier),
             _structureList, x, y,
             (byte)Math.Round(1 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier), 
             (byte)Math.Round(3 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier),

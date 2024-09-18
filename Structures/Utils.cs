@@ -41,7 +41,7 @@ public static class StructureID
 
     public static readonly short[] BranchingHallwayIDs =
     [
-        6, 7
+        6, 7, 8
     ];
 
     public static bool IsBranchingHallway(CustomChainStructure structure)

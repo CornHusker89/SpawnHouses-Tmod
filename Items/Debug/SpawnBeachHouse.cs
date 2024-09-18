@@ -53,10 +53,12 @@ namespace SpawnHouses.Items.Debug
 
 			y = (ushort)(y - 29); //the structure spawning has an offset + we want it to be a little off the ground
 			x = (ushort)(x - 18); //center the struct
+
+			bool reverse = x > Main.LocalPlayer.position.X / 16;
 			
-			BeachHouseStructure structure = new BeachHouseStructure(x, y);	
-			//structure.Generate();
-			structure._GenerateStructure();
+			BeachHouseStructure structure = new BeachHouseStructure(x, y, 0, reverse);	
+			structure.Generate();
+			//structure._GenerateStructure();
 			
 			return true;
 		}

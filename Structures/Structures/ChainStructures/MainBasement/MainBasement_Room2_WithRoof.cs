@@ -11,11 +11,6 @@ public sealed class MainBasement_Room2_WithRoof : CustomChainStructure
     public static readonly string _filePath = "Structures/StructureFiles/mainBasement/mainBasement_Room2_WithRoof";
     public static readonly ushort _structureXSize = 23;
     public static readonly ushort _structureYSize = 7;
-
-    public static readonly Floor[] _floors = 
-    [
-        new Floor(0, 6, 23)
-    ];
     
     public static readonly ChainConnectPoint[][] _connectPoints =
     [
@@ -40,7 +35,7 @@ public sealed class MainBasement_Room2_WithRoof : CustomChainStructure
 
     public MainBasement_Room2_WithRoof(sbyte cost, ushort weight, Bridge[] childBridgeType, byte status = StructureStatus.NotGenerated,
         ushort x = 1000, ushort y = 1000) :
-        base(_filePath, _structureXSize, _structureYSize, CopyFloors(_floors),
+        base(_filePath, _structureXSize, _structureYSize,
             CopyChainConnectPoints(_connectPoints), childBridgeType, status, x, y, cost, weight)
     {
         ID = StructureID.MainHouseBasement_Room2_WithRoof;
@@ -50,7 +45,7 @@ public sealed class MainBasement_Room2_WithRoof : CustomChainStructure
     public override void Generate()
     {
         base.Generate();
-        Floors[0].GenerateCobwebs(StructureYSize);
+        GenHelper.GenerateCobwebs(new Point(X, Y), StructureXSize, _structureYSize);
         
         int centerX = X + (StructureXSize / 2);
         int centerY = Y + (StructureXSize / 2);
