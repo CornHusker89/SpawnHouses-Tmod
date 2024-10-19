@@ -1,7 +1,8 @@
-Version 0.4.0
+Version 1.0.0
 Major Changes
 - Added a mineshaft near the Main House. As always, can be configured in mod config
-- Fixed critical edge case with loading worlds on mismatched versions of the mod. I don't know if anyone else found this but please tell me if you see any load/save errors especially!
+- Fixed critical edge case with loading worlds on mismatched versions of the mod. I don't know if anyone else found this but please tell me if you see any save/load errors especially!
+- Changed name (again lol) Generated Houses -> Generated Housing
 
 Minor Changes
 - Slightly changed description
@@ -10,3 +11,4 @@ Minor Changes
 - Changed weighting for basement, it'll be less common to get the same room many times in the same basement
 - Added bushes on the main house
 - Fixed broken geometry in a small number of basements
+- Made basement cobweb generation more consistent

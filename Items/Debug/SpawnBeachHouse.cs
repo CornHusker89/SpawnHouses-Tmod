@@ -56,7 +56,7 @@ namespace SpawnHouses.Items.Debug
 
 			bool reverse = x > Main.LocalPlayer.position.X / 16;
 			
-			BeachHouseStructure structure = new BeachHouseStructure(x, y, 0, reverse);	
+			BeachHouse structure = new BeachHouse(x, y, 0, reverse);	
 			structure.Generate();
 			//structure._GenerateStructure();
 			

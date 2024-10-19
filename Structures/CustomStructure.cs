@@ -1,42 +1,48 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Terraria;
-using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
 using Terraria.WorldBuilding;
 
 using SpawnHouses.Structures.StructureParts;
-using SpawnHouses.Structures;
-using Terraria.GameContent.Drawing;
 
 namespace SpawnHouses.Structures;
 
 public abstract class CustomStructure
 {
-    public short ID { get; init; }= 0;
-    public string FilePath { get; set; }
-    public ushort StructureXSize { get; set; }
-    public ushort StructureYSize { get; set; }
-    public ushort X { get; set; }
-    public ushort Y { get; set; }
-    public byte Status { get; set; } = global::SpawnHouses.Structures.StructureStatus.NotGenerated;
+    public ushort ID;
+    public string FilePath;
+    public ushort StructureXSize;
+    public ushort StructureYSize;
+    public ushort X;
+    public ushort Y;
+    public byte Status;
 
-    public ConnectPoint[][] ConnectPoints { get; set; }
-    
-    
+    public ConnectPoint[][] ConnectPoints;
+
+
     protected CustomStructure(String filePath, ushort structureXSize, ushort structureYSize,
-        ConnectPoint[][] connectPoints, byte status, ushort x = 1000, ushort y = 1000) 
+        ConnectPoint[][] connectPoints, byte status, ushort x, ushort y, bool isChainStructure = false)
     {
         FilePath = filePath;
         StructureXSize = structureXSize;
         StructureYSize = structureYSize;
-        ConnectPoints = connectPoints;
         Status = status;
         X = x;
         Y = y;
+
+        if (Enum.TryParse(this.GetType().Name, out StructureID result))
+            ID = (ushort)result;
+        else
+            throw new Exception($"StructureID of {this.ToString()} not found");
+
+        if (!isChainStructure)
+        {
+            ConnectPoints = connectPoints;
+            SetSubstructurePositions();
+        }
+        
     }
     
     protected virtual void SetSubstructurePositions()
@@ -53,7 +59,7 @@ public abstract class CustomStructure
         SetSubstructurePositions();
     }
 
-    protected void FrameTiles()
+    public void FrameTiles()
     {
         int centerX = X + (StructureXSize / 2);
         int centerY = Y + (StructureXSize / 2);
@@ -68,7 +74,7 @@ public abstract class CustomStructure
         ));
     }
     
-    protected void FrameTiles(int centerX, int centerY, int radius)
+    public void FrameTiles(int centerX, int centerY, int radius)
     {
         WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(radius), Actions.Chain(
             new Actions.SetFrames(),
@@ -102,6 +108,9 @@ public abstract class CustomStructure
         Status = StructureStatus.GeneratedButNotFound;
     }
 
+    /// <summary>
+    /// Changes structure status
+    /// </summary>
     public virtual void OnFound()
     {
         Status = StructureStatus.GeneratedAndFound;
@@ -115,6 +124,12 @@ public abstract class CustomStructure
     {
         StructureHelper.Generator.GenerateStructure(FilePath, new Point16(X:X, Y:Y), ModInstance.Mod);
         FrameTiles();
+    }
+    
+    public virtual CustomStructure Clone()
+    {
+        Type type = this.GetType();
+        return (CustomStructure)Activator.CreateInstance(type, X, Y, Status)!;
     }
 
     public void ActionOnEachConnectPoint(Action<ConnectPoint> function)

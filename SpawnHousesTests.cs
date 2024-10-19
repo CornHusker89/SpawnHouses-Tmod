@@ -3,7 +3,7 @@ using Terraria.ModLoader;
 
 namespace SpawnHouses;
 
-public static class SpawnHousesTests
+public static class SpawnHousesIngameTests
 {
     public static void DoAllTests()
     {

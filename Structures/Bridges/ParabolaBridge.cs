@@ -147,8 +147,10 @@ public class ParabolaBridge : Bridge
 
     public override ParabolaBridge Clone()
     {
-        return new ParabolaBridge(StructureFilePath, StructureLength, StructureHeight, StructureYOffset, AttemptSlope, BoundingBoxYMargin,
-            MinDeltaX, MaxDeltaX, MinDeltaY, MaxDeltaY, DeltaXMultiple, DeltaYMultiple, BackwardsGeneration, Point1, Point2);
+        Type type = this.GetType();
+        ParabolaBridge bridge = (ParabolaBridge)Activator.CreateInstance(type)!;
+        //if (Point1 is not null) bridge.Point1 = Point1;
+        return bridge;
     }
     
     

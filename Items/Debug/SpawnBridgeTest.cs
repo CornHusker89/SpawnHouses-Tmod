@@ -57,7 +57,7 @@ namespace SpawnHouses.Items.Debug
 			y = (ushort)(y - 9); //the structure spawning has an offset + we want it to be a little off the ground
 			x = (ushort)(x - 4); //center the struct
 			
-			BridgeTestStructure structure1 = new BridgeTestStructure(x, y);
+			BridgeTest structure1 = new BridgeTest(x, y);
 			structure1._GenerateStructure();
 
 
@@ -84,7 +84,7 @@ namespace SpawnHouses.Items.Debug
 			y = (ushort)(y - 9); //the structure spawning has an offset + we want it to be a little off the ground
 			x = (ushort)(x - 4); //center the struct
 			
-			BridgeTestStructure structure2 = new BridgeTestStructure(x, y);
+			BridgeTest structure2 = new BridgeTest(x, y);
 			structure2._GenerateStructure();
 
 

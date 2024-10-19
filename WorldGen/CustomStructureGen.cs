@@ -10,9 +10,10 @@ using Terraria.Localization;
 using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Structures;
-using SpawnHouses.Structures.StructureChains;
+using SpawnHouses.Structures.Chains;
 using SpawnHouses.Structures.Structures;
 using Terraria.ModLoader.IO;
+using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
 
 namespace SpawnHouses.WorldGen;
@@ -53,21 +54,13 @@ public class CustomStructureGen : ModSystem
 
     public override void PreWorldGen()
     {
-	    // set the world's configs
-	    string configString = $"SpawnPointHouse: {ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointHouse}\n";
-	    configString += $"SpawnPointBasement: {ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement}\n";
-	    configString += $"BeachHouse: {ModContent.GetInstance<SpawnHousesConfig>().EnableBeachHouse}\n";
-	    configString += $"MagicStorage: {SpawnHousesModHelper.IsMSEnabled}\n";
-	    configString += $"SpawnPointHouseSize: {ModContent.GetInstance<SpawnHousesConfig>().SpawnPointHouseSize}\n";
-	    configString += $"SpawnPointBasementSize: {ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementSize}\n";
-	    configString += $"BeachHouseSize: {ModContent.GetInstance<SpawnHousesConfig>().BeachHouseSize}";
-	    SpawnHousesSystem.WorldConfig = configString;
+	    SpawnHousesSystem.WorldVersion = ModInstance.Mod.Version.ToString();
     }
 
     public override void PostWorldGen()
     {
 	    // move guide into the main house (if it's there)
-	    if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointHouse)
+	    if (SpawnHousesSystem.MainHouse is not null)
 	    {
 		    foreach (var npc in Main.npc)
 		    {
@@ -82,18 +75,31 @@ public class CustomStructureGen : ModSystem
 	    
 	    if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement)
 	    {
-		    if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointHouse)
+		    BoundingBox[] mineshaftBoundingBox = [];
+		    if (SpawnHousesSystem.Mineshaft is not null)
 		    {
-			    MainBasement chain = new MainBasement((ushort)SpawnHousesSystem.MainHouse.BasementEntryPos.X, (ushort)SpawnHousesSystem.MainHouse.BasementEntryPos.Y);
-			    chain.Generate();
-				
-			    SpawnHousesSystem.MainBasement = chain;
+			    Mineshaft structure = SpawnHousesSystem.Mineshaft;
+			    BoundingBox structureBox = new BoundingBox(structure.X - 8, structure.Y,
+				    structure.X + structure.StructureXSize + 8, structure.Y + 200);
+			    mineshaftBoundingBox = [structureBox];
+		    }
+
+		    MainBasement chain;
+		    if (SpawnHousesSystem.MainHouse is not null)
+		    {
+			   
+			    chain = new MainBasement((ushort)SpawnHousesSystem.MainHouse.BasementEntryPos.X, (ushort)SpawnHousesSystem.MainHouse.BasementEntryPos.Y, 
+				    startingBoundingBoxes: mineshaftBoundingBox);
 		    }
 		    else
 		    {
-			    MainBasement chain = new MainBasement((ushort)Main.spawnTileX, (ushort)Main.spawnTileY);
+			    chain = new MainBasement((ushort)Main.spawnTileX, (ushort)Main.spawnTileY,
+				    startingBoundingBoxes: mineshaftBoundingBox);
+		    }
+
+		    if (chain.SuccessfulGeneration)
+		    {
 			    chain.Generate();
-				
 			    SpawnHousesSystem.MainBasement = chain;
 		    }
 	    }
@@ -221,7 +227,7 @@ public class CustomHousesPass : GenPass
 			// just in case something above got fucked up
 			if (!foundValidSpot)
 			{
-				ModContent.GetInstance<SpawnHouses>().Logger.Error("Failed to generate SpawnPointHouse. Please report this world seed and your client.log to the mod's author\n" + SpawnHousesSystem.WorldConfig);
+				ModContent.GetInstance<SpawnHouses>().Logger.Error("Failed to generate SpawnPointHouse. Please report this world seed and your client.log to the mod's author");
 				return;
 			}
 			
@@ -246,14 +252,14 @@ public class CustomHousesPass : GenPass
 			// set initialY to the average y pos of the raycasts
 			initialY = (int) Math.Round(sum / 7.0);
 			
-			MainHouseStructure houseStructure = new MainHouseStructure((ushort)(initialX - 31), (ushort)(initialY - 16), hasBasement: ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement, inUnderworld: spawnUnderworld);
-			houseStructure.Generate();
+			MainHouse house = new MainHouse((ushort)(initialX - 31), (ushort)(initialY - 16), hasBasement: ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement, inUnderworld: spawnUnderworld);
+			house.Generate();
 			
-			SpawnHousesSystem.MainHouse = houseStructure;
+			SpawnHousesSystem.MainHouse = house;
 			
 			
 			// move the spawn point to the upper floor of the house
-			Main.spawnTileX = initialX + houseStructure.LeftSize - 1 - 31;
+			Main.spawnTileX = initialX + house.LeftSize - 1 - 31;
 			Main.spawnTileY = initialY + 5 - 15;
 		
 			// replace all dirt with ash if we're in the underworld
@@ -284,7 +290,7 @@ public class CustomHousesPass : GenPass
 				bool FindValidLocation(bool left = true)
 				{
 					if (left)
-						x = initialX - 31 - Terraria.WorldGen.genRand.Next(25, 40);
+						x = initialX - 31 - Terraria.WorldGen.genRand.Next(18, 28);
 					else
 						x = initialX - 31 + SpawnHousesSystem.MainHouse.StructureXSize + Terraria.WorldGen.genRand.Next(25, 40);
 
@@ -306,10 +312,10 @@ public class CustomHousesPass : GenPass
 
 				if (FindValidLocation(startLeftSide) || FindValidLocation(!startLeftSide))
 				{
-					MineshaftStructure mineshaftStructure = new MineshaftStructure((ushort)(x - 13), (ushort)(y - 10));
-					mineshaftStructure.Generate();
+					Mineshaft mineshaft = new Mineshaft((ushort)(x - 13), (ushort)(y - 10));
+					mineshaft.Generate();
 
-					SpawnHousesSystem.Mineshaft = mineshaftStructure;
+					SpawnHousesSystem.Mineshaft = mineshaft;
 				}
 			}
 		}
@@ -400,12 +406,12 @@ public class CustomBeachHousePass : GenPass
 			
 			if (tileX != 0 && tileY != 0)
 			{
-				BeachHouseStructure beachHouseStructure = leftSide ? 
-					new BeachHouseStructure((ushort)(tileX - 9), (ushort)(tileY - 32)) : 
-					new BeachHouseStructure((ushort)(tileX - 23), (ushort)(tileY - 32), reverse: true);
-				beachHouseStructure.Generate();
+				BeachHouse beachHouse = leftSide ? 
+					new BeachHouse((ushort)(tileX - 9), (ushort)(tileY - 32)) : 
+					new BeachHouse((ushort)(tileX - 23), (ushort)(tileY - 32), reverse: true);
+				beachHouse.Generate();
 				
-				SpawnHousesSystem.BeachHouse = beachHouseStructure;
+				SpawnHousesSystem.BeachHouse = beachHouse;
 				
 				// firepit generation
 				if (Terraria.WorldGen.genRand.Next(0, 2) == 0) // 1/2 chance
@@ -434,7 +440,7 @@ public class CustomBeachHousePass : GenPass
 					y = (ushort)(y - 2);
 					x = (ushort)(x - 3);
 		
-					FirepitStructure structure = new FirepitStructure(x, y);
+					Firepit structure = new Firepit(x, y);
 					structure.Generate();
 				}
 			}

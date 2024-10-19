@@ -7,12 +7,13 @@ using Microsoft.Xna.Framework;
 
 namespace SpawnHouses.Structures.StructureParts;
 
-public class ConnectPoint {
-    public byte Direction { get; set; } = 0;
-    public ushort X { get; set; }
-    public ushort Y { get; set; }
-    public short YOffset { get; set; }
-    public short XOffset { get; set; }
+public class ConnectPoint
+{
+    public byte Direction;
+    public ushort X;
+    public ushort Y;
+    public short YOffset;
+    public short XOffset;
     
     public ConnectPoint(short xOffset, short yOffset, byte direction)
     {
@@ -33,8 +34,8 @@ public class ConnectPoint {
     
     public void SetPosition(int mainStructureX, int mainStructureY)
     {
-        X = Convert.ToUInt16(mainStructureX + XOffset);
-        Y = Convert.ToUInt16(mainStructureY + YOffset);
+        X = (ushort)(mainStructureX + XOffset);
+        Y = (ushort)(mainStructureY + YOffset);
     }
     
     public void BlendLeft(ushort topTileID, ushort blendDistance, ushort fillTileID = 0, ushort maxFillCount = 999,

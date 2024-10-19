@@ -1,0 +1,5 @@
+Version 1.0.0
+Important Internal Changes
+- Started keeping mod version in world data
+- Changed Chainstructure seed system to saving each individual structure
+- Removed the System's worldconfig string

@@ -99,9 +99,11 @@ public class SingleStructureBridge : Bridge
 
     public override SingleStructureBridge Clone()
     {
-        return new SingleStructureBridge(StructureFilePath, StructureLength, StructureHeight, 
-            StructureOffsetX, StructureOffsetY, DeltaXMultiple, DeltaYMultiple, 
-            InputDirections, BoundingBoxOverride, HasBoundingBox, Point1, Point2);
+        Type type = this.GetType();
+        SingleStructureBridge bridge = (SingleStructureBridge)Activator.CreateInstance(type)!;
+        if (Point1 is not null && Point2 is not null)
+            bridge.SetPoints(Point1, Point2);
+        return bridge;
     }
     
     
@@ -138,106 +140,106 @@ public class SingleStructureBridge : Bridge
     
     
     // straight
-    public class MainHouseBasementHallway1 : SingleStructureBridge
+    public class MainBasementHallway1 : SingleStructureBridge
     {
-        public MainHouseBasementHallway1() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway1",
+        public MainBasementHallway1() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway1",
             8, 7, 0, -7, 8, -1, [Directions.Right, Directions.Left]) {}
     }
-    public class MainHouseBasementHallway1AltGen : SingleStructureBridge
+    public class MainBasementHallway1AltGen : SingleStructureBridge
     {
-        public MainHouseBasementHallway1AltGen() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway1",
+        public MainBasementHallway1AltGen() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway1",
             8, 7, -9, -7, -10, -1, [Directions.Left, Directions.Right]) {}
     }
     
 
     
     // L shaped
-    public class MainHouseBasementHallway2 : SingleStructureBridge
+    public class MainBasementHallway2 : SingleStructureBridge
     {
-        public MainHouseBasementHallway2() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway2",
+        public MainBasementHallway2() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway2",
             6, 11, -3, -1, 3, 9, [Directions.Down, Directions.Left], [new BoundingBox(0, -1, 0, 0)]) {}
     }
-    public class MainHouseBasementHallway2AltGen : SingleStructureBridge
+    public class MainBasementHallway2AltGen : SingleStructureBridge
     {
-        public MainHouseBasementHallway2AltGen() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway2",
+        public MainBasementHallway2AltGen() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway2",
             6, 11, -7, -11, -5, -11, [Directions.Left, Directions.Down], [new BoundingBox(0, -1, 0, 0)]) {}
     }
     
-    public class MainHouseBasementHallway2Reversed : SingleStructureBridge
+    public class MainBasementHallway2Reversed : SingleStructureBridge
     {
-        public MainHouseBasementHallway2Reversed() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway2_r",
+        public MainBasementHallway2Reversed() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway2_r",
             6, 11, -3, -1, -4, 9, [Directions.Down, Directions.Right], [new BoundingBox(0, -1, 0, 0)]) {}
     } 
-    public class MainHouseBasementHallway2ReversedAltGen : SingleStructureBridge
+    public class MainBasementHallway2ReversedAltGen : SingleStructureBridge
     {
-        public MainHouseBasementHallway2ReversedAltGen() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway2_r",
+        public MainBasementHallway2ReversedAltGen() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway2_r",
             6, 11, 0, -11, 2, -11, [Directions.Right, Directions.Down], [new BoundingBox(0, -1, 0, 0)]) {}
     } 
     
     
     
     // L shaped
-    public class MainHouseBasementHallway3 : SingleStructureBridge
+    public class MainBasementHallway3 : SingleStructureBridge
     {
-        public MainHouseBasementHallway3() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway3",
+        public MainBasementHallway3() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway3",
             6, 11, -3, -11, 3, -6, [Directions.Up, Directions.Left], [new BoundingBox(0, 0, 0, -1)]) {}
     }
-    public class MainHouseBasementHallway3AltGen : SingleStructureBridge
+    public class MainBasementHallway3AltGen : SingleStructureBridge
     {
-        public MainHouseBasementHallway3AltGen() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway3",
+        public MainBasementHallway3AltGen() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway3",
             6, 11, -7, -6, -5, 4, [Directions.Left, Directions.Up], [new BoundingBox(0, 0, 0, -1)]) {}
     }
     
-    public class MainHouseBasementHallway3Reversed : SingleStructureBridge
+    public class MainBasementHallway3Reversed : SingleStructureBridge
     {
-        public MainHouseBasementHallway3Reversed() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway3_r",
+        public MainBasementHallway3Reversed() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway3_r",
             6, 11, -3, -11, -4, -6, [Directions.Up, Directions.Right], [new BoundingBox(0, 0, 0, -1)]) {}
     } 
-    public class MainHouseBasementHallway3ReversedAltGen : SingleStructureBridge
+    public class MainBasementHallway3ReversedAltGen : SingleStructureBridge
     {
-        public MainHouseBasementHallway3ReversedAltGen() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway3_r",
+        public MainBasementHallway3ReversedAltGen() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway3_r",
             6, 11, 0, -6, 2, 4, [Directions.Right, Directions.Up], [new BoundingBox(0, 0, 0, -1)]) {}
     } 
     
     
     
     // just a 1-tile short lil mini lil feller
-    public class MainHouseBasementHallway6 : SingleStructureBridge
+    public class MainBasementHallway6 : SingleStructureBridge
     {
-        public MainHouseBasementHallway6() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway6",
+        public MainBasementHallway6() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway6",
             1, 5, 0, -5, 1, -1, [Directions.Right, Directions.Left]) {}
     }
-    public class MainHouseBasementHallway6AltGen : SingleStructureBridge
+    public class MainBasementHallway6AltGen : SingleStructureBridge
     {
-        public MainHouseBasementHallway6AltGen() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway6",
+        public MainBasementHallway6AltGen() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway6",
             1, 5, -1, -5, -1, -1, [Directions.Left, Directions.Right]) {}
     }
     
     
     
     // a 3-tile short mini fella, but a lil bigger
-    public class MainHouseBasementHallway7 : SingleStructureBridge
+    public class MainBasementHallway7 : SingleStructureBridge
     {
-        public MainHouseBasementHallway7() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway7",
+        public MainBasementHallway7() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway7",
             3, 5, 0, -5, 3, -1, [Directions.Right, Directions.Left]) {}
     }
-    public class MainHouseBasementHallway7AltGen : SingleStructureBridge
+    public class MainBasementHallway7AltGen : SingleStructureBridge
     {
-        public MainHouseBasementHallway7AltGen() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway7",
+        public MainBasementHallway7AltGen() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway7",
             3, 5, -3, -5, -3, -1, [Directions.Left, Directions.Right]) {}
     }
     
     
     
     // vertical bridge
-    public class MainHouseBasementHallway8 : SingleStructureBridge
+    public class MainBasementHallway8 : SingleStructureBridge
     {
-        public MainHouseBasementHallway8() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway8",
+        public MainBasementHallway8() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway8",
             6, 11, -3, -1, -1, 9, [Directions.Down, Directions.Up]) {}
     }
-    public class MainHouseBasementHallway8AltGen : SingleStructureBridge
+    public class MainBasementHallway8AltGen : SingleStructureBridge
     {
-        public MainHouseBasementHallway8AltGen() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway8",
+        public MainBasementHallway8AltGen() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway8",
             6, 11, -3, -12, -1, -11, [Directions.Up, Directions.Down]) {}
     }
     

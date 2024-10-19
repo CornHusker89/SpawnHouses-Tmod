@@ -1,11 +1,6 @@
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.DataStructures;
-using Microsoft.Xna.Framework;
-using SpawnHouses.Structures.StructureChains;
-using Terraria.Chat;
-using Terraria.WorldBuilding;
 using SpawnHouses.Structures.Structures;
 
 
@@ -53,7 +48,7 @@ namespace SpawnHouses.Items.Debug
 			y = (ushort)(y - 16); //the structure spawning has an offset + we want it to be a little off the ground
 			x = (ushort)(x - 31); //center the struct
 			
-			MainHouseStructure structure = new MainHouseStructure(x, y);
+			MainHouse structure = new MainHouse(x, y);
 			structure.Generate();
 
 			return true;

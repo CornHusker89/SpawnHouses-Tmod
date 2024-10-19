@@ -8,7 +8,7 @@ using Terraria.WorldBuilding;
 
 namespace SpawnHouses.Structures.Structures;
 
-public sealed class BeachHouseStructure : CustomStructure
+public sealed class BeachHouse : CustomStructure
 {
     // constants
     public static readonly string _filePath = "Structures/StructureFiles/beachHouse/beachHouse_v2";
@@ -53,14 +53,12 @@ public sealed class BeachHouseStructure : CustomStructure
     
     public readonly bool Reverse;
     
-    public BeachHouseStructure(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, bool reverse = false) :
+    public BeachHouse(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, bool reverse = false) :
         base(!reverse ? _filePath : _filePath_r, _structureXSize, _structureYSize,
             CopyConnectPoints(!reverse? _connectPoints : _connectPoints_r), status, x, y)
     {
         Reverse = reverse;
         Status = status;
-        ID = StructureID.BeachHouse;
-        SetSubstructurePositions();
     }
     
     public override void OnFound()

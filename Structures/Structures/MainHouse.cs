@@ -12,7 +12,7 @@ using Terraria.ModLoader;
 
 namespace SpawnHouses.Structures.Structures;
 
-public sealed class MainHouseStructure : CustomStructure
+public sealed class MainHouse : CustomStructure
 {
     // constants
     private const byte _type_not_generated = 0;
@@ -96,7 +96,7 @@ public sealed class MainHouseStructure : CustomStructure
     private readonly bool RightSmall = false;
     private readonly bool generatedBasement = false;
     
-    public MainHouseStructure(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, 
+    public MainHouse(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, 
         bool hasBasement = false, bool inUnderworld = false, byte leftType = _type_not_generated, byte rightType = _type_not_generated) :
         base("Structures/", _structureXSize, _structureYSize, 
             CopyConnectPoints(_connectPoints), status, x, y)
@@ -252,9 +252,6 @@ public sealed class MainHouseStructure : CustomStructure
         StructureYSize = _structureYSize;
         
         Status = status;
-        
-        ID = StructureID.MainHouse;
-        SetSubstructurePositions();
     }
 
     public override void OnFound() {}
@@ -262,7 +259,6 @@ public sealed class MainHouseStructure : CustomStructure
     [NoJIT]
     public override void Generate()
     {
-        Console.WriteLine("bush attmpt");
         GenHelper.GenerateFoundation(new Point(X + StructureXSize / 2, Y + 29), TileID.Dirt, StructureXSize / 2);
 
         if (!InUnderworld)
@@ -287,18 +283,22 @@ public sealed class MainHouseStructure : CustomStructure
         Terraria.WorldGen.PlaceTile(X + LeftSize - 1, Y + 14, TileID.WorkBenches, true, true, style: 0);
         StructureHelper.Generator.GenerateStructure("Structures/StructureFiles/mainHouse/mainHouse_Rose", new Point16(X + LeftSize - 1, Y + 8), ModInstance.Mod);
 
-        ushort[] blacklistWallIDs = [WallID.StoneSlab, WallID.PearlstoneBrick, WallID.SnowBrick, WallID.RichMaogany];
-        int leftBushCount = Terraria.WorldGen.genRand.Next(2, 5);
-        for (int i = 0; i < leftBushCount; i++)
+        // bushes
+        if (!InUnderworld)
         {
-            int xOffset = Terraria.WorldGen.genRand.Next(0, 12);
-            GenHelper.PlaceBush(new Point(X + xOffset, Y + 15 + Terraria.WorldGen.genRand.Next(0, 2)), wallBlacklistIDs: blacklistWallIDs);
-        }
-        int rightBushCount = Terraria.WorldGen.genRand.Next(2, 5);
-        for (int i = 0; i < rightBushCount; i++)
-        {
-            int xOffset = Terraria.WorldGen.genRand.Next(0, 12);
-            GenHelper.PlaceBush(new Point(X + StructureXSize - 1 - xOffset, Y + 15 + Terraria.WorldGen.genRand.Next(0, 2)), wallBlacklistIDs: blacklistWallIDs);
+            ushort[] blacklistWallIDs = [WallID.StoneSlab, WallID.PearlstoneBrick, WallID.SnowBrick, WallID.RichMaogany];
+            int leftBushCount = Terraria.WorldGen.genRand.Next(2, 5);
+            for (int i = 0; i < leftBushCount; i++)
+            {
+                int xOffset = Terraria.WorldGen.genRand.Next(0, 12);
+                GenHelper.PlaceBush(new Point(X + xOffset, Y + 15 + Terraria.WorldGen.genRand.Next(0, 2)), wallBlacklistIDs: blacklistWallIDs);
+            }
+            int rightBushCount = Terraria.WorldGen.genRand.Next(2, 5);
+            for (int i = 0; i < rightBushCount; i++)
+            {
+                int xOffset = Terraria.WorldGen.genRand.Next(0, 12);
+                GenHelper.PlaceBush(new Point(X + StructureXSize - 1 - xOffset, Y + 15 + Terraria.WorldGen.genRand.Next(0, 2)), wallBlacklistIDs: blacklistWallIDs);
+            }
         }
         
         FrameTiles(X + LeftSize, Y + 4, 40);

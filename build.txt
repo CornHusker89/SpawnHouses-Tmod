@@ -1,4 +1,4 @@
-displayName = Generated Houses
+displayName = Generated Housing
 author = CornHusker and Duck
-version = 0.4.0
+version = 1.0.0
 weakReferences = MagicStorage
