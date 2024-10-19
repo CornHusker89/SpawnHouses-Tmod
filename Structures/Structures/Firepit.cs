@@ -11,7 +11,7 @@ using Actions = Terraria.GameContent.Animations.Actions;
 
 namespace SpawnHouses.Structures.Structures;
 
-public sealed class FirepitStructure : CustomStructure
+public sealed class Firepit : CustomStructure
 {
     
     // constants
@@ -38,13 +38,10 @@ public sealed class FirepitStructure : CustomStructure
         ]
     ];
     
-    public FirepitStructure(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated) : 
+    public Firepit(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated) : 
         base(_filePath, _structureXSize, _structureYSize, 
             CopyConnectPoints(_connectPoints), status, x, y)
-    {
-        ID = StructureID.Firepit;
-        SetSubstructurePositions();
-    }
+    {}
     
     public override void Generate()
     {

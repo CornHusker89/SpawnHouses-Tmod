@@ -2,17 +2,17 @@ using SpawnHouses.Structures.Bridges;
 using SpawnHouses.Structures.ChainStructures;
 using Terraria.DataStructures;
 
-namespace SpawnHouses.Structures.StructureChains;
+namespace SpawnHouses.Structures.Chains;
 
-public class TestStructure : StructureChain
+public class TestChain : StructureChain
 {
     public static Bridge _bridge = new ParabolaBridge.TestBridgeSmall();
     
     public static CustomChainStructure[] _structureList =
     [
-        new TestChainStructure(10, 100, [_bridge])
+        new TestChainStructure(cost: 10, weight: 100)
     ];
     
-    public TestStructure(ushort x, ushort y) : 
-        base(100, 60, _structureList, x, y, 3, 7) {}
+    public TestChain(ushort x, ushort y) : 
+        base(100, 60, _structureList, x, y, 3, 7, [_bridge]) {}
 }

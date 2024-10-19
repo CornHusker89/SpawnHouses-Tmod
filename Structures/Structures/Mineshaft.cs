@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using ReLogic.Utilities;
 using Terraria.ID;
 using SpawnHouses.Structures;
 
@@ -11,7 +12,7 @@ using Actions = Terraria.GameContent.Animations.Actions;
 
 namespace SpawnHouses.Structures.Structures;
 
-public sealed class MineshaftStructure : CustomStructure
+public sealed class Mineshaft : CustomStructure
 {
     
     // constants
@@ -37,13 +38,15 @@ public sealed class MineshaftStructure : CustomStructure
             new ConnectPoint(20, 13, Directions.Right)
         ]
     ];
+
+    public readonly bool IsLeftSide;
     
-    public MineshaftStructure(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated) :
+    public Mineshaft(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated) :
         base(_filePath, _structureXSize, _structureYSize, 
             CopyConnectPoints(_connectPoints), status, x, y)
     {
-        ID = StructureID.Well;
-        SetSubstructurePositions();
+        if (SpawnHousesSystem.MainHouse is not null && SpawnHousesSystem.MainHouse.X > X)
+            IsLeftSide = true;
     }
     
     public override void Generate()
@@ -53,15 +56,19 @@ public sealed class MineshaftStructure : CustomStructure
         
         _GenerateStructure();
         
-        Terraria.WorldGen.digTunnel(X + 10, Y + 32, 0, 12, 
-            Terraria.WorldGen.genRand.Next(18, 25), Terraria.WorldGen.genRand.Next(7, 9));
+        int tunnelSteps = Terraria.WorldGen.genRand.Next(7, 11);
+        WorldUtils.Gen(new Point(X + 9, Y + 13),  // make sure rope can fully generate
+            new Shapes.Rectangle(2, 10 + tunnelSteps * 15),
+            new Terraria.WorldBuilding.Actions.ClearTile(true)
+        );
+        GenHelper.DigVerticalTunnel(new Point(X + 10, Y + 14), 3, tunnelSteps);
 
         // place rope
         for (int i = 5; i < 300; i++)
         {
             Tile tile = Main.tile[X + 10, Y + i];
 
-            if (Terraria.WorldGen.SolidTile(X + 10, Y + i + 1)) break;
+            if (Terraria.WorldGen.SolidTile(X + 10, Y + i + 3)) break;
  
             tile.HasTile = true;
             tile.Slope = SlopeType.Solid;

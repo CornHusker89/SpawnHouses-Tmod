@@ -14,6 +14,8 @@ namespace SpawnHouses.Structures;
 
 public class Bridge
 {
+    public ushort ID;
+    
     public readonly byte[] InputDirections;
     public readonly short MinDeltaX;
     public readonly short MaxDeltaX;
@@ -41,6 +43,11 @@ public class Bridge
         Point1 = point1;
         Point2 = point2;
         BoundingBoxes = boundingBoxes;
+        
+        if (Enum.TryParse(this.GetType().Name, out BridgeID result))
+            ID = (ushort)result;
+        else
+            throw new Exception($"BridgeID of {this.ToString()} not found");
     }
 
     public virtual void Generate()
@@ -70,7 +77,7 @@ public class Bridge
     
     public virtual Bridge Clone()
     {
-        return new Bridge(InputDirections, MinDeltaX, MaxDeltaX, MinDeltaY, MaxDeltaY, 
-            DeltaXMultiple, DeltaYMultiple, Point1, Point2, BoundingBoxes);
+        Type type = this.GetType();
+        return (Bridge)Activator.CreateInstance(type)!;
     }
 }

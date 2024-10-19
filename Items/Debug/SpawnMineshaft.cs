@@ -1,19 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Threading;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.DataStructures;
-using Microsoft.Xna.Framework;
-using SpawnHouses.Structures;
-using SpawnHouses.Structures.Bridges;
-using Terraria.Chat;
-using Terraria.WorldBuilding;
-using SpawnHouses.Structures.ChainStructures;
-using SpawnHouses.Structures.StructureChains;
 using SpawnHouses.Structures.Structures;
-using Terraria.Utilities;
 
 
 namespace SpawnHouses.Items.Debug
@@ -59,7 +47,7 @@ namespace SpawnHouses.Items.Debug
 			y = (ushort)(y - 13);
 			x = (ushort)(x - 10);
 
-			MineshaftStructure structure = new MineshaftStructure(x, y);
+			Mineshaft structure = new Mineshaft(x, y);
 			structure.Generate();
 
 			return true;

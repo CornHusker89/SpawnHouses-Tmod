@@ -52,7 +52,7 @@ namespace SpawnHouses.Items.Debug
 			y = (ushort)(y - 2);
 			x = (ushort)(x - 3);
 			
-			FirepitStructure structure = new FirepitStructure(x, y);
+			Firepit structure = new Firepit(x, y);
 			structure.Generate();
 
 			return true;

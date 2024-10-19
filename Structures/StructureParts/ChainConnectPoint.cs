@@ -14,24 +14,21 @@ namespace SpawnHouses.Structures.StructureParts;
 public class ChainConnectPoint : ConnectPoint 
 {
     private readonly Mod _mod = ModContent.GetInstance<SpawnHouses>();
-    
-    public bool RootPoint { get; set; }
-    public byte GenerateChance { get; set; }
-    public Bridge ChildBridge { get; set; }
-    public byte BranchLength { get; set; }
-    public Seal SealObj { get; set; }
-    public CustomChainStructure ChildStructure { get; set; }
-    public CustomChainStructure ParentStructure { get; set; }
-    public ChainConnectPoint ChildConnectPoint { get; set; }
+
+    public bool RootPoint;
+    public byte GenerateChance;
+    public Bridge ChildBridge;
+    public byte BranchLength;
+    public Seal SealObj;
+    public CustomChainStructure ChildStructure;
+    public CustomChainStructure ParentStructure;
+    public ChainConnectPoint ChildConnectPoint;
     
     public ChainConnectPoint(short xOffset, short yOffset, byte direction, Seal sealObj = null, bool rootPoint = false,
         byte generateChance = GenerateChances.Neutral, Bridge childBridge = null, byte branchLength = 0,
         CustomChainStructure childStructure = null, CustomChainStructure parentStructure = null, ChainConnectPoint childConnectPoint = null) :
         base(xOffset, yOffset, direction)
     {
-        XOffset = xOffset;
-        YOffset = yOffset;
-        Direction = direction;
         SealObj = sealObj;
         ChildBridge = childBridge;
         BranchLength = branchLength;
@@ -47,15 +44,14 @@ public class ChainConnectPoint : ConnectPoint
         byte generateChance, Bridge childBridge, byte branchLength, CustomChainStructure childStructure, CustomChainStructure parentStructure, ChainConnectPoint childConnectPoint) :
         base(xOffset, yOffset, direction)
     {
+        X = x;
+        Y = y;
+        
         Direction = direction;
         SealObj = sealObj;
         ChildBridge = childBridge;
         BranchLength = branchLength;
         GenerateChance = generateChance;
-        X = x;
-        Y = y;
-        XOffset = xOffset;
-        YOffset = yOffset;
         ChildStructure = childStructure;
         ParentStructure = parentStructure;
         ChildConnectPoint = childConnectPoint;

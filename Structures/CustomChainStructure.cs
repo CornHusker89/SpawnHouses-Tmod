@@ -4,41 +4,41 @@ using Terraria.ModLoader;
 using Terraria.DataStructures;
 using Terraria.WorldBuilding;
 using SpawnHouses.Structures.StructureParts;
+using Terraria.GameContent.UI.Elements;
 
 namespace SpawnHouses.Structures;
 
 public class CustomChainStructure : CustomStructure
-{    
-    public new ChainConnectPoint[][] ConnectPoints { get; set; }
-    public Bridge[] ChildBridgeTypes { get; set; }
-    public sbyte Cost { get; set; }
-    public ushort Weight { get; set; }
-    public BoundingBox[] StructureBoundingBoxes { get; set; }
-    public ChainConnectPoint ParentChainConnectPoint { get; set; }
-    public byte BoundingBoxMargin;
-    public List<byte> BridgeDirectionHistory { get; set; } = [];
+{
+    public new ChainConnectPoint[][] ConnectPoints;
+    public sbyte Cost;
+    public ushort Weight;
+    public BoundingBox[] StructureBoundingBoxes;
+    public ChainConnectPoint ParentChainConnectPoint;
+    public List<byte> BridgeDirectionHistory = [];
     
     protected CustomChainStructure(String filePath, ushort structureXSize, ushort structureYSize,
-        ChainConnectPoint[][] connectPoints, Bridge[] childBridges, byte status = StructureStatus.NotGenerated,
-        ushort x = 1000, ushort y = 1000, sbyte cost = -1, ushort weight = 10) :
-            base(filePath, structureXSize, structureYSize, null, status, x, y)
+        ChainConnectPoint[][] connectPoints, ushort x = 1000, ushort y = 1000,
+        byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
+            base(filePath, structureXSize, structureYSize, null, status, x, y, true)
     {
-        ConnectPoints = connectPoints; // need to overwrite CustomStructure's connectPoints property
-        ChildBridgeTypes = childBridges;
+        ConnectPoints = CopyChainConnectPoints(connectPoints); // need to overwrite CustomStructure's connectPoints property
         Cost = cost;
         Weight = weight;
         
         for (byte direction = 0; direction < 4; direction++)
             foreach (ChainConnectPoint connectPoint in ConnectPoints[direction])
                 connectPoint.ParentStructure = this;
+        
+        SetSubstructurePositions();
     }
     
     protected override void SetSubstructurePositions()
     {
-        // need to have a new one because the ConnectPoint type changes
+        // can't inherit because the ConnectPoint type changes
         for (byte direction = 0; direction < 4; direction++)
             foreach (var connectPoint in ConnectPoints[direction])
-                connectPoint.SetPosition(mainStructureX: X, mainStructureY: Y);
+                connectPoint.SetPosition(X, Y);
         
         StructureBoundingBoxes =
         [
@@ -93,9 +93,10 @@ public class CustomChainStructure : CustomStructure
         return newBridges;
     }
     
-    public virtual CustomChainStructure Clone()
+    public override CustomChainStructure Clone()
     {
-        return null;
+        Type type = this.GetType();
+        return (CustomChainStructure)Activator.CreateInstance(type, X, Y, Status, Cost, Weight)!;
     }
     
     public void ActionOnEachConnectPoint(Action<ChainConnectPoint> function)

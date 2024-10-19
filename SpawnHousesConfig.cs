@@ -87,7 +87,7 @@ public class SpawnHousesConfig : ModConfig
 			SetTotalNpcs();
 		}
 	}
-	[JsonIgnore] public float SpawnPointBasementMultiplier { get; private set; } = 1;
+	[JsonIgnore] public float SpawnPointBasementMultiplier { get; set; } = 1;
 
 
 	[DefaultValue(2)]

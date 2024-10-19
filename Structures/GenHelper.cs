@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using ReLogic.Utilities;
 using Terraria;
 using Terraria.ID;
 using Terraria.WorldBuilding;
@@ -9,6 +10,55 @@ namespace SpawnHouses.Structures;
 
 public static class GenHelper
 {
+    private class ClearTileSafe : GenAction
+    {
+        private bool _frameNeighbors;
+
+        public ClearTileSafe(bool frameNeighbors = false)
+        {
+            _frameNeighbors = frameNeighbors;
+        }
+
+        public override bool Apply(Point origin, int x, int y, params object[] args)
+        {
+            ClearChest(x, y);
+            WorldUtils.ClearTile(x, y, _frameNeighbors);
+            return UnitApply(origin, x, y, args);
+        }
+    }
+    
+    /// <summary>
+    /// If any part of a chest is at (x, y), it will completely remove it
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    public static void ClearChest(int x, int y)
+    {
+        void Clear(int chestX, int chestY)
+        {
+            int id = Chest.FindChest(chestX, chestY);
+            Chest.DestroyChestDirect(chestX, chestY, id);
+        }
+        if (Chest.FindChest(x, y) != -1)
+            Clear(x, y);
+        if (Chest.FindChest(x - 1, y) != -1)
+            Clear(x, y);
+        if (Chest.FindChest(x + 1, y) != -1)
+            Clear(x, y);
+        if (Chest.FindChest(x, y - 1) != -1)
+            Clear(x, y);
+        if (Chest.FindChest(x - 1, y - 1) != -1)
+            Clear(x, y);
+        if (Chest.FindChest(x + 1, y - 1) != -1)
+            Clear(x, y);
+        if (Chest.FindChest(x, y - 2) != -1)
+            Clear(x, y);
+        if (Chest.FindChest(x - 1, y - 2) != -1)
+            Clear(x, y);
+        if (Chest.FindChest(x + 1, y - 2) != -1)
+            Clear(x, y);
+    }
+    
     /// <summary>
     /// Places a bush (walls) with many variants, from 1x1 to 2x3 at the coordinates given
     /// </summary>
@@ -81,6 +131,7 @@ public static class GenHelper
         }
     }
     
+    
     /// <summary>
     /// 65% chance of placing cobweb on every tile in designated area
     /// </summary>
@@ -125,6 +176,15 @@ public static class GenHelper
     }
     
     
+    /// <summary>
+    /// Generates beams of a specific tile type
+    /// </summary>
+    /// <param name="start"></param>
+    /// <param name="beamTile"></param>
+    /// <param name="beamInterval"></param>
+    /// <param name="beamsCount"></param>
+    /// <param name="maxBeamSize"></param>
+    /// <param name="stopOnNonSolidTile"></param>
     public static void GenerateBeams(Point start, Tile beamTile, ushort beamInterval, ushort beamsCount,
         ushort maxBeamSize = 50, bool stopOnNonSolidTile = false)
     {
@@ -172,6 +232,12 @@ public static class GenHelper
     }
 
     
+    /// <summary>
+    /// Generates a circle of a specific tile
+    /// </summary>
+    /// <param name="start"></param>
+    /// <param name="tileID"></param>
+    /// <param name="foundationRadius"></param>
     public static void GenerateFoundation(Point start, ushort tileID, int foundationRadius) 
     {
         WorldUtils.Gen(start, new Shapes.Circle(foundationRadius),
@@ -187,6 +253,34 @@ public static class GenHelper
                 return true;
             })
         );
+    }
 
+
+    public static void DigVerticalTunnel(Point start, int randomStepOffset, int steps)
+    {
+        int initialYOffset = 0;
+        for (int i = 0; i < steps; i++)
+        {
+            int width = Terraria.WorldGen.genRand.Next(7, 17);
+            double toleranceFactor = width / 16.0;
+            int baseXOffset = (int)(Terraria.WorldGen.genRand.Next(-randomStepOffset, randomStepOffset + 1) * toleranceFactor);
+            double vectorXOffset = (int)(Terraria.WorldGen.genRand.Next(-randomStepOffset, randomStepOffset + 1) * toleranceFactor * 0.65);
+            if (i == 0 || i == steps - 1)
+            {
+                initialYOffset = (int)(width * 1.7);
+                baseXOffset = 0;
+                vectorXOffset = 0;
+            }
+
+            WorldUtils.Gen(new Point(start.X + baseXOffset, start.Y + initialYOffset + i * 15), 
+                new Shapes.Tail(width, new Vector2D(vectorXOffset, width * 1.7)),
+                new ClearTileSafe(true)
+            );
+				
+            WorldUtils.Gen(new Point(start.X + baseXOffset, start.Y + initialYOffset + 1 + i * 15), 
+                new Shapes.Tail(width, new Vector2D(vectorXOffset, width * -1.7)),
+                new ClearTileSafe(true)
+            );
+        }
     }
 }

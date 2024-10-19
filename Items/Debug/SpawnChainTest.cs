@@ -1,19 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Threading;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.DataStructures;
-using Microsoft.Xna.Framework;
-using SpawnHouses.Structures;
-using SpawnHouses.Structures.Bridges;
-using Terraria.Chat;
-using Terraria.WorldBuilding;
-using SpawnHouses.Structures.ChainStructures;
-using SpawnHouses.Structures.StructureChains;
-using SpawnHouses.Structures.Structures;
-using Terraria.Utilities;
+using SpawnHouses.Structures.Chains;
 
 
 namespace SpawnHouses.Items.Debug
@@ -40,7 +29,7 @@ namespace SpawnHouses.Items.Debug
 		{
 			Point16 point = (Main.MouseWorld / 16).ToPoint16();
 
-			TestStructure chain = new TestStructure((ushort)point.X, (ushort)point.Y);
+			TestChain chain = new TestChain((ushort)point.X, (ushort)point.Y);
 			chain.Generate();
 			return true;
 		}

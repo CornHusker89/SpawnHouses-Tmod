@@ -42,8 +42,8 @@ public class SpawnHousesPlayer : ModPlayer
 
             if (SpawnHousesSystem.BeachHouse.Status == StructureStatus.GeneratedButNotFound)
             {
-                int houseCenterX = SpawnHousesSystem.BeachHouse.X + BeachHouseStructure._structureXSize / 2;
-                int houseCenterY = SpawnHousesSystem.BeachHouse.Y + BeachHouseStructure._structureYSize / 2;
+                int houseCenterX = SpawnHousesSystem.BeachHouse.X + BeachHouse._structureXSize / 2;
+                int houseCenterY = SpawnHousesSystem.BeachHouse.Y + BeachHouse._structureYSize / 2;
 
                 if (
                     x > houseCenterX - 70
