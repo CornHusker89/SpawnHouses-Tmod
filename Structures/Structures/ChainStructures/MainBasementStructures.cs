@@ -400,6 +400,8 @@ public class MainBasement_Room5 : CustomChainStructure
             
             GenHelper.GenerateCobwebs(new Point(X, Y), StructureXSize, StructureYSize);
             FrameTiles();
+            
+            Terraria.NetMessage.SendTileSquare(-1, X, Y, StructureXSize, StructureYSize);
         }
     }
 }
