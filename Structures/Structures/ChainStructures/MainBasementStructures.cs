@@ -5,9 +5,8 @@ using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
 namespace SpawnHouses.Structures.Structures.ChainStructures;
 
+// ReSharper disable ConvertToPrimaryConstructor
 // ReSharper disable InconsistentNaming
-
-
 
 public class MainBasement_Entry1 : CustomChainStructure
 {
@@ -65,6 +64,17 @@ public class MainBasement_Entry2 : CustomChainStructure
             ],
             x, y, status, cost, weight)
     {}
+    
+    protected override void SetSubstructurePositions()
+    {
+        base.SetSubstructurePositions();
+        
+        StructureBoundingBoxes =
+        [
+            new BoundingBox(X + 1, Y, X + 5, Y + 4),
+            new BoundingBox(X, Y + 5, X + StructureXSize - 1, Y + StructureYSize - 1)
+        ];
+    }
 }
 
 public class MainBasement_Hallway4 : CustomChainStructure
@@ -334,7 +344,7 @@ public class MainBasement_Room4 : CustomChainStructure
 public class MainBasement_Room5 : CustomChainStructure
 {
     public MainBasement_Room5(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
-        base(SpawnHousesModHelper.IsMSEnabled ? "Structures/StructureFiles/mainBasement/mainBasement_Room5" : "Structures/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage",
+        base(SpawnHousesModHelper.IsMSEnabled ? "Structures/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage" : "Structures/StructureFiles/mainBasement/mainBasement_Room5",
             22,
             9,
             [
@@ -346,12 +356,12 @@ public class MainBasement_Room5 : CustomChainStructure
         
                 // left
                 [
-                    new ChainConnectPoint(0, 10, Directions.Left, new Seal.MainBasement_SealWall(), true),
+                    new ChainConnectPoint(0, 8, Directions.Left, new Seal.MainBasement_SealWall(), true),
                 ],
         
                 // right
                 [
-                    new ChainConnectPoint(12, 10, Directions.Right, new Seal.MainBasement_SealWall(), false),
+                    new ChainConnectPoint(21, 8, Directions.Right, new Seal.MainBasement_SealWall(), false),
                 ]
             ],
             x, y, status, cost, weight)

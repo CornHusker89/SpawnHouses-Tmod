@@ -54,7 +54,7 @@ public class CustomStructureGen : ModSystem
 
     public override void PreWorldGen()
     {
-	    SpawnHousesSystem.WorldVersion = ModInstance.Mod.Version.ToString();
+	    SpawnHousesSystem.WorldVersion = new Version(ModInstance.Mod.Version.ToString());
     }
 
     public override void PostWorldGen()

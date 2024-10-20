@@ -1,6 +1,7 @@
 using Terraria;
 using Terraria.ID;
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Structures;
 
@@ -15,7 +16,18 @@ namespace SpawnHouses.Structures.Structures;
 public sealed class MainHouse : CustomStructure
 {
     // constants
+    
+    // ReSharper disable InconsistentNaming
+    private static readonly List<string> _signQuotes = 
+        [
+            "All good adventures start in a tavern...To bad this isn't a tavern :(",
+            "Welcome to the conveniently placed house in the middle of nowhere!",
+            "FINALLY, NO MORE BOX HOTELS!!!",
+            "No, we don’t care if this has an impact on official lore"
+        ];
+    
     private const byte _type_not_generated = 0;
+    
     
     public static readonly string _filePath_left = "Structures/StructureFiles/mainHouse/mainHouse_Left_v4";
     private const byte _type_left = 1;
@@ -53,7 +65,6 @@ public sealed class MainHouse : CustomStructure
     
     public static readonly string _filePath_top = "Structures/StructureFiles/mainHouse/mainHouse_Top_v4"; // 1
     
-    
     public static readonly ushort _structureXSize = 63;
     public static readonly ushort _structureYSize = 36;
 
@@ -75,10 +86,8 @@ public sealed class MainHouse : CustomStructure
             new ConnectPoint(62, 16, Directions.Right)
         ]
     ];
-    
     public readonly bool InUnderworld;
     public readonly bool HasBasement;
-    public readonly bool HasMagicStorage;
     
     public readonly string LeftFilePath;
     public readonly string RightFilePath;
@@ -129,6 +138,7 @@ public sealed class MainHouse : CustomStructure
         else
         {
             if (LeftSmall)
+            {
                 if (hasBasement && (RightSmall || Terraria.WorldGen.genRand.NextBool()))
                 {
                     LeftType = _type_small_basement_left;
@@ -141,13 +151,16 @@ public sealed class MainHouse : CustomStructure
                 }
                 else
                     LeftType = _type_small_left;
-
+            }
             else if (SpawnHousesModHelper.IsMSEnabled && RightSmall)
                 LeftType = _type_basement_left;
             else if (SpawnHousesModHelper.IsMSEnabled)
                 LeftType = _type_magicstorage_left;
             else if (hasBasement && (RightSmall || Terraria.WorldGen.genRand.NextBool()))
+            {
                 LeftType = _type_basement_left;
+                generatedBasement = true;
+            }
             else
                 LeftType = _type_left;
         }
@@ -175,7 +188,6 @@ public sealed class MainHouse : CustomStructure
             case _type_magicstorage_left:
                 LeftFilePath = _filePath_magicstorage_left;
                 LeftSize = 33;
-                HasMagicStorage = true;
                 StorageHeartPos = new Point16(X + 25, Y + 17);
                 SignPos = new Point16(X + 7, Y + 10);
                 break;
@@ -230,13 +242,11 @@ public sealed class MainHouse : CustomStructure
                 RightFilePath = _filePath_small_magicstorage_right;
                 RightSize = 21;
                 RightSmall = true;
-                HasMagicStorage = true;
                 StorageHeartPos = new Point16(X + LeftSize + 4, Y + 17);
                 break; 
             case _type_magicstorage_right:
                 RightFilePath = _filePath_magicstorage_right;
                 RightSize = 30;
-                HasMagicStorage = true;
                 StorageHeartPos = new Point16(X + LeftSize + 4, Y + 17);
                 break; 
         }
@@ -278,7 +288,7 @@ public sealed class MainHouse : CustomStructure
         
         int signIndex = Sign.ReadSign(this.SignPos.X, this.SignPos.Y);
         if (signIndex != -1)
-            Sign.TextSign(signIndex, "All good adventures start in a tavern...To bad this isn't a tavern :(");
+            Sign.TextSign(signIndex, _signQuotes[Terraria.WorldGen.genRand.Next(0, _signQuotes.Count)]);
         
         Terraria.WorldGen.PlaceTile(X + LeftSize - 1, Y + 14, TileID.WorkBenches, true, true, style: 0);
         StructureHelper.Generator.GenerateStructure("Structures/StructureFiles/mainHouse/mainHouse_Rose", new Point16(X + LeftSize - 1, Y + 8), ModInstance.Mod);
