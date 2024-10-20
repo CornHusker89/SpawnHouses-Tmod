@@ -87,7 +87,8 @@ public sealed class Mineshaft : CustomStructure
         while (!Terraria.WorldGen.SolidTile(rightBushX, surfaceY))
             surfaceY++;
         GenHelper.PlaceBush(new Point(rightBushX, surfaceY - 1));
-        
         FrameTiles(X + 10, Y + 160, 180);
+
+        Status = StructureStatus.GeneratedAndFound;
     }
 }

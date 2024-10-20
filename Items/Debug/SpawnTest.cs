@@ -10,6 +10,7 @@ using Terraria.Chat;
 using Terraria.WorldBuilding;
 using SpawnHouses.Structures.Structures;
 using SpawnHouses;
+using SpawnHouses.Structures;
 
 
 namespace SpawnHouses.Items.Debug
@@ -35,9 +36,7 @@ namespace SpawnHouses.Items.Debug
 			int x = (Main.MouseWorld / 16).ToPoint16().X;
 			int y = (Main.MouseWorld / 16).ToPoint16().Y;
 			
-			Console.WriteLine(x + ", " + y);
-			SpawnHousesSystem.MainBasement.Generate();
-			Console.WriteLine(SpawnHousesSystem.MainBasement.EntryPosX);
+			GenHelper.ClearChest(x, y);
 			
 			return true;
 

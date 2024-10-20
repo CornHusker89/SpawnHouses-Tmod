@@ -38,25 +38,29 @@ public static class GenHelper
         {
             int id = Chest.FindChest(chestX, chestY);
             Chest.DestroyChestDirect(chestX, chestY, id);
+            WorldUtils.ClearTile(chestX, chestY, true);
+            WorldUtils.ClearTile(chestX + 1, chestY, true);
+            WorldUtils.ClearTile(chestX, chestY + 1, true);
+            WorldUtils.ClearTile(chestX + 1, chestY + 1, true);
         }
         if (Chest.FindChest(x, y) != -1)
             Clear(x, y);
         if (Chest.FindChest(x - 1, y) != -1)
-            Clear(x, y);
+            Clear(x - 1, y);
         if (Chest.FindChest(x + 1, y) != -1)
-            Clear(x, y);
+            Clear(x + 1, y);
         if (Chest.FindChest(x, y - 1) != -1)
-            Clear(x, y);
+            Clear(x, y - 1);
         if (Chest.FindChest(x - 1, y - 1) != -1)
-            Clear(x, y);
+            Clear(x - 1, y - 1);
         if (Chest.FindChest(x + 1, y - 1) != -1)
-            Clear(x, y);
+            Clear(x + 1, y - 1);
         if (Chest.FindChest(x, y - 2) != -1)
-            Clear(x, y);
+            Clear(x, y - 2);
         if (Chest.FindChest(x - 1, y - 2) != -1)
-            Clear(x, y);
+            Clear(x - 1, y - 2);
         if (Chest.FindChest(x + 1, y - 2) != -1)
-            Clear(x, y);
+            Clear(x + 1, y - 2);
     }
     
     /// <summary>

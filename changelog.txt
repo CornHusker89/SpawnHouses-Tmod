@@ -1,4 +1,7 @@
 Version 1.0.0
+
+Finally, version 1! Thanks to all who have supported this mod this far!
+
 Major Changes
 - Added a mineshaft near the Main House. As always, can be configured in mod config
 - Fixed critical edge case with loading worlds on mismatched versions of the mod. I don't know if anyone else found this but please tell me if you see any save/load errors especially!
@@ -12,3 +15,5 @@ Minor Changes
 - Added bushes on the main house
 - Fixed broken geometry in a small number of basements
 - Made basement cobweb generation more consistent
+- Fixed case where 2 basements would spawn
+- Added more main house sign quotes :)

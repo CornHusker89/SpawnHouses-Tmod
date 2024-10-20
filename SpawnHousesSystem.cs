@@ -17,7 +17,7 @@ namespace SpawnHouses;
 
 internal class SpawnHousesSystem : ModSystem
 {
-    public static string WorldVersion = "0.3.2";
+    public static Version WorldVersion = new Version(ModInstance.Mod.Version.ToString());
 
     public static MainHouse? MainHouse;
     public static MainBasement? MainBasement;
@@ -35,21 +35,109 @@ internal class SpawnHousesSystem : ModSystem
     }
     public override void LoadWorldData(TagCompound tag)
     {
-        WorldVersion = tag.ContainsKey("WorldVersion") ? tag.GetString("WorldVersion") : "0.3.2";
-        
-        MainHouse = tag.ContainsKey("MainHouse") ? tag.Get<MainHouse>("MainHouse") : null;
-        MainBasement = tag.ContainsKey("MainBasement") ? tag.Get<MainBasement>("MainBasement") : null;
-        Mineshaft = tag.ContainsKey("Mineshaft") ? tag.Get<Mineshaft>("Mineshaft") : null;
-        BeachHouse = tag.ContainsKey("BeachHouse") ? tag.Get<BeachHouse>("BeachHouse") : null;
+        WorldVersion = tag.ContainsKey("WorldVersion") ? new Version(tag.GetString("WorldVersion")) : new Version("0.3.2");
+
+        if (WorldVersion.Major < 1)
+        {
+            // the rest are unrecoverable. mainhouse might use just 1 structure, basement uses seeds, mineshaft doesn't exist
+            BeachHouse = tag.ContainsKey("BeachHouse") ? tag.Get<BeachHouse>("BeachHouse") : null;
+        }
+        else
+        {
+            MainHouse = tag.ContainsKey("MainHouse") ? tag.Get<MainHouse>("MainHouse") : null;
+            MainBasement = tag.ContainsKey("MainBasement") ? tag.Get<MainBasement>("MainBasement") : null;
+            Mineshaft = tag.ContainsKey("Mineshaft") ? tag.Get<Mineshaft>("Mineshaft") : null;
+            BeachHouse = tag.ContainsKey("BeachHouse") ? tag.Get<BeachHouse>("BeachHouse") : null;
+        }
     }
     public override void ClearWorld()
     {
-        WorldVersion = "";
+        WorldVersion = new Version(ModInstance.Mod.Version.ToString());
         MainHouse = null;
         MainBasement = null;
         Mineshaft = null;
         BeachHouse = null;
     }
+}
+
+internal static class ChainProcessor
+{
+    internal static Dictionary<string, object> ProcessStructure(CustomChainStructure processingStructure)
+    {
+        Dictionary<string, object> dict = new Dictionary<string, object>
+        {
+            ["ID"] = processingStructure.ID,
+            ["X"] = processingStructure.X,
+            ["Y"] = processingStructure.Y,
+            ["Status"] = processingStructure.Status
+        };
+
+        int i = 0;
+        processingStructure.ActionOnEachConnectPoint((ChainConnectPoint connectPoint) =>
+        {
+                
+            if (connectPoint.ChildStructure is not null)
+            {
+                dict[$"Substructure{i}"] = ProcessStructure(connectPoint.ChildStructure);
+                dict[$"Substructure{i}Bridge"] = new Dictionary<string, object>
+                {
+                    ["ID"] = connectPoint.ChildBridge.ID,
+                    ["X1"] = connectPoint.ChildBridge.Point1.X,
+                    ["Y1"] = connectPoint.ChildBridge.Point1.Y,
+                    ["X2"] = connectPoint.ChildBridge.Point2.X,
+                    ["Y2"] = connectPoint.ChildBridge.Point2.Y
+                };
+            }
+            i++;
+        });
+
+        return dict;
+    }
+    
+    internal static CustomChainStructure ProcessSubstructure(TagCompound structureObj)
+        {
+            CustomChainStructure structure = (CustomChainStructure)StructureIDUtils.CreateStructure(
+                (ushort)(short)structureObj["ID"],
+                (ushort)(short)structureObj["X"],
+                (ushort)(short)structureObj["Y"],
+                (byte)structureObj["Status"]
+            );
+            
+            int i = 0;
+            structure.ActionOnEachConnectPoint((ChainConnectPoint point) =>
+            {
+                if (structureObj.ContainsKey($"Substructure{i}"))
+                {
+                    point.ChildStructure = ProcessSubstructure((TagCompound)structureObj[$"Substructure{i}"]);
+                    if (structureObj.ContainsKey($"Substructure{i}Bridge"))
+                    {
+                        TagCompound bridgeObj = (TagCompound)structureObj[$"Substructure{i}Bridge"];
+                        Bridge bridge = BridgeIDUtils.CreateBridge((ushort)(short)bridgeObj["ID"]);
+                        
+                        // get the child connect point
+                        ushort goalX = (ushort)(short)bridgeObj["X2"];
+                        ushort goalY = (ushort)(short)bridgeObj["Y2"];
+                        bool found = false;
+                        point.ChildStructure.ActionOnEachConnectPoint((ChainConnectPoint nextPoint) =>
+                        {
+                            if (nextPoint.X == goalX && nextPoint.Y == goalY)
+                            {
+                                found = true;
+                                point.ChildConnectPoint = nextPoint;
+                                bridge.SetPoints(point, nextPoint);
+                            }
+                        });
+                        if (!found)
+                            throw new Exception("Bridge loading failed");
+                        
+                        point.ChildBridge = bridge;
+                    }
+                }
+                i++;
+            });
+
+            return structure;
+        }
 }
 
 internal class DictionarySerializer : TagSerializer<Dictionary<string, object>, TagCompound>
@@ -96,60 +184,12 @@ internal class MainBasementSerializer : TagSerializer<MainBasement, TagCompound>
 {
     public override TagCompound Serialize(MainBasement chain) 
     {
-        chain.ActionOnEachStructure(structure =>
-        {
-            structure.ActionOnEachConnectPoint((ChainConnectPoint connectPoint) =>
-            {
-                if (connectPoint.ChildBridge is not null)
-                {
-                    Bridge bridge = connectPoint.ChildBridge;
-                    Console.WriteLine("structure id: " + structure + ",  bridge stuff: " + bridge.Point1.X);
-
-                }
-            });
-        });
-        
-        
-        
-        Dictionary<string, object> ProcessStructure(CustomChainStructure processingStructure)
-        {
-            Dictionary<string, object> dict = new Dictionary<string, object>
-            {
-                ["ID"] = processingStructure.ID,
-                ["X"] = processingStructure.X,
-                ["Y"] = processingStructure.Y,
-                ["Status"] = processingStructure.Status
-            };
-
-            int i = 0;
-            processingStructure.ActionOnEachConnectPoint((ChainConnectPoint connectPoint) =>
-            {
-                
-                if (connectPoint.ChildStructure is not null)
-                {
-                    dict[$"Substructure{i}"] = ProcessStructure(connectPoint.ChildStructure);
-                    Console.WriteLine("cp2 - " + (connectPoint.ChildBridge.Point2 is null));
-                    dict[$"Substructure{i}Bridge"] = new Dictionary<string, object>
-                    {
-                        ["ID"] = connectPoint.ChildBridge.ID,
-                        ["X1"] = connectPoint.ChildBridge.Point1.X,
-                        ["Y1"] = connectPoint.ChildBridge.Point1.Y,
-                        ["X2"] = connectPoint.ChildBridge.Point2.X,
-                        ["Y2"] = connectPoint.ChildBridge.Point2.Y
-                    };
-                }
-                i++;
-            });
-
-            return dict;
-        }
-
         return new TagCompound
         {
             ["X"] = chain.EntryPosX,
             ["Y"] = chain.EntryPosY,
             ["Status"] = chain.Status,
-            ["RootStructure"] = ProcessStructure(chain.RootStructure)
+            ["RootStructure"] = ChainProcessor.ProcessStructure(chain.RootStructure)
         };
     }
 
@@ -161,60 +201,7 @@ internal class MainBasementSerializer : TagSerializer<MainBasement, TagCompound>
             tag.GetByte("Status"),
             generateSubstructures: false
         );
-
-        CustomChainStructure ProcessSubstructure(TagCompound structureObj)
-        {
-            CustomChainStructure structure = (CustomChainStructure)StructureIDUtils.CreateStructure(
-                (ushort)(short)structureObj["ID"],
-                (ushort)(short)structureObj["X"],
-                (ushort)(short)structureObj["Y"],
-                (byte)structureObj["Status"]
-            );
-            
-            int i = 0;
-            structure.ActionOnEachConnectPoint((ChainConnectPoint point) =>
-            {
-                if (structureObj.ContainsKey($"Substructure{i}"))
-                {
-                    point.ChildStructure = ProcessSubstructure((TagCompound)structureObj[$"Substructure{i}"]);
-                    if (structureObj.ContainsKey($"Substructure{i}Bridge"))
-                    {
-                        Console.WriteLine("loading bridge to substructure id " + point.ChildStructure.ID);
-                        TagCompound bridgeObj = (TagCompound)structureObj[$"Substructure{i}Bridge"];
-                        Bridge bridge = BridgeIDUtils.CreateBridge((ushort)(short)bridgeObj["ID"]);
-                        
-                        // get the child connect point
-                        ushort goalX = (ushort)(short)bridgeObj["X2"];
-                        ushort goalY = (ushort)(short)bridgeObj["Y2"];
-                        bool found = false;
-                        point.ChildStructure.ActionOnEachConnectPoint((ChainConnectPoint nextPoint) =>
-                        {
-                            if (nextPoint.X == goalX && nextPoint.Y == goalY)
-                            {
-                                Console.WriteLine("loading bridge opposite connect points");
-                                found = true;
-                                point.ChildConnectPoint = nextPoint;
-                                bridge.SetPoints(point, nextPoint);
-                            }
-                        });
-                        if (!found)
-                        {
-                            Console.WriteLine("goal: " + goalX + ", " + goalY);
-                            point.ChildStructure.ActionOnEachConnectPoint((ChainConnectPoint nextPoint) =>
-                            {
-                                Console.WriteLine(nextPoint.X + ", " + nextPoint.Y);
-                            });
-                        }
-                        
-                        point.ChildBridge = bridge;
-                    }
-                }
-                i++;
-            });
-
-            return structure;
-        }
-        basement.RootStructure = ProcessSubstructure((TagCompound)tag["RootStructure"]);
+        basement.RootStructure = ChainProcessor.ProcessSubstructure((TagCompound)tag["RootStructure"]);
         return basement;
     }
 }

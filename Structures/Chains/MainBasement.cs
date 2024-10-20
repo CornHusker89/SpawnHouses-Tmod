@@ -83,13 +83,13 @@ public class MainBasement : StructureChain
         else return true;
     }
 
-    protected override bool IsConnectPointValid(ChainConnectPoint connectPoint, CustomChainStructure rootStructure)
+    protected override bool IsConnectPointValid(ChainConnectPoint connectPoint, ChainConnectPoint targetConnectPoint, CustomChainStructure rootStructure)
     {
         if ((connectPoint.ParentStructure.ID == (ushort)StructureID.MainBasement_Entry1 || connectPoint.ParentStructure.ID == (ushort)StructureID.MainBasement_Entry2) &&
             connectPoint.RootPoint)
             return false;
 
-        if (connectPoint.Y < rootStructure.Y + 10)
+        if (targetConnectPoint.Y < rootStructure.Y + 10)
             return false;
         
         return true;
@@ -98,13 +98,15 @@ public class MainBasement : StructureChain
     protected override void OnStructureGenerate(CustomChainStructure structure)
     {
         if (structure.ID != (ushort)StructureID.MainBasement_Room5 || !SpawnHousesModHelper.IsMSEnabled)
-            GenHelper.GenerateCobwebs(new Point(structure.X, structure.Y), 
-                structure.StructureXSize, structure.StructureYSize);
+            foreach (var boundingBox in structure.StructureBoundingBoxes)
+                GenHelper.GenerateCobwebs(new Point(boundingBox.Point1.X, boundingBox.Point1.Y),
+                    (ushort)(boundingBox.Point2.X - boundingBox.Point1.X + 1),
+                    (ushort)(boundingBox.Point2.Y - boundingBox.Point1.Y + 1));
         
         int centerX = structure.X + (structure.StructureXSize / 2);
         int centerY = structure.Y + (structure.StructureXSize / 2);
         WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle((structure.StructureXSize + structure.StructureYSize + 2) / 2), Actions.Chain(
-            new Modifiers.OnlyWalls(WallID.DirtUnsafe, WallID.GrassUnsafe),
+            new Modifiers.OnlyWalls(WallID.DirtUnsafe, WallID.GrassUnsafe, WallID.Cave2Unsafe, WallID.Cave3Unsafe, WallID.Cave4Unsafe, WallID.Cave5Unsafe, WallID.Cave6Unsafe, WallID.Cave7Unsafe),
             new Actions.PlaceTile(TileID.Dirt)
         ));
         

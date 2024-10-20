@@ -34,12 +34,12 @@ public abstract class StructureChain
         Status = status;
         StartingBoundingBoxes = startingBoundingBoxes;
         Bridges = bridges;
-
-        SuccessfulGeneration = false;
         
         // assume it's a blank object and just return
         if (!generateSubstructures)
             return;
+        
+        SuccessfulGeneration = true;
         
         foreach (var structure in structureList)
             if (structure.Cost < 0)
@@ -94,22 +94,14 @@ public abstract class StructureChain
             var points = queuedConnectPoints; // because scope
             rootStructure.ActionOnEachConnectPoint(connectPoint =>
             {
-                if (IsConnectPointValid(connectPoint, rootStructure))
-                {
-                    connectPoint.BranchLength = 0;
-                    points.Add(connectPoint);
-                }
+                connectPoint.BranchLength = 0;
+                points.Add(connectPoint);
             });
             
             while (queuedConnectPoints.Count > 0)
             {
                 ChainConnectPoint connectPoint = queuedConnectPoints[0];
-                
-                if (IsConnectPointValid(connectPoint, rootStructure))
-                    CalculateChildrenStructures(connectPoint);
-                else
-                    failedConnectPointList.Add(connectPoint);
-                
+                CalculateChildrenStructures(connectPoint);
                 queuedConnectPoints.RemoveAt(0);
             }
             
@@ -282,7 +274,8 @@ public abstract class StructureChain
                 MoveConnectPointAndStructure(newStructure, targetConnectPoint, newStructureConnectPointX, newStructureConnectPointY);
                 connectPointBridge.SetPoints(connectPoint, targetConnectPoint);
 
-
+                if (!IsConnectPointValid(connectPoint, targetConnectPoint, rootStructure)) continue;
+                
                 if (
                     !BoundingBox.IsAnyBoundingBoxesColliding(newStructure.StructureBoundingBoxes, boundingBoxes) &&
                     !BoundingBox.IsAnyBoundingBoxesColliding(connectPointBridge.BoundingBoxes, boundingBoxes)
@@ -345,6 +338,7 @@ public abstract class StructureChain
         ActionOnEachStructure(structure =>
         {
             structure.Generate();
+            OnStructureGenerate(structure);
             structure.ActionOnEachConnectPoint(connectPoint =>
             {
                 if (connectPoint.ChildBridge is not null)
@@ -355,6 +349,7 @@ public abstract class StructureChain
             });
         });
         RootStructure.Generate();
+        OnStructureGenerate(RootStructure);
         
         foreach (var bridge in bridgeList)
             bridge.Generate();
@@ -485,13 +480,13 @@ public abstract class StructureChain
     /// <param name="connectPoint"></param>
     /// <param name="rootStructure"></param>
     /// <returns>If true, children will generate</returns>
-    protected virtual bool IsConnectPointValid(ChainConnectPoint connectPoint, CustomChainStructure rootStructure)
+    protected virtual bool IsConnectPointValid(ChainConnectPoint connectPoint, ChainConnectPoint targetConnectPoint, CustomChainStructure rootStructure)
     {
         return true;
     }
 
     /// <summary>
-    /// Called when the CustomChainStructures are being generated, called with each one
+    /// Called for each CustomChainStructure right after it gets generated.
     /// </summary>
     protected virtual void OnStructureGenerate(CustomChainStructure structure)
     {
