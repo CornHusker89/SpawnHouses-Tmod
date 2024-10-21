@@ -18,12 +18,13 @@ public sealed class MainHouse : CustomStructure
     // constants
     
     // ReSharper disable InconsistentNaming
-    private static readonly List<string> _signQuotes = 
+    private static List<string> _signQuotes = 
         [
             "All good adventures start in a tavern...To bad this isn't a tavern :(",
             "Welcome to the conveniently placed house in the middle of nowhere!",
             "FINALLY, NO MORE BOX HOTELS!!!",
-            "No, we don’t care if this has an impact on official lore"
+            "No, we don’t care if this has an impact on official lore.",
+            "This house has been generated ~ times"
         ];
     
     private const byte _type_not_generated = 0;
@@ -144,7 +145,7 @@ public sealed class MainHouse : CustomStructure
                     LeftType = _type_small_basement_left;
                     generatedBasement = true;
                 }
-                else if (hasBasement && SpawnHousesModHelper.IsMSEnabled && !RightSmall)
+                else if (hasBasement && ModHelper.IsMSEnabled && !RightSmall)
                 {
                     LeftType = _type_small_basement_left;
                     generatedBasement = true;
@@ -152,9 +153,9 @@ public sealed class MainHouse : CustomStructure
                 else
                     LeftType = _type_small_left;
             }
-            else if (SpawnHousesModHelper.IsMSEnabled && RightSmall)
+            else if (ModHelper.IsMSEnabled && RightSmall)
                 LeftType = _type_basement_left;
-            else if (SpawnHousesModHelper.IsMSEnabled)
+            else if (ModHelper.IsMSEnabled)
                 LeftType = _type_magicstorage_left;
             else if (hasBasement && (RightSmall || Terraria.WorldGen.genRand.NextBool()))
             {
@@ -205,7 +206,7 @@ public sealed class MainHouse : CustomStructure
         else
         {
             if (RightSmall)
-                if (SpawnHousesModHelper.IsMSEnabled && LeftType != _type_magicstorage_left)
+                if (ModHelper.IsMSEnabled && LeftType != _type_magicstorage_left)
                     RightType = _type_small_magicstorage_right;
                 else
                     RightType = _type_small_right;
@@ -216,7 +217,7 @@ public sealed class MainHouse : CustomStructure
                     RightType = _type_basement_right;
                     generatedBasement = true;
                 }
-                else if (SpawnHousesModHelper.IsMSEnabled && LeftSmall)
+                else if (ModHelper.IsMSEnabled && LeftSmall)
                     RightType = _type_magicstorage_right;
                 else
                     RightType = _type_right;
@@ -286,9 +287,43 @@ public sealed class MainHouse : CustomStructure
         StructureHelper.Generator.GenerateStructure(RightFilePath, new Point16(X + LeftSize, Y), ModInstance.Mod);
         StructureHelper.Generator.GenerateStructure(TopFilePath, new Point16(X + LeftSize - 14, Y - 10), ModInstance.Mod);
         
+        string signString = "All good adventures start in a tavern...To bad this isn't a tavern :(";
+        Random rnd = new Random();
+        for (int i = 0; i < 15; i++)
+        {
+            string possibleString = _signQuotes[rnd.Next(0, _signQuotes.Count)];
+            if (possibleString.Contains('~'))
+            {
+                try
+                {
+                    Dictionary<string, int> dict = WebClientInstance.WebClient.GetSpawnCount();
+                    if (dict is not null)
+                    {
+                        dict.TryGetValue("main_houses", out int value);
+                        if (value is not -1)
+                        {
+                            signString = possibleString.Replace("~", value.ToString());
+                            break;
+                        }
+                    }
+                    continue;
+                    
+                }
+                catch
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                signString = possibleString;
+                break;
+            }
+        }
+        
         int signIndex = Sign.ReadSign(this.SignPos.X, this.SignPos.Y);
         if (signIndex != -1)
-            Sign.TextSign(signIndex, _signQuotes[Terraria.WorldGen.genRand.Next(0, _signQuotes.Count)]);
+            Sign.TextSign(signIndex, signString);
         
         Terraria.WorldGen.PlaceTile(X + LeftSize - 1, Y + 14, TileID.WorkBenches, true, true, style: 0);
         StructureHelper.Generator.GenerateStructure("Structures/StructureFiles/mainHouse/mainHouse_Rose", new Point16(X + LeftSize - 1, Y + 8), ModInstance.Mod);

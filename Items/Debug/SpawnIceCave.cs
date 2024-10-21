@@ -27,12 +27,12 @@ namespace SpawnHouses.Items.Debug
 		{
 		}
 
-		public override bool AltFunctionUse(Player player)
+		public override bool AltFunctionUse(Terraria.Player player)
 		{
 			return true;
 		}
 		
-		public override bool? UseItem(Player player)
+		public override bool? UseItem(Terraria.Player player)
 		{
 			Point16 point = (Main.MouseWorld / 16).ToPoint16();
 			int x = point.X;

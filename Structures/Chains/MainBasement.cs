@@ -71,7 +71,7 @@ public class MainBasement : StructureChain
 
     protected override bool IsChainComplete()
     {
-        if (SpawnHousesModHelper.IsMSEnabled && ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier > 0.60)
+        if (ModHelper.IsMSEnabled && ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier > 0.60)
         {
             bool found = false;
             ActionOnEachStructure(structure =>
@@ -95,9 +95,32 @@ public class MainBasement : StructureChain
         return true;
     }
 
+    // protected override bool ConnectPointAttrition(ChainConnectPoint connectPoint, byte currentBranchLength, byte minBranchLength,
+    //     byte maxBranchLength)
+    // {
+    //     float shape = ModContent.GetInstance<SpawnHousesConfig>().MainBasementShape;
+    //     if (connectPoint.Direction is Directions.Left or Directions.Right)
+    //     {
+    //         if (Terraria.WorldGen.genRand.NextDouble() >= shape)
+    //             return false;
+    //     }
+    //     else
+    //         if (Terraria.WorldGen.genRand.NextDouble() <= shape)
+    //             return false;
+    //     
+    //     if (connectPoint.GenerateChance != GenerateChances.Guaranteed)
+    //         if ((Terraria.WorldGen.genRand.Next(0, maxBranchLength - currentBranchLength) == 0 ||
+    //              currentBranchLength >= maxBranchLength) && currentBranchLength >= minBranchLength)
+    //             return false;
+    //         
+    //     if (connectPoint.GenerateChance == GenerateChances.Rejected)
+    //         return false;
+    //     return true;
+    // }
+
     protected override void OnStructureGenerate(CustomChainStructure structure)
     {
-        if (structure.ID != (ushort)StructureID.MainBasement_Room5 || !SpawnHousesModHelper.IsMSEnabled)
+        if (structure.ID != (ushort)StructureID.MainBasement_Room5 || !ModHelper.IsMSEnabled)
             foreach (var boundingBox in structure.StructureBoundingBoxes)
                 GenHelper.GenerateCobwebs(new Point(boundingBox.Point1.X, boundingBox.Point1.Y),
                     (ushort)(boundingBox.Point2.X - boundingBox.Point1.X + 1),
