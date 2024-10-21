@@ -1,3 +1,4 @@
-Version 1.0.1
+Version 1.0.2
 Minor Changes
-- Patch for multiplayer desync (oops)
+- Added another main house sign message, with the live count of main houses generated
+- Backend Changes

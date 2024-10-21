@@ -6,7 +6,7 @@ using Terraria.ModLoader;
 
 namespace SpawnHouses;
 
-public class SpawnHousesModHelper : ModSystem
+public class ModHelper : ModSystem
 {
     public static bool IsMSEnabled;
     public static bool ErrorLoadingMS;

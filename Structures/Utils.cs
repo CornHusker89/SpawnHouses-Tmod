@@ -302,3 +302,8 @@ public static class ModInstance
 {
     public static readonly Mod Mod = ModContent.GetInstance<SpawnHouses>();
 }
+
+public static class WebClientInstance
+{
+    public static readonly WebHelper WebClient = new WebHelper();
+}

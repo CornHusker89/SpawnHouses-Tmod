@@ -19,11 +19,12 @@ public abstract class StructureChain
     public CustomChainStructure RootStructure;
     public readonly bool SuccessfulGeneration = true;
     
-    protected readonly List<ChainConnectPoint> _failedConnectPointList = [];
+    private readonly List<ChainConnectPoint> _failedConnectPointList = [];
     private readonly BoundingBox[] StartingBoundingBoxes;
     private int _structureListWeightSum;
     private CustomChainStructure[] _usableStructureList;
     private Bridge[] Bridges;
+    private List<ChainConnectPoint> failedConnectPointList = [];
 
     public StructureChain(ushort maxCost, ushort minCost, CustomChainStructure[] structureList, ushort entryPosX, ushort entryPosY,
         byte minBranchLength, byte maxBranchLength, Bridge[] bridges, CustomChainStructure[] rootStructureList = null, BoundingBox[] startingBoundingBoxes = null,
@@ -60,7 +61,6 @@ public abstract class StructureChain
         
         List<BoundingBox> boundingBoxes;
         List<ChainConnectPoint> queuedConnectPoints;
-        List<ChainConnectPoint> failedConnectPointList = [];
 
         bool foundValidStructureChain = false;
         const ushort maxAttempts = 250;
@@ -179,14 +179,8 @@ public abstract class StructureChain
                 failedConnectPointList.Add(connectPoint);
                 return;
             }
-            
-            if (connectPoint.GenerateChance != GenerateChances.Guaranteed)
-                if ((Terraria.WorldGen.genRand.Next(0, maxBranchLength - currentBranchLength) == 0 || currentBranchLength >= maxBranchLength) && currentBranchLength >= minBranchLength)
-                {
-                    failedConnectPointList.Add(connectPoint);
-                    return;
-                }
-            if (connectPoint.GenerateChance == GenerateChances.Rejected)
+
+            if (!ConnectPointAttrition(connectPoint, currentBranchLength, minBranchLength, maxBranchLength))
             {
                 failedConnectPointList.Add(connectPoint);
                 return;
@@ -221,7 +215,7 @@ public abstract class StructureChain
             Bridge connectPointBridge = null;
             bool validLocation = false;
             
-            for (int findLocationAttempts = 0; findLocationAttempts < 20; findLocationAttempts++)
+            for (int findLocationAttempts = 0; findLocationAttempts < 25; findLocationAttempts++)
             {
                 // randomly pick either the top or bottom side
                 int randomSide = 0; //Terraria.WorldGen.genRand.Next(0, 2);
@@ -232,30 +226,10 @@ public abstract class StructureChain
                     failedConnectPointList.Add(connectPoint);
                     return;
                 }
-                
-                int deltaX, deltaY;
-                if (connectPointBridge.DeltaXMultiple != 0)
-                {
-                    int minRangeX = connectPointBridge.MinDeltaX / connectPointBridge.DeltaXMultiple;
-                    int maxRangeX = connectPointBridge.MaxDeltaX / connectPointBridge.DeltaXMultiple;
-                    deltaX = Terraria.WorldGen.genRand.Next(minRangeX, maxRangeX + 1) * connectPointBridge.DeltaXMultiple;
-                }
-                else
-                    deltaX = 0;
 
-                if (connectPointBridge.DeltaYMultiple != 0)
-                {
-                    int minRangeY = connectPointBridge.MinDeltaY / connectPointBridge.DeltaYMultiple;
-                    int maxRangeY = connectPointBridge.MaxDeltaY / connectPointBridge.DeltaYMultiple;
-                    deltaY = Terraria.WorldGen.genRand.Next(minRangeY, maxRangeY + 1) * connectPointBridge.DeltaYMultiple;
-                }
-                else
-                    deltaY = 0;
-                
-                // note: the +/-1 is because connect points have no space between them even when the deltaX is 1
-                
-                int newStructureConnectPointX = connectPoint.X + deltaX + 1;
-                int newStructureConnectPointY = connectPoint.Y + deltaY + 1;
+                var position = SetProspectiveStructurePosition(newStructure, connectPoint, connectPointBridge);
+                int newStructureConnectPointX = position.newStructureConnectPointX;
+                int newStructureConnectPointY = position.newStructureConnectPointY;
                 
                 byte secondConnectPointDirection;
                 if (connectPointBridge.InputDirections[0] == targetDirection)
@@ -464,6 +438,39 @@ public abstract class StructureChain
         }
         return null;
     }
+
+    /// <summary>
+    /// Called after choosing bridge and structure. This method decides where the next structure goes (based on its cp)
+    /// </summary>
+    /// <param name="structure"></param>
+    /// <param name="connectPoint"></param>
+    /// <param name="bridge"></param>
+    /// <returns></returns>
+    protected virtual (int newStructureConnectPointX, int newStructureConnectPointY) SetProspectiveStructurePosition(
+        CustomChainStructure structure, ChainConnectPoint connectPoint, Bridge bridge)
+    {
+        int deltaX, deltaY;
+        if (bridge.DeltaXMultiple != 0)
+        {
+            int minRangeX = bridge.MinDeltaX / bridge.DeltaXMultiple;
+            int maxRangeX = bridge.MaxDeltaX / bridge.DeltaXMultiple;
+            deltaX = Terraria.WorldGen.genRand.Next(minRangeX, maxRangeX + 1) * bridge.DeltaXMultiple;
+        }
+        else
+            deltaX = 0;
+
+        if (bridge.DeltaYMultiple != 0)
+        {
+            int minRangeY = bridge.MinDeltaY / bridge.DeltaYMultiple;
+            int maxRangeY = bridge.MaxDeltaY / bridge.DeltaYMultiple;
+            deltaY = Terraria.WorldGen.genRand.Next(minRangeY, maxRangeY + 1) * bridge.DeltaYMultiple;
+        }
+        else
+            deltaY = 0;
+                
+        // note: the +/-1 is because connect points have no space between them even when the deltaX is 1
+        return (connectPoint.X + deltaX + 1, connectPoint.Y + deltaY + 1);
+    }
     
     /// <summary>
     /// Called at the very end of Chain generation when object is created
@@ -475,9 +482,30 @@ public abstract class StructureChain
     }
 
     /// <summary>
+    /// Called before attempting to generate a connect point's children
+    /// </summary>
+    /// <param name="connectPoint"></param>
+    /// <param name="currentBranchLength"></param>
+    /// <param name="minBranchLength"></param>
+    /// <param name="maxBranchLength"></param>
+    /// <returns>True if connect point is valid</returns>
+    protected virtual bool ConnectPointAttrition(ChainConnectPoint connectPoint, byte currentBranchLength,
+        byte minBranchLength, byte maxBranchLength)
+    {
+        if (connectPoint.GenerateChance != GenerateChances.Guaranteed)
+            if ((Terraria.WorldGen.genRand.Next(0, maxBranchLength - currentBranchLength) == 0 ||
+                 currentBranchLength >= maxBranchLength) && currentBranchLength >= minBranchLength)
+                return false;
+        if (connectPoint.GenerateChance == GenerateChances.Rejected)
+            return false;
+        return true;
+    }
+
+    /// <summary>
     /// Called before generating ConnectPoint's children.
     /// </summary>
     /// <param name="connectPoint"></param>
+    /// <param name="targetConnectPoint"></param>
     /// <param name="rootStructure"></param>
     /// <returns>If true, children will generate</returns>
     protected virtual bool IsConnectPointValid(ChainConnectPoint connectPoint, ChainConnectPoint targetConnectPoint, CustomChainStructure rootStructure)

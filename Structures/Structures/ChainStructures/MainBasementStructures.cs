@@ -344,7 +344,7 @@ public class MainBasement_Room4 : CustomChainStructure
 public class MainBasement_Room5 : CustomChainStructure
 {
     public MainBasement_Room5(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
-        base(SpawnHousesModHelper.IsMSEnabled ? "Structures/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage" : "Structures/StructureFiles/mainBasement/mainBasement_Room5",
+        base(ModHelper.IsMSEnabled ? "Structures/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage" : "Structures/StructureFiles/mainBasement/mainBasement_Room5",
             22,
             9,
             [
@@ -369,34 +369,34 @@ public class MainBasement_Room5 : CustomChainStructure
     
     public override void OnFound()
     {
-        if (SpawnHousesModHelper.IsMSEnabled && FilePath == "Structures/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage")
+        if (ModHelper.IsMSEnabled && FilePath == "Structures/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage")
         {
-            Terraria.WorldGen.PlaceTile(X + 11, Y + 7, SpawnHousesModHelper.RemoteAccessTileID);
-            TileEntity.PlaceEntityNet(X + 10, Y + 6, SpawnHousesModHelper.RemoteAccessTileEntityID);
+            Terraria.WorldGen.PlaceTile(X + 11, Y + 7, ModHelper.RemoteAccessTileID);
+            TileEntity.PlaceEntityNet(X + 10, Y + 6, ModHelper.RemoteAccessTileEntityID);
             
             if (SpawnHousesSystem.MainHouse is not null && SpawnHousesSystem.MainHouse.Status != StructureStatus.NotGenerated)
-                SpawnHousesModHelper.LinkRemoteStorage(
+                ModHelper.LinkRemoteStorage(
                     new Point16(X + 10, Y + 6),
                     SpawnHousesSystem.MainHouse.StorageHeartPos
                 );
             
-            Terraria.WorldGen.PlaceTile(X + 9, Y + 4, SpawnHousesModHelper.StorageUnitTileID);
-            TileEntity.PlaceEntityNet(X + 8, Y + 3, SpawnHousesModHelper.StorageUnitTileEntityID);
+            Terraria.WorldGen.PlaceTile(X + 9, Y + 4, ModHelper.StorageUnitTileID);
+            TileEntity.PlaceEntityNet(X + 8, Y + 3, ModHelper.StorageUnitTileEntityID);
             
-            Terraria.WorldGen.PlaceTile(X + 13, Y + 4, SpawnHousesModHelper.StorageUnitTileID);
-            TileEntity.PlaceEntityNet(X + 12, Y + 3, SpawnHousesModHelper.StorageUnitTileEntityID);
+            Terraria.WorldGen.PlaceTile(X + 13, Y + 4, ModHelper.StorageUnitTileID);
+            TileEntity.PlaceEntityNet(X + 12, Y + 3, ModHelper.StorageUnitTileEntityID);
             
-            Terraria.WorldGen.PlaceTile(X + 15, Y + 4, SpawnHousesModHelper.StorageUnitTileID);
-            TileEntity.PlaceEntityNet(X + 14, Y + 3, SpawnHousesModHelper.StorageUnitTileEntityID);
+            Terraria.WorldGen.PlaceTile(X + 15, Y + 4, ModHelper.StorageUnitTileID);
+            TileEntity.PlaceEntityNet(X + 14, Y + 3, ModHelper.StorageUnitTileEntityID);
             
-            Terraria.WorldGen.PlaceTile(X + 7, Y + 7, SpawnHousesModHelper.StorageUnitTileID);
-            TileEntity.PlaceEntityNet(X + 6, Y + 6, SpawnHousesModHelper.StorageUnitTileEntityID);
+            Terraria.WorldGen.PlaceTile(X + 7, Y + 7, ModHelper.StorageUnitTileID);
+            TileEntity.PlaceEntityNet(X + 6, Y + 6, ModHelper.StorageUnitTileEntityID);
             
-            Terraria.WorldGen.PlaceTile(X + 9, Y + 7, SpawnHousesModHelper.StorageUnitTileID);
-            TileEntity.PlaceEntityNet(X + 8, Y + 6, SpawnHousesModHelper.StorageUnitTileEntityID);
+            Terraria.WorldGen.PlaceTile(X + 9, Y + 7, ModHelper.StorageUnitTileID);
+            TileEntity.PlaceEntityNet(X + 8, Y + 6, ModHelper.StorageUnitTileEntityID);
             
-            Terraria.WorldGen.PlaceTile(X + 13, Y + 7, SpawnHousesModHelper.StorageUnitTileID);
-            TileEntity.PlaceEntityNet(X + 12, Y + 6, SpawnHousesModHelper.StorageUnitTileEntityID);
+            Terraria.WorldGen.PlaceTile(X + 13, Y + 7, ModHelper.StorageUnitTileID);
+            TileEntity.PlaceEntityNet(X + 12, Y + 6, ModHelper.StorageUnitTileEntityID);
             
             GenHelper.GenerateCobwebs(new Point(X, Y), StructureXSize, StructureYSize);
             FrameTiles();

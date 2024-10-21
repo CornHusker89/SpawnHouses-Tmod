@@ -13,8 +13,6 @@ namespace SpawnHouses;
 public class SpawnHousesConfig : ModConfig
 {
 	public override ConfigScope Mode => ConfigScope.ServerSide;
-
-	
 	
 	// [JsonIgnore]
 	// [ShowDespiteJsonIgnore]
@@ -51,13 +49,9 @@ public class SpawnHousesConfig : ModConfig
 		// 	}
 		// }
 	}
-
 	
-
 	private int _spawnPointHouseSize = 4;
 	[Header("SizeHeader")]
-	
-	
 	
 	[DefaultValue(4)]
 	[Terraria.ModLoader.Config.Range(2, 4)]
@@ -71,7 +65,6 @@ public class SpawnHousesConfig : ModConfig
 			SetTotalNpcs();
 		}
 	}
-
 	
 	private int _spawnPointBasementSize = 6;
 	[DefaultValue(6)]
@@ -88,8 +81,7 @@ public class SpawnHousesConfig : ModConfig
 		}
 	}
 	[JsonIgnore] public float SpawnPointBasementMultiplier { get; set; } = 1;
-
-
+	
 	[DefaultValue(2)]
 	[Terraria.ModLoader.Config.Range(2, 2)]
 	[Slider]
@@ -110,6 +102,13 @@ public class SpawnHousesConfig : ModConfig
 	[ReloadRequired]
 	[DefaultValue(true)]
 	public bool MagicStorageIntegrations { get; set; }
+	
+	[DefaultValue(0.5f)]
+	[Slider]
+	[Terraria.ModLoader.Config.Range(0, 1)]
+	[Increment(0.1f)]
+	[JsonIgnore]
+	public float MainBasementShape { get; set; }
 
 	
 	
@@ -124,8 +123,6 @@ public class SpawnHousesConfig : ModConfig
 	private bool _enableSpawnPointHouse = true; //this is in the StructuresHeader
 	[Header("StructuresHeader")]
 	
-	
-	
 	[DefaultValue(true)]
 	public bool EnableSpawnPointHouse
 	{
@@ -136,7 +133,6 @@ public class SpawnHousesConfig : ModConfig
 			SetTotalNpcs();
 		}
 	}
-	
 	
 	private bool _enableSpawnPointBasement = true;
 	[DefaultValue(true)]
@@ -150,10 +146,8 @@ public class SpawnHousesConfig : ModConfig
 		}
 	}
 
-
 	[DefaultValue(true)] 
 	public bool EnableMineshaft { get; set; }= true;
-	
 	
 	private bool _enableBeachHouse  = true;
 	[DefaultValue(true)]

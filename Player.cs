@@ -7,11 +7,11 @@ using Terraria.ModLoader;
 
 namespace SpawnHouses;
 
-public class SpawnHousesPlayer : ModPlayer
+public class Player : ModPlayer
 {
     public override void OnEnterWorld()
     {
-        if (SpawnHousesModHelper.ErrorLoadingMS)
+        if (ModHelper.ErrorLoadingMS)
             Main.NewText("Generated Houses had an issue loading Magic Storage content, so Magic Storage features in Generated Houses are disabled. Please contact the author about this issue!", Color.Red);
     }
 

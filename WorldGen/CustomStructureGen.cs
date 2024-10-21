@@ -103,6 +103,13 @@ public class CustomStructureGen : ModSystem
 			    SpawnHousesSystem.MainBasement = chain;
 		    }
 	    }
+
+	    WebClientInstance.WebClient.AddSpawnCount(
+		    SpawnHousesSystem.MainHouse is not null,
+		    SpawnHousesSystem.MainBasement is not null,
+		    SpawnHousesSystem.BeachHouse is not null,
+		    SpawnHousesSystem.Mineshaft is not null
+		);
     }
 }
 
@@ -173,7 +180,7 @@ public class CustomHousesPass : GenPass
 				int xVal = Terraria.WorldGen.genRand.Next(Main.spawnTileX - (counts / 8), Main.spawnTileX + (counts / 8));
 				
 				// Move out of the way of the big spawn tree
-				if (SpawnHousesModHelper.IsRemnantsEnabled)
+				if (ModHelper.IsRemnantsEnabled)
 					xVal -= 70;
 				
 				if (!spawnUnderworld)

@@ -68,11 +68,6 @@ Mods: {
 				Tooltip: --Testing item, no guarantees it won't crash the game--
 			}
 
-			SpawnWell: {
-				DisplayName: Spawn Mineshaft
-				Tooltip: --Testing item, no guarantees it won't crash the game--
-			}
-
 			SpawnMineshaft: {
 				DisplayName: Spawn Mineshaft
 				Tooltip: Spawns the mineshaft on the ground underneath the cursor
@@ -107,6 +102,11 @@ Mods: {
 				MagicStorageIntegrations: {
 					Label: Magic Storage Integrations
 					Tooltip: If ON, Magic Storage features within Generated Houses will be enabled. Only has an effect when Magic Storage (the mod) is enabled.
+				}
+
+				MainBasementShape: {
+					Label: Main Basement Shape
+					Tooltip: 0 will not favor generating in any direction. Values closer to 0 will generate the basement more vertically, while values closer to 1 will generate the basement more horizontally.
 				}
 
 				EnableSpawnPointHouse: {

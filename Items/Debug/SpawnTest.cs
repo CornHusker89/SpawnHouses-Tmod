@@ -3,6 +3,7 @@ using System.Linq;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using SpawnHouses.Structures;
 using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
 using ReLogic.Utilities;
@@ -26,21 +27,21 @@ namespace SpawnHouses.Items.Debug
 			Item.rare = ItemRarityID.Blue;
 		}
 		
-		public override bool AltFunctionUse(Player player)
+		public override bool AltFunctionUse(Terraria.Player player)
 		{
 			return true;
 		}
 		
-		public override bool? UseItem(Player player)
+		public override bool? UseItem(Terraria.Player player)
 		{
 			int x = (Main.MouseWorld / 16).ToPoint16().X;
 			int y = (Main.MouseWorld / 16).ToPoint16().Y;
 			
-			GenHelper.ClearChest(x, y);
+			//Console.WriteLine(WebClientInstance.WebClient.GetSpawnCount()["main_houses"]);
+			
+			//WebClientInstance.WebClient.AddSpawnCount(true);
 			
 			return true;
-
-			
 		}
 
 	}
