@@ -13,13 +13,7 @@ public class WebHelper
     
     public WebHelper()
     {
-        // bypass ssl cert verification. i know, this sounds scary, but no sensitive information is being passed.
-        // all this api does is increment the global structure spawn count or get the global structure spawn count 
-        HttpClientHandler handler = new HttpClientHandler();
-        handler.ServerCertificateCustomValidationCallback = 
-            (HttpRequestMessage message, X509Certificate2 cert, X509Chain chain, SslPolicyErrors sslErrors) => true;
-    
-        Client = new HttpClient(handler)
+        Client = new HttpClient()
         {
             Timeout = TimeSpan.FromSeconds(3)
         };
@@ -36,7 +30,7 @@ public class WebHelper
         try
         {
             ModContent.GetInstance<SpawnHouses.SpawnHouses>().Logger.Info("Getting spawn count info from Web API");
-            HttpResponseMessage response = Client.GetAsync("https://34.55.127.7/api/get").Result;
+            HttpResponseMessage response = Client.GetAsync("https://spawnhousescounter.xyz/api/get").Result;
             response.EnsureSuccessStatusCode();
             string responseBody = response.Content.ReadAsStringAsync().Result;
             return JsonSerializer.Deserialize<Dictionary<string, int>>(responseBody);
@@ -60,7 +54,7 @@ public class WebHelper
                 ["mineshaft"] = mineshaft? 1 : 0
             };
             var content = new StringContent(JsonSerializer.Serialize(dict), Encoding.UTF8, "application/json");
-            HttpResponseMessage response = Client.PostAsync("https://34.55.127.7/api/add", content).Result;
+            HttpResponseMessage response = Client.PostAsync("https://spawnhousescounter.xyz/api/add", content).Result;
             response.EnsureSuccessStatusCode();
         }
         catch
