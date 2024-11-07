@@ -1,3 +1,3 @@
-Version 1.0.3
+Version 1.0.4
 Minor Changes
-- Backend Changes
+- Added "Main Basement Shape" to the configs, controls either being neutral, vertical, or horizontal

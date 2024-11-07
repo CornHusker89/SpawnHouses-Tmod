@@ -31,7 +31,8 @@ public class CaveTown1 : StructureChain
         base(100, 40, _structureList, x, y, 2, 5, null) {}
 
     // Only lets 1 structure to the left and right of the root structure
-    protected override bool IsConnectPointValid(ChainConnectPoint connectPoint, ChainConnectPoint targetConnectPoint, CustomChainStructure rootStructure)
+    protected override bool IsConnectPointValid(ChainConnectPoint connectPoint, ChainConnectPoint targetConnectPoint, 
+        CustomChainStructure targetStructure, CustomChainStructure rootStructure)
     {
         int netSideDistance = 0;
         foreach (byte direction in connectPoint.ParentStructure.BridgeDirectionHistory)

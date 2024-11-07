@@ -20,9 +20,14 @@ public class ChainConnectPoint : ConnectPoint
     public Bridge ChildBridge;
     public byte BranchLength;
     public Seal SealObj;
-    public CustomChainStructure ChildStructure;
     public CustomChainStructure ParentStructure;
-    public ChainConnectPoint ChildConnectPoint;
+    
+    #nullable enable
+    
+    public CustomChainStructure? ChildStructure;
+    public ChainConnectPoint? ChildConnectPoint;
+    
+    #nullable disable
     
     public ChainConnectPoint(short xOffset, short yOffset, byte direction, Seal sealObj = null, bool rootPoint = false,
         byte generateChance = GenerateChances.Neutral, Bridge childBridge = null, byte branchLength = 0,
