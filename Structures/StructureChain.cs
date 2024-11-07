@@ -5,7 +5,8 @@ using System.Threading.Tasks;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 using SpawnHouses.Structures.StructureParts;
-
+using Terraria;
+using Terraria.IO;
 using Terraria.Utilities;
 using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
@@ -25,6 +26,7 @@ public abstract class StructureChain
     private CustomChainStructure[] _usableStructureList;
     private Bridge[] Bridges;
     private List<ChainConnectPoint> failedConnectPointList = [];
+    protected int MaxAttempts = 1000;
 
     public StructureChain(ushort maxCost, ushort minCost, CustomChainStructure[] structureList, ushort entryPosX, ushort entryPosY,
         byte minBranchLength, byte maxBranchLength, Bridge[] bridges, CustomChainStructure[] rootStructureList = null, BoundingBox[] startingBoundingBoxes = null,
@@ -40,7 +42,7 @@ public abstract class StructureChain
         if (!generateSubstructures)
             return;
         
-        SuccessfulGeneration = true;
+        SuccessfulGeneration = false;
         
         foreach (var structure in structureList)
             if (structure.Cost < 0)
@@ -61,11 +63,10 @@ public abstract class StructureChain
         
         List<BoundingBox> boundingBoxes;
         List<ChainConnectPoint> queuedConnectPoints;
-
+        
         bool foundValidStructureChain = false;
-        const ushort maxAttempts = 250;
         // try to find a configuration that satisfies the minCost
-        for (byte attempts = 0; attempts < maxAttempts; attempts++)
+        for (int attempts = 0; attempts < MaxAttempts; attempts++)
         {
             CopiedStructureList = (CustomChainStructure[])structureList.Clone();
             for (byte i = 0; i < structureList.Length; i++)
@@ -110,15 +111,17 @@ public abstract class StructureChain
                 RootStructure = rootStructure;
                 if (!IsChainComplete()) continue;
                 
+                Console.WriteLine($"took {attempts} tries");
                 foundValidStructureChain = true;
                 break;
             }
         }
 
-        // if we didn't find what we needed in 250 tries, abort
+        // if we didn't find what we needed in 1000 tries, abort
         if (!foundValidStructureChain)
         {
-            ModContent.GetInstance<SpawnHouses>().Logger.Error($"Failed to generate StructureChain of type {this.ToString()}. Please report this error, this seed, and your client.log to the mod's author");
+            ModContent.GetInstance<SpawnHouses>().Logger.Error(
+                $"Failed to generate StructureChain of type {this.ToString()}. Please report this error, this seed ({Main.ActiveWorldFileData.Seed}), and your client.log to the mod's author");
             return;
         }
         
@@ -150,7 +153,7 @@ public abstract class StructureChain
             CustomChainStructure structure = null;
             for (int i = 0; i < 100; i++)
             {
-                structure = GetNewStructure(parentConnectPoint, closeToMaxBranchLength);
+                structure = GetNewStructure(parentConnectPoint, closeToMaxBranchLength, _structureListWeightSum, _usableStructureList, rootStructure);
                 
                 if (structure is not null)
                 {
@@ -215,7 +218,7 @@ public abstract class StructureChain
             Bridge connectPointBridge = null;
             bool validLocation = false;
             
-            for (int findLocationAttempts = 0; findLocationAttempts < 25; findLocationAttempts++)
+            for (int findLocationAttempts = 0; findLocationAttempts < 15; findLocationAttempts++)
             {
                 // randomly pick either the top or bottom side
                 int randomSide = 0; //Terraria.WorldGen.genRand.Next(0, 2);
@@ -248,7 +251,7 @@ public abstract class StructureChain
                 MoveConnectPointAndStructure(newStructure, targetConnectPoint, newStructureConnectPointX, newStructureConnectPointY);
                 connectPointBridge.SetPoints(connectPoint, targetConnectPoint);
 
-                if (!IsConnectPointValid(connectPoint, targetConnectPoint, rootStructure)) continue;
+                if (!IsConnectPointValid(connectPoint, targetConnectPoint, newStructure, rootStructure)) continue;
                 
                 if (
                     !BoundingBox.IsAnyBoundingBoxesColliding(newStructure.StructureBoundingBoxes, boundingBoxes) &&
@@ -367,7 +370,8 @@ public abstract class StructureChain
                     Recursive(connectPoint.ChildStructure);
             });
         }
-        Recursive(RootStructure);
+        if (SuccessfulGeneration)
+            Recursive(RootStructure);
     }
     /// <summary>
     /// Calls the function with each connectPoint in the chain.<para/>
@@ -390,7 +394,8 @@ public abstract class StructureChain
                     Recursive(connectPoint.ChildStructure);
             });
         }
-        Recursive(RootStructure);
+        if (SuccessfulGeneration)
+            Recursive(RootStructure);
     }
     
     
@@ -400,13 +405,16 @@ public abstract class StructureChain
     /// </summary>
     /// <param name="parentConnectPoint"></param>
     /// <param name="closeToMaxBranchLength"></param>
+    /// <param name="structureWeightSum"></param>
+    /// <param name="usableStructureList"></param>
     /// <returns>The new structure to be used for generation</returns>
-    protected virtual CustomChainStructure GetNewStructure(ChainConnectPoint parentConnectPoint, bool closeToMaxBranchLength)
+    protected virtual CustomChainStructure GetNewStructure(ChainConnectPoint parentConnectPoint, 
+            bool closeToMaxBranchLength, int structureWeightSum, CustomChainStructure[] usableStructureList, CustomChainStructure rootStructure)
     {
         for (int i = 0; i < 50; i++)
         {
-            double randomValue = Terraria.WorldGen.genRand.NextDouble() * _structureListWeightSum;
-            CustomChainStructure structure = _usableStructureList.Last(curStructure => curStructure.Weight <= randomValue).Clone();
+            double randomValue = Terraria.WorldGen.genRand.NextDouble() * structureWeightSum;
+            CustomChainStructure structure = usableStructureList.Last(curStructure => curStructure.Weight <= randomValue).Clone();
         
             // don't generate a branching hallway right after another one :)
             if (parentConnectPoint is not null && parentConnectPoint.GenerateChance == GenerateChances.Guaranteed && StructureIDUtils.IsBranchingHallway(structure))
@@ -502,13 +510,15 @@ public abstract class StructureChain
     }
 
     /// <summary>
-    /// Called before generating ConnectPoint's children.
+    /// Called after generatring a prospective childbridge and childstructure, but before generating ConnectPoint's children
     /// </summary>
     /// <param name="connectPoint"></param>
     /// <param name="targetConnectPoint"></param>
+    /// <param name="targetStructure"></param>
     /// <param name="rootStructure"></param>
     /// <returns>If true, children will generate</returns>
-    protected virtual bool IsConnectPointValid(ChainConnectPoint connectPoint, ChainConnectPoint targetConnectPoint, CustomChainStructure rootStructure)
+    protected virtual bool IsConnectPointValid(ChainConnectPoint connectPoint, ChainConnectPoint targetConnectPoint, 
+        CustomChainStructure targetStructure, CustomChainStructure rootStructure)
     {
         return true;
     }

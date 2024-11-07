@@ -107,7 +107,6 @@ public class SpawnHousesConfig : ModConfig
 	[Slider]
 	[Terraria.ModLoader.Config.Range(0, 1)]
 	[Increment(0.1f)]
-	[JsonIgnore]
 	public float MainBasementShape { get; set; }
 
 	

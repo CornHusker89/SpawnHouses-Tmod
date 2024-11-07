@@ -1,17 +1,6 @@
-using System;
-using System.Linq;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using SpawnHouses.Structures;
-using Terraria.DataStructures;
-using Microsoft.Xna.Framework;
-using ReLogic.Utilities;
-using Terraria.Chat;
-using Terraria.WorldBuilding;
-using SpawnHouses.Structures.Structures;
-using SpawnHouses;
-using SpawnHouses.Structures;
 
 
 namespace SpawnHouses.Items.Debug

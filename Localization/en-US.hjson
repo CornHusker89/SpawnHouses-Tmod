@@ -106,7 +106,7 @@ Mods: {
 
 				MainBasementShape: {
 					Label: Main Basement Shape
-					Tooltip: 0 will not favor generating in any direction. Values closer to 0 will generate the basement more vertically, while values closer to 1 will generate the basement more horizontally.
+					Tooltip: 0.5 will not favor generating in any direction. Values closer to 0 will generate the basement more vertically, while values closer to 1 will generate the basement more horizontally.
 				}
 
 				EnableSpawnPointHouse: {
