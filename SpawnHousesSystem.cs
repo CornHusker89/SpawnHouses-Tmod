@@ -74,8 +74,7 @@ internal static class ChainProcessor
 
         int i = 0;
         processingStructure.ActionOnEachConnectPoint((ChainConnectPoint connectPoint) =>
-        {
-                
+        {  
             if (connectPoint.ChildStructure is not null)
             {
                 dict[$"Substructure{i}"] = ProcessStructure(connectPoint.ChildStructure);
@@ -198,8 +197,7 @@ internal class MainBasementSerializer : TagSerializer<MainBasement, TagCompound>
         MainBasement basement = new MainBasement(
             (ushort)tag.Get<short>("X"),
             (ushort)tag.Get<short>("Y"),
-            tag.GetByte("Status"),
-            generateSubstructures: false
+            tag.GetByte("Status")
         );
         basement.RootStructure = ChainProcessor.ProcessSubstructure((TagCompound)tag["RootStructure"]);
         return basement;

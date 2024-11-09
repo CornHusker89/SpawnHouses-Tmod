@@ -8,7 +8,7 @@ using Terraria.WorldBuilding;
 
 namespace SpawnHouses.Structures;
 
-public static class GenHelper
+public static class StructureGenHelper
 {
     private class ClearTileSafe : GenAction
     {
@@ -267,8 +267,8 @@ public static class GenHelper
         {
             int width = Terraria.WorldGen.genRand.Next(7, 17);
             double toleranceFactor = width / 16.0;
-            int baseXOffset = (int)(Terraria.WorldGen.genRand.Next(-randomStepOffset, randomStepOffset + 1) * toleranceFactor);
-            double vectorXOffset = (int)(Terraria.WorldGen.genRand.Next(-randomStepOffset, randomStepOffset + 1) * toleranceFactor * 0.65);
+            int baseXOffset = i == 0? 0 : (int)(Terraria.WorldGen.genRand.Next(-randomStepOffset, randomStepOffset + 1) * toleranceFactor);
+            double vectorXOffset = i == 0? 0 : (int)(Terraria.WorldGen.genRand.Next(-randomStepOffset, randomStepOffset + 1) * toleranceFactor * 0.65);
             if (i == 0 || i == steps - 1)
             {
                 initialYOffset = (int)(width * 1.7);

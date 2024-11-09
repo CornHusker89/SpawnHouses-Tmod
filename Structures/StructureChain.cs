@@ -7,6 +7,7 @@ using Terraria.ModLoader;
 using SpawnHouses.Structures.StructureParts;
 using Terraria;
 using Terraria.IO;
+using Terraria.UI;
 using Terraria.Utilities;
 using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
@@ -16,290 +17,326 @@ public abstract class StructureChain
 {
     public readonly ushort EntryPosX;
     public readonly ushort EntryPosY;
+    public readonly ushort MaxCost;
+    public readonly ushort MinCost;
+    public readonly byte MinBranchLength;
+    public readonly byte MaxBranchLength;
     public byte Status;
-    public CustomChainStructure RootStructure;
-    public readonly bool SuccessfulGeneration = true;
-    
-    private readonly List<ChainConnectPoint> _failedConnectPointList = [];
+    private Bridge[] _bridges;
     private readonly BoundingBox[] StartingBoundingBoxes;
+    private CustomChainStructure[] _originalStructureList;
+    private CustomChainStructure[] _rootStructureList;
+    
+    public CustomChainStructure RootStructure;
+    public bool SuccessfulGeneration = true;
     private int _structureListWeightSum;
+    private int _currentCost;
     private CustomChainStructure[] _usableStructureList;
-    private Bridge[] Bridges;
-    private List<ChainConnectPoint> failedConnectPointList = [];
-    protected int MaxAttempts = 1000;
+    private CustomChainStructure[] _copiedStructureList;
+    private List<ChainConnectPoint> _failedConnectPointList = [];
+    private List<BoundingBox> _boundingBoxes;
+    private List<ChainConnectPoint> _queuedConnectPoints;
 
-    public StructureChain(ushort maxCost, ushort minCost, CustomChainStructure[] structureList, ushort entryPosX, ushort entryPosY,
-        byte minBranchLength, byte maxBranchLength, Bridge[] bridges, CustomChainStructure[] rootStructureList = null, BoundingBox[] startingBoundingBoxes = null,
-        byte status = StructureStatus.NotGenerated, bool generateSubstructures = true)
-    {
+    protected StructureChain(ushort minCost, ushort maxCost, byte minBranchLength, byte maxBranchLength, ushort entryPosX,
+        ushort entryPosY, CustomChainStructure[] structureList, Bridge[] bridges, CustomChainStructure[] rootStructureList = null,
+        BoundingBox[] startingBoundingBoxes = null,
+        byte status = StructureStatus.NotGenerated)
+    {        
+        MinCost = minCost;
+        MaxCost = maxCost;
+        MinBranchLength = minBranchLength;
+        MaxBranchLength = maxBranchLength;
         EntryPosX = entryPosX;
         EntryPosY = entryPosY;
-        Status = status;
+        _originalStructureList = structureList;
+        _bridges = bridges;
+        _rootStructureList = rootStructureList;
         StartingBoundingBoxes = startingBoundingBoxes;
-        Bridges = bridges;
-        
-        // assume it's a blank object and just return
-        if (!generateSubstructures)
-            return;
-        
-        SuccessfulGeneration = false;
-        
-        foreach (var structure in structureList)
+        Status = status;
+    }
+
+    /// <summary>
+    /// Calculates full chain. Call before Generate()
+    /// </summary>
+    /// <exception cref="Exception"></exception>
+    public void CalculateChain()
+    {
+        foreach (var structure in _originalStructureList)
             if (structure.Cost < 0)
                 throw new Exception("invalid item cost in structureList");
 
-        if (structureList.Length == 0)
+        if (_originalStructureList.Length == 0)
             throw new Exception("structureList had no valid options");
-        
-        CustomChainStructure[] CopiedStructureList = (CustomChainStructure[])structureList.Clone();
-        for (byte i = 0; i < structureList.Length; i++)
-            CopiedStructureList[i] = structureList[i].Clone();
-            
-        int currentCost = 0;
+
+        _copiedStructureList = (CustomChainStructure[])_originalStructureList.Clone();
+        for (byte i = 0; i < _originalStructureList.Length; i++)
+            _copiedStructureList[i] = _originalStructureList[i].Clone();
+
         CalculateWeights();
-        
-        CustomChainStructure rootStructure = null;
+
         ChainConnectPoint rootConnectPoint = null;
-        
-        List<BoundingBox> boundingBoxes;
-        List<ChainConnectPoint> queuedConnectPoints;
-        
         bool foundValidStructureChain = false;
         // try to find a configuration that satisfies the minCost
-        for (int attempts = 0; attempts < MaxAttempts; attempts++)
+        for (int attempts = 0; attempts < 7500; attempts++)
         {
-            CopiedStructureList = (CustomChainStructure[])structureList.Clone();
-            for (byte i = 0; i < structureList.Length; i++)
-                CopiedStructureList[i] = structureList[i].Clone();
-            
-            if (rootStructureList == null)
-                rootStructure = NewStructure(null, false, entryPosX, entryPosY);
+            _copiedStructureList = (CustomChainStructure[])_originalStructureList.Clone();
+            for (byte i = 0; i < _originalStructureList.Length; i++)
+                _copiedStructureList[i] = _originalStructureList[i].Clone();
+
+            if (_rootStructureList == null)
+                RootStructure = PlaceNewStructure(null, false, EntryPosX, EntryPosY);
             else
             {
-                int index = Terraria.WorldGen.genRand.Next(0, rootStructureList.Length);
-                rootStructure = rootStructureList[index].Clone();
-                rootStructure.SetPosition(entryPosX, entryPosY);
+                int index = Terraria.WorldGen.genRand.Next(0, _rootStructureList.Length);
+                RootStructure = _rootStructureList[index].Clone();
+                RootStructure.SetPosition(EntryPosX, EntryPosY);
             }
-            rootConnectPoint = rootStructure.GetRootConnectPoint();
-            if (rootConnectPoint != null)
-                MoveConnectPointAndStructure(rootStructure, rootConnectPoint, entryPosX, entryPosY);
-            
-            currentCost = rootStructure.Cost;
-            queuedConnectPoints = [];
-            failedConnectPointList = [];
-            boundingBoxes = [];
-            if (StartingBoundingBoxes is not null && StartingBoundingBoxes.Length != 0)
-                boundingBoxes.AddRange(StartingBoundingBoxes);
-            boundingBoxes.AddRange(rootStructure.StructureBoundingBoxes);
 
-            var points = queuedConnectPoints; // because scope
-            rootStructure.ActionOnEachConnectPoint(connectPoint =>
+            rootConnectPoint = RootStructure.GetRootConnectPoint();
+            if (rootConnectPoint != null)
+                MoveConnectPointAndStructure(RootStructure, rootConnectPoint, EntryPosX, EntryPosY);
+
+            _currentCost = RootStructure.Cost;
+            _queuedConnectPoints = [];
+            _failedConnectPointList = [];
+            _boundingBoxes = [];
+            if (StartingBoundingBoxes is not null && StartingBoundingBoxes.Length != 0)
+                _boundingBoxes.AddRange(StartingBoundingBoxes);
+            _boundingBoxes.AddRange(RootStructure.StructureBoundingBoxes);
+
+            var points = _queuedConnectPoints; // because scope
+            RootStructure.ActionOnEachConnectPoint(connectPoint =>
             {
                 connectPoint.BranchLength = 0;
                 points.Add(connectPoint);
             });
-            
-            while (queuedConnectPoints.Count > 0)
+
+            while (_queuedConnectPoints.Count > 0)
             {
-                ChainConnectPoint connectPoint = queuedConnectPoints[0];
+                ChainConnectPoint connectPoint = _queuedConnectPoints[0];
                 CalculateChildrenStructures(connectPoint);
-                queuedConnectPoints.RemoveAt(0);
+                _queuedConnectPoints.RemoveAt(0);
             }
-            
-            if (currentCost >= minCost)
+
+            if (_currentCost >= MinCost)
             {
-                RootStructure = rootStructure;
                 if (!IsChainComplete()) continue;
-                
-                Console.WriteLine($"took {attempts} tries");
+
                 foundValidStructureChain = true;
                 break;
             }
         }
 
-        // if we didn't find what we needed in 1000 tries, abort
+        // if we didn't find what we needed in however many tries, abort
         if (!foundValidStructureChain)
         {
             ModContent.GetInstance<SpawnHouses>().Logger.Error(
                 $"Failed to generate StructureChain of type {this.ToString()}. Please report this error, this seed ({Main.ActiveWorldFileData.Seed}), and your client.log to the mod's author");
+            SuccessfulGeneration = false;
             return;
         }
         
-        RootStructure = rootStructure;
-        _failedConnectPointList = failedConnectPointList;
-        SuccessfulGeneration = true;
-        
-        
-        
-        
-        // functions
-        void CalculateWeights()
+        // prune any dangling branching hallways
+        ActionOnEachStructure(structure => 
         {
-            _usableStructureList = (CustomChainStructure[])CopiedStructureList.Clone();
-            for (byte i = 0; i < CopiedStructureList.Length; i++)
-                _usableStructureList[i] = CopiedStructureList[i].Clone();
-            
-            _structureListWeightSum = CopiedStructureList.Sum(curStructure => curStructure.Weight);
-            
-            //make the weights in useableStructureList cumulative, and make the starting weight 0
-            _usableStructureList[0].Weight = 0;
-            
-            for (int i = 1; i < CopiedStructureList.Length; i++)
-                _usableStructureList[i].Weight = (ushort)(_usableStructureList[i - 1].Weight + CopiedStructureList[i - 1].Weight);
-        }
-       
-        CustomChainStructure NewStructure(ChainConnectPoint parentConnectPoint, bool closeToMaxBranchLength = false, int x = 500, int y = 500)
-        {
-            CustomChainStructure structure = null;
-            for (int i = 0; i < 100; i++)
+            if (StructureIDUtils.IsBranchingHallway(structure))
             {
-                structure = GetNewStructure(parentConnectPoint, closeToMaxBranchLength, _structureListWeightSum, _usableStructureList, rootStructure);
-                
-                if (structure is not null)
+                int count = 0;
+                structure.ActionOnEachConnectPoint((ChainConnectPoint point) =>
                 {
-                    structure.ParentChainConnectPoint = parentConnectPoint;
-                    structure.SetPosition(x, y);
-                    break;
-                }
-            }
-            return structure;
-        }
-
-        void MoveConnectPointAndStructure(CustomChainStructure structure, ChainConnectPoint connectPoint, int x, int y)
-        {
-            int deltaX = connectPoint.X - x;
-            int deltaY = connectPoint.Y - y;
-            structure.SetPosition(structure.X - deltaX, structure.Y - deltaY);
-        }
+                    if (point.ChildStructure is not null)
+                        count++;
+                });
         
-        void CalculateChildrenStructures(ChainConnectPoint connectPoint)
-        {
-            byte currentBranchLength = connectPoint.BranchLength;
-            byte targetDirection = connectPoint.Direction;
-
-            if (currentBranchLength > maxBranchLength) // extra failsafe
-            {
-                failedConnectPointList.Add(connectPoint);
-                return;
-            }
-
-            if (!ConnectPointAttrition(connectPoint, currentBranchLength, minBranchLength, maxBranchLength))
-            {
-                failedConnectPointList.Add(connectPoint);
-                return;
-            }
-            
-            // try to find a structure that won't result in a cost overrun
-            bool foundStructure = false;
-            CustomChainStructure newStructure = null;
-            for (int attempts = 0; attempts < 20; attempts++)
-            {
-                bool closeToMaxBranchLen = connectPoint.BranchLength >= maxBranchLength - 1;
-                newStructure = NewStructure(connectPoint, closeToMaxBranchLen);
-                if (newStructure is null)
+                if (count == 0 && Terraria.WorldGen.genRand.NextBool()) // 0 because the bridge going into this is a parent, not child. also random bool cuz otherwise it feels too empty
                 {
-                    failedConnectPointList.Add(connectPoint);
-                    return;
-                }
-                if (currentCost + newStructure.Cost <= maxCost)
-                {
-                    foundStructure = true;
-                    break;
-                }
-            }
-            
-            if (!foundStructure)
-            {
-                failedConnectPointList.Add(connectPoint);
-                return;
-            }
-
-            ChainConnectPoint targetConnectPoint = null;
-            Bridge connectPointBridge = null;
-            bool validLocation = false;
-            
-            for (int findLocationAttempts = 0; findLocationAttempts < 15; findLocationAttempts++)
-            {
-                // randomly pick either the top or bottom side
-                int randomSide = 0; //Terraria.WorldGen.genRand.Next(0, 2);
-                
-                connectPointBridge = GetBridgeOfDirection(Bridges, targetDirection, newStructure);
-                if (connectPointBridge is null)
-                {
-                    failedConnectPointList.Add(connectPoint);
-                    return;
-                }
-
-                var position = SetProspectiveStructurePosition(newStructure, connectPoint, connectPointBridge);
-                int newStructureConnectPointX = position.newStructureConnectPointX;
-                int newStructureConnectPointY = position.newStructureConnectPointY;
-                
-                byte secondConnectPointDirection;
-                if (connectPointBridge.InputDirections[0] == targetDirection)
-                    secondConnectPointDirection = connectPointBridge.InputDirections[1];
-                else
-                    secondConnectPointDirection = connectPointBridge.InputDirections[0];
-                    
-                ChainConnectPoint[] targetConnectPointList = newStructure.ConnectPoints[secondConnectPointDirection];
-                
-                
-                if (targetConnectPointList.Length != 0)
-                    targetConnectPoint = targetConnectPointList[(targetConnectPointList.Length - 1) * randomSide];
-                else
-                    continue; // try another bridge
-                
-                MoveConnectPointAndStructure(newStructure, targetConnectPoint, newStructureConnectPointX, newStructureConnectPointY);
-                connectPointBridge.SetPoints(connectPoint, targetConnectPoint);
-
-                if (!IsConnectPointValid(connectPoint, targetConnectPoint, newStructure, rootStructure)) continue;
-                
-                if (
-                    !BoundingBox.IsAnyBoundingBoxesColliding(newStructure.StructureBoundingBoxes, boundingBoxes) &&
-                    !BoundingBox.IsAnyBoundingBoxesColliding(connectPointBridge.BoundingBoxes, boundingBoxes)
-                ) {
-                    //BoundingBox.VisualizeCollision();
-                    validLocation = true;
-                    break;
+                    structure.ActionOnEachConnectPoint((ChainConnectPoint point) =>
+                    {
+                        _failedConnectPointList.Remove(point);
+                    });
+                    _failedConnectPointList.Add(structure.ParentChainConnectPoint);
+                    structure.ParentChainConnectPoint.ChildBridge = null;
+                    structure.ParentChainConnectPoint.ChildConnectPoint = null;
+                    structure.ParentChainConnectPoint.ChildStructure = null;
                 }
             }
-
-            if (!validLocation)
-            {
-                failedConnectPointList.Add(connectPoint);
-                return;
-            }
-            
-            boundingBoxes.AddRange(newStructure.StructureBoundingBoxes);
-            boundingBoxes.AddRange(connectPointBridge.BoundingBoxes);
-            
-            connectPoint.ChildStructure = newStructure;
-            connectPoint.ChildStructure.BridgeDirectionHistory = CustomChainStructure.CloneBridgeDirectionHistory(connectPoint.ParentStructure);
-            connectPoint.ChildStructure.BridgeDirectionHistory.Add(connectPoint.Direction);
-            connectPoint.ChildConnectPoint = targetConnectPoint;
-            connectPoint.ChildBridge = connectPointBridge;
-            connectPoint.ChildBridge.Point1 = connectPoint;
-            connectPoint.ChildBridge.Point2 = targetConnectPoint;
-            
-            currentCost += newStructure.Cost;
-            
-            // reduce the weighting of the chosen structure so that we don't get 5 in a row 
-            CopiedStructureList.First(curStructure => curStructure.ID == newStructure.ID).Weight /= 2;
-            CalculateWeights();
-            
-            for (byte direction = 0; direction < 4; direction++)
-                foreach (ChainConnectPoint nextConnectPoint in newStructure.ConnectPoints[direction])
-                {
-                    // if the point already has the bridge on it
-                    if (connectPoint.ChildConnectPoint == nextConnectPoint)
-                        continue;
-                    
-                    // """recursive"""
-                    nextConnectPoint.BranchLength = (byte)(currentBranchLength + 1);
-                    queuedConnectPoints.Add(nextConnectPoint);
-                }
-        }
+        });
     }
     
+    private void CalculateWeights()
+    {
+        _usableStructureList = (CustomChainStructure[])_copiedStructureList.Clone();
+        for (byte i = 0; i < _copiedStructureList.Length; i++)
+            _usableStructureList[i] = _copiedStructureList[i].Clone();
+
+        _structureListWeightSum = _copiedStructureList.Sum(curStructure => curStructure.Weight);
+
+        //make the weights in useableStructureList cumulative, and make the starting weight 0
+        _usableStructureList[0].Weight = 0;
+
+        for (int i = 1; i < _copiedStructureList.Length; i++)
+            _usableStructureList[i].Weight =
+                (ushort)(_usableStructureList[i - 1].Weight + _copiedStructureList[i - 1].Weight);
+    }
+
+    private CustomChainStructure PlaceNewStructure(ChainConnectPoint parentConnectPoint, bool closeToMaxBranchLength = false,
+        int x = 500, int y = 500)
+    {
+        CustomChainStructure structure = null;
+        for (int i = 0; i < 100; i++)
+        {
+            structure = GetNewStructure(parentConnectPoint, closeToMaxBranchLength, _structureListWeightSum,
+                _usableStructureList);
+
+            if (structure is not null)
+            {
+                structure.ParentChainConnectPoint = parentConnectPoint;
+                structure.SetPosition(x, y);
+                break;
+            }
+        }
+
+        return structure;
+    }
+
+    private void MoveConnectPointAndStructure(CustomChainStructure structure, ChainConnectPoint connectPoint, int x, int y)
+    {
+        int deltaX = connectPoint.X - x;
+        int deltaY = connectPoint.Y - y;
+        structure.SetPosition(structure.X - deltaX, structure.Y - deltaY);
+    }
+
+    private void CalculateChildrenStructures(ChainConnectPoint connectPoint)
+    {
+        byte currentBranchLength = connectPoint.BranchLength;
+        byte targetDirection = connectPoint.Direction;
+
+        if (currentBranchLength > MaxBranchLength) // extra failsafe
+        {
+            _failedConnectPointList.Add(connectPoint);
+            return;
+        }
+
+        if (!ConnectPointAttrition(connectPoint, currentBranchLength, MinBranchLength, MaxBranchLength))
+        {
+            _failedConnectPointList.Add(connectPoint);
+            return;
+        }
+
+        // try to find a structure that won't result in a cost overrun
+        bool foundStructure = false;
+        CustomChainStructure newStructure = null;
+        for (int attempts = 0; attempts < 20; attempts++)
+        {
+            bool closeToMaxBranchLen = connectPoint.BranchLength >= MaxBranchLength - 1;
+            newStructure = PlaceNewStructure(connectPoint, closeToMaxBranchLen);
+            if (newStructure is null)
+            {
+                _failedConnectPointList.Add(connectPoint);
+                return;
+            }
+
+            if (_currentCost + newStructure.Cost <= MaxCost)
+            {
+                foundStructure = true;
+                break;
+            }
+        }
+
+        if (!foundStructure)
+        {
+            _failedConnectPointList.Add(connectPoint);
+            return;
+        }
+
+        ChainConnectPoint targetConnectPoint = null;
+        Bridge connectPointBridge = null;
+        bool validLocation = false;
+
+        for (int findLocationAttempts = 0; findLocationAttempts < 15; findLocationAttempts++)
+        {
+            // randomly pick either the top or bottom side
+            int randomSide = 0; //Terraria.WorldGen.genRand.Next(0, 2);
+
+            connectPointBridge = GetBridgeOfDirection(_bridges, targetDirection, newStructure);
+            if (connectPointBridge is null)
+            {
+                _failedConnectPointList.Add(connectPoint);
+                return;
+            }
+
+            var position = SetProspectiveStructurePosition(newStructure, connectPoint, connectPointBridge);
+            int newStructureConnectPointX = position.newStructureConnectPointX;
+            int newStructureConnectPointY = position.newStructureConnectPointY;
+
+            byte secondConnectPointDirection;
+            if (connectPointBridge.InputDirections[0] == targetDirection)
+                secondConnectPointDirection = connectPointBridge.InputDirections[1];
+            else
+                secondConnectPointDirection = connectPointBridge.InputDirections[0];
+
+            ChainConnectPoint[] targetConnectPointList = newStructure.ConnectPoints[secondConnectPointDirection];
+
+
+            if (targetConnectPointList.Length != 0)
+                targetConnectPoint = targetConnectPointList[(targetConnectPointList.Length - 1) * randomSide];
+            else
+                continue; // try another bridge
+
+            MoveConnectPointAndStructure(newStructure, targetConnectPoint, newStructureConnectPointX,
+                newStructureConnectPointY);
+            connectPointBridge.SetPoints(connectPoint, targetConnectPoint);
+
+            if (!IsConnectPointValid(connectPoint, targetConnectPoint, newStructure)) continue;
+
+            if (!BoundingBox.IsAnyBoundingBoxesColliding(newStructure.StructureBoundingBoxes, _boundingBoxes) &&
+                !BoundingBox.IsAnyBoundingBoxesColliding(connectPointBridge.BoundingBoxes, _boundingBoxes))
+            {
+                //BoundingBox.VisualizeCollision();
+                validLocation = true;
+                break;
+            }
+        }
+
+        if (!validLocation)
+        {
+            _failedConnectPointList.Add(connectPoint);
+            return;
+        }
+
+        _boundingBoxes.AddRange(newStructure.StructureBoundingBoxes);
+        _boundingBoxes.AddRange(connectPointBridge.BoundingBoxes);
+
+        connectPoint.ChildStructure = newStructure;
+        connectPoint.ChildStructure.BridgeDirectionHistory =
+            CustomChainStructure.CloneBridgeDirectionHistory(connectPoint.ParentStructure);
+        connectPoint.ChildStructure.BridgeDirectionHistory.Add(connectPoint.Direction);
+        connectPoint.ChildConnectPoint = targetConnectPoint;
+        connectPoint.ChildBridge = connectPointBridge;
+        connectPoint.ChildBridge.Point1 = connectPoint;
+        connectPoint.ChildBridge.Point2 = targetConnectPoint;
+
+        _currentCost += newStructure.Cost;
+
+        // reduce the weighting of the chosen structure so that we don't get 5 in a row 
+        _copiedStructureList.First(curStructure => curStructure.ID == newStructure.ID).Weight /= 2;
+        CalculateWeights();
+
+        for (byte direction = 0; direction < 4; direction++)
+        {
+            foreach (ChainConnectPoint nextConnectPoint in newStructure.ConnectPoints[direction])
+            {
+                // if the point already has the bridge on it
+                if (connectPoint.ChildConnectPoint == nextConnectPoint)
+                    continue;
+
+                // """recursive"""
+                nextConnectPoint.BranchLength = (byte)(currentBranchLength + 1);
+                _queuedConnectPoints.Add(nextConnectPoint);
+            }
+        }
+    }
+
     /// <summary>
     /// Called to physcially generate the structures of the chain. Changes status
     /// </summary>
@@ -373,6 +410,7 @@ public abstract class StructureChain
         if (SuccessfulGeneration)
             Recursive(RootStructure);
     }
+    
     /// <summary>
     /// Calls the function with each connectPoint in the chain.<para/>
     /// Sample Usage:<para/>
@@ -397,9 +435,7 @@ public abstract class StructureChain
         if (SuccessfulGeneration)
             Recursive(RootStructure);
     }
-    
-    
-    
+
     /// <summary>
     /// Called whenever the chain needs to have another structure. Will call this with 100 attempts. Return null to retry
     /// </summary>
@@ -409,7 +445,7 @@ public abstract class StructureChain
     /// <param name="usableStructureList"></param>
     /// <returns>The new structure to be used for generation</returns>
     protected virtual CustomChainStructure GetNewStructure(ChainConnectPoint parentConnectPoint, 
-            bool closeToMaxBranchLength, int structureWeightSum, CustomChainStructure[] usableStructureList, CustomChainStructure rootStructure)
+            bool closeToMaxBranchLength, int structureWeightSum, CustomChainStructure[] usableStructureList)
     {
         for (int i = 0; i < 50; i++)
         {
@@ -518,7 +554,7 @@ public abstract class StructureChain
     /// <param name="rootStructure"></param>
     /// <returns>If true, children will generate</returns>
     protected virtual bool IsConnectPointValid(ChainConnectPoint connectPoint, ChainConnectPoint targetConnectPoint, 
-        CustomChainStructure targetStructure, CustomChainStructure rootStructure)
+        CustomChainStructure targetStructure)
     {
         return true;
     }

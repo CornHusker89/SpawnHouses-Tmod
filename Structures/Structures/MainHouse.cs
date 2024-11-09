@@ -270,7 +270,7 @@ public sealed class MainHouse : CustomStructure
     [NoJIT]
     public override void Generate()
     {
-        GenHelper.GenerateFoundation(new Point(X + StructureXSize / 2, Y + 29), TileID.Dirt, StructureXSize / 2);
+        StructureGenHelper.GenerateFoundation(new Point(X + StructureXSize / 2, Y + 29), TileID.Dirt, StructureXSize / 2);
 
         if (!InUnderworld)
         {
@@ -336,13 +336,13 @@ public sealed class MainHouse : CustomStructure
             for (int i = 0; i < leftBushCount; i++)
             {
                 int xOffset = Terraria.WorldGen.genRand.Next(0, 12);
-                GenHelper.PlaceBush(new Point(X + xOffset, Y + 15 + Terraria.WorldGen.genRand.Next(0, 2)), wallBlacklistIDs: blacklistWallIDs);
+                StructureGenHelper.PlaceBush(new Point(X + xOffset, Y + 15 + Terraria.WorldGen.genRand.Next(0, 2)), wallBlacklistIDs: blacklistWallIDs);
             }
             int rightBushCount = Terraria.WorldGen.genRand.Next(2, 5);
             for (int i = 0; i < rightBushCount; i++)
             {
                 int xOffset = Terraria.WorldGen.genRand.Next(0, 12);
-                GenHelper.PlaceBush(new Point(X + StructureXSize - 1 - xOffset, Y + 15 + Terraria.WorldGen.genRand.Next(0, 2)), wallBlacklistIDs: blacklistWallIDs);
+                StructureGenHelper.PlaceBush(new Point(X + StructureXSize - 1 - xOffset, Y + 15 + Terraria.WorldGen.genRand.Next(0, 2)), wallBlacklistIDs: blacklistWallIDs);
             }
         }
         

@@ -1,3 +1,4 @@
+using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -29,6 +30,8 @@ namespace SpawnHouses.Items.Debug
 			//Console.WriteLine(WebClientInstance.WebClient.GetSpawnCount()["main_houses"]);
 			
 			//WebClientInstance.WebClient.AddSpawnCount(true);
+			
+			Console.WriteLine(x + ", " + y);
 			
 			return true;
 		}

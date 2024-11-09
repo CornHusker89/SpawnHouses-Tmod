@@ -6,6 +6,10 @@
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>portable</DebugType>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="MagicStorage">
       <HintPath>..\..\ModReader\MagicStorage\MagicStorage.dll</HintPath>

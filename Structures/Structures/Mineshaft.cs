@@ -61,7 +61,7 @@ public sealed class Mineshaft : CustomStructure
             new Shapes.Rectangle(2, 10 + tunnelSteps * 15),
             new Terraria.WorldBuilding.Actions.ClearTile(true)
         );
-        GenHelper.DigVerticalTunnel(new Point(X + 10, Y + 14), 3, tunnelSteps);
+        StructureGenHelper.DigVerticalTunnel(new Point(X + 10, Y + 14), 3, tunnelSteps);
 
         // place rope
         for (int i = 5; i < 300; i++)
@@ -80,13 +80,13 @@ public sealed class Mineshaft : CustomStructure
         int surfaceY = Y + 5;
         while (!Terraria.WorldGen.SolidTile(leftBushX, surfaceY))
             surfaceY++;
-        GenHelper.PlaceBush(new Point(leftBushX, surfaceY - 1));
+        StructureGenHelper.PlaceBush(new Point(leftBushX, surfaceY - 1));
         
         int rightBushX = X + _structureXSize + Terraria.WorldGen.genRand.Next(-2, 2);
         surfaceY = Y + 5;
         while (!Terraria.WorldGen.SolidTile(rightBushX, surfaceY))
             surfaceY++;
-        GenHelper.PlaceBush(new Point(rightBushX, surfaceY - 1));
+        StructureGenHelper.PlaceBush(new Point(rightBushX, surfaceY - 1));
         FrameTiles(X + 10, Y + 160, 180);
 
         Status = StructureStatus.GeneratedAndFound;
