@@ -31,6 +31,7 @@ namespace SpawnHouses.Items.Debug
 			Point16 point = (Main.MouseWorld / 16).ToPoint16();
 
 			MainBasement chain = new MainBasement((ushort)point.X, (ushort)point.Y);
+			chain.CalculateChain();
 			chain.Generate();
 			return true;
 		}

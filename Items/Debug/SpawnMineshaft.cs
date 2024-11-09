@@ -44,8 +44,8 @@ namespace SpawnHouses.Items.Debug
 				foundLocation = true;
 			}
 
+			x = (ushort)(x - 13);
 			y = (ushort)(y - 13);
-			x = (ushort)(x - 10);
 
 			Mineshaft structure = new Mineshaft(x, y);
 			structure.Generate();

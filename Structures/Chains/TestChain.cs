@@ -14,5 +14,5 @@ public class TestChain : StructureChain
     ];
     
     public TestChain(ushort x, ushort y) : 
-        base(100, 60, _structureList, x, y, 3, 7, [_bridge]) {}
+        base(60, 100, 3, 7, x, y, _structureList, [_bridge]) {}
 }

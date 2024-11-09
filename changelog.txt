@@ -1,3 +1,10 @@
 Version 1.0.4
+Major Changes
+- Added "Main Basement Shape" to the configs, controls overall generation shape. It's still random, just a little more guided
+
 Minor Changes
-- Added "Main Basement Shape" to the configs, controls either being neutral, vertical, or horizontal
+- Mineshaft can now spawn without the main house
+- Improved error handling
+- Small fixes for odd dirt generation near the basement & mineshaft
+- Basement generation improvements
+- Beach House dock pillars fixed

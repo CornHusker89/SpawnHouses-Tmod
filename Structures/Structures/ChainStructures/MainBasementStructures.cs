@@ -398,7 +398,7 @@ public class MainBasement_Room5 : CustomChainStructure
             Terraria.WorldGen.PlaceTile(X + 13, Y + 7, ModHelper.StorageUnitTileID);
             TileEntity.PlaceEntityNet(X + 12, Y + 6, ModHelper.StorageUnitTileEntityID);
             
-            GenHelper.GenerateCobwebs(new Point(X, Y), StructureXSize, StructureYSize);
+            StructureGenHelper.GenerateCobwebs(new Point(X, Y), StructureXSize, StructureYSize);
             FrameTiles();
             
             Terraria.NetMessage.SendTileSquare(-1, X, Y, StructureXSize, StructureYSize);

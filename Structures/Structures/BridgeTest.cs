@@ -41,7 +41,7 @@ public sealed class BridgeTest : CustomStructure
 
     public override void Generate()
     {
-        GenHelper.GenerateFoundation(new Point(X, Y + 9), TileID.Dirt, 4);
+        StructureGenHelper.GenerateFoundation(new Point(X, Y + 9), TileID.Dirt, 4);
 
         base.Generate();
     }
