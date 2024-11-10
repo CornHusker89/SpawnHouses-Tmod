@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Structures;
 using SpawnHouses.Structures.Chains;
 using SpawnHouses.Structures.Structures;
 using Terraria;
@@ -145,42 +146,34 @@ public static class WorldGenHelper
 	public static void GenerateMineshaft()
 	{
 		int x, y;
-		bool FindValidLocation(bool left = true)
+		try
 		{
-			if (left)
-				x = Main.spawnTileX - Terraria.WorldGen.genRand.Next(18, 34) - 35;
-			else
-				x = Main.spawnTileX + Terraria.WorldGen.genRand.Next(18, 34) + 35 ;
-
-			y = Main.spawnTileY - 16;
-			for (int i = 0; i < 32; i++)
+			bool FindValidLocation(bool left = true)
 			{
-				y++;
-				Tile tile = Main.tile[x, y];
-				if (Terraria.WorldGen.SolidTile(x, y))
-					if (tile.TileType == TileID.Grass)
-						return true;
-					else
-						return false;
+				if (left)
+					x = Main.spawnTileX - Terraria.WorldGen.genRand.Next(18, 34) - 35;
+				else
+					x = Main.spawnTileX + Terraria.WorldGen.genRand.Next(18, 34) + 35 ;
+
+				var surfaceLevel = StructureGenHelper.GetSurfaceLevel(x - 10, x + 11, Main.spawnTileY - 24);
+				y = (int)surfaceLevel.average;
+			
+				return surfaceLevel.sd <= 2.8;
 			}
-			return false;
-		}
 
-		bool startLeftSide = false;//Terraria.WorldGen.genRand.NextBool();
+			bool startLeftSide = false;//Terraria.WorldGen.genRand.NextBool();
 
-		if (FindValidLocation(startLeftSide) || FindValidLocation(!startLeftSide))
-		{
-			try
+			if (FindValidLocation(startLeftSide) || FindValidLocation(!startLeftSide))
 			{
 				Mineshaft mineshaft = new Mineshaft((ushort)(x - 13), (ushort)(y - 13));
 				mineshaft.Generate();
 				SpawnHousesSystem.Mineshaft = mineshaft;
 			}
-			catch (Exception e)
-			{
-				ModContent.GetInstance<SpawnHouses>().Logger.Error($"Mineshaft failed to generate:\n{e}");
-				return;
-			}
+		}
+		catch (Exception e)
+		{
+			ModContent.GetInstance<SpawnHouses>().Logger.Error($"Mineshaft failed to generate:\n{e}");
+			return;
 		}
 	}
 	
