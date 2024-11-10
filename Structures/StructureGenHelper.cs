@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using ReLogic.Utilities;
@@ -259,7 +260,12 @@ public static class StructureGenHelper
         );
     }
 
-
+    /// <summary>
+    /// digs a simple tunnel. used by the mineshaft
+    /// </summary>
+    /// <param name="start"></param>
+    /// <param name="randomStepOffset"></param>
+    /// <param name="steps"></param>
     public static void DigVerticalTunnel(Point start, int randomStepOffset, int steps)
     {
         int initialYOffset = 0;
@@ -286,5 +292,32 @@ public static class StructureGenHelper
                 new ClearTileSafe(true)
             );
         }
+    }
+    
+    /// <summary>
+    /// gets data about the average surface level, based on start/end, and the raycast's starting y
+    /// </summary>
+    /// <param name="x1"></param>
+    /// <param name="x2"></param>
+    /// <param name="y"></param>
+    /// <param name="step">each time it measures, increase target x by this</param>
+    /// <param name="maxCastDistance"></param>
+    /// <returns></returns>
+    public static (double average, double sd) GetSurfaceLevel(
+        int x1, int x2, int y, byte step = 1, ushort maxCastDistance = 50)
+    {
+        List<double> surfaceLevels = [];
+        for (int i = x1; i <= x2; i += step)
+            for (int j = 0; j < maxCastDistance; j++)
+                if (Terraria.WorldGen.SolidTile(i, y + j))
+                {
+                    surfaceLevels.Add(y + j);
+                    break;
+                }
+            
+        double average = surfaceLevels.Average();
+        double sumOfSquaresOfDifferences = surfaceLevels.Select(val => (val - average) * (val - average)).Sum();
+        double sd = Math.Sqrt(sumOfSquaresOfDifferences / surfaceLevels.Count);
+        return (average, sd);
     }
 }

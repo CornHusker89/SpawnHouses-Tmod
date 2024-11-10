@@ -1,4 +1,5 @@
 using System;
+using SpawnHouses.Structures;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -31,7 +32,10 @@ namespace SpawnHouses.Items.Debug
 			
 			//WebClientInstance.WebClient.AddSpawnCount(true);
 			
-			Console.WriteLine(x + ", " + y);
+			//Console.WriteLine(x + ", " + y);
+
+			var s = StructureGenHelper.GetSurfaceLevel(x - 10, x + 10, y);
+			Console.WriteLine($"ave: {s.average}, sd: {s.sd}");
 			
 			return true;
 		}

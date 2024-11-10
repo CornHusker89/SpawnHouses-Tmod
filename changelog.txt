@@ -5,6 +5,6 @@ Major Changes
 Minor Changes
 - Mineshaft can now spawn without the main house
 - Improved error handling
-- Small fixes for odd dirt generation near the basement & mineshaft
+- Fixes for odd dirt generation near the basement & mineshaft
 - Basement generation improvements
 - Beach House dock pillars fixed
