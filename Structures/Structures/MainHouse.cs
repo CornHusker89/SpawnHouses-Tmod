@@ -20,11 +20,11 @@ public sealed class MainHouse : CustomStructure
     // ReSharper disable InconsistentNaming
     private static List<string> _signQuotes = 
         [
-            "All good adventures start in a tavern...To bad this isn't a tavern :(",
+            "All good adventures start in a tavern...Too bad this isn't a tavern :(",
             "Welcome to the conveniently placed house in the middle of nowhere!",
             "FINALLY, NO MORE BOX HOTELS!!!",
             "No, we don’t care if this has an impact on official lore.",
-            "This house has been generated ~ times"
+            "This house has been generated ~ times!"
         ];
     
     private const byte _type_not_generated = 0;
@@ -270,7 +270,7 @@ public sealed class MainHouse : CustomStructure
     [NoJIT]
     public override void Generate()
     {
-        StructureGenHelper.GenerateFoundation(new Point(X + StructureXSize / 2, Y + 29), TileID.Dirt, StructureXSize / 2);
+        StructureGenHelper.GenerateFoundation(new Point(X + StructureXSize / 2, Y + 16), TileID.Dirt, StructureXSize / 2 + 7, true);
 
         if (!InUnderworld)
         {

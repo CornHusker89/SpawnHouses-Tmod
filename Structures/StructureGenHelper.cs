@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using ReLogic.Utilities;
 using Terraria;
+using Terraria.GameContent.Generation;
 using Terraria.ID;
 using Terraria.WorldBuilding;
 
@@ -243,21 +244,39 @@ public static class StructureGenHelper
     /// <param name="start"></param>
     /// <param name="tileID"></param>
     /// <param name="foundationRadius"></param>
-    public static void GenerateFoundation(Point start, ushort tileID, int foundationRadius) 
+    public static void GenerateFoundation(Point start, ushort tileID, int foundationRadius, bool useHalfCircle = false) 
     {
-        WorldUtils.Gen(start, new Shapes.Circle(foundationRadius),
-            new Actions.Custom((i, j, args) =>
-            {
+        if (useHalfCircle)
+        {
+            WorldUtils.Gen(start, new Shapes.HalfCircle(foundationRadius), Actions.Chain(
+                new Modifiers.Flip(false, true),
+                new Actions.Custom((i, j, args) =>
                 {
-                    Tile tile = Main.tile[i, j];
-                    tile.HasTile = true;
-                    tile.TileType = tileID;
-                    tile.Slope = SlopeType.Solid;
-                    tile.IsHalfBlock = false;
-                }
-                return true;
-            })
-        );
+                    {
+                        Tile tile = Main.tile[i, j];
+                        tile.HasTile = true;
+                        tile.TileType = tileID;
+                        tile.Slope = SlopeType.Solid;
+                        tile.IsHalfBlock = false;
+                    }
+                    return true;
+                })
+            ));
+        }
+        else
+            WorldUtils.Gen(start, new Shapes.Circle(foundationRadius),
+                new Actions.Custom((i, j, args) =>
+                {
+                    {
+                        Tile tile = Main.tile[i, j];
+                        tile.HasTile = true;
+                        tile.TileType = tileID;
+                        tile.Slope = SlopeType.Solid;
+                        tile.IsHalfBlock = false;
+                    }
+                    return true;
+                })
+            );
     }
 
     /// <summary>
@@ -319,5 +338,21 @@ public static class StructureGenHelper
         double sumOfSquaresOfDifferences = surfaceLevels.Select(val => (val - average) * (val - average)).Sum();
         double sd = Math.Sqrt(sumOfSquaresOfDifferences / surfaceLevels.Count);
         return (average, sd);
+    }
+    
+    /// <summary>
+    /// Gives distance to first solid tile, pointing downwards
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="maxCastDistance"></param>
+    /// <returns>The distance from (x, y) to the surface, in tiles</returns>
+    /// <exception cref="Exception"></exception>
+    public static int SurfaceRaycast(int x, int y, int maxCastDistance = 100) 
+    {
+        for (int i = 0; i < maxCastDistance; i++)
+            if (Terraria.WorldGen.SolidTile(x, y + i))
+                return i;
+        throw new Exception("surface not found within " + maxCastDistance);
     }
 }

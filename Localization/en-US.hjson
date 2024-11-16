@@ -76,7 +76,7 @@ Mods: {
 
 		Configs: {
 			SpawnHousesConfig: {
-				DisplayName: Generated Houses Config
+				DisplayName: Generated Housing Config
 
 				Headers: {
 					SizeHeader: Structure Sizes
@@ -101,7 +101,17 @@ Mods: {
 
 				MagicStorageIntegrations: {
 					Label: Magic Storage Integrations
-					Tooltip: If ON, Magic Storage features within Generated Houses will be enabled. Only has an effect when Magic Storage (the mod) is enabled.
+					Tooltip: If ON, Magic Storage features within Generated Housing will be enabled. Only has an effect when Magic Storage (the mod) is enabled.
+				}
+
+				SpawnPointHouseOffset: {
+					Label: Spawn Point House Offset
+					Tooltip: If ON, the Spawn Point House will generate ~120 tiles away from the spawn point. Useful for mod compatability
+				}
+
+				SpawnPointHouseSetsSpawn: {
+					Label: Spawn Point House Sets Spawn
+					Tooltip: If ON, the Spawn Point House will set the world spawn to itself
 				}
 
 				MainBasementShape: {

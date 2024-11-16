@@ -34,23 +34,23 @@ public class WorldGenPasses : ModSystem
         int sunflowersIndex = tasks.FindIndex(genpass => genpass.Name.Equals("Sunflowers"));
         if (sunflowersIndex != -1) 
             // 6. We register our world generation pass by passing in an instance of our custom GenPass class below. The GenPass class will execute our world generation code.
-            tasks.Insert(sunflowersIndex + 1, new CustomHousesPass("Generate Custom Houses Pass", 100f));
+            tasks.Insert(sunflowersIndex + 1, new MainHousePass("Main House Pass", 100f));
         else
         {
-            tasks.Insert(tasks.Count - 8, new CustomHousesPass("Generate Custom Houses Pass", 100f));
+            tasks.Insert(tasks.Count - 8, new MainHousePass("Main House Pass", 100f));
         }
         
         int iceIndex = tasks.FindIndex(genpass => genpass.Name.Equals("Ice"));
         if (iceIndex != -1) 
 	        // 6. We register our world generation pass by passing in an instance of our custom GenPass class below. The GenPass class will execute our world generation code.
-	        tasks.Insert(iceIndex + 1, new ClearSpawnPointPass("Generate Custom Houses Pass", 100f));
+	        tasks.Insert(iceIndex + 1, new ClearSpawnPointPass("Spawn Point Basement Prep Pass", 100f));
         else
         {
-	        tasks.Insert(tasks.Count - 40, new ClearSpawnPointPass("Generate Custom Houses Pass", 100f));
+	        tasks.Insert(tasks.Count - 40, new ClearSpawnPointPass("Spawn Point Basement Prep Pass", 100f));
         }
 
 
-        tasks.Insert(tasks.Count - 2, item: new CustomBeachHousePass("Custom Beach House Pass", 100f));
+        tasks.Insert(tasks.Count - 2, item: new BeachHousePass("Beach House Pass", 100f));
     }
 
     public override void PreWorldGen()
@@ -129,9 +129,9 @@ public class ClearSpawnPointPass : GenPass
 }
 
 // 7. Make sure to inherit from the GenPass class.
-public class CustomHousesPass : GenPass
+public class MainHousePass : GenPass
 {
-	public CustomHousesPass(string name, float loadWeight) : base(name, loadWeight) {
+	public MainHousePass(string name, float loadWeight) : base(name, loadWeight) {
 	}
 
 	// 8. The ApplyPass method is where the actual world generation code is placed.
@@ -149,9 +149,9 @@ public class CustomHousesPass : GenPass
 	}
 }
 
-public class CustomBeachHousePass : GenPass
+public class BeachHousePass : GenPass
 {
-	public CustomBeachHousePass(string name, float loadWeight) : base(name, loadWeight) {
+	public BeachHousePass(string name, float loadWeight) : base(name, loadWeight) {
 	}
 
 	// 8. The ApplyPass method is where the actual world generation code is placed.

@@ -103,6 +103,12 @@ public class SpawnHousesConfig : ModConfig
 	[DefaultValue(true)]
 	public bool MagicStorageIntegrations { get; set; }
 	
+	[DefaultValue(false)]
+	public bool SpawnPointHouseOffset { get; set; }
+	
+	[DefaultValue(true)]
+	public bool SpawnPointHouseSetsSpawn { get; set; }
+	
 	[DefaultValue(0.5f)]
 	[Slider]
 	[Terraria.ModLoader.Config.Range(0, 1)]
