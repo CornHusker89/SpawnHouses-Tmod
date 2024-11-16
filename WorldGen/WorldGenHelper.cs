@@ -13,6 +13,8 @@ namespace SpawnHouses.WorldGen;
 
 public static class WorldGenHelper
 {
+	private static byte _mainHouseOffsetDirection = Directions.None;
+	
     public static void GenerateMainHouse()
     {
 		bool spawnUnderworld = Main.ActiveWorldFileData.SeedText.ToLower() == "dont dig up" || Main.ActiveWorldFileData.SeedText.ToLower() == "get fixed boi";
@@ -21,22 +23,17 @@ public static class WorldGenHelper
 		int initialY = 1;
 		
 		bool foundValidSpot = false;
-
-		for (ushort counts = 0; counts < 400; counts++)
+		
+		for (ushort counts = 0; counts < 10; counts++)
 		{
-			int xVal = Terraria.WorldGen.genRand.Next(Main.spawnTileX - (counts / 8), Main.spawnTileX + (counts / 8));
-			
-			// Move out of the way of the big spawn tree
-			if (ModHelper.IsRemnantsEnabled)
-				xVal -= 70;
-			
+			initialX = Terraria.WorldGen.genRand.Next(Main.spawnTileX - 25, Main.spawnTileX + 25);
 			if (!spawnUnderworld)
-				initialY = (int)(Main.worldSurface / 2);
+				initialY = Main.spawnTileY - 40;
 			else
-				initialY = Main.spawnTileY - 15;
+				initialY = Main.spawnTileY - 20;
 				
 			//make sure we're not under the surface
-			while (!Is40AboveTilesClear(xVal, initialY) && !spawnUnderworld)
+			while (!Is40AboveTilesClear(initialX, initialY) && !spawnUnderworld)
 				initialY -= 30;
 
 			bool Is40AboveTilesClear(int x, int y)
@@ -48,21 +45,34 @@ public static class WorldGenHelper
 				return true;
 			}
 			
-			initialX = xVal;
-			
-			// move down to the surface
-			while (initialY < Main.worldSurface + 50)
+			// Move out of the way of the big spawn tree or just offset it
+			if (ModHelper.IsRemnantsEnabled || ModContent.GetInstance<SpawnHousesConfig>().SpawnPointHouseOffset)
 			{
-				if (Terraria.WorldGen.SolidTile(initialX, initialY))
-					break;
-				
-				initialY++;
+				var leftSurface = StructureGenHelper.GetSurfaceLevel(initialX - 120 - 30, initialX - 120 + 30, initialY, maxCastDistance: 100);
+				var rightSurface = StructureGenHelper.GetSurfaceLevel(initialX + 120 - 30, initialX + 120 + 30, initialY, maxCastDistance: 100);
+				if (leftSurface.sd < rightSurface.sd)
+				{
+					initialX -= 120;
+					initialY = (int)leftSurface.average;
+					_mainHouseOffsetDirection = Directions.Left;
+				}
+				else
+				{
+					initialX += 120;
+					initialY = (int)rightSurface.average;
+					_mainHouseOffsetDirection = Directions.Right;
+				}
 			}
-
-			// if we found a good spot, break search loop
-			if (!spawnUnderworld)
+			else
 			{
-				if (Terraria.WorldGen.SolidTile(initialX, initialY) && Main.tile[initialX, initialY].TileType == TileID.Grass)
+				var surface = StructureGenHelper.GetSurfaceLevel(initialX - 30, initialX + 30, initialY, maxCastDistance: 100);
+				initialY = (int)surface.average;
+			}
+			
+			// if we found a good spot, break search loop
+			if (spawnUnderworld)
+			{
+				if (initialY >= Main.spawnTileY - 50)
 				{
 					foundValidSpot = true;
 					break;
@@ -70,11 +80,8 @@ public static class WorldGenHelper
 			}
 			else
 			{
-				if (initialY >= Main.spawnTileY - 50)
-				{
-					foundValidSpot = true;
-					break;
-				}
+				foundValidSpot = true;
+				break;
 			}
 		}
 		
@@ -84,62 +91,44 @@ public static class WorldGenHelper
 			ModContent.GetInstance<SpawnHouses>().Logger.Error("Failed to generate SpawnPointHouse. Please report this world seed and your client.log to the mod's author");
 			return;
 		}
-		
-		int sum = 0;
-		for (int i = -3; i <= 3; i++)
-		{
-			int x = i * 10 + initialX;
-			int y;
 
-			if (!spawnUnderworld)
-				y = initialY;
-			else
-				y = initialY - 14;
-		
-			
-			while (!Terraria.WorldGen.SolidTile(x, y))
-				y++;
-			
-			sum += y;
-		}
-
-		// set initialY to the average y pos of the raycasts
-		initialY = (int) Math.Round(sum / 7.0);
-		MainHouse house = null;
 		try
 		{
-			house = new MainHouse((ushort)(initialX - 31), (ushort)(initialY - 16), hasBasement: ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement, inUnderworld: spawnUnderworld);
+			MainHouse house = new MainHouse((ushort)(initialX - 31), (ushort)(initialY - 16), hasBasement: ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement, inUnderworld: spawnUnderworld);
 			house.Generate();
 			SpawnHousesSystem.MainHouse = house;
+			
+			// move the spawn point to the upper floor of the house
+			if (ModContent.GetInstance<SpawnHousesConfig>().SpawnPointHouseSetsSpawn)
+			{
+				Main.spawnTileX = initialX + house.LeftSize - 1 - 31;
+				Main.spawnTileY = initialY + 5 - 15;
+			}
+	
+			// replace all dirt with ash if we're in the underworld
+			if (spawnUnderworld)
+				WorldUtils.Gen(new Point(initialX, initialY), new Shapes.Circle(150, 100), Actions.Chain(
+					new Actions.Custom((i, j, args) =>
+					{
+						if (Main.tile[i, j].HasTile && Main.tile[i, j].TileType == TileID.Dirt)
+						{
+							Tile tile = Main.tile[i, j];
+							tile.TileType = TileID.Ash;
+						}
+						if (Main.tile[i, j].HasTile && Main.tile[i, j].TileType == TileID.Grass)
+						{
+							Tile tile = Main.tile[i, j];
+							tile.TileType = TileID.AshGrass;
+						}
+						return true;
+					})
+				));
 		}
 		catch (Exception e)
 		{
 			ModContent.GetInstance<SpawnHouses>().Logger.Error($"Main house failed to generate:\n{e}");
 			return;
 		}
-		
-		// move the spawn point to the upper floor of the house
-		Main.spawnTileX = initialX + house.LeftSize - 1 - 31;
-		Main.spawnTileY = initialY + 5 - 15;
-	
-		// replace all dirt with ash if we're in the underworld
-		if (spawnUnderworld)
-			WorldUtils.Gen(new Point(initialX, initialY), new Shapes.Circle(150, 100), Actions.Chain(
-				new Actions.Custom((i, j, args) =>
-				{
-					if (Main.tile[i, j].HasTile && Main.tile[i, j].TileType == TileID.Dirt)
-					{
-						Tile tile = Main.tile[i, j];
-						tile.TileType = TileID.Ash;
-					}
-					if (Main.tile[i, j].HasTile && Main.tile[i, j].TileType == TileID.Grass)
-					{
-						Tile tile = Main.tile[i, j];
-						tile.TileType = TileID.AshGrass;
-					}
-					return true;
-				})
-			));
     }
 	
 	
@@ -150,10 +139,21 @@ public static class WorldGenHelper
 		{
 			bool FindValidLocation(bool left = true)
 			{
-				if (left)
-					x = Main.spawnTileX - Terraria.WorldGen.genRand.Next(18, 34) - 35;
+				if (SpawnHousesSystem.MainHouse != null)
+				{
+					int centerHouse = SpawnHousesSystem.MainHouse.X + (SpawnHousesSystem.MainHouse.StructureXSize / 2);
+					if (left)
+						x = centerHouse - Terraria.WorldGen.genRand.Next(18, 38) - 35;
+					else
+						x = centerHouse + Terraria.WorldGen.genRand.Next(18, 38) + 35;
+				}
 				else
-					x = Main.spawnTileX + Terraria.WorldGen.genRand.Next(18, 34) + 35 ;
+				{
+					if (left)
+						x = Main.spawnTileX - Terraria.WorldGen.genRand.Next(18, 34) - 35;
+					else
+						x = Main.spawnTileX + Terraria.WorldGen.genRand.Next(18, 34) + 35;
+				}
 
 				var surfaceLevel = StructureGenHelper.GetSurfaceLevel(x - 10, x + 11, Main.spawnTileY - 24);
 				y = (int)surfaceLevel.average;
@@ -161,7 +161,11 @@ public static class WorldGenHelper
 				return surfaceLevel.sd <= 2.8;
 			}
 
-			bool startLeftSide = false;//Terraria.WorldGen.genRand.NextBool();
+			bool startLeftSide;
+			if (_mainHouseOffsetDirection == Directions.None)
+				startLeftSide = Terraria.WorldGen.genRand.NextBool();
+			else
+				startLeftSide = _mainHouseOffsetDirection == Directions.Left;
 
 			if (FindValidLocation(startLeftSide) || FindValidLocation(!startLeftSide))
 			{

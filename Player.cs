@@ -16,24 +16,24 @@ public class Player : ModPlayer
     }
 
 
-    private int frameCounter = 0;
+    private int _frameCounter = 0;
     
     public override void PostUpdate()
     {
-        frameCounter++;
-        if (frameCounter >= 20)
+        _frameCounter++;
+        if (_frameCounter >= 16)
         {
-            frameCounter = 0;
+            _frameCounter = 0;
             int x = (int)Player.Center.X / 16;
             int y = (int)Player.Center.Y / 16;
             
             if (SpawnHousesSystem.MainBasement is not null && SpawnHousesSystem.MainBasement.Status == StructureStatus.GeneratedButNotFound)
             {
                 if (
-                    x > SpawnHousesSystem.MainBasement.EntryPosX - 5
-                    && x < SpawnHousesSystem.MainBasement.EntryPosX + 5
+                    x > SpawnHousesSystem.MainBasement.EntryPosX - 7
+                    && x < SpawnHousesSystem.MainBasement.EntryPosX + 7
                     && y > SpawnHousesSystem.MainBasement.EntryPosY + 6
-                    && y < SpawnHousesSystem.MainBasement.EntryPosY + 17
+                    && y < SpawnHousesSystem.MainBasement.EntryPosY + 20
                 )
                 {
                     SpawnHousesSystem.MainBasement.OnFound();

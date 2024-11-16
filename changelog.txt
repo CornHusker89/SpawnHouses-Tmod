@@ -1,10 +1,11 @@
-Version 1.0.4
+Version 1.0.5
 Major Changes
-- Added "Main Basement Shape" to the configs, controls overall generation shape. It's still random, just a little more guided
+- Added config to offset main house from the world's spawn. Can be useful for mod compatability
+- Added config to turn off setting world spawn to the house 
 
 Minor Changes
-- Mineshaft can now spawn without the main house
-- Improved error handling
-- Fixes for odd dirt generation near the basement & mineshaft
-- Basement generation improvements
-- Beach House dock pillars fixed
+- More error handling improvements
+- Fixed rare issue with basement lights not turning on
+- Improved dirt generation around main house
+- Fixed naming inconsistencies
+- Changed description

@@ -55,12 +55,14 @@ namespace SpawnHouses.Items.Debug
 			
 			
 			// central cave itself
-			WorldUtils.Gen(new Point(x, y), new CustomShapes.ReverseMound(w - pondDiff + bleed, h - pondDiff + bleed), Actions.Chain(
+			WorldUtils.Gen(new Point(x, y), new Shapes.Mound(w - pondDiff + bleed, h - pondDiff + bleed), Actions.Chain(
+				new Modifiers.Flip(false, true),
 				new Actions.SetTile(TileID.IceBlock, true),
 				new Modifiers.Dither(0.22),
 				new Actions.SetTile(TileID.SnowBlock, true)
 			));
-			WorldUtils.Gen(new Point(x, y), new CustomShapes.ReverseMound(w - pondDiff, h - pondDiff), Actions.Chain(
+			WorldUtils.Gen(new Point(x, y), new Shapes.Mound(w - pondDiff, h - pondDiff), Actions.Chain(
+				new Modifiers.Flip(false, true),
 				new Actions.ClearTile(),
 				new Actions.SetLiquid(LiquidID.Water, 232),
 				new Actions.SetFrames(true)

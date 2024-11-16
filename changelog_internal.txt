@@ -1,3 +1,2 @@
-Version 1.0.4
+Version 1.0.5
 Important Internal Changes
-- ChainStructure layout no longer calculated on init, now by CalculateChain()

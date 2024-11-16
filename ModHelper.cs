@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
+// ReSharper disable InconsistentNaming
 
 namespace SpawnHouses;
 

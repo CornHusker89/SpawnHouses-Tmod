@@ -84,8 +84,7 @@ public class MainBasement : StructureChain
             {
                 if (structure.ID == (ushort)StructureID.MainBasement_Room5) found = true;
             });
-            if (found)
-                return true;
+            return found;
         }
         return true;
     }

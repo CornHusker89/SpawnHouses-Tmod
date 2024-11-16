@@ -267,6 +267,7 @@ public static class Directions
     public const byte Down = 1;
     public const byte Left = 2;
     public const byte Right = 3;
+    public const byte None = 4;
 
     public static byte FlipDirection(byte direction)
     {
@@ -289,13 +290,6 @@ public static class GenerateChances
     public const byte Rejected = 0;
     public const byte Neutral = 1;
     public const byte Guaranteed = 2;
-}
-
-public static class ChainConnectPointStatus
-{
-    public const byte HasChild = 0;
-    public const byte Empty = 1;
-    public const byte Blocked = 2;
 }
 
 public static class ModInstance

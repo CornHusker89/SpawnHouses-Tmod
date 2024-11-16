@@ -91,7 +91,6 @@ public sealed class BeachHouse : CustomStructure
             TileType = TileID.RichMahoganyBeam,
             TileColor = PaintID.BrownPaint
         };
-        Console.WriteLine(Reverse);
         if (!Reverse)
         {
             ConnectPoints[3][0].BlendRight(TileID.Sand, 8);
