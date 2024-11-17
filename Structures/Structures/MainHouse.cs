@@ -289,7 +289,7 @@ public sealed class MainHouse : CustomStructure
         
         string signString = "All good adventures start in a tavern...To bad this isn't a tavern :(";
         Random rnd = new Random();
-        for (int i = 0; i < 15; i++)
+        for (int i = 0; i < 25; i++)
         {
             string possibleString = _signQuotes[rnd.Next(0, _signQuotes.Count)];
             if (possibleString.Contains('~'))
@@ -299,7 +299,7 @@ public sealed class MainHouse : CustomStructure
                     Dictionary<string, int> dict = WebClientInstance.WebClient.GetSpawnCount();
                     if (dict is not null)
                     {
-                        dict.TryGetValue("main_houses", out int value);
+                        dict.TryGetValue("main_houses_extrapolated", out int value);
                         if (value is not -1)
                         {
                             signString = possibleString.Replace("~", value.ToString());
