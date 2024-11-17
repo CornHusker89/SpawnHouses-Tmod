@@ -24,7 +24,7 @@ public class WebHelper
     /// <summary>
     /// 
     /// </summary>
-    /// <returns>keys are "beach_house", "main_basement", "main_house", "mineshaft"</returns>
+    /// <returns>keys are "beach_houses", "main_basements", "main_houses", "mineshafts", "main_houses_extrapolated"</returns>
     public Dictionary<string, int> GetSpawnCount()
     {
         try
