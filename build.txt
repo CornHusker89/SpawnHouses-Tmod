@@ -1,4 +1,4 @@
 displayName = Generated Housing
 author = CornHusker and Duck
-version = 1.0.4
+version = 1.0.5
 weakReferences = MagicStorage
