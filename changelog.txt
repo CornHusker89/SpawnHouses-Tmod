@@ -1,12 +1,6 @@
-Version 1.0.5
+Version 1.0.6
 Major Changes
-- Added config to offset main house from the world's spawn. Can be useful for mod compatability
-- Added config to turn off setting world spawn to the house 
+- Fixed the mineshaft...I may have fumbled the bag
 
 Minor Changes
-- More error handling improvements
-- Fixed rare issue with basement lights not turning on
-- Improved dirt generation around main house
-- Fixed naming inconsistencies
-- Changed description
-- Used data from the past month to estimate the total number of houses generated, main house sign message now reflects new estimate
+- Fixed the mod recognizing upside-down seeds

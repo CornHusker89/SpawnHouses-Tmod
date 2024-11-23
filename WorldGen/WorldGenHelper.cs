@@ -17,7 +17,8 @@ public static class WorldGenHelper
 	
     public static void GenerateMainHouse()
     {
-		bool spawnUnderworld = Main.ActiveWorldFileData.SeedText.ToLower() == "dont dig up" || Main.ActiveWorldFileData.SeedText.ToLower() == "get fixed boi";
+		bool spawnUnderworld = Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "") == "dontdigup" || 
+			Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "") == "getfixedboi";
 		
 		int initialX = 1;
 		int initialY = 1;
