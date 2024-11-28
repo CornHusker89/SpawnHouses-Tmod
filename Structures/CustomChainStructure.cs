@@ -1,10 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Terraria.ModLoader;
-using Terraria.DataStructures;
-using Terraria.WorldBuilding;
 using SpawnHouses.Structures.StructureParts;
-using Terraria.GameContent.UI.Elements;
 
 namespace SpawnHouses.Structures;
 
@@ -17,7 +13,7 @@ public class CustomChainStructure : CustomStructure
     public ChainConnectPoint ParentChainConnectPoint;
     public List<byte> BridgeDirectionHistory = [];
     
-    protected CustomChainStructure(String filePath, ushort structureXSize, ushort structureYSize,
+    protected CustomChainStructure(string filePath, ushort structureXSize, ushort structureYSize,
         ChainConnectPoint[][] connectPoints, ushort x = 1000, ushort y = 1000,
         byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
             base(filePath, structureXSize, structureYSize, null, status, x, y, true)
