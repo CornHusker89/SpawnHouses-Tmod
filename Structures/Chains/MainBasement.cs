@@ -159,7 +159,10 @@ public class MainBasement : StructureChain
         {
             double randomValue = Terraria.WorldGen.genRand.NextDouble() * structureWeightSum;
             CustomChainStructure structure = usableStructureList.Last(curStructure => curStructure.Weight <= randomValue).Clone();
-        
+
+            if (structure is null)
+                continue;
+            
             // don't generate a branching hallway right after another one :) but only if the shape isn't too vertical
             if (_shape > 0.31 && (parentConnectPoint is not null && parentConnectPoint.GenerateChance == GenerateChances.Guaranteed && 
                 StructureIDUtils.IsBranchingHallway(structure)))
@@ -189,13 +192,20 @@ public class MainBasement : StructureChain
                         continue;
                 }
                 else
-                {
-                    if (parentConnectPoint.ParentStructure!.ParentChainConnectPoint is not null &&
-                        !(StructureIDUtils.IsBranchingHallway(structure) || StructureIDUtils.IsBranchingHallway(parentConnectPoint.ParentStructure))
-                        || StructureIDUtils.IsBranchingHallway(parentConnectPoint.ParentStructure.ParentChainConnectPoint!.ParentStructure))
-                        continue;
-                }
-                    
+                {   
+                    if (parentConnectPoint.ParentStructure is not null)
+                    {
+                        if (parentConnectPoint.ParentStructure.ParentChainConnectPoint is not null &&
+                            !(StructureIDUtils.IsBranchingHallway(structure) || StructureIDUtils.IsBranchingHallway(parentConnectPoint.ParentStructure)))
+                            continue;
+                        if (parentConnectPoint.ParentStructure.ParentChainConnectPoint is not null 
+                            && parentConnectPoint.ParentStructure.ParentChainConnectPoint.ParentStructure is not null 
+                            && StructureIDUtils.IsBranchingHallway(parentConnectPoint.ParentStructure.ParentChainConnectPoint!.ParentStructure))
+                        {
+                            continue;
+                        } 
+                    }
+                }   
             }
             chosenStructure = structure;
         }
