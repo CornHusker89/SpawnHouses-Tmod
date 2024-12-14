@@ -131,7 +131,7 @@ public class MainBasement : StructureChain
                     
                         maxDistance = 35;
                     if (_shape <= 0.01f)
-                        maxDistance = 25;
+                        maxDistance = 29;
                 }
             }
         }

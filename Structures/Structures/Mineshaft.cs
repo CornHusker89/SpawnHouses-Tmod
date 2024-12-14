@@ -51,8 +51,8 @@ public sealed class Mineshaft : CustomStructure
     
     public override void Generate()
     {
-        ConnectPoints[2][0].BlendLeft(TileID.Grass, 7);
-        ConnectPoints[3][0].BlendRight(TileID.Grass, 7);
+        StructureGenHelper.Blend(ConnectPoints[2][0], 7, TileID.Grass);
+        StructureGenHelper.Blend(ConnectPoints[3][0], 7, TileID.Grass, blendLeftSide: false);
         
         _GenerateStructure();
         

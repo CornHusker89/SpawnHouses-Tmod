@@ -77,7 +77,7 @@ public abstract class StructureChain
         ChainConnectPoint rootConnectPoint = null;
         bool foundValidStructureChain = false;
         // try to find a configuration that satisfies the minCost
-        for (int attempts = 0; attempts < 7500; attempts++)
+        for (int attempts = 0; attempts < 15000; attempts++)
         {
             _copiedStructureList = (CustomChainStructure[])_originalStructureList.Clone();
             for (byte i = 0; i < _originalStructureList.Length; i++)

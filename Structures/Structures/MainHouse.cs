@@ -272,17 +272,9 @@ public sealed class MainHouse : CustomStructure
     {
         StructureGenHelper.GenerateFoundation(new Point(X + StructureXSize / 2, Y + 16), TileID.Dirt, StructureXSize / 2 + 7, true);
 
-        if (!InUnderworld)
-        {
-            ConnectPoints[2][0].BlendLeft(topTileID: TileID.Grass, blendDistance: 20, maxFillCount: 25);
-            ConnectPoints[3][0].BlendRight(topTileID: TileID.Grass, blendDistance: 20, maxFillCount: 25);
-        }
-        else
-        {
-            ConnectPoints[2][0].BlendLeft(topTileID: TileID.Grass, blendDistance: 20, maxFillCount: 25, maxHeight: 10);
-            ConnectPoints[3][0].BlendRight(topTileID: TileID.Grass, blendDistance: 20, maxFillCount: 25, maxHeight: 10);
-        }
-        
+        StructureGenHelper.Blend(ConnectPoints[2][0], 20, TileID.Grass, maxHeight: InUnderworld? (ushort)10 : (ushort)38);
+        StructureGenHelper.Blend(ConnectPoints[3][0], 20, TileID.Grass, maxHeight: InUnderworld? (ushort)10 : (ushort)38, blendLeftSide: false);
+                
         _GenerateStructure(); // generates the left side
         StructureHelper.Generator.GenerateStructure(RightFilePath, new Point16(X + LeftSize, Y), ModInstance.Mod);
         StructureHelper.Generator.GenerateStructure(TopFilePath, new Point16(X + LeftSize - 14, Y - 10), ModInstance.Mod);

@@ -74,6 +74,13 @@ public class WorldGenPasses : ModSystem
 		    }
 	    }
 		
+	    if (Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "").Replace("'", "") == "dontdigup" || 
+			Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "") == "getfixedboi")
+		{
+			//so that it won't go out of bounds
+			ModContent.GetInstance<SpawnHousesConfig>().MainBasementShape = float.Max(ModContent.GetInstance<SpawnHousesConfig>().MainBasementShape, 0.4f);
+		}
+		
 	    if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement)
 		    GenerateMainBasement();
 
@@ -139,7 +146,8 @@ public class MainHousePass : GenPass
 		
 		// 9. Finally, we do the actual world generation code.
 		
-		bool spawnUnderworld = Main.ActiveWorldFileData.SeedText.ToLower() == "dont dig up" || Main.ActiveWorldFileData.SeedText.ToLower() == "get fixed boi";
+		bool spawnUnderworld = Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "").Replace("'", "") == "dontdigup" || 
+		                       Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "") == "getfixedboi";
 
 		if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointHouse)
 			GenerateMainHouse();
