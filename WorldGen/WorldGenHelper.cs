@@ -17,8 +17,8 @@ public static class WorldGenHelper
 	
     public static void GenerateMainHouse()
     {
-		bool spawnUnderworld = Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "") == "dontdigup" || 
-			Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "") == "getfixedboi";
+	    bool spawnUnderworld = Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "").Replace("'", "") == "dontdigup" || 
+	                           Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "") == "getfixedboi";
 		
 		int initialX = 1;
 		int initialY = 1;
@@ -34,8 +34,9 @@ public static class WorldGenHelper
 				initialY = Main.spawnTileY - 20;
 				
 			//make sure we're not under the surface
-			while (!Is40AboveTilesClear(initialX, initialY) && !spawnUnderworld)
-				initialY -= 30;
+			if (!spawnUnderworld)
+				while (!Is40AboveTilesClear(initialX, initialY))
+					initialY -= 30;
 
 			bool Is40AboveTilesClear(int x, int y)
 			{
@@ -47,33 +48,44 @@ public static class WorldGenHelper
 			}
 			
 			// Move out of the way of the big spawn tree or just offset it
-			if (ModHelper.IsRemnantsEnabled || ModContent.GetInstance<SpawnHousesConfig>().SpawnPointHouseOffset)
+			try
 			{
-				var leftSurface = StructureGenHelper.GetSurfaceLevel(initialX - 120 - 30, initialX - 120 + 30, initialY, maxCastDistance: 100);
-				var rightSurface = StructureGenHelper.GetSurfaceLevel(initialX + 120 - 30, initialX + 120 + 30, initialY, maxCastDistance: 100);
-				if (leftSurface.sd < rightSurface.sd)
+				if (ModHelper.IsRemnantsEnabled || ModContent.GetInstance<SpawnHousesConfig>().SpawnPointHouseOffset)
 				{
-					initialX -= 120;
-					initialY = (int)leftSurface.average;
-					_mainHouseOffsetDirection = Directions.Left;
+					var leftSurface = StructureGenHelper.GetSurfaceLevel(initialX - 120 - 30, initialX - 120 + 30,
+						initialY, maxCastDistance: 400);
+					var rightSurface = StructureGenHelper.GetSurfaceLevel(initialX + 120 - 30, initialX + 120 + 30,
+						initialY, maxCastDistance: 400);
+					if (leftSurface.sd < rightSurface.sd)
+					{
+						initialX -= 120;
+						initialY = (int)leftSurface.average;
+						_mainHouseOffsetDirection = Directions.Left;
+					}
+					else
+					{
+						initialX += 120;
+						initialY = (int)rightSurface.average;
+						_mainHouseOffsetDirection = Directions.Right;
+					}
 				}
 				else
 				{
-					initialX += 120;
-					initialY = (int)rightSurface.average;
-					_mainHouseOffsetDirection = Directions.Right;
+					var surface = StructureGenHelper.GetSurfaceLevel(initialX - 30, initialX + 30, initialY,
+						maxCastDistance: 400);
+					initialY = (int)surface.average;
 				}
 			}
-			else
+			catch (Exception e)
 			{
-				var surface = StructureGenHelper.GetSurfaceLevel(initialX - 30, initialX + 30, initialY, maxCastDistance: 100);
-				initialY = (int)surface.average;
+				ModContent.GetInstance<SpawnHouses>().Logger.Error($"Main house failed to generate:\n{e}");
+				return;
 			}
 			
 			// if we found a good spot, break search loop
 			if (spawnUnderworld)
 			{
-				if (initialY >= Main.spawnTileY - 50)
+				if (initialY >= Main.spawnTileY - 25)
 				{
 					foundValidSpot = true;
 					break;
@@ -226,91 +238,96 @@ public static class WorldGenHelper
 	
 	public static void GenerateBeachHouse()
 	{
-					ushort tileX = 0, tileY = 0;
-			short yModifier = 0;
-
-			bool FindLeft(bool reverse = false, bool force = false) {
-				ushort x, y;
-				if (!reverse)
-					x = 70;	
-				else
-					x = (ushort)(Main.maxTilesX - 70);
-				
-				while (true) {
-					if (!reverse)
-						x++;
-					else
-						x--;
-
-					y = (ushort)(Main.worldSurface * 2 / 5 - yModifier);
-					if (Terraria.WorldGen.SolidTile(x, y))
-						yModifier -= 70;
-						
-					while (true) {
-						y++;
-						
-						if (Terraria.WorldGen.SolidTile(x, y))
-						{
-							if ((Main.tile[x, y].TileType == TileID.Sand || Main.tile[x, y].TileType == TileID.ShellPile) || force)
-							{
-								tileX = x;
-								tileY = y;
-								return true;
-							}
-							return false;
-						}
-						
-						if (Main.tile[x, y].LiquidAmount != 0) 
-							break;
-					}
-				}
-			}
-
-			bool FindRight(bool force = false) {
-				return FindLeft(true, force);
-			}
-
-			bool dungeonIsLeftSide = Main.dungeonX < Main.maxTilesX / 2;
-
-			bool spawnDungeonSide = Terraria.WorldGen.genRand.Next(0, 4) == 0; // 1 out of 4
-
-			// initally set it to the same side, then swap it if we aren't spawning on the DungeonSide
-			bool leftSide = dungeonIsLeftSide;
-			if (!spawnDungeonSide)
-				leftSide = !leftSide;
-			
-			if (leftSide)
-			{
-				if (!FindLeft())
-				{
-					leftSide = false;
-					FindRight(force: true);
-				}
-			}
+		ushort tileX = 0, tileY = 0;
+		short yModifier = 0;
+		ushort fillTileType = TileID.Sand;
+		
+		bool FindLeft(bool reverse = false, bool force = false) {
+			ushort x, y;
+			if (!reverse)
+				x = 70;	
 			else
-			{
-				if (!FindRight())
-				{
-					leftSide = true;
-					FindLeft(force: true);
+				x = (ushort)(Main.maxTilesX - 70);
+			
+			while (true) {
+				if (!reverse)
+					x++;
+				else
+					x--;
+
+				y = (ushort)(Main.worldSurface * 2 / 5 - yModifier);
+				if (Terraria.WorldGen.SolidTile(x, y))
+					yModifier -= 70;
+					
+				while (true) { // sample vertical segment
+					y++;
+					
+					if (Terraria.WorldGen.SolidTile(x, y))
+					{
+						if (!Terraria.WorldGen.SolidTile(x, y + 20) || !Terraria.WorldGen.SolidTile(x, y + 28)) // if we're on an "island" keep going
+							break;
+						
+						ushort type = Main.tile[x, y].TileType;
+						if (type is TileID.Sand or TileID.ShellPile or TileID.Crimsand or TileID.Ebonsand or TileID.Pearlsand || force)
+						{
+							tileX = x;
+							tileY = y;
+							
+							//sample a deeper tile
+							fillTileType = Main.tile[x, y + 10].TileType;
+							if (fillTileType == TileID.ShellPile)
+								fillTileType = TileID.Sand;
+							
+							return true;
+						}
+						return false;
+					}
+					
+					if (Main.tile[x, y].LiquidAmount != 0) 
+						break;
 				}
 			}
-			
-			if (tileX != 0 && tileY != 0)
+		}
+
+		bool FindRight(bool force = false) {
+			return FindLeft(true, force);
+		}
+
+		bool dungeonIsLeftSide = Main.dungeonX < Main.maxTilesX / 2;
+
+		bool spawnDungeonSide = Terraria.WorldGen.genRand.Next(0, 4) == 0; // 1 out of 4
+
+		// initally set it to the same side, then swap it if we aren't spawning on the DungeonSide
+		bool leftSide = dungeonIsLeftSide;
+		if (!spawnDungeonSide)
+			leftSide = !leftSide;
+		
+		if (leftSide)
+		{
+			if (!FindLeft())
 			{
-				try
-				{
-					BeachHouse beachHouse = leftSide ? 
-						new BeachHouse((ushort)(tileX - 9), (ushort)(tileY - 32)) : 
-						new BeachHouse((ushort)(tileX - 23), (ushort)(tileY - 32), reverse: true);
-					beachHouse.Generate();
-					SpawnHousesSystem.BeachHouse = beachHouse;
-				}
-				catch (Exception e)
-				{
-					ModContent.GetInstance<SpawnHouses>().Logger.Error($"Beach house failed to generate:\n{e}");
-					return;
-				}
+				leftSide = false;
+				FindRight(force: true);
+			}
+		}
+		else
+		{
+			if (!FindRight())
+			{
+				leftSide = true;
+				FindLeft(force: true);
+			}
+		}
+		
+		if (tileX != 0 && tileY != 0)
+		{
+			try
+			{
+				BeachHouse beachHouse = leftSide ? 
+					new BeachHouse((ushort)(tileX - 9), (ushort)(tileY - 32)) : 
+					new BeachHouse((ushort)(tileX - 23), (ushort)(tileY - 32), reverse: true);
+				beachHouse.Generate();
+				SpawnHousesSystem.BeachHouse = beachHouse;
 				
 				// firepit generation
 				if (Terraria.WorldGen.genRand.Next(0, 2) == 0) // 1/2 chance
@@ -322,7 +339,7 @@ public static class WorldGenHelper
 						x = (ushort)(tileX - 9 + 35 + Terraria.WorldGen.genRand.Next(8, 12));
 					else
 						x = (ushort)(tileX - 23 - Terraria.WorldGen.genRand.Next(8, 12));
-				
+			
 					ushort y = 10;
 					while (!foundLocation)
 					{
@@ -338,10 +355,30 @@ public static class WorldGenHelper
 
 					y = (ushort)(y - 2);
 					x = (ushort)(x - 3);
-		
+	
 					Firepit structure = new Firepit(x, y);
 					structure.Generate();
 				}
+				
+				// replace all sand with filltype sand (for when the beaches are corrupt blocks)
+				if (fillTileType is not TileID.Sand)
+					WorldUtils.Gen(new Point(tileX, tileY), new Shapes.Circle(150, 100), Actions.Chain(
+						new Actions.Custom((i, j, args) =>
+						{
+							if (Main.tile[i, j].HasTile && Main.tile[i, j].TileType == TileID.Sand)
+							{
+								Tile tile = Main.tile[i, j];
+								tile.TileType = fillTileType;
+							}
+							return true;
+						})
+					));
 			}
+			catch (Exception e)
+			{
+				ModContent.GetInstance<SpawnHouses>().Logger.Error($"Beach house failed to generate:\n{e}");
+				return;
+			}
+		}
 	}
 }

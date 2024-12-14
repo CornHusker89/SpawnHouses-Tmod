@@ -101,7 +101,7 @@ Mods: {
 
 				MagicStorageIntegrations: {
 					Label: Magic Storage Integrations
-					Tooltip: If ON, Magic Storage features within Generated Housing will be enabled. Only has an effect when Magic Storage (the mod) is enabled.
+					Tooltip: If ON, a Magic Storage starter setup will spawn in the Spawn Point House. In order to spawn, Magic Storage (the mod) must be loaded
 				}
 
 				SpawnPointHouseOffset: {
@@ -116,7 +116,7 @@ Mods: {
 
 				MainBasementShape: {
 					Label: Main Basement Shape
-					Tooltip: 0.5 will not favor generating in any direction. Values closer to 0 will generate the basement more vertically, while values closer to 1 will generate the basement more horizontally.
+					Tooltip: 0.5 will not favor generating in any direction. Values closer to 0 will generate the basement more vertically, while values closer to 1 will generate the basement more horizontally.\nWhen in an upside-down seed, value will not go below 0.4
 				}
 
 				EnableSpawnPointHouse: {

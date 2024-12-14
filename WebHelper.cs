@@ -7,6 +7,8 @@ using System.Text;
 using System.Text.Json;
 using Terraria.ModLoader;
 
+namespace SpawnHouses;
+
 public class WebHelper
 {
     private readonly HttpClient Client;
@@ -29,7 +31,7 @@ public class WebHelper
     {
         try
         {
-            ModContent.GetInstance<SpawnHouses.SpawnHouses>().Logger.Info("Getting spawn count info from Web API");
+            ModContent.GetInstance<SpawnHouses>().Logger.Info("Getting spawn count info from Web API");
             HttpResponseMessage response = Client.GetAsync("https://spawnhousescounter.xyz/api/get").Result;
             response.EnsureSuccessStatusCode();
             string responseBody = response.Content.ReadAsStringAsync().Result;
@@ -45,7 +47,7 @@ public class WebHelper
     {
         try
         {
-            ModContent.GetInstance<SpawnHouses.SpawnHouses>().Logger.Info("Sending spawn count info to Web API");
+            ModContent.GetInstance<SpawnHouses>().Logger.Info("Sending spawn count info to Web API");
             Dictionary<string, int> dict = new Dictionary<string, int>
             {
                 ["main_house"] = mainHouse? 1 : 0,

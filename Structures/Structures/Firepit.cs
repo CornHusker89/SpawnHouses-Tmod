@@ -52,8 +52,8 @@ public sealed class Firepit : CustomStructure
         if (blendTileID == TileID.ShellPile)
             blendTileID = TileID.Sand;
         
-        ConnectPoints[2][0].BlendLeft(topTileID: blendTileID, blendDistance: 5);
-        ConnectPoints[3][0].BlendRight(topTileID: blendTileID, blendDistance: 5);
+        StructureGenHelper.Blend(ConnectPoints[2][0], 5, blendTileID);
+        StructureGenHelper.Blend(ConnectPoints[3][0], 5, blendTileID, blendLeftSide: false);
 
         // make sure that blending doesn't fuck up the tiles next to the chairs
         Tile tile = Main.tile[X - 1, Y + 2];

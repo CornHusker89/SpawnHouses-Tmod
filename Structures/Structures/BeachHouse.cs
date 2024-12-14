@@ -93,13 +93,13 @@ public sealed class BeachHouse : CustomStructure
         };
         if (!Reverse)
         {
-            ConnectPoints[3][0].BlendRight(TileID.Sand, 8);
+            StructureGenHelper.Blend(ConnectPoints[3][0], 8, TileID.Sand, blendLeftSide: false);
             StructureGenHelper.GenerateBeams(new Point(X + 1, Y + 30), beamTile, 4, 3);
             StructureGenHelper.GenerateFoundation(new Point(X + 22, Y + 34), TileID.Sand, 11);
         }
         else
         {
-            ConnectPoints[2][0].BlendLeft(TileID.Sand, 8);
+            StructureGenHelper.Blend(ConnectPoints[2][0], 8, TileID.Sand);
             StructureGenHelper.GenerateBeams(new Point(X + 25, Y + 30), beamTile, 4, 3);
             StructureGenHelper.GenerateFoundation(new Point(X + 12, Y + 34), TileID.Sand, 11);
         }
