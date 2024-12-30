@@ -13,17 +13,12 @@ namespace SpawnHouses;
 
 public class SpawnHousesModMenu : ModMenu
 {
-    public override bool IsAvailable => false;
+    public override bool IsAvailable => true;
     
     public override string DisplayName => "Generated Housing";
     //public override int Music => MusicLoader.GetMusicSlot(Mod, "Sounds/Music/YourMenuTheme"); // Optional custom music
 
     public override ModSurfaceBackgroundStyle MenuBackgroundStyle => ModContent.GetInstance<CustomMenuBackgroundStyle>();
-    
-    public void test()
-    {
-        // EntryPoint=CustomMenu in build.txt?
-    }
 }
 
 
@@ -34,24 +29,31 @@ public class CustomMenuBackgroundStyle : ModSurfaceBackgroundStyle
     private Asset<Texture2D> _backgroundTexture;
     private Asset<Texture2D>[] _foregroundTextures;
 
-    private double _frameInterval = 1000.0 / 7;
-    private int _totalFrameNum;
+    private double _frameInterval = 1000.0 / 9;
 
     public override void Load()
     {        
         _stopwatch = Stopwatch.StartNew();
-        
-        _backgroundTexture = ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/back0001");
-
+                
+        _backgroundTexture = ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/back0050");
         _foregroundTextures =
         [
-            ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/front0001"),
-            ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/front0002"),
-            ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/front0003"),
-            ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/front0004"),
-            ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/front0005"),
-            ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/front0006")
+            ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/front0050"),
+            ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/front0051"),
+            ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/front0052"),
+            ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/front0053"),
+            ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/front0054"),
+            ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/front0055")
         ];
+    }
+
+    public override void Unload()
+    {
+        _backgroundTexture.Dispose();
+        foreach (var texture in _foregroundTextures)
+            texture.Dispose();
+        _backgroundTexture = null;
+        _foregroundTextures = null;
     }
 
     public override bool PreDrawCloseBackground(SpriteBatch spriteBatch)
@@ -62,14 +64,8 @@ public class CustomMenuBackgroundStyle : ModSurfaceBackgroundStyle
             Color.White
         );
         
-        if (Math.Round(_stopwatch.Elapsed.Milliseconds / _frameInterval) >= 1)
-        {
-            _stopwatch.Restart();
-            _totalFrameNum++;
-        }
-        
         spriteBatch.Draw(
-            _foregroundTextures[_totalFrameNum % 6].Value,
+            _foregroundTextures[(int)Math.Round(_stopwatch.ElapsedMilliseconds / _frameInterval) % 6].Value,
             new Rectangle(0, 0, Main.screenWidth, Main.screenHeight),
             Color.White
         );
