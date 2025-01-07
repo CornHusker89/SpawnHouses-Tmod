@@ -362,10 +362,10 @@ public static class WorldGenHelper
 				
 				// replace all sand with filltype sand (for when the beaches are corrupt blocks)
 				if (fillTileType is not TileID.Sand)
-					WorldUtils.Gen(new Point(tileX, tileY), new Shapes.Circle(150, 100), Actions.Chain(
+					WorldUtils.Gen(new Point(tileX, tileY), new Shapes.Circle(60, 50), Actions.Chain(
 						new Actions.Custom((i, j, args) =>
 						{
-							if (Main.tile[i, j].HasTile && Main.tile[i, j].TileType == TileID.Sand)
+							if (Terraria.WorldGen.InWorld(i, j) && Main.tile[i, j].HasTile && Main.tile[i, j].TileType == TileID.Sand)
 							{
 								Tile tile = Main.tile[i, j];
 								tile.TileType = fillTileType;
