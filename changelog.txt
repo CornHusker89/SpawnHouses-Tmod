@@ -1,12 +1,3 @@
-Version 1.0.8
+Version 1.0.9
 Minor Changes
-- Fixed mineshaft generating on upside-down seeds typed without spaces
-- Fixed beach house trying to generate in the sulfuric sea on upside-down seeds
-- Fixed beach house not spawning on corrupted sand
-- Fixed main house spawning above the underworld in upside-down seeds (I think, it's hard to test)
-- Fixed basement going out of bounds on upside-down seeds
-- Fixed some cases of a problem where terrain blending would cover caves
-- Fixed some cases of very large basements with very low shape values would fail to generate
-- Fixed some cases of the main house failing to place, and improved error handling when it does fail
-- Fixed beach house generating on first land from the outside of the world, leading it to generate on any "islands"
-- Fixed not recognizing an upside-down world using an apostrophe ("don't")
+- Fixed out-of-bounds error when generating beach house
