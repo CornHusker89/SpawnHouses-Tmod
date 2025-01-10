@@ -1,8 +1,11 @@
 using System;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Structures;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
+using WorldGenTesting.Helpers;
+
 // ReSharper disable InconsistentNaming
 
 namespace SpawnHouses;
@@ -26,6 +29,8 @@ public class ModHelper : ModSystem
     public static int EnviromentAccessTileEntityID;
 
     public static bool IsRemnantsEnabled;
+
+    public static bool IsWorldGenTestingEnabled;
     
     
     
@@ -97,13 +102,46 @@ public class ModHelper : ModSystem
         IsRemnantsEnabled = true;
     }
     
+    
+    [JITWhenModsEnabled("WorldGenTesting")]
+    public static void GetWorldGenTesting()
+    {
+        IsWorldGenTestingEnabled = true;
 
+        var consoleInstance = ModContent.GetInstance<WorldGenTesting.UI.MenuConsoleSystem>();
+                
+        string CreateWorld()
+        {
+            TestingHelper.MakeWorld("SpawnHousesAutomatedTesting", TestingHelper.WorldSize.Medium);
+            return null;
+        }
+                
+        consoleInstance.AddTest(new Test(
+            ModInstance.Mod, [CreateWorld, SpawnHousesTesting.TestMainHouse], "mainhouse"
+        ));
+        consoleInstance.AddTest(new Test(
+            ModInstance.Mod, [CreateWorld, SpawnHousesTesting.TestBeachHouse], "beachhouse"
+        ));
+        consoleInstance.AddTest(new Test(
+            ModInstance.Mod, [CreateWorld, SpawnHousesTesting.TestMainBasement], "mainbasement"
+        ));
+        consoleInstance.AddTest(new Test(
+            ModInstance.Mod, [CreateWorld, SpawnHousesTesting.TestMineshaft], "mineshaft"
+        ));
+        consoleInstance.AddTest(new Test(
+            ModInstance.Mod, [CreateWorld, SpawnHousesTesting.TestMainHouse, SpawnHousesTesting.TestBeachHouse, 
+                SpawnHousesTesting.TestMainBasement, SpawnHousesTesting.TestMineshaft], "all"
+        ));
+    }
+    
+    
     public override void OnModLoad()
     {
         if (ModLoader.HasMod("MagicStorage") && ModContent.GetInstance<SpawnHousesConfig>().MagicStorageIntegrations)
             GetMagicStorage();
         if (ModLoader.HasMod("Remnants"))
             GetRemnants();
-        
+        if (ModLoader.HasMod("WorldGenTesting"))
+            GetWorldGenTesting();
     }
 }

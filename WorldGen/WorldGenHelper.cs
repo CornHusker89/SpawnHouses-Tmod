@@ -142,8 +142,7 @@ public static class WorldGenHelper
 			ModContent.GetInstance<SpawnHouses>().Logger.Error($"Main house failed to generate:\n{e}");
 			return;
 		}
-    }
-	
+    }	
 	
 	public static void GenerateMineshaft()
 	{
