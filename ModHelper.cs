@@ -4,6 +4,7 @@ using SpawnHouses.Structures;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
+using WorldGenTesting.Helpers;
 
 // ReSharper disable InconsistentNaming
 
@@ -111,23 +112,23 @@ public class ModHelper : ModSystem
                 
         string CreateWorld()
         {
-            WorldGenTesting.Helpers.TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
+            TestingHelper.MakeWorld("SpawnHousesAutomatedTesting", TestingHelper.WorldSize.Medium);
             return null;
         }
                 
-        consoleInstance.AddTest(new WorldGenTesting.Helpers.Test(
+        consoleInstance.AddTest(new Test(
             ModInstance.Mod, [CreateWorld, SpawnHousesTesting.TestMainHouse], "mainhouse"
         ));
-        consoleInstance.AddTest(new WorldGenTesting.Helpers.Test(
+        consoleInstance.AddTest(new Test(
             ModInstance.Mod, [CreateWorld, SpawnHousesTesting.TestBeachHouse], "beachhouse"
         ));
-        consoleInstance.AddTest(new WorldGenTesting.Helpers.Test(
+        consoleInstance.AddTest(new Test(
             ModInstance.Mod, [CreateWorld, SpawnHousesTesting.TestMainBasement], "mainbasement"
         ));
-        consoleInstance.AddTest(new WorldGenTesting.Helpers.Test(
+        consoleInstance.AddTest(new Test(
             ModInstance.Mod, [CreateWorld, SpawnHousesTesting.TestMineshaft], "mineshaft"
         ));
-        consoleInstance.AddTest(new WorldGenTesting.Helpers.Test(
+        consoleInstance.AddTest(new Test(
             ModInstance.Mod, [CreateWorld, SpawnHousesTesting.TestMainHouse, SpawnHousesTesting.TestBeachHouse, 
                 SpawnHousesTesting.TestMainBasement, SpawnHousesTesting.TestMineshaft], "all"
         ));
