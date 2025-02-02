@@ -14,7 +14,6 @@ using SpawnHouses.Structures.Chains;
 using SpawnHouses.Structures.Structures;
 using Terraria.ModLoader.IO;
 using static SpawnHouses.WorldGen.WorldGenHelper;
-using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
 
 namespace SpawnHouses.WorldGen;

@@ -1,3 +1,2 @@
-Version 1.0.9
+Version 1.0.10
 Minor Changes
-- Fixed out-of-bounds error when generating beach house

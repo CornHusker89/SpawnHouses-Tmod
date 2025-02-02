@@ -1,7 +1,6 @@
 using Microsoft.Xna.Framework;
 using SpawnHouses.Structures.StructureParts;
 using Terraria.DataStructures;
-using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
 namespace SpawnHouses.Structures.Structures.ChainStructures;
 

@@ -7,7 +7,6 @@ using Terraria.ModLoader;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
-using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
 namespace SpawnHouses.Structures.Bridges;
 
@@ -21,12 +20,12 @@ public class SingleStructureBridge : Bridge
     public readonly short StructureOffsetX;
     public readonly short StructureOffsetY;
     
-    private BoundingBox[] BoundingBoxOverride;
+    private Box[] BoundingBoxOverride;
     private bool HasBoundingBox;
     
     public SingleStructureBridge(string structureFilePath, ushort structureLength, ushort structureHeight,
         short structureOffsetX, short structureOffsetY, short deltaX, short deltaY, 
-        byte[] inputDirections, BoundingBox[] boundingBoxOverride = null, bool hasBoundingBox = true,
+        byte[] inputDirections, Box[] boundingBoxOverride = null, bool hasBoundingBox = true,
         ConnectPoint point1 = null, ConnectPoint point2 = null) 
         : 
         base(inputDirections, deltaX, deltaX, deltaY, deltaY, 
@@ -41,7 +40,7 @@ public class SingleStructureBridge : Bridge
         
         // BoundingBoxOverride represents an offset from the normal position, not an absolute value
         if (boundingBoxOverride == null)
-            BoundingBoxOverride = [new BoundingBox(0, 0, 0, 0)];
+            BoundingBoxOverride = [new Box(0, 0, 0, 0)];
         else
             BoundingBoxOverride = boundingBoxOverride;
         
@@ -59,10 +58,10 @@ public class SingleStructureBridge : Bridge
         
         if (HasBoundingBox)
         {
-            BoundingBoxes = new BoundingBox[BoundingBoxOverride.Length];
+            BoundingBoxes = new Box[BoundingBoxOverride.Length];
             for (int i = 0; i < BoundingBoxOverride.Length; i++)
             {
-                BoundingBoxes[i] = new BoundingBox
+                BoundingBoxes[i] = new Box
                 (
                     startX + BoundingBoxOverride[i].Point1.X,
                     startY + BoundingBoxOverride[i].Point1.Y,
@@ -157,23 +156,23 @@ public class SingleStructureBridge : Bridge
     public class MainBasementHallway2 : SingleStructureBridge
     {
         public MainBasementHallway2() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway2",
-            6, 11, -3, -1, 3, 9, [Directions.Down, Directions.Left], [new BoundingBox(0, -1, 0, 0)]) {}
+            6, 11, -3, -1, 3, 9, [Directions.Down, Directions.Left], [new Box(0, -1, 0, 0)]) {}
     }
     public class MainBasementHallway2AltGen : SingleStructureBridge
     {
         public MainBasementHallway2AltGen() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway2",
-            6, 11, -7, -11, -5, -11, [Directions.Left, Directions.Down], [new BoundingBox(0, -1, 0, 0)]) {}
+            6, 11, -7, -11, -5, -11, [Directions.Left, Directions.Down], [new Box(0, -1, 0, 0)]) {}
     }
     
     public class MainBasementHallway2Reversed : SingleStructureBridge
     {
         public MainBasementHallway2Reversed() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway2_r",
-            6, 11, -3, -1, -4, 9, [Directions.Down, Directions.Right], [new BoundingBox(0, -1, 0, 0)]) {}
+            6, 11, -3, -1, -4, 9, [Directions.Down, Directions.Right], [new Box(0, -1, 0, 0)]) {}
     } 
     public class MainBasementHallway2ReversedAltGen : SingleStructureBridge
     {
         public MainBasementHallway2ReversedAltGen() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway2_r",
-            6, 11, 0, -11, 2, -11, [Directions.Right, Directions.Down], [new BoundingBox(0, -1, 0, 0)]) {}
+            6, 11, 0, -11, 2, -11, [Directions.Right, Directions.Down], [new Box(0, -1, 0, 0)]) {}
     } 
     
     
@@ -182,23 +181,23 @@ public class SingleStructureBridge : Bridge
     public class MainBasementHallway3 : SingleStructureBridge
     {
         public MainBasementHallway3() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway3",
-            6, 11, -3, -11, 3, -6, [Directions.Up, Directions.Left], [new BoundingBox(0, 0, 0, -1)]) {}
+            6, 11, -3, -11, 3, -6, [Directions.Up, Directions.Left], [new Box(0, 0, 0, -1)]) {}
     }
     public class MainBasementHallway3AltGen : SingleStructureBridge
     {
         public MainBasementHallway3AltGen() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway3",
-            6, 11, -7, -6, -5, 4, [Directions.Left, Directions.Up], [new BoundingBox(0, 0, 0, -1)]) {}
+            6, 11, -7, -6, -5, 4, [Directions.Left, Directions.Up], [new Box(0, 0, 0, -1)]) {}
     }
     
     public class MainBasementHallway3Reversed : SingleStructureBridge
     {
         public MainBasementHallway3Reversed() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway3_r",
-            6, 11, -3, -11, -4, -6, [Directions.Up, Directions.Right], [new BoundingBox(0, 0, 0, -1)]) {}
+            6, 11, -3, -11, -4, -6, [Directions.Up, Directions.Right], [new Box(0, 0, 0, -1)]) {}
     } 
     public class MainBasementHallway3ReversedAltGen : SingleStructureBridge
     {
         public MainBasementHallway3ReversedAltGen() : base("Structures/StructureFiles/mainBasement/mainBasement_Hallway3_r",
-            6, 11, 0, -6, 2, 4, [Directions.Right, Directions.Up], [new BoundingBox(0, 0, 0, -1)]) {}
+            6, 11, 0, -6, 2, 4, [Directions.Right, Directions.Up], [new Box(0, 0, 0, -1)]) {}
     } 
     
     

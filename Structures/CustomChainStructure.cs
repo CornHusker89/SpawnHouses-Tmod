@@ -13,7 +13,7 @@ public class CustomChainStructure : CustomStructure
     public new ChainConnectPoint[][] ConnectPoints;
     public sbyte Cost;
     public ushort Weight;
-    public BoundingBox[] StructureBoundingBoxes;
+    public Box[] StructureBoundingBoxes;
     public ChainConnectPoint ParentChainConnectPoint;
     public List<byte> BridgeDirectionHistory = [];
     
@@ -42,7 +42,7 @@ public class CustomChainStructure : CustomStructure
         
         StructureBoundingBoxes =
         [
-            new BoundingBox(X, Y, X + StructureXSize - 1, Y + StructureYSize - 1)
+            new Box(X, Y, X + StructureXSize - 1, Y + StructureYSize - 1)
         ];
     }
     

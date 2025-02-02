@@ -1,3 +1,4 @@
+using SpawnHouses.Structures.AdvStructures;
 using Terraria.ModLoader;
 
 namespace SpawnHouses

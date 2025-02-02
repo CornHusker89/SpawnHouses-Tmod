@@ -6,7 +6,6 @@ using SpawnHouses.Structures.StructureParts;
 using Terraria.ModLoader;
 using Microsoft.Xna.Framework;
 using Terraria;
-using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
 namespace SpawnHouses.Structures.Bridges;
 
@@ -74,7 +73,7 @@ public class ParabolaBridge : Bridge
         Point1 = point1;
         Point2 = point2;
 
-        List<BoundingBox> boundingBoxesList = new List<BoundingBox>(); 
+        List<Box> boundingBoxesList = new List<Box>(); 
         var parabola = _CalculateParabolaBridge(AttemptSlope);
         double a = parabola.Item1;
         double b = parabola.Item2;
@@ -93,7 +92,7 @@ public class ParabolaBridge : Bridge
                 ushort bridgeStructureY = (ushort)(cumulativeBridgeStructureY / StructureLength);
                 
                 boundingBoxesList.Add(
-                    new BoundingBox(
+                    new Box(
                         bridgeStructureX,
                         bridgeStructureY - BoundingBoxYMargin,
                         bridgeStructureX + StructureLength - 1,

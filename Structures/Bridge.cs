@@ -8,7 +8,6 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.DataStructures;
 using Terraria.WorldBuilding;
-using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
 namespace SpawnHouses.Structures;
 
@@ -26,12 +25,12 @@ public class Bridge
     public ConnectPoint Point1;
     public ConnectPoint Point2;
 
-    public BoundingBox[] BoundingBoxes;
+    public Box[] BoundingBoxes;
     
     
     public Bridge(byte[] inputDirections,
         short minDeltaX, short maxDeltaX, short minDeltaY, short maxDeltaY, sbyte deltaXMultiple = 1, sbyte deltaYMultiple = 1,
-        ConnectPoint point1 = null, ConnectPoint point2 = null, BoundingBox[] boundingBoxes = null)
+        ConnectPoint point1 = null, ConnectPoint point2 = null, Box[] boundingBoxes = null)
     {
         InputDirections = inputDirections;
         MinDeltaX = minDeltaX;

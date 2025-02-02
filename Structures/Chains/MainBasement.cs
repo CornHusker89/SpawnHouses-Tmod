@@ -11,7 +11,6 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
-using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
 namespace SpawnHouses.Structures.Chains;
 
@@ -20,7 +19,7 @@ public class MainBasement : StructureChain
     private readonly float _shape;
     
     public MainBasement(ushort x = 1000, ushort y = 1000, byte status = StructureStatus.NotGenerated,
-        BoundingBox[] startingBoundingBoxes = null) :
+        Box[] startingBoundingBoxes = null) :
         base((ushort)(58 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier),
             (ushort)(80 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier),
             (byte)Math.Round(1 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier),

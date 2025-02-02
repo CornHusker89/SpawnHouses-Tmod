@@ -32,7 +32,7 @@ public class ConnectPoint
         Direction = direction;
     }
     
-    public void SetPosition(int mainStructureX, int mainStructureY)
+    public virtual void SetPosition(int mainStructureX, int mainStructureY)
     {
         X = (ushort)(mainStructureX + XOffset);
         Y = (ushort)(mainStructureY + YOffset);

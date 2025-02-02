@@ -2,12 +2,12 @@ using System;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Structures;
 using SpawnHouses.Structures.Chains;
+using SpawnHouses.Structures.StructureParts;
 using SpawnHouses.Structures.Structures;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
-using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
 namespace SpawnHouses.WorldGen;
 
@@ -196,11 +196,11 @@ public static class WorldGenHelper
 	
 	public static void GenerateMainBasement()
 	{
-		BoundingBox[] mineshaftBoundingBox = [];
+		Box[] mineshaftBoundingBox = [];
 		if (SpawnHousesSystem.Mineshaft is not null)
 		{
 			Mineshaft structure = SpawnHousesSystem.Mineshaft;
-			BoundingBox structureBox = new BoundingBox(structure.X - 8, structure.Y,
+			Box structureBox = new Box(structure.X - 8, structure.Y,
 				structure.X + structure.StructureXSize + 8, structure.Y + 200);
 			mineshaftBoundingBox = [structureBox];
 		}

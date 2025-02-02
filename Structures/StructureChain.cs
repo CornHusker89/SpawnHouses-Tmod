@@ -9,7 +9,6 @@ using Terraria;
 using Terraria.IO;
 using Terraria.UI;
 using Terraria.Utilities;
-using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
 namespace SpawnHouses.Structures;
 
@@ -23,7 +22,7 @@ public abstract class StructureChain
     public readonly byte MaxBranchLength;
     public byte Status;
     private Bridge[] _bridges;
-    private readonly BoundingBox[] StartingBoundingBoxes;
+    private readonly Box[] StartingBoundingBoxes;
     private CustomChainStructure[] _originalStructureList;
     private CustomChainStructure[] _rootStructureList;
     
@@ -34,12 +33,12 @@ public abstract class StructureChain
     private CustomChainStructure[] _usableStructureList;
     private CustomChainStructure[] _copiedStructureList;
     private List<ChainConnectPoint> _failedConnectPointList = [];
-    private List<BoundingBox> _boundingBoxes;
+    private List<Box> _boundingBoxes;
     private List<ChainConnectPoint> _queuedConnectPoints;
 
     protected StructureChain(ushort minCost, ushort maxCost, byte minBranchLength, byte maxBranchLength, ushort entryPosX,
         ushort entryPosY, CustomChainStructure[] structureList, Bridge[] bridges, CustomChainStructure[] rootStructureList = null,
-        BoundingBox[] startingBoundingBoxes = null,
+        Box[] startingBoundingBoxes = null,
         byte status = StructureStatus.NotGenerated)
     {        
         MinCost = minCost;
@@ -289,8 +288,8 @@ public abstract class StructureChain
 
             if (!IsConnectPointValid(connectPoint, targetConnectPoint, newStructure)) continue;
 
-            if (!BoundingBox.IsAnyBoundingBoxesColliding(newStructure.StructureBoundingBoxes, _boundingBoxes) &&
-                !BoundingBox.IsAnyBoundingBoxesColliding(connectPointBridge.BoundingBoxes, _boundingBoxes))
+            if (!Box.IsAnyBoundingBoxesColliding(newStructure.StructureBoundingBoxes, _boundingBoxes) &&
+                !Box.IsAnyBoundingBoxesColliding(connectPointBridge.BoundingBoxes, _boundingBoxes))
             {
                 //BoundingBox.VisualizeCollision();
                 validLocation = true;
