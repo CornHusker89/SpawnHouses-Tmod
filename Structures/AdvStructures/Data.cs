@@ -9,36 +9,17 @@ namespace SpawnHouses.Structures.AdvStructures;
 
 public static class Data
 {
-    public enum ComponentTag
+    
+    public enum StructureTag
     {
-        // ===== component types =====
-        /// component is described as a roof
-        Roof,
-        /// component is described as a room, typically with some form of npc housing
-        Room,
-        /// component is described as a volume, usually empty or filled with tiles
-        Volume,
-                        
         
-        // ===== room tags =====
-        RoomHasHousing,
-        RoomFlatFloor,
-        RoomFlatCeiling,
-        /// room is 10 - 19 tiles wide
-        RoomSmallLength,
-        /// room is 20 - 29 tiles wide
-        RoomMediumLength,
-        /// room is 30 - 39 tiles wide
-        RoomLargeLength,
-        /// room is 4 - 5 tiles tall
-        RoomSmallHeight,
-        /// room is 6 - 8 tiles tall
-        RoomMediumHeight,
-        /// room is 9 - 20 tiles tall
-        RoomLargeHeight,
-
+        // ===== basic attributes =====
+        HasHousing,
+        IsSymmetric,
         
-        // ===== roof tags =====
+        
+        // ===== roof =====
+        HasRoof,
         RoofSlantNone,
         RoofSlantLeftHigh,
         RoofSlantRightHigh,
@@ -49,17 +30,8 @@ public static class Data
         RoofSlope1To1,
         RoofSlopeLessThan1,
         RoofSlopeGreaterThan1,
-        RoofSlopeNone
+        RoofSlopeNone,
         
-    }
-    
-    public enum StructureTag
-    {
-        
-        // ===== basic attributes =====
-        HasHousing,
-        HasRoof,
-        IsSymmetric,
         
         // ===== themes =====
         /// structure is categorized as being above ground (typically has a roof)
@@ -99,58 +71,75 @@ public static class Data
     
     public struct StructureParams
     {
-        public ComponentTag[] ComponentTagsRequiredAll;
-        public ComponentTag[] ComponentTagsRequiredOne;
-        public ComponentTag[] ComponentTagBlacklist;
         public StructureTag[] StructureTagsRequired;
         public StructureTag[] StructureTagBlacklist;
         public Point16 Start;
         public Point16 End;
+        public int Length;
         public int MinVolume;
         public int MaxVolume;
+        public int Volume;
+        public int Height;
         public int MinHousing;
         public int MaxHousing;
+        public int Housing;
         public bool HasRoof;
 
-        public StructureParams(ComponentTag[] componentTagsRequiredAll,
-            ComponentTag[] componentTagsRequiredOne,
-            ComponentTag[] componentTagBlacklist,
+        public StructureParams(
             StructureTag[] structureTagsRequired,
             StructureTag[] structureTagBlacklist,
             Point16 start,
             Point16 end,
-            int minVolume,
-            int maxVolume,
-            int minHousing = 0,
-            int maxHousing = 0,
+            Range volumeRange,
+            Range housingRange,
             bool hasRoof = true)
         {
-            ComponentTagsRequiredAll = componentTagsRequiredAll;
-            ComponentTagsRequiredOne = componentTagsRequiredOne;
-            ComponentTagBlacklist = componentTagBlacklist;
             StructureTagsRequired = structureTagsRequired;
             StructureTagBlacklist = structureTagBlacklist;
             Start = start;
             End = end;
             if (Start.X > End.X)
                 (Start, End) = (End, Start);
-            MinVolume = minVolume;
-            MaxVolume = maxVolume;
-            MinHousing = minHousing;
-            MaxHousing = maxHousing;
+            Length = End.X - Start.X;
+            MinVolume = volumeRange.Min;
+            MaxVolume = volumeRange.Max;
+            MinHousing = housingRange.Min;
+            MaxHousing = housingRange.Max;
             HasRoof = hasRoof;
+            
+            RerollRanges();
+        }
+        
+        public void RerollRanges()
+        {
+            double scale = Terraria.WorldGen.genRand.NextDouble();
+            Volume = (int)(MinVolume + (MaxVolume - MinVolume) * scale);
+            Height = Volume / (End.X - Start.X);
+            if (Height <= 4)
+                throw new ArgumentException($"Volume ({Volume}) is too small compared to the length ({Length}) of the structure, resulting in a height of {Height}");
+
+            if (MinHousing < 0)
+                throw new ArgumentException("Min housing cannot be less than 0");
+            if (MaxHousing < 0)
+                throw new ArgumentException("Max housing cannot be less than 0");
+            if (MaxHousing < MinHousing)
+                throw new ArgumentException("Max Housing is less than min housing");
+            if (MaxHousing == 0 && StructureTagBlacklist.Contains(StructureTag.HasHousing))
+                throw new ArgumentException(
+                    "Adv structure cannot have a max housing of 0 while blacklisting components with housing");
+            Housing = (int)(MinHousing + (MaxHousing - MinHousing) * scale);
         }
     }
     
     public struct ComponentParams(
-        List<ComponentTag> tagsRequired,
-        List<ComponentTag> tagsBlacklist,
+        List<StructureTag> tagsRequired,
+        List<StructureTag> tagsBlacklist,
         List<Shape> connectingVolumes,
         Point16 start,
         int length)
     {
-        public readonly ComponentTag[] TagsRequired = tagsRequired.ToArray();
-        public readonly ComponentTag[] TagsBlacklist = tagsBlacklist.ToArray();
+        public readonly StructureTag[] TagsRequired = tagsRequired.ToArray();
+        public readonly StructureTag[] TagsBlacklist = tagsBlacklist.ToArray();
         public List<Shape> ConnectingVolumes = connectingVolumes;
         public Point16 Start = start;
         public int Length = length;

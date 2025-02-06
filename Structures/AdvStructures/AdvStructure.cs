@@ -11,7 +11,6 @@ namespace SpawnHouses.Structures.AdvStructures;
 public class AdvStructure
 {
     public StructureParams Params;
-    public readonly List<Component> Components = [];
     public readonly List<StructureTag> Tags = [];
     public readonly List<Shape> RoomVolumes = [];
     public readonly List<Shape> WallVolumes = [];
@@ -46,39 +45,8 @@ public class AdvStructure
         XSize = Params.End.X - Params.Start.X;
 
         var method = AdvStructureGen.GetRandomMethod(structureParams);
-        
-
     }
     
-    /// <summary>
-    /// does not change dimensions
-    /// </summary>
-    /// <param name="component"></param>
-    private void AddComponent(Component component)
-    {
-        Components.Add(component);
-        AddComponentTagsAndData(component);
-        
-    }
-    
-    public void AddComponentTagsAndData(Component component)
-    {
-        if (component.Tags.Contains(ComponentTag.RoomHasHousing))
-        {
-            Tags.Add(StructureTag.HasHousing);
-            HousingCount += (int)component.Data[DataType.HousingCount];
-        }
-            
-        if (component.Tags.Contains(ComponentTag.Roof))
-            Tags.Add(StructureTag.HasRoof);
-    }
-    
-    public void RebuildTagsAndData()
-    {
-        Tags.Clear();
-        foreach (var component in Components)
-            AddComponentTagsAndData(component);
-    }
     
     public void RebuildDimensions()
     {

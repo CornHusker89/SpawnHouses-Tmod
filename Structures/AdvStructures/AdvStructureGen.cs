@@ -1,3 +1,4 @@
+#nullable enable
 using static SpawnHouses.Structures.AdvStructures.Data;
 using System;
 using System.Collections.Generic;
@@ -11,22 +12,28 @@ namespace SpawnHouses.Structures.AdvStructures;
 
 public static class AdvStructureGen
 {
-    public static readonly (StructureTag[] possibleTags, int minLength, int maxLength, Func<StructureParams, AdvStructure> method)[] GenMethods = 
-    [
-        ([], 
-        34, 70,
-        Layout1)
-    ];
-    
+    public static readonly (StructureTag[] possibleTags, Range? lengthRange, Range? volumeRange, Range? heightRange, 
+        Range? housingRange, Func<StructureParams, AdvStructure> method)[] GenMethods =
+        [
+            ([], null, null, null, null,
+                Layout1)
+        ];
+
     public static Func<StructureParams, AdvStructure> GetRandomMethod(StructureParams structureParams)
     {
-        List<(StructureTag[] possibleTags, int minLength, int maxLength, Func<StructureParams, AdvStructure> method)> methodTuples = [];
+        List<(StructureTag[] possibleTags, Range? lengthRange, Range? volumeRange, Range? heightRange, 
+            Range? housingRange, Func<StructureParams, AdvStructure> method)> methodTuples = [];
+        
         foreach (var tuple in GenMethods)
         {
-            int length = structureParams.End.X - structureParams.Start.X;
-            if (length < tuple.minLength || length > tuple.maxLength)
+            if (tuple.lengthRange?.InRange(structureParams.Length) is !true)
                 continue;
-            
+            if (tuple.volumeRange?.InRange(structureParams.Volume) is !true)
+                continue;
+            if (tuple.heightRange?.InRange(structureParams.Height) is !true)
+                continue;
+            if (tuple.housingRange?.InRange(structureParams.Housing) is !true)
+                continue;
             List<StructureTag> requiredTags = structureParams.StructureTagsRequired.ToList();
             foreach (var tag in tuple.possibleTags)
             {
@@ -38,72 +45,58 @@ public static class AdvStructureGen
             if (requiredTags.Count == 0)
                 methodTuples.Add(tuple);
         }
+
         if (methodTuples.Count == 0)
             throw new Exception("No structures found were compatible with given length and tags");
         return methodTuples[Terraria.WorldGen.genRand.Next(0, methodTuples.Count)].method;
     }
-    
-    
-    public static (int volume, int housing, int approxHeight, Shape boundingShape) GetBasicAttributes(StructureParams structureParams)
+
+    public static Shape GetBoundingShape(StructureParams structureParams)
     {
-        double scale = Terraria.WorldGen.genRand.NextDouble();
-        int volume = (int)(structureParams.MinVolume + (structureParams.MaxVolume - structureParams.MinVolume) * scale);
-        int approxHeight = volume / (structureParams.End.X - structureParams.Start.X);
-        if (approxHeight <= 4)
-            throw new ArgumentException("Volume is too small compared to the length of the structure");
         Shape boundingShape = new Shape(
             new Point16(structureParams.Start.X, Math.Max(structureParams.Start.Y, structureParams.End.Y)),
-            new Point16(structureParams.End.X, Math.Min(structureParams.Start.Y, structureParams.End.Y) + approxHeight + 3)
+            new Point16(structureParams.End.X,
+                Math.Min(structureParams.Start.Y, structureParams.End.Y) + structureParams.Height + 3)
         );
-        
-        if (structureParams.MinHousing < 0)
-            throw new ArgumentException("Min housing cannot be less than 0");
-        if (structureParams.MaxHousing < 0)
-            throw new ArgumentException("Max housing cannot be less than 0");
-        if (structureParams.MaxHousing < structureParams.MinHousing)
-            throw new  ArgumentException("Max Housing is less than min housing");
-        if (structureParams.MaxHousing == 0 && structureParams.ComponentTagBlacklist.Contains(ComponentTag.RoomHasHousing))
-            throw new ArgumentException("Adv structure cannot have a max housing of 0 while blacklisting components with housing");
-        int housing = (int)(structureParams.MinHousing + (structureParams.MaxHousing - structureParams.MinHousing) * scale);
-        return (volume, housing, approxHeight, boundingShape);
+        return boundingShape;
     }
     
-    
+    /// <summary>
+    /// a house with a tall side, and possible extrusions on tall side. generally quite large and medieval looking
+    /// </summary>
     public static AdvStructure Layout1(StructureParams structureParams)
     {
-        var basicAttributes = GetBasicAttributes(structureParams);
+        List<Shape> roomVolumes = [];
+        List<Shape> wallVolumes = [];
+        List<Shape> floorVolumes = [];
+        
         bool leftTall = Terraria.WorldGen.genRand.NextBool();
-        int leftHeight = leftTall? (int)Math.Round(basicAttributes.approxHeight * 1.33) : (int)Math.Round(basicAttributes.approxHeight * 0.66) - 4;
-        int rightHeight = !leftTall? (int)Math.Round(basicAttributes.approxHeight * 1.33) : (int)Math.Round(basicAttributes.approxHeight * 0.66) - 4;
-        int flangeHeight = (int)(0.85 + Terraria.WorldGen.genRand.NextDouble() * 0.3) * basicAttributes.approxHeight;
+        int leftHeight = !leftTall? (int)Math.Round(structureParams.Height * 1.33) - 4 : (int)Math.Round(structureParams.Height * 0.66) - 4;
+        int rightHeight = leftTall? (int)Math.Round(structureParams.Height * 1.33) - 4 : (int)Math.Round(structureParams.Height * 0.66) - 4;
+        int flangeHeight = (int)(0.85 + Terraria.WorldGen.genRand.NextDouble() * 0.3) * structureParams.Height;
         bool leftFlange = Terraria.WorldGen.genRand.NextBool();
-        int leftFlangeWidth = leftFlange? Terraria.WorldGen.genRand.Next(4, 8) : 0;
+        int leftFlangeWidth = leftFlange ? 0 : Terraria.WorldGen.genRand.Next(4, 8);
         bool rightFlange = Terraria.WorldGen.genRand.NextBool();
-        int rightFlangeWidth = rightFlange? Terraria.WorldGen.genRand.Next(4, 8) : 0;
+        int rightFlangeWidth = rightFlange ? 0 : Terraria.WorldGen.genRand.Next(4, 8);
         int rightSideStartXPos = structureParams.Start.X + (structureParams.End.X - structureParams.Start.X) / 2;
         if (leftTall)
             rightSideStartXPos += leftFlangeWidth + rightFlangeWidth;
         else
             rightSideStartXPos -= leftFlangeWidth + rightFlangeWidth;
-        
+
         int firstFloorHeight = Terraria.WorldGen.genRand.Next(6, 9);
-        int nonFirstFloorHeight = firstFloorHeight >= 8? firstFloorHeight - 3 : firstFloorHeight - 2;
+        int nonFirstFloorHeight = firstFloorHeight >= 8 ? firstFloorHeight - 2 : firstFloorHeight - 3;
         List<int> leftSideFloorYPositions = [structureParams.Start.Y];
         List<int> rightSideFloorYPositions = [structureParams.End.Y];
-        
-        Shape boundingShape;
-        List<Shape> roomVolumes = [];
-        List<Shape> wallVolumes = [];
-        List<Shape> floorVolumes = [];
-        
+
         while (leftSideFloorYPositions[^1] < leftSideFloorYPositions[0] - leftHeight)
             leftSideFloorYPositions.Add(leftSideFloorYPositions[^1] - nonFirstFloorHeight - 3);
         leftHeight = structureParams.Start.Y - (leftSideFloorYPositions[^1] - nonFirstFloorHeight - 3);
-        
+
         while (rightSideFloorYPositions[^1] < rightSideFloorYPositions[0] + rightHeight)
             rightSideFloorYPositions.Add(rightSideFloorYPositions[^1] + nonFirstFloorHeight + 3);
         rightHeight = structureParams.End.Y - (rightSideFloorYPositions[^1] - nonFirstFloorHeight - 3);
-        
+
         // add outer wall volumes
         if (leftTall && leftFlange)
         {
@@ -123,7 +116,7 @@ public static class AdvStructureGen
                 new Point16(structureParams.Start.X, structureParams.Start.Y - leftHeight)
             ));
         }
-        
+
         if (leftTall && rightFlange)
         {
             wallVolumes.Add(new Shape(
@@ -172,8 +165,109 @@ public static class AdvStructureGen
                 new Point16(structureParams.End.X + 2, structureParams.End.Y - rightHeight)
             ));
         }
-        
+
+        Console.WriteLine(
+            $"leftTall: {leftTall}, leftFlange: {leftFlange}, rightFlange: {rightFlange}, leftHeight: {leftHeight}, rightHeight: {rightHeight}, rightSideStartXPos: {rightSideStartXPos}, approxHeight: {structureParams.Height}");
         Shape.CreateOutline(wallVolumes.ToArray());
+
+        return new AdvStructure();
+    }
+
+    
+    
+    /// <summary>
+    /// a basic vertical house, expands as much as needed vertically but poor horizontal expansion
+    /// </summary>
+    public static AdvStructure Layout2(StructureParams structureParams)
+    {
+        List<Shape> roomVolumes = [];
+        List<Shape> wallVolumes = [];
+        List<Shape> floorVolumes = [];
+
+        int externalWallThickness = Terraria.WorldGen.genRand.Next(1, 3);
+
+        // set floor y positions & floor count
+        List<int> floorYPositions = [];
+        int floorVolumeHeight = Terraria.WorldGen.genRand.Next(1, 3);
+        int roomVolumeHeight = Terraria.WorldGen.genRand.Next(4, 7);
+        structureParams.Height -= structureParams.Height % (floorVolumeHeight + roomVolumeHeight);
+        for (int y = structureParams.Start.Y; y >= structureParams.Start.Y - structureParams.Height - (floorVolumeHeight + roomVolumeHeight); y -= floorVolumeHeight + roomVolumeHeight)
+            floorYPositions.Add(y);
+        
+        // determine floor slope
+        bool flatFloor = structureParams.Start.Y == structureParams.End.Y;
+        int floorSlopeStartX = !flatFloor? 0 : Terraria.WorldGen.genRand.Next(
+            structureParams.Start.X + 2, structureParams.Start.X + 2 + (structureParams.Length / 2));
+        int floorSlopeLength = Math.Abs(structureParams.Start.Y - structureParams.End.Y);
+        int floorSlopeEndX = !flatFloor? 0 : Terraria.WorldGen.genRand.Next(
+            structureParams.Start.X + 2 + (structureParams.Length / 2) + floorSlopeLength, structureParams.End.X - 2);
+        
+        // set first floor volumes
+        if (flatFloor)
+        {
+            floorVolumes.Add(new Shape(
+                new Point16(structureParams.Start.X, structureParams.Start.Y + 1),
+                new Point16(structureParams.End.X, structureParams.End.Y + 3)
+            ));
+            roomVolumes.Add(new Shape(
+                new Point16(structureParams.Start.X + 1, structureParams.Start.Y),
+                new Point16(structureParams.End.X - 1, floorYPositions.Count == 1? structureParams.Start.Y - roomVolumeHeight : floorYPositions[1])
+            ));
+        }
+        else
+        {
+            floorVolumes.Add(new Shape(
+                new Point16(structureParams.Start.X, structureParams.Start.Y + 1),
+                new Point16(floorSlopeStartX, structureParams.Start.Y + 1),
+                new Point16(floorSlopeEndX, structureParams.End.Y + 1),
+                new Point16(structureParams.End.X, structureParams.End.Y + 1),
+                new Point16(structureParams.Start.X, structureParams.Start.Y + 4),
+                new Point16(structureParams.End.X, structureParams.End.Y + 4)
+            ));
+            roomVolumes.Add(new Shape(
+                new Point16(structureParams.Start.X + 1, structureParams.Start.Y),
+                new Point16(floorSlopeStartX, structureParams.Start.Y),
+                new Point16(floorSlopeEndX, structureParams.End.Y),
+                new Point16(structureParams.End.X - 1, structureParams.End.Y),
+                new Point16(structureParams.Start.X + 1, floorYPositions.Count == 1? structureParams.Start.Y + roomVolumeHeight : floorYPositions[1]),
+                new Point16(structureParams.End.X - 1, floorYPositions.Count == 1? structureParams.Start.Y + roomVolumeHeight : floorYPositions[1])
+            ));
+        }
+        
+        wallVolumes.Add(new Shape(
+            new Point16(structureParams.Start.X + 1 - externalWallThickness, structureParams.Start.Y - 3),
+            new Point16(structureParams.Start.X, structureParams.Start.Y - structureParams.Height)
+        ));
+        wallVolumes.Add(new Shape(
+            new Point16(structureParams.End.X, structureParams.End.Y - 3),
+            new Point16(structureParams.End.X - 1 + externalWallThickness, structureParams.End.Y - structureParams.Height)
+        ));
+        wallVolumes.Add(new Shape(
+            new Point16(structureParams.End.X + 10, structureParams.End.Y - 3),
+            new Point16(structureParams.End.X + 9 + externalWallThickness, structureParams.End.Y - structureParams.Height)
+        ));
+        
+        for (int floorNumber = 1; floorNumber < floorYPositions.Count; floorNumber++)
+        {
+            floorVolumes.Add(new Shape(
+                new Point16(structureParams.Start.X + 1, floorYPositions[floorNumber] + floorVolumeHeight),
+                new Point16(structureParams.End.X - 1, floorYPositions[floorNumber])
+            ));
+            roomVolumes.Add(new Shape(
+                new Point16(structureParams.Start.X + 1, floorYPositions[floorNumber] - 1),
+                new Point16(structureParams.End.X - 1, floorYPositions[floorNumber] - 1 - roomVolumeHeight)
+            ));
+        }
+        
+        // Shape.CreateOutline(roomVolumes.ToArray());
+        Shape.CreateOutline(wallVolumes.ToArray());
+        // Shape.CreateOutline(floorVolumes.ToArray());
+        // Shape.CreateOutline([new Shape(
+        //     new Point16(structureParams.End.X, structureParams.End.Y - 3),
+        //     new Point16(structureParams.End.X - 1 + externalWallThickness, structureParams.End.Y - structureParams.Height)
+        // )]);
+        
+        
         
         return new AdvStructure();
     }

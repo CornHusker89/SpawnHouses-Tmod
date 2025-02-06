@@ -278,6 +278,17 @@ public static class Directions
     }
 }
 
+public class Range(int min, int max)
+{
+    public int Min = min;
+    public int Max = max;
+    
+    public bool InRange(int value)
+    {
+        return value >= Min && value <= Max;
+    }
+}
+
 public static class StructureStatus
 {
     public const byte NotGenerated = 0;

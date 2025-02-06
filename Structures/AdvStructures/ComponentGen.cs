@@ -10,26 +10,26 @@ namespace SpawnHouses.Structures.AdvStructures;
 
 public static class ComponentGen
 {
-    public static readonly (ComponentTag[] possibleTags, Func<ComponentParams, object> method)[] GenMethods = 
+    public static readonly (StructureTag[] possibleTags, Func<ComponentParams, object> method)[] GenMethods = 
         [
-            ([ComponentTag.Roof, 
-                ComponentTag.RoofShort,
-                ComponentTag.RoofTall,
-                ComponentTag.RoofSlantCenterHigh, 
-                ComponentTag.RoofSlantLeftHigh, 
-                ComponentTag.RoofSlantRightHigh,
-                ComponentTag.RoofSlope1To1,
-                ComponentTag.RoofSlopeLessThan1,
-                ComponentTag.RoofSlopeNone], 
+            ([StructureTag.HasRoof, 
+                StructureTag.RoofShort,
+                StructureTag.RoofTall,
+                StructureTag.RoofSlantCenterHigh, 
+                StructureTag.RoofSlantLeftHigh, 
+                StructureTag.RoofSlantRightHigh,
+                StructureTag.RoofSlope1To1,
+                StructureTag.RoofSlopeLessThan1,
+                StructureTag.RoofSlopeNone], 
             Roof2)
         ];
     
     public static Func<ComponentParams, object> GetRandomMethod(ComponentParams componentParams)
     {
-        List<(ComponentTag[] possibleTags, Func<ComponentParams, object> method)> methodTuples = [];
+        List<(StructureTag[] possibleTags, Func<ComponentParams, object> method)> methodTuples = [];
         foreach (var tuple in GenMethods)
         {
-            List<ComponentTag> requiredTags = componentParams.TagsRequired.ToList();
+            List<StructureTag> requiredTags = componentParams.TagsRequired.ToList();
             foreach (var tag in tuple.possibleTags)
             {
                 if (componentParams.TagsBlacklist.Contains(tag))
@@ -57,9 +57,13 @@ public static class ComponentGen
         tile.WallType = WallID.Planked;
         tile.WallColor = paintId;
     }
+    
 
     #region Roof Methods
     
+    /// <summary>
+    /// basic roof, capable of handling most roof shapes
+    /// </summary>
     public static object Roof2(ComponentParams componentParams)
     {
         var roofBottom = StructureGenHelper.GetTopTilesPos(componentParams.Start, componentParams.Length);
@@ -253,5 +257,21 @@ public static class ComponentGen
         return false;
     }
     
+    #endregion
+    
+    
+    #region Volume Methods
+    
+    /// <summary>
+    /// Creates a volume with random blocks, but the top block consistent. great for base-layer floors
+    /// </summary>
+    public static void Volume1(ComponentParams componentParams)
+    {
+    }
+    
+    #endregion
+    
+    
+    #region Room Methods
     #endregion
 }
