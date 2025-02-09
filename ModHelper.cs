@@ -110,6 +110,7 @@ public class ModHelper : ModSystem
 
         var consoleInstance = ModContent.GetInstance<WorldGenTesting.UI.MenuConsoleSystem>();
                 
+        [JITWhenModsEnabled("WorldGenTesting")]
         string CreateWorld()
         {
             TestingHelper.MakeWorld("SpawnHousesAutomatedTesting", TestingHelper.WorldSize.Medium);

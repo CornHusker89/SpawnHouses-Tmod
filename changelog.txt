@@ -1,3 +1,3 @@
-Version 1.0.9
+Version 1.0.10
 Minor Changes
-- Fixed out-of-bounds error when generating beach house
+- Fixed a JIT error on mod loading. Not sure how I didn't notice this earlier
