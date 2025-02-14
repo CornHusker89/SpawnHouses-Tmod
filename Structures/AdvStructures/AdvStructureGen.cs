@@ -1,5 +1,4 @@
 #nullable enable
-using static SpawnHouses.Structures.AdvStructures.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -180,9 +179,9 @@ public static class AdvStructureGen
     /// </summary>
     public static AdvStructure Layout2(StructureParams structureParams)
     {
-        List<Shape> roomVolumes = [];
-        List<Shape> wallVolumes = [];
         List<Shape> floorVolumes = [];
+        List<Shape> wallVolumes = [];
+        List<Shape> roomVolumes = [];
 
         int externalWallThickness = Terraria.WorldGen.genRand.Next(1, 3);
 
@@ -266,6 +265,14 @@ public static class AdvStructureGen
         //     new Point16(structureParams.End.X, structureParams.End.Y - 3),
         //     new Point16(structureParams.End.X - 1 + externalWallThickness, structureParams.End.Y - structureParams.Height)
         // )]);
+
+        foreach (var wallVolume in wallVolumes)
+            ComponentGen.GetRandomMethod(new ComponentParams(
+                [StructureTag.HasWall],
+                [],
+                wallVolume,
+                structureParams.Palette
+            ));
         
         
         

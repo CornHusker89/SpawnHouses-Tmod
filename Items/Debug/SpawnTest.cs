@@ -10,7 +10,6 @@ using Terraria.ModLoader;
 using Terraria.WorldBuilding;
 using Range = SpawnHouses.Structures.Range;
 
-
 namespace SpawnHouses.Items.Debug
 {
 	public class SpawnTest : ModItem	
@@ -49,7 +48,7 @@ namespace SpawnHouses.Items.Debug
 			// ));
 
 			
-			AdvStructureGen.Layout2(new Data.StructureParams([], [], new Point16(x, y),
+			AdvStructureGen.Layout2(new StructureParams(TilePalette.Palette1(), [], [], new Point16(x, y),
 				new Point16(x + length, y), new Range(175, 1000), new Range(0, 99)));
 			
 			return true;

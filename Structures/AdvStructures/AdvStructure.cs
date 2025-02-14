@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.Structures.StructureParts;
-using static SpawnHouses.Structures.AdvStructures.Data;
 using Terraria;
 using Terraria.DataStructures;
 
