@@ -1,2 +1,3 @@
-Version 1.0.10
-Minor Changes
+Version 1.0.11
+Major Changes
+- New icon
