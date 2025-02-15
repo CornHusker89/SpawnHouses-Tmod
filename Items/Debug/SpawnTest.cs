@@ -37,19 +37,17 @@ namespace SpawnHouses.Items.Debug
 
 			int length = 30;
 			
-			// ComponentGen.Roof2(new Data.ComponentParams([], [], null, new Point16(x, y), length));
-			// WorldUtils.Gen(new Point(x + length / 2, y + length / 2), new Shapes.Circle((length + 50) / 2), Actions.Chain(
-			// 	new Actions.SetFrames(),
-			// 	new Actions.Custom((i, j, args) =>
-			// 	{
-			// 		Framing.WallFrame(i, j);
-			// 		return true;
-			// 	})
-			// ));
-
-			
 			AdvStructureGen.Layout2(new StructureParams(TilePalette.Palette1(), [], [], new Point16(x, y),
 				new Point16(x + length, y), new Range(175, 1000), new Range(0, 99)));
+			
+			WorldUtils.Gen(new Point(x + length / 2, y - length), new Shapes.Circle((length + 50) / 2), Actions.Chain(
+				new Actions.SetFrames(),
+				new Actions.Custom((i, j, args) =>
+				{
+					Framing.WallFrame(i, j);
+					return true;
+				})
+			));
 			
 			return true;
 		}

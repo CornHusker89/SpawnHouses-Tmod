@@ -60,6 +60,24 @@ public static class AdvStructureGen
         return boundingShape;
     }
     
+    private static void FillVolumes(List<Shape> volumes, StructureTag[] tagsRequired, StructureTag[] tagsBlacklist, TilePalette palette)
+    {
+        ComponentParams componentParams = new ComponentParams(
+            tagsRequired,
+            [],
+            volumes[0],
+            palette
+        );
+        var genMethod = ComponentGen.GetRandomMethod(componentParams);
+        
+        foreach (var volume in volumes)
+        {
+            componentParams.MainVolume = volume;
+            genMethod(componentParams);
+        }
+    }
+    
+    
     /// <summary>
     /// a house with a tall side, and possible extrusions on tall side. generally quite large and medieval looking
     /// </summary>
@@ -180,17 +198,22 @@ public static class AdvStructureGen
     public static AdvStructure Layout2(StructureParams structureParams)
     {
         List<Shape> floorVolumes = [];
+        Shape bottomFloorVolume;
+        List<Shape> floorGapVolumes = [];
         List<Shape> wallVolumes = [];
+        List<Shape> bottomWallVolumes;
+        List<Shape> wallGapVolumes = [];
         List<Shape> roomVolumes = [];
+        
 
         int externalWallThickness = Terraria.WorldGen.genRand.Next(1, 3);
 
         // set floor y positions & floor count
         List<int> floorYPositions = [];
-        int floorVolumeHeight = Terraria.WorldGen.genRand.Next(1, 3);
+        int floorVolumeHeight = Terraria.WorldGen.genRand.Next(1, 4);
         int roomVolumeHeight = Terraria.WorldGen.genRand.Next(4, 7);
         structureParams.Height -= structureParams.Height % (floorVolumeHeight + roomVolumeHeight);
-        for (int y = structureParams.Start.Y; y >= structureParams.Start.Y - structureParams.Height - (floorVolumeHeight + roomVolumeHeight); y -= floorVolumeHeight + roomVolumeHeight)
+        for (int y = structureParams.Start.Y; y > structureParams.Start.Y - structureParams.Height - (floorVolumeHeight + roomVolumeHeight); y -= floorVolumeHeight + roomVolumeHeight)
             floorYPositions.Add(y);
         
         // determine floor slope
@@ -204,10 +227,10 @@ public static class AdvStructureGen
         // set first floor volumes
         if (flatFloor)
         {
-            floorVolumes.Add(new Shape(
+            bottomFloorVolume = new Shape(
                 new Point16(structureParams.Start.X, structureParams.Start.Y + 1),
                 new Point16(structureParams.End.X, structureParams.End.Y + 3)
-            ));
+            );
             roomVolumes.Add(new Shape(
                 new Point16(structureParams.Start.X + 1, structureParams.Start.Y),
                 new Point16(structureParams.End.X - 1, floorYPositions.Count == 1? structureParams.Start.Y - roomVolumeHeight : floorYPositions[1])
@@ -215,14 +238,14 @@ public static class AdvStructureGen
         }
         else
         {
-            floorVolumes.Add(new Shape(
+            bottomFloorVolume = new Shape(
                 new Point16(structureParams.Start.X, structureParams.Start.Y + 1),
                 new Point16(floorSlopeStartX, structureParams.Start.Y + 1),
                 new Point16(floorSlopeEndX, structureParams.End.Y + 1),
                 new Point16(structureParams.End.X, structureParams.End.Y + 1),
                 new Point16(structureParams.Start.X, structureParams.Start.Y + 4),
                 new Point16(structureParams.End.X, structureParams.End.Y + 4)
-            ));
+            );
             roomVolumes.Add(new Shape(
                 new Point16(structureParams.Start.X + 1, structureParams.Start.Y),
                 new Point16(floorSlopeStartX, structureParams.Start.Y),
@@ -232,18 +255,20 @@ public static class AdvStructureGen
                 new Point16(structureParams.End.X - 1, floorYPositions.Count == 1? structureParams.Start.Y + roomVolumeHeight : floorYPositions[1])
             ));
         }
-        
+
+        // make bottom walls, if we hit the chance
+        bool hasBottomWalls = Terraria.WorldGen.genRand.Next(0, 3) != 0;
+        int bottomWallHeight = hasBottomWalls? Terraria.WorldGen.genRand.Next(3, 8) : 0;
+        if (bottomWallHeight > structureParams.Height - 3)
+            bottomWallHeight = structureParams.Height - 3;
+            
         wallVolumes.Add(new Shape(
-            new Point16(structureParams.Start.X + 1 - externalWallThickness, structureParams.Start.Y - 3),
+            new Point16(structureParams.Start.X + 1 - externalWallThickness, structureParams.Start.Y - 2),
             new Point16(structureParams.Start.X, structureParams.Start.Y - structureParams.Height)
         ));
         wallVolumes.Add(new Shape(
-            new Point16(structureParams.End.X, structureParams.End.Y - 3),
+            new Point16(structureParams.End.X, structureParams.End.Y - 2),
             new Point16(structureParams.End.X - 1 + externalWallThickness, structureParams.End.Y - structureParams.Height)
-        ));
-        wallVolumes.Add(new Shape(
-            new Point16(structureParams.End.X + 10, structureParams.End.Y - 3),
-            new Point16(structureParams.End.X + 9 + externalWallThickness, structureParams.End.Y - structureParams.Height)
         ));
         
         for (int floorNumber = 1; floorNumber < floorYPositions.Count; floorNumber++)
@@ -259,22 +284,22 @@ public static class AdvStructureGen
         }
         
         // Shape.CreateOutline(roomVolumes.ToArray());
-        Shape.CreateOutline(wallVolumes.ToArray());
+        // Shape.CreateOutline(wallVolumes.ToArray());
         // Shape.CreateOutline(floorVolumes.ToArray());
         // Shape.CreateOutline([new Shape(
         //     new Point16(structureParams.End.X, structureParams.End.Y - 3),
         //     new Point16(structureParams.End.X - 1 + externalWallThickness, structureParams.End.Y - structureParams.Height)
         // )]);
 
-        foreach (var wallVolume in wallVolumes)
-            ComponentGen.GetRandomMethod(new ComponentParams(
-                [StructureTag.HasWall],
-                [],
-                wallVolume,
-                structureParams.Palette
-            ));
+        FillVolumes([bottomFloorVolume], 
+            [StructureTag.HasFloor, floorVolumeHeight <= 2? StructureTag.FloorThin : StructureTag.FloorThick],
+            [], structureParams.Palette);
         
+        FillVolumes(floorVolumes,
+            [StructureTag.HasFloor, StructureTag.FloorElevated,  floorVolumeHeight <= 2? StructureTag.FloorThin : StructureTag.FloorThick],
+            [], structureParams.Palette);
         
+        FillVolumes(wallVolumes, [StructureTag.HasWall], [], structureParams.Palette);
         
         return new AdvStructure();
     }

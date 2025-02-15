@@ -15,7 +15,6 @@ public class AdvStructure
     public readonly List<Shape> WallVolumes = [];
     public readonly List<Shape> FloorVolumes = [];
     public readonly List<Shape> ConnectingVolumes = [];
-    public readonly Dictionary<DataType, object> Data = new();
     public Shape BoundingShape;
     public Point16 Position;
     public int XSize, YSize, Volume, HousingCount;

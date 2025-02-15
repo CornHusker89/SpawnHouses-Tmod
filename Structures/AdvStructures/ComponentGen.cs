@@ -11,7 +11,8 @@ public static class ComponentGen
 {
     public static readonly (StructureTag[] possibleTags, Func<ComponentParams, object> method)[] GenMethods =
     [
-        ([
+        (
+            [
                 StructureTag.HasRoof,
                 StructureTag.RoofShort,
                 StructureTag.RoofTall,
@@ -22,25 +23,84 @@ public static class ComponentGen
                 StructureTag.RoofSlopeLessThan1,
                 StructureTag.RoofSlopeNone
             ],
-            Roof2),
+            Roof2
+        ),
 
-        ([StructureTag.HasFloor],
-            Floor1),
-
-        ([StructureTag.HasFloor],
-            Floor2),
-
-        ([StructureTag.HasFloor],
-            Floor3),
             
-        ([StructureTag.HasWall],
-            Wall1),
+            
+        (
+            [
+                StructureTag.HasFloor, 
+                StructureTag.FloorSolid,
+                StructureTag.FloorGroundLevel,
+                StructureTag.FloorThin,
+                StructureTag.FloorThick,
+            ],
+            Floor1
+        ),
 
-        ([StructureTag.HasWall],
-            Wall2),
+        (
+            [
+                StructureTag.HasFloor, 
+                StructureTag.FloorSolid,
+                StructureTag.FloorGroundLevel,
+                StructureTag.FloorThin,
+                StructureTag.FloorThick
+            ],
+            Floor2
+        ),
 
-        ([StructureTag.HasWall],
-            Wall3)
+        (
+            [
+                StructureTag.HasFloor, 
+                StructureTag.FloorSolid,
+                StructureTag.FloorGroundLevel,
+                StructureTag.FloorElevated,
+                StructureTag.FloorThin,
+                StructureTag.FloorThick
+            ],
+            Floor3
+        ),
+            
+        (
+            [
+                StructureTag.HasFloor,
+                StructureTag.FloorHollow,
+                StructureTag.FloorGroundLevel,
+                StructureTag.FloorElevated,
+                StructureTag.FloorThick
+            ],
+            Floor4
+        ),
+            
+            
+            
+        (
+            [
+                StructureTag.HasWall,
+                StructureTag.WallGroundLevel,
+                StructureTag.WallElevated
+            ],
+            Wall1
+        ),
+
+        (
+            [
+                StructureTag.HasWall,
+                StructureTag.WallGroundLevel,
+                StructureTag.WallElevated
+            ],
+            Wall2
+        ),
+
+        (
+            [
+                StructureTag.HasWall,
+                StructureTag.WallGroundLevel,
+                StructureTag.WallElevated
+            ],
+            Wall3
+        )
     ];
 
     public static Func<ComponentParams, object> GetRandomMethod(ComponentParams componentParams)
@@ -49,11 +109,11 @@ public static class ComponentGen
         foreach (var tuple in GenMethods)
         {
             List<StructureTag> requiredTags = componentParams.TagsRequired.ToList();
-            foreach (var tag in tuple.possibleTags)
+            foreach (var possibleTag in tuple.possibleTags)
             {
-                if (componentParams.TagsBlacklist.Contains(tag))
+                if (componentParams.TagsBlacklist.Contains(possibleTag))
                     break;
-                requiredTags.Remove(tag);
+                requiredTags.Remove(possibleTag);
             }
 
             if (requiredTags.Count == 0)
@@ -147,12 +207,12 @@ public static class ComponentGen
             switch (tile.BlockType)
             {
                 case BlockType.SlopeDownRight: // up
-                    PaintedType.PlaceTile(tile, palette.RoofMain, BlockType.Solid);
+                    PaintedType.PlaceTile(x, roofTop.pos[index], palette.RoofMain, BlockType.Solid);
                     if (index != 0 && index != roofLength - 1)
                         PaintedType.PlaceTile(x - 1, roofTop.pos[index], palette.RoofMain, BlockType.SlopeDownRight);
                     break;
                 case BlockType.SlopeDownLeft: // down
-                    PaintedType.PlaceTile(tile, palette.RoofMain, BlockType.Solid);
+                    PaintedType.PlaceTile(x, roofTop.pos[index], palette.RoofMain, BlockType.Solid);
                     if (index != 0 && index != +roofLength - 1)
                         PaintedType.PlaceTile(x + 1, roofTop.pos[index], palette.RoofMain, BlockType.SlopeDownLeft);
                     break;
@@ -316,7 +376,7 @@ public static class ComponentGen
         {
             PaintedType.PlaceTile(x, y, componentParams.TilePalette.FloorMain);
         });
-
+    
         return false;
     }
 
@@ -338,21 +398,79 @@ public static class ComponentGen
     /// </summary>
     public static object Floor3(ComponentParams componentParams)
     {
+        bool elevated = componentParams.TagsRequired.Contains(StructureTag.FloorElevated);
         int xStart = componentParams.MainVolume.BoundingBox.topLeft.X;
         int xSize = componentParams.MainVolume.BoundingBox.bottomRight.X - xStart + 1;
         int[] topY = new int[xSize];
-
+    
         componentParams.MainVolume.ExecuteInArea((x, y) =>
         {
-            PaintedType.PlaceTile(x, y, PaintedType.PickRandom(componentParams.TilePalette.FloorAlt));
-
+            PaintedType.PlaceTile(x, y, 
+                PaintedType.PickRandom(elevated? componentParams.TilePalette.FloorAlt : componentParams.TilePalette.FloorAltElevated));
+    
+            if (topY[x - xStart] == 0)
+                topY[x - xStart] = y;
+            
             if (y < topY[x - xStart])
                 topY[x - xStart] = y;
         });
-
+    
         for (int index = 0; index < topY.Length; index++)
-            PaintedType.PlaceTile(xStart + index, topY[index], componentParams.TilePalette.FloorAccent);
-
+            PaintedType.PlaceTile(xStart + index, topY[index], 
+                elevated? componentParams.TilePalette.FloorMainElevated : componentParams.TilePalette.FloorMain);
+    
+        return false;
+    }
+    
+    /// <summary>
+    /// Fills top and bottom of volume, adds support struts in the middle
+    /// </summary>
+    public static object Floor4(ComponentParams componentParams)
+    {
+        bool elevated = componentParams.TagsRequired.Contains(StructureTag.FloorElevated);
+        int xStart = componentParams.MainVolume.BoundingBox.topLeft.X;
+        int xSize = componentParams.MainVolume.BoundingBox.bottomRight.X - xStart + 1;
+        int[] topY = new int[xSize];
+        int[] bottomY = new int[xSize];
+        int supportInterval = Terraria.WorldGen.genRand.Next(3, 5);
+    
+        componentParams.MainVolume.ExecuteInArea((x, y) =>
+        {
+            if ((x - xStart + 1) % supportInterval == 0)
+                PaintedType.PlaceTile(x, y, elevated? componentParams.TilePalette.FloorMainElevated : componentParams.TilePalette.FloorMain);
+            else
+            {
+                Tile tile = Main.tile[x, y];
+                tile.HasTile = false;
+            }
+            
+            if (topY[x - xStart] == 0)
+                topY[x - xStart] = y;
+            if (bottomY[x - xStart] == 0)
+                bottomY[x - xStart] = y;
+    
+            if (y < topY[x - xStart])
+                topY[x - xStart] = y;
+            if (y > bottomY[x - xStart])
+                bottomY[x - xStart] = y;
+        });
+    
+        for (int index = 0; index < topY.Length; index++)
+        {
+            PaintedType.PlaceTile(xStart + index, topY[index], 
+                elevated? componentParams.TilePalette.FloorMainElevated : componentParams.TilePalette.FloorMain);
+            PaintedType.PlaceTile(xStart + index, bottomY[index], 
+                elevated? componentParams.TilePalette.FloorMainElevated : componentParams.TilePalette.FloorMain);
+        }
+    
+        return false;
+    }
+    
+    /// <summary>
+    /// A gap floor, places platforms 
+    /// </summary>
+    public static object Floor5(ComponentParams componentParams)
+    {
         return false;
     }
 
@@ -362,27 +480,67 @@ public static class ComponentGen
     #region Wall Methods
 
     /// <summary>
-    /// Fills a volume with wall blocks
+    /// Fills a volume with the same wall blocks, with special blocks at regular intervals
     /// </summary>
     public static object Wall1(ComponentParams componentParams)
     {
+        int yStart = componentParams.MainVolume.BoundingBox.topLeft.Y;
+        int ySize = componentParams.MainVolume.BoundingBox.bottomRight.Y - yStart + 1;
+        int[] lowX = new int[ySize];
+        int[] highX = new int[ySize];
         componentParams.MainVolume.ExecuteInArea((x, y) =>
         {
             PaintedType.PlaceTile(x, y, componentParams.TilePalette.WallMain);
+            
+            if (lowX[y - yStart] == 0)
+                lowX[y - yStart] = x;
+            if (highX[y - yStart] == 0)
+                highX[y - yStart] = x;
+    
+            if (x < lowX[y - yStart])
+                lowX[y - yStart] = x;
+            if (x > highX[y - yStart])
+                highX[y - yStart] = x;
         });
-
+        
+        for (int index = 0; index < lowX.Length; index++)
+        {
+            PaintedType.PlaceTile(yStart + index, lowX[index], componentParams.TilePalette.WallSpecial);
+            PaintedType.PlaceTile(yStart + index, highX[index], componentParams.TilePalette.WallSpecial);
+        }
+    
         return false;
     }
 
     /// <summary>
-    /// Fills a volume with random wall blocks
+    /// Fills a volume with random wall blocks, with special blocks at regular intervals
     /// </summary>
     public static object Wall2(ComponentParams componentParams)
     {
+        int yStart = componentParams.MainVolume.BoundingBox.topLeft.Y;
+        int ySize = componentParams.MainVolume.BoundingBox.bottomRight.Y - yStart + 1;
+        int[] lowX = new int[ySize];
+        int[] highX = new int[ySize];
         componentParams.MainVolume.ExecuteInArea((x, y) =>
         {
             PaintedType.PlaceTile(x, y, PaintedType.PickRandom(componentParams.TilePalette.WallAlt));
+                        
+            if (lowX[y - yStart] == 0)
+                lowX[y - yStart] = x;
+            if (highX[y - yStart] == 0)
+                highX[y - yStart] = x;
+    
+            if (x < lowX[y - yStart])
+                lowX[y - yStart] = x;
+            if (x > highX[y - yStart])
+                highX[y - yStart] = x;
         });
+        
+        for (int index = 0; index < lowX.Length; index++)
+        {
+            PaintedType.PlaceTile(yStart + index, lowX[index], componentParams.TilePalette.WallSpecial);
+            PaintedType.PlaceTile(yStart + index, highX[index], componentParams.TilePalette.WallSpecial);
+        }
 
         return false;
     }
@@ -394,23 +552,37 @@ public static class ComponentGen
         int xStart = componentParams.MainVolume.BoundingBox.topLeft.X;
         int xSize = componentParams.MainVolume.BoundingBox.bottomRight.X - xStart + 1;
         int[] bottomY = new int[xSize];
-
+    
         componentParams.MainVolume.ExecuteInArea((x, y) =>
         {
             PaintedType.PlaceTile(x, y, PaintedType.PickRandom(componentParams.TilePalette.WallAlt));
-
+    
+            if (bottomY[x - xStart] == 0)
+                bottomY[x - xStart] = y;
+            
             if (y > bottomY[x - xStart])
                 bottomY[x - xStart] = y;
         });
-
+    
         for (int index = 0; index < bottomY.Length; index++)
             PaintedType.PlaceTile(xStart + index, bottomY[index], componentParams.TilePalette.WallAccent);
-
+    
         return false;
     }
 
     #endregion
     
     #region Room Methods
+    
+    public static object Room1(ComponentParams componentParams)
+    {
+        componentParams.MainVolume.ExecuteInArea((x, y) =>
+        {
+            PaintedType.PlaceTile(x, y, PaintedType.PickRandom(componentParams.TilePalette.WallAlt));
+        });
+        
+        return false;
+    }
+    
     #endregion
 }
