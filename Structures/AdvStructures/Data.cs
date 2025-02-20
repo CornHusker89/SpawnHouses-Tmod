@@ -11,8 +11,10 @@ namespace SpawnHouses.Structures.AdvStructures;
 
 
 public enum StructureTag
-{
-    // ===== themes =====
+{    
+    // ===== structure =====
+    HasHousing,
+    IsSymmetric,
     /// structure is categorized as being above ground (typically has a roof)
     AboveGround, 
     /// structure is categorized as being below ground (typically has a no roof)
@@ -29,9 +31,10 @@ public enum StructureTag
     Cavern, 
     
     
-    // ===== basic attributes =====
-    HasHousing,
-    IsSymmetric,
+    // ===== room =====
+    HasRoom,
+    PrebuiltRoom,
+    ProceduralRoom,
     
     
     // ===== floor =====
@@ -54,16 +57,24 @@ public enum StructureTag
     WallElevated,
     
     
-    // ===== room =====
-    HasWindow,
+    // ===== decor =====
+    HasDecor,
+    DecorHasWindow,
+    DecorIsUnderGround,
+    DecorGroundLevel,
+    DecorElevated,
+    
+    
+    // ===== stairway =====
+    HasStairway,
+    
+    
+    // ===== background =====
+    HasBackground,
     
     
     // ===== roof =====
     HasRoof,
-    RoofSlantNone,
-    RoofSlantLeftHigh,
-    RoofSlantRightHigh,
-    RoofSlantCenterHigh,
     RoofTall,
     RoofShort,
     HasChimney,
@@ -97,8 +108,8 @@ public struct StructureParams
     }
     
     public TilePalette Palette; 
-    public StructureTag[] StructureTagsRequired;
-    public StructureTag[] StructureTagBlacklist;
+    public StructureTag[] TagsRequired;
+    public StructureTag[] TagBlacklist;
     public Point16 Start;
     public Point16 End;
     public int Length;
@@ -110,16 +121,16 @@ public struct StructureParams
 
     public StructureParams(
         TilePalette tilePalette,
-        StructureTag[] structureTagsRequired,
-        StructureTag[] structureTagBlacklist,
+        StructureTag[] tagsRequired,
+        StructureTag[] tagBlacklist,
         Point16 start,
         Point16 end,
         Range volumeRange,
         Range housingRange)
     {
         Palette = tilePalette;
-        StructureTagsRequired = structureTagsRequired;
-        StructureTagBlacklist = structureTagBlacklist;
+        TagsRequired = tagsRequired;
+        TagBlacklist = tagBlacklist;
         Start = start;
         End = end;
         if (Start.X > End.X)
@@ -127,6 +138,11 @@ public struct StructureParams
         Length = End.X - Start.X;
         VolumeRange = volumeRange;
         HousingRange = housingRange;
+        
+        if (VolumeRange.Min / HousingRange.Min < 50)
+            throw new ArgumentException("Volume minimum is too small given the housing minimum");
+        if (VolumeRange.Max / HousingRange.Max < 50)
+            throw new ArgumentException("Volume maximum is too small given the housing maximum");
         
         ReRollRanges();
     }
@@ -145,15 +161,53 @@ public struct StructureParams
             throw new ArgumentException("Max housing cannot be less than 0");
         if (HousingRange.Max < HousingRange.Min)
             throw new ArgumentException("Max Housing is less than min housing");
-        if (HousingRange.Max == 0 && StructureTagBlacklist.Contains(StructureTag.HasHousing))
+        if (HousingRange.Max == 0 && TagBlacklist.Contains(StructureTag.HasHousing))
             throw new ArgumentException(
                 "Adv structure cannot have a max housing of 0 while blacklisting components with housing");
         Housing = (int)(HousingRange.Min + (HousingRange.Max - HousingRange.Min) * scale);
     }
 }
 
+public struct RoomParams(
+    StructureTag[] tagsRequired,
+    StructureTag[] tagsBlacklist,
+    Shape mainVolume,
+    TilePalette tilePalette,
+    int floorWidth,
+    int wallWidth,
+    int housing
+)
+{
+    public readonly StructureTag[] TagsRequired = tagsRequired;
+    public readonly StructureTag[] TagsBlacklist = tagsBlacklist;
+    public Shape MainVolume = mainVolume;
+    public readonly TilePalette TilePalette = tilePalette;
+    public readonly int FloorWidth = floorWidth;
+    public readonly int WallWidth = wallWidth;
+    public readonly int Housing = housing;
+}
 
-public struct ComponentParams(
+public class RoomLayout(
+    List<Shape> floorVolumes,
+    List<Shape> floorGapVolumes,
+    List<Shape> wallVolumes,
+    List<Shape> wallGapVolumes,
+    List<Shape> decorVolumes,
+    List<Shape> stairwayVolumes,
+    List<Shape> backgroundVolumes
+)
+{
+    public readonly List<Shape> FloorVolumes = floorVolumes;
+    public readonly List<Shape> FloorGapVolumes = floorGapVolumes;
+    public readonly List<Shape> WallVolumes = wallVolumes;
+    public readonly List<Shape> WallGapVolumes = wallGapVolumes;
+    public readonly List<Shape> DecorVolumes = decorVolumes;
+    public readonly List<Shape> StairwayVolumes = stairwayVolumes;
+    public readonly List<Shape> BackgroundVolumes = backgroundVolumes;
+}
+
+public struct ComponentParams
+(
     StructureTag[] tagsRequired,
     StructureTag[] tagsBlacklist,
     Shape mainVolume,

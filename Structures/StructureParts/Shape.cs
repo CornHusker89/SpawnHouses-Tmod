@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
+using ClipperLib;
 
 namespace SpawnHouses.Structures.StructureParts;
 
@@ -20,18 +21,6 @@ public class Shape
         Color.Black,
         Color.Aquamarine,
         Color.Red,
-        Color.Purple,
-        Color.Orange,
-        Color.Brown,
-        Color.Blue,
-        Color.Pink,
-        Color.Green,
-        Color.Yellow,
-        Color.Gray,
-        Color.SkyBlue,
-        Color.SteelBlue,
-        Color.Olive,
-        Color.PeachPuff
     ];
     
     private static Color GetColor(int index)
@@ -39,12 +28,14 @@ public class Shape
         return Colors[index % Colors.Length];
     }
     
-    public static void CreateOutline(Shape[] shapes)
+    /// <param name="shapes">shapes to create outline with</param>
+    /// <param name="duration">effect duration, in seconds</param>
+    public static void CreateOutline(Shape[] shapes, int duration = 10)
     {
         Task.Run(() =>
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            while (stopwatch.ElapsedMilliseconds / 1000 < 10)
+            while (stopwatch.ElapsedMilliseconds / 1000 < duration)
             {
                 for (int i = 0; i < shapes.Length; i++)
                 {
@@ -64,11 +55,9 @@ public class Shape
 
     public (Point16 topLeft, Point16 bottomRight) BoundingBox;
     public Point16[] Points;
-    private int _area = -1;
+    public bool IsBox = false; // because many of the shapes will be boxes, introduce optimizations for boxes
    
-    /// <summary>
-    /// 
-    /// </summary>
+    
     /// <param name="points">If only 2 points are passed, will assume a box</param>
     /// <returns></returns>
     public Shape(params Point16[] points)
@@ -76,14 +65,19 @@ public class Shape
         Init(points);
     }
     
-    /// <summary>
-    /// 
-    /// </summary>
     /// <param name="points">If only 2 points are passed, will assume a box</param>
     /// <returns></returns>
     public Shape(IEnumerable<Point16> points)
     {
         Point16[] pointsArray = points.ToArray();
+        Init(pointsArray);
+    }
+    
+    public Shape(List<IntPoint> points)
+    {
+        Point16[] pointsArray = new Point16[points.Count];
+        for (int i = 0; i < points.Count; i++)
+            pointsArray[i] = new Point16((int)points[i].X, (int)points[i].Y);
         Init(pointsArray);
     }
     
@@ -101,6 +95,7 @@ public class Shape
                     new Point16(points[1].X, points[1].Y),
                     new Point16(points[0].X, points[1].Y)
                 ];
+                IsBox = true;
                 break;
             default:
                 Points = points;
@@ -119,8 +114,9 @@ public class Shape
     
     public int GetArea()
     {
-        if (_area != -1)
-            return _area;
+        if (IsBox)
+            return (BoundingBox.bottomRight.X - BoundingBox.topLeft.X) *
+                   (BoundingBox.bottomRight.Y - BoundingBox.topLeft.Y);
 
         double area = 0;
         for (int i = 0; i < Points.Length; i++)
@@ -130,12 +126,15 @@ public class Shape
 
             area += current.X * next.Y - next.X * current.Y;
         }
-        _area = (int)Math.Abs(area / 2);
-        return _area;
+        return (int)Math.Abs(area / 2);
     }
     
     public bool Contains(Point16 point)
     {
+        if (IsBox)
+            return point.X >= BoundingBox.topLeft.X && point.X <= BoundingBox.bottomRight.X &&
+                   point.Y >= BoundingBox.topLeft.Y && point.Y <= BoundingBox.bottomRight.Y;
+        
         int crossingCount = 0;
         for (int i = 0; i < Points.Length; i++)
         {
@@ -146,12 +145,16 @@ public class Shape
                 crossingCount++;
         }
 
-        // A point is inside the polygon if it crosses the edges an odd number of times when raycasting in a single direction
+        // a point is inside the polygon if it crosses the edges an odd number of times when raycasting in a single direction
         return crossingCount % 2 == 1;
     }
     
-    public bool Intersects(Shape other)
+    public bool HasIntersection(Shape other)
     {
+        if (IsBox && other.IsBox)
+            return BoundingBox.topLeft.X <= other.BoundingBox.bottomRight.X && BoundingBox.bottomRight.X >= other.BoundingBox.topLeft.X &&
+                   BoundingBox.topLeft.Y <= other.BoundingBox.bottomRight.Y && BoundingBox.bottomRight.Y >= other.BoundingBox.topLeft.Y;
+        
         List<Point16> axes = GetUniqueAxes(this).Concat(GetUniqueAxes(other)).ToList();
 
         foreach (var axis in axes)
@@ -164,59 +167,81 @@ public class Shape
         }
         return true;
     }
-    
-    public void ExecuteOnPerimeter(Action<int, int> action)
+
+    public void ExecuteOnPerimeter(Action<int, int> action, bool completeLoop = true)
     {
-        Point16 middle = new Point16(
-            BoundingBox.topLeft.X + (BoundingBox.bottomRight.X - BoundingBox.topLeft.X) / 2,
-            BoundingBox.topLeft.Y + (BoundingBox.bottomRight.Y - BoundingBox.topLeft.Y) / 2
-        );
-        
-        for (int pointNum = 0; pointNum < Points.Length - 1; pointNum++)
+        if (IsBox)
         {
-            // test for a vertical line
-            if (Points[pointNum].X - Points[pointNum + 1].X == 0)
+            for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
             {
-                int lowerY = Math.Min(Points[pointNum].Y, Points[pointNum + 1].Y);
-                int higherY = Math.Max(Points[pointNum].Y, Points[pointNum + 1].Y);
-                for (int y = lowerY; y < higherY; y++)
-                    action(Points[pointNum].X, y);
+                action(x, BoundingBox.topLeft.Y);
+                if (completeLoop)
+                    action(x, BoundingBox.bottomRight.Y);
             }
-            else
+            for (int y = BoundingBox.topLeft.Y + 1; y < BoundingBox.bottomRight.Y; y++)
             {
-                double slope = (double)(Points[pointNum].Y - Points[pointNum + 1].Y) / (Points[pointNum].X - Points[pointNum + 1].X);
-                
-                // determine whether to iterate along x/y-axis
-                if (Math.Abs(slope) > 1)
+                action(BoundingBox.topLeft.X, y);
+                action(BoundingBox.bottomRight.X, y);
+            }
+        }
+        else
+        {
+            Point16 middle = new Point16(
+                BoundingBox.topLeft.X + (BoundingBox.bottomRight.X - BoundingBox.topLeft.X) / 2,
+                BoundingBox.topLeft.Y + (BoundingBox.bottomRight.Y - BoundingBox.topLeft.Y) / 2
+            );
+
+            for (int pointNum = 0; pointNum < Points.Length - 1; pointNum++)
+            {
+                // test for a vertical line
+                if (Points[pointNum].X - Points[pointNum + 1].X == 0)
                 {
-                    // by y
-                    slope = 1 / slope;
                     int lowerY = Math.Min(Points[pointNum].Y, Points[pointNum + 1].Y);
                     int higherY = Math.Max(Points[pointNum].Y, Points[pointNum + 1].Y);
-                    int startingX = Points[pointNum].Y < Points[pointNum + 1].Y? Points[pointNum + 1].X : Points[pointNum].X;
                     for (int y = lowerY; y < higherY; y++)
-                    {
-                        // round towards the middle
-                        double x = startingX + slope * (y - lowerY);
-                        if (x < middle.X)
-                            action((int)Math.Floor(x), y);
-                        else
-                            action((int)Math.Ceiling(x), y);
-                    }
+                        action(Points[pointNum].X, y);
                 }
                 else
                 {
-                    // by x
-                    int lowerX = Math.Min(Points[pointNum].X, Points[pointNum + 1].X);
-                    int higherX = Math.Max(Points[pointNum].X, Points[pointNum + 1].X);
-                    int startingY = Points[pointNum].X < Points[pointNum + 1].X? Points[pointNum + 1].Y : Points[pointNum].Y;
-                    for (int x = lowerX; x < higherX; x++)
+                    double slope = (double)(Points[pointNum].Y - Points[pointNum + 1].Y) /
+                                   (Points[pointNum].X - Points[pointNum + 1].X);
+
+                    // determine whether to iterate along x/y-axis
+                    if (Math.Abs(slope) > 1)
                     {
-                        double y = startingY + slope * (x - lowerX);
-                        if (y < middle.Y)
-                            action(x, (int)Math.Floor(y));
-                        else
-                            action(x, (int)Math.Ceiling(y));
+                        // by y
+                        slope = 1 / slope;
+                        int lowerY = Math.Min(Points[pointNum].Y, Points[pointNum + 1].Y);
+                        int higherY = Math.Max(Points[pointNum].Y, Points[pointNum + 1].Y);
+                        int startingX = Points[pointNum].Y < Points[pointNum + 1].Y
+                            ? Points[pointNum + 1].X
+                            : Points[pointNum].X;
+                        for (int y = lowerY; y < higherY; y++)
+                        {
+                            // round towards the middle
+                            double x = startingX + slope * (y - lowerY);
+                            if (x < middle.X)
+                                action((int)Math.Floor(x), y);
+                            else
+                                action((int)Math.Ceiling(x), y);
+                        }
+                    }
+                    else
+                    {
+                        // by x
+                        int lowerX = Math.Min(Points[pointNum].X, Points[pointNum + 1].X);
+                        int higherX = Math.Max(Points[pointNum].X, Points[pointNum + 1].X);
+                        int startingY = Points[pointNum].X < Points[pointNum + 1].X
+                            ? Points[pointNum + 1].Y
+                            : Points[pointNum].Y;
+                        for (int x = lowerX; x < higherX; x++)
+                        {
+                            double y = startingY + slope * (x - lowerX);
+                            if (y < middle.Y)
+                                action(x, (int)Math.Floor(y));
+                            else
+                                action(x, (int)Math.Ceiling(y));
+                        }
                     }
                 }
             }
@@ -225,59 +250,108 @@ public class Shape
     
     public void ExecuteInArea(Action<int, int> action)
     {
-        // iterate through each scanline
-        for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
+        if (IsBox)
         {
-            List<int> intersections = new List<int>();
-
-            // find intersection points with polygon edges
-            for (int i = 0; i < Points.Length; i++)
-            {
-                Point16 p1 = Points[i];
-                Point16 p2 = Points[(i + 1) % Points.Length]; // loop back to start
-
-                // check if the scanline intersects the edge
-                if ((p1.Y <= y && p2.Y > y) || (p2.Y <= y && p1.Y > y))
-                {
-                    // compute intersection X using linear interpolation
-                    double intersectX = p1.X + (double)(y - p1.Y) * (p2.X - p1.X) / (p2.Y - p1.Y);
-                    intersections.Add((int)Math.Floor(intersectX));
-                }
-            }
-
-            // sort the intersection points
-            intersections.Sort();
-
-            // fill tiles between pairs of intersections
-            for (int i = 0; i < intersections.Count; i += 2)
-            {
-                if (i + 1 >= intersections.Count) break; // ensure pairs exist
-
-                int startX = intersections[i];
-                int endX = intersections[i + 1];
-
-                for (int x = startX; x <= endX; x++)
-                {
+            for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
+                for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
                     action(x, y);
+        }
+        else
+        {
+            for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
+            {
+                List<int> intersections = new List<int>();
+
+                for (int i = 0; i < Points.Length; i++)
+                {
+                    Point16 p1 = Points[i];
+                    Point16 p2 = Points[(i + 1) % Points.Length];
+
+                    // **Handle horizontal edges properly**
+                    if (p1.Y == p2.Y)
+                    {
+                        if (p1.Y == BoundingBox.bottomRight.Y) // If it's the bottom edge, count it
+                        {
+                            int startX = Math.Min(p1.X, p2.X);
+                            int endX = Math.Max(p1.X, p2.X);
+                            for (int x = startX; x <= endX; x++)
+                                action(x, y);
+                        }
+                        continue;
+                    }
+
+                    // **Find intersection of edge with the current scanline**
+                    if ((p1.Y <= y && p2.Y > y) || (p2.Y <= y && p1.Y > y))
+                    {
+                        double intersectX = p1.X + (y - p1.Y) * (p2.X - p1.X) / (p2.Y - p1.Y);
+                        intersections.Add((int)Math.Round(intersectX));
+                    }
+                }
+
+                intersections.Sort();
+
+                for (int i = 0; i < intersections.Count; i += 2)
+                {
+                    if (i + 1 >= intersections.Count) break;
+
+                    int startX = intersections[i];
+                    int endX = intersections[i + 1];
+
+                    for (int x = startX; x <= endX; x++)
+                        action(x, y);
                 }
             }
         }
     }
+    
+    public Shape[] Difference(Shape other)
+    {
+        Clipper clipper = new Clipper();
+        List<List<IntPoint>> solution = [];
+
+        clipper.AddPolygon(GetIntPoints(), PolyType.ptSubject);
+        clipper.AddPolygon(other.GetIntPoints(), PolyType.ptClip);
+        clipper.Execute(ClipType.ctDifference, solution, PolyFillType.pftNonZero, PolyFillType.pftNonZero);
+
+        Shape[] result = new Shape[solution.Count];
+        for (int i = 0; i < solution.Count; i++)
+            result[i] = new Shape(solution[i]);
+        return result;
+    }
+    
+    public Shape[] Intersect(Shape other)
+    {
+        Clipper clipper = new Clipper();
+        List<List<IntPoint>> solution = [];
+
+        clipper.AddPolygon(GetIntPoints(), PolyType.ptSubject);
+        clipper.AddPolygon(other.GetIntPoints(), PolyType.ptClip);
+        clipper.Execute(ClipType.ctIntersection, solution, PolyFillType.pftNonZero, PolyFillType.pftNonZero);
+
+        Shape[] result = new Shape[solution.Count];
+        for (int i = 0; i < solution.Count; i++)
+            result[i] = new Shape(solution[i]);
+        return result;
+    }
+    
+    
+    
+    
     
     private bool RayIntersectsSegment(Point16 point, Point16 segmentStart, Point16 segmentEnd)
     {
         if (segmentStart.Y > segmentEnd.Y)
             (segmentStart, segmentEnd) = (segmentEnd, segmentStart);
 
-        // Check if the point is outside the segment's Y range
+        // check if the point is outside the segment's Y range
         if (point.Y <= segmentStart.Y || point.Y > segmentEnd.Y)
             return false;
 
-        // Check if the point is to the right of the segment
+        // check if the point is to the right of the segment
         if (point.X >= Math.Max(segmentStart.X, segmentEnd.X))
             return false;
 
-        // Check for intersection
+        // check for intersection
         double slope = (segmentEnd.X - segmentStart.X) / (double)(segmentEnd.Y - segmentStart.Y);
         double intersectX = segmentStart.X + (point.Y - segmentStart.Y) * slope;
 
@@ -286,7 +360,7 @@ public class Shape
     
     private List<Point16> GetUniqueAxes(Shape shape)
     {
-        List<Point16> axes = new List<Point16>();
+        List<Point16> axes = [];
 
         for (int i = 0; i < shape.Points.Length; i++)
         {
@@ -320,21 +394,23 @@ public class Shape
         return new Projection(min, max);
     }
     
-    private class Projection
+    private class Projection(double min, double max)
     {
-        private double Min { get; }
-        private double Max { get; }
-
-        public Projection(double min, double max)
-        {
-            Min = min;
-            Max = max;
-        }
+        private double Min { get; } = min;
+        private double Max { get; } = max;
 
         public bool Overlaps(Projection other)
         {
             return !(Max < other.Min || other.Max < Min);
         }
+    }
+    
+    private List<IntPoint> GetIntPoints()
+    {
+        List<IntPoint> intPoints = [];
+        foreach (var point in Points)
+            intPoints.Add(new IntPoint(point.X, point.Y));
+        return intPoints;
     }
     
     

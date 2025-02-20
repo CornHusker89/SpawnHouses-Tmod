@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Build.Tasks.Deployment.Bootstrapper;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Structures;
 using SpawnHouses.Structures.AdvStructures;
@@ -28,6 +31,32 @@ namespace SpawnHouses.Items.Debug
 			return true;
 		}
 		
+		
+		
+		
+		private static void FillComponents(List<Shape> volumes, StructureTag[] tagsRequired, StructureTag[] tagsBlacklist, TilePalette palette)
+		{
+			if (volumes.Count == 0)
+				return;
+        
+			ComponentParams componentParams = new ComponentParams(
+				tagsRequired,
+				tagsBlacklist,
+				volumes[0],
+				palette
+			);
+			var genMethod = ComponentGen.GetRandomMethod(componentParams);
+        
+			foreach (var volume in volumes)
+			{
+				componentParams.MainVolume = volume;
+				genMethod(componentParams);
+			}
+		}
+		
+		
+		
+		
 		public override bool? UseItem(Terraria.Player player)
 		{
 			int x = (Main.MouseWorld / 16).ToPoint16().X;
@@ -36,9 +65,16 @@ namespace SpawnHouses.Items.Debug
 			Console.WriteLine(x + ", " + y);
 
 			int length = 30;
+			var palette = TilePalette.Palette1();
 			
-			AdvStructureGen.Layout2(new StructureParams(TilePalette.Palette1(), [], [], new Point16(x, y),
-				new Point16(x + length, y), new Range(175, 1000), new Range(0, 99)));
+			// AdvStructureGen.Layout2(new StructureParams(palette, [], [], new Point16(x, y),
+			// 	new Point16(x + length, y), new Range(175, 1000), new Range(0, 99)));
+
+			var result = RoomGen.Room1(new RoomParams([], [], new Shape(new Point16(x, y), new Point16(x + length, y - length)),
+				palette, 2, 2, 4));
+
+			FillComponents(result.FloorVolumes, [StructureTag.HasFloor], [], palette);
+			FillComponents(result.WallVolumes, [StructureTag.HasWall], [], palette);
 			
 			WorldUtils.Gen(new Point(x + length / 2, y - length), new Shapes.Circle((length + 50) / 2), Actions.Chain(
 				new Actions.SetFrames(),

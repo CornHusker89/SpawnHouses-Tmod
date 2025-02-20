@@ -61,6 +61,7 @@ public class TilePalette
     public readonly PaintedType BackgroundRoomWindowFrame;
     public readonly PaintedType BackgroundOutdoors;
 
+    public readonly PaintedType BackgroundBeam;
     public readonly ushort FurnitureStyle;
    
     public TilePalette(
@@ -73,7 +74,7 @@ public class TilePalette
         PaintedType? floorAccentElevated = null, PaintedType? wallAccentElevated = null, PaintedType? backgroundRoomAccentElevated = null,
         PaintedType[]? floorAltElevated = null, PaintedType[]? wallAltElevated = null, PaintedType[]? backgroundRoomAltElevated = null,
         PaintedType? platform = null, PaintedType? backgroundRoomWindow = null, PaintedType? backgroundRoomWindowFrame = null, PaintedType? backgroundOutdoors = null,
-        ushort furnitureStyle = 1
+        PaintedType? backgroundBeam = null, ushort furnitureStyle = 1
         )
     {
         PossibleTags = possibleTags;
@@ -86,21 +87,21 @@ public class TilePalette
         BackgroundRoomMain = backgroundRoomMain;
         BackgroundRoofMain = backgroundRoofMain;
         
-        FloorAccent = floorAccent ?? floorMain;
-        WallAccent = wallAccent ?? wallMain;
-        RoofAccent = roofAccent ?? roofMain;
-        BackgroundFloorAccent = backgroundFloorAccent ?? backgroundFloorMain;
-        BackgroundWallAccent = backgroundWallAccent ?? backgroundWallMain;
-        BackgroundRoomAccent = backgroundRoomAccent ?? backgroundRoomMain;
-        BackgroundRoofAccent = backgroundRoofAccent ?? backgroundRoofMain;
+        FloorAccent = floorAccent ?? FloorMain;
+        WallAccent = wallAccent ?? WallMain;
+        RoofAccent = roofAccent ?? RoofMain;
+        BackgroundFloorAccent = backgroundFloorAccent ?? BackgroundFloorMain;
+        BackgroundWallAccent = backgroundWallAccent ?? BackgroundWallMain;
+        BackgroundRoomAccent = backgroundRoomAccent ?? BackgroundRoomMain;
+        BackgroundRoofAccent = backgroundRoofAccent ?? BackgroundRoofMain;
         
-        FloorAlt = floorAlt ?? [floorMain];
-        WallAlt = wallAlt ?? [wallMain];
-        RoofAlt = roofAlt ?? [roofMain];
-        BackgroundFloorAlt = backgroundFloorAlt ?? [backgroundFloorMain];
-        BackgroundWallAlt = backgroundWallAlt ?? [backgroundWallMain];
-        BackgroundRoomAlt = backgroundRoomAlt ?? [backgroundRoomMain];
-        BackgroundRoofAlt = backgroundRoofAlt ?? [backgroundRoofMain];
+        FloorAlt = floorAlt ?? [FloorMain];
+        WallAlt = wallAlt ?? [WallMain];
+        RoofAlt = roofAlt ?? [RoofMain];
+        BackgroundFloorAlt = backgroundFloorAlt ?? [BackgroundFloorMain];
+        BackgroundWallAlt = backgroundWallAlt ?? [BackgroundWallMain];
+        BackgroundRoomAlt = backgroundRoomAlt ?? [BackgroundRoomMain];
+        BackgroundRoofAlt = backgroundRoofAlt ?? [BackgroundRoofMain];
 
         FloorSpecial = floorSpecial ?? FloorAccent;
         WallSpecial = wallSpecial ?? WallAccent;
@@ -110,7 +111,7 @@ public class TilePalette
         
         FloorMainElevated = floorMainElevated ?? floorMain;
         WallMainElevated = wallMainElevated ?? wallMain;
-        BackgroundRoomMainElevated = backgroundRoomMainElevated ?? backgroundRoomMain;
+        BackgroundRoomMainElevated = backgroundRoomMainElevated ?? BackgroundRoomMain;
         
         FloorAccentElevated = floorAccentElevated ?? FloorAccent;
         WallAccentElevated = wallAccentElevated ?? WallAccent;
@@ -121,10 +122,11 @@ public class TilePalette
         BackgroundRoomAltElevated = backgroundRoomAltElevated ?? BackgroundRoomAlt;
         
         Platform = platform ?? new PaintedType(TileID.Platforms);
-        BackgroundRoomWindow = backgroundRoomWindow ?? backgroundRoomMain;
-        BackgroundRoomWindowFrame = backgroundRoomWindowFrame ?? backgroundRoomMain;
+        BackgroundRoomWindow = backgroundRoomWindow ?? BackgroundRoomMain;
+        BackgroundRoomWindowFrame = backgroundRoomWindowFrame ?? BackgroundRoomAccent;
         BackgroundOutdoors = backgroundOutdoors ?? new PaintedType(WallID.Grass);
 
+        BackgroundBeam = backgroundBeam ?? BackgroundRoomMain;
         FurnitureStyle = furnitureStyle;
     }
     
@@ -144,7 +146,7 @@ public class TilePalette
             new PaintedType(TileID.RedDynastyShingles, PaintID.YellowPaint),
             new PaintedType(WallID.Wood, PaintID.None),
             new PaintedType(WallID.GrayBrick, PaintID.None),
-            new PaintedType(WallID.BlueDungeon, PaintID.GrayPaint),
+            new PaintedType(WallID.BlueDungeonSlab, PaintID.GrayPaint),
             new PaintedType(WallID.Wood, PaintID.None),
             null,
             new PaintedType(TileID.DynastyWood, PaintID.BrownPaint),
@@ -157,8 +159,8 @@ public class TilePalette
             [new PaintedType(TileID.GrayBrick, PaintID.None), new PaintedType(TileID.Stone, PaintID.None), new PaintedType(TileID.StoneSlab, PaintID.None)],
             null,
             null,
-            [new PaintedType(WallID.GrayBrick, PaintID.None), new PaintedType(WallID.Stone, PaintID.None), new PaintedType(WallID.StoneSlab, PaintID.None), new PaintedType(WallID.BlueDungeon, PaintID.GrayPaint)],
-            [new PaintedType(WallID.GrayBrick, PaintID.None), new PaintedType(WallID.Stone, PaintID.None), new PaintedType(WallID.StoneSlab, PaintID.None), new PaintedType(WallID.BlueDungeon, PaintID.GrayPaint)],
+            [new PaintedType(WallID.GrayBrick, PaintID.None), new PaintedType(WallID.Stone, PaintID.None), new PaintedType(WallID.StoneSlab, PaintID.None), new PaintedType(WallID.BlueDungeonSlab, PaintID.GrayPaint)],
+            [new PaintedType(WallID.GrayBrick, PaintID.None), new PaintedType(WallID.Stone, PaintID.None), new PaintedType(WallID.StoneSlab, PaintID.None), new PaintedType(WallID.BlueDungeonSlab, PaintID.GrayPaint)],
             null,
             null,
             new PaintedType(TileID.PalladiumColumn, PaintID.GrayPaint),
@@ -178,6 +180,7 @@ public class TilePalette
             new PaintedType(WallID.WoodenFence, PaintID.BrownPaint),
             null,
             new PaintedType(WallID.Grass, PaintID.None),
+            new PaintedType(WallID.PalmWood, PaintID.BrownPaint),
             1
         );
     }
