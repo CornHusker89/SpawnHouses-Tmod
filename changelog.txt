@@ -1,3 +1,5 @@
-Version 1.0.11
-Major Changes
-- New icon
+Version 1.0.12
+Minor Changes
+- Increased maximum basement size from 15 to 25
+- Fixed a typo in the basement shape's config description
+- Small basement optimizations

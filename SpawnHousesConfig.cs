@@ -68,7 +68,7 @@ public class SpawnHousesConfig : ModConfig
 	
 	private int _spawnPointBasementSize = 6;
 	[DefaultValue(6)]
-	[Terraria.ModLoader.Config.Range(3, 15)]
+	[Terraria.ModLoader.Config.Range(3, 25)]
 	[Slider]
 	public int SpawnPointBasementSize
 	{
@@ -111,9 +111,9 @@ public class SpawnHousesConfig : ModConfig
 	
 	[DefaultValue(0.5f)]
 	[Slider]
-	[Terraria.ModLoader.Config.Range(0, 1)]
+	[Terraria.ModLoader.Config.Range(0.1f, 1.0f)]
 	[Increment(0.1f)]
-	public float MainBasementShape { get; set; }
+	public float SpawnPointBasementShape { get; set; }
 
 	
 	

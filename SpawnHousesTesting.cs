@@ -53,7 +53,7 @@ public class SpawnHousesTesting
                 SpawnHousesSystem.MainBasement.EntryPosX - 60,
                 SpawnHousesSystem.MainBasement.EntryPosY - 20,
                 120,
-                120
+                200
             ),
             Main.ActiveWorldFileData.Seed + "_MainBasement"
         );

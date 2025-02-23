@@ -77,7 +77,7 @@ public abstract class StructureChain
         ChainConnectPoint rootConnectPoint = null;
         bool foundValidStructureChain = false;
         // try to find a configuration that satisfies the minCost
-        for (int attempts = 0; attempts < 15000; attempts++)
+        for (int attempts = 0; attempts < 20000; attempts++)
         {
             _copiedStructureList = (CustomChainStructure[])_originalStructureList.Clone();
             for (byte i = 0; i < _originalStructureList.Length; i++)
@@ -292,7 +292,6 @@ public abstract class StructureChain
             if (!BoundingBox.IsAnyBoundingBoxesColliding(newStructure.StructureBoundingBoxes, _boundingBoxes) &&
                 !BoundingBox.IsAnyBoundingBoxesColliding(connectPointBridge.BoundingBoxes, _boundingBoxes))
             {
-                //BoundingBox.VisualizeCollision();
                 validLocation = true;
                 break;
             }

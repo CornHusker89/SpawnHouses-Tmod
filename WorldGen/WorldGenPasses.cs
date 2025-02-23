@@ -78,7 +78,7 @@ public class WorldGenPasses : ModSystem
 			Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "") == "getfixedboi")
 		{
 			//so that it won't go out of bounds
-			ModContent.GetInstance<SpawnHousesConfig>().MainBasementShape = float.Max(ModContent.GetInstance<SpawnHousesConfig>().MainBasementShape, 0.4f);
+			ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementShape = float.Max(ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementShape, 0.4f);
 		}
 		
 	    if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement)

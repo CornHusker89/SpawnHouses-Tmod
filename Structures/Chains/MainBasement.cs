@@ -23,7 +23,7 @@ public class MainBasement : StructureChain
         BoundingBox[] startingBoundingBoxes = null) :
         base((ushort)(58 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier),
             (ushort)(80 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier),
-            (byte)Math.Round(1 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier),
+            (byte)Math.Round(ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementSize >= 15? 2.5 : 1 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier),
             (byte)Math.Round(4 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier),
             x, y,
             [
@@ -71,7 +71,7 @@ public class MainBasement : StructureChain
             ],
             startingBoundingBoxes, status)
     {
-        _shape = ModContent.GetInstance<SpawnHousesConfig>().MainBasementShape;
+        _shape = ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementShape;
     }
 
 
@@ -127,11 +127,12 @@ public class MainBasement : StructureChain
                 if (_shape <= 0.21f)
                 {
                     maxDistance = 50;
-                    if (_shape <= 0.11f)
-                    
+                    if (_shape <= 0.11f && ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementSize <= 14)
+                    {
                         maxDistance = 35;
-                    if (_shape <= 0.01f)
-                        maxDistance = 29;
+                        if (_shape <= 0.01f)
+                            maxDistance = 29;
+                    }
                 }
             }
         }
@@ -141,11 +142,11 @@ public class MainBasement : StructureChain
         int startX = RootStructure.ConnectPoints[direction][0].X;
         if (Math.Abs(targetConnectPoint.X - startX) > maxDistance)
             return false;
-        targetStructure.ActionOnEachConnectPoint((ChainConnectPoint point) =>
-        {
-            if (Math.Abs(point.X - startX) > maxDistance * 1.18)
-                valid = false;
-        });
+        // targetStructure.ActionOnEachConnectPoint((point) =>
+        // {
+        //     if (Math.Abs(point.X - startX) > maxDistance * 1.18)
+        //         valid = false;
+        // });
         if (!valid) return false;
         
         return true;
