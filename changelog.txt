@@ -1,5 +1,4 @@
-Version 1.0.12
+Version 1.0.13
 Minor Changes
-- Increased maximum basement size from 15 to 25
-- Fixed a typo in the basement shape's config description
-- Small basement optimizations
+- Removed music boxes from basement
+- Fixed wiring problem in basement
