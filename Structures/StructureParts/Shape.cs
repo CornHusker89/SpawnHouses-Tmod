@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,7 +9,6 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
-using ClipperLib;
 
 namespace SpawnHouses.Structures.StructureParts;
 
@@ -57,6 +57,7 @@ public class Shape
     public Point16[] Points;
     public bool IsBox = false; // because many of the shapes will be boxes, introduce optimizations for boxes
    
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     
     /// <param name="points">If only 2 points are passed, will assume a box</param>
     /// <returns></returns>
@@ -67,19 +68,15 @@ public class Shape
     
     /// <param name="points">If only 2 points are passed, will assume a box</param>
     /// <returns></returns>
+
     public Shape(IEnumerable<Point16> points)
+
     {
         Point16[] pointsArray = points.ToArray();
         Init(pointsArray);
     }
     
-    public Shape(List<IntPoint> points)
-    {
-        Point16[] pointsArray = new Point16[points.Count];
-        for (int i = 0; i < points.Count; i++)
-            pointsArray[i] = new Point16((int)points[i].X, (int)points[i].Y);
-        Init(pointsArray);
-    }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     
     private void Init(Point16[] points)
     {
@@ -111,7 +108,15 @@ public class Shape
         }
         BoundingBox = (new Point16(minX, minY), new Point16(maxX, maxY));
     }
-    
+
+    public override string ToString()
+    {
+        string pointsStr = string.Empty;
+        for (int i = 0; i < Points.Length; i++)
+            pointsStr += $"point {i}: {Points[i]}\n";
+        return pointsStr;
+    }
+
     public int GetArea()
     {
         if (IsBox)
@@ -128,6 +133,10 @@ public class Shape
         }
         return (int)Math.Abs(area / 2);
     }
+    
+    
+    
+    #region Intersection Methods
     
     public bool Contains(Point16 point)
     {
@@ -167,6 +176,79 @@ public class Shape
         }
         return true;
     }
+    
+        private bool RayIntersectsSegment(Point16 point, Point16 segmentStart, Point16 segmentEnd)
+    {
+        if (segmentStart.Y > segmentEnd.Y)
+            (segmentStart, segmentEnd) = (segmentEnd, segmentStart);
+
+        // check if the point is outside the segment's Y range
+        if (point.Y <= segmentStart.Y || point.Y > segmentEnd.Y)
+            return false;
+
+        // check if the point is to the right of the segment
+        if (point.X >= Math.Max(segmentStart.X, segmentEnd.X))
+            return false;
+
+        // check for intersection
+        double slope = (segmentEnd.X - segmentStart.X) / (double)(segmentEnd.Y - segmentStart.Y);
+        double intersectX = segmentStart.X + (point.Y - segmentStart.Y) * slope;
+
+        return point.X < intersectX;
+    }
+    
+    private List<Point16> GetUniqueAxes(Shape shape)
+    {
+        List<Point16> axes = [];
+
+        for (int i = 0; i < shape.Points.Length; i++)
+        {
+            Point16 p1 = shape.Points[i];
+            Point16 p2 = shape.Points[(i + 1) % shape.Points.Length]; // Next vertex (looping)
+
+            Point16 edge = p2 - p1;
+            Point16 normal = new Point16(-edge.Y, edge.X); // Perpendicular normal
+
+            double length = Math.Sqrt(normal.X * normal.X + normal.Y * normal.Y);
+            Point16 normalized = length == 0 ? new Point16(0, 0) : new Point16((int)(normal.X / length), (int)(normal.Y / length));
+
+            axes.Add(normalized);
+        }
+
+        return axes;
+    }
+
+    private Projection ProjectOntoAxis(Shape shape, Point16 axis)
+    {
+        double min = double.MaxValue;
+        double max = double.MinValue;
+
+        foreach (var point in shape.Points)
+        {
+            double projection = point.X * axis.X + point.Y * axis.Y;
+            min = Math.Min(min, projection);
+            max = Math.Max(max, projection);
+        }
+
+        return new Projection(min, max);
+    }
+    
+    private class Projection(double min, double max)
+    {
+        private double Min { get; } = min;
+        private double Max { get; } = max;
+
+        public bool Overlaps(Projection other)
+        {
+            return !(Max < other.Min || other.Max < Min);
+        }
+    }  
+    
+    #endregion
+    
+    
+    
+    #region ExecuteIn Methods
 
     public void ExecuteOnPerimeter(Action<int, int> action, bool completeLoop = true)
     {
@@ -283,8 +365,8 @@ public class Shape
                     // **Find intersection of edge with the current scanline**
                     if ((p1.Y <= y && p2.Y > y) || (p2.Y <= y && p1.Y > y))
                     {
-                        double intersectX = p1.X + (y - p1.Y) * (p2.X - p1.X) / (p2.Y - p1.Y);
-                        intersections.Add((int)Math.Round(intersectX));
+                        int intersectX = (int)Math.Round(p1.X + (double)(y - p1.Y) * (p2.X - p1.X) / (p2.Y - p1.Y));
+                        intersections.Add(intersectX);
                     }
                 }
 
@@ -304,114 +386,97 @@ public class Shape
         }
     }
     
-    public Shape[] Difference(Shape other)
+    #endregion
+    
+    
+    
+    #region boolean methods
+    
+    public (Shape? lower, Shape? middle, Shape? higher) CutTwice(bool cutXAxis, int cutCoord1, int cutCoord2)
     {
-        Clipper clipper = new Clipper();
-        List<List<IntPoint>> solution = [];
+        if (cutCoord2 < cutCoord1)
+            (cutCoord1, cutCoord2) = (cutCoord2, cutCoord1);
 
-        clipper.AddPolygon(GetIntPoints(), PolyType.ptSubject);
-        clipper.AddPolygon(other.GetIntPoints(), PolyType.ptClip);
-        clipper.Execute(ClipType.ctDifference, solution, PolyFillType.pftNonZero, PolyFillType.pftNonZero);
+        // upper left piece
+        Shape? shapeA = ClipPolygon(cutXAxis, cutCoord1, true, false);
 
-        Shape[] result = new Shape[solution.Count];
-        for (int i = 0; i < solution.Count; i++)
-            result[i] = new Shape(solution[i]);
-        return result;
+        // remainder after the first cut
+        Shape? remainder = ClipPolygon(cutXAxis, cutCoord1, false, true);
+
+        // middle piece (clip remainder again)
+        Shape? shapeB = remainder?.ClipPolygon(cutXAxis, cutCoord2, true, true);
+
+        // lower right piece
+        Shape? shapeC = remainder?.ClipPolygon(cutXAxis, cutCoord2, false, false);
+
+        return (shapeA, shapeB, shapeC);
     }
     
-    public Shape[] Intersect(Shape other)
+    private Shape? ClipPolygon(bool cutXAxis, int cutCoord, bool keepLower, bool includeCut)
     {
-        Clipper clipper = new Clipper();
-        List<List<IntPoint>> solution = [];
+        var outputList = new List<Point16>();
 
-        clipper.AddPolygon(GetIntPoints(), PolyType.ptSubject);
-        clipper.AddPolygon(other.GetIntPoints(), PolyType.ptClip);
-        clipper.Execute(ClipType.ctIntersection, solution, PolyFillType.pftNonZero, PolyFillType.pftNonZero);
-
-        Shape[] result = new Shape[solution.Count];
-        for (int i = 0; i < solution.Count; i++)
-            result[i] = new Shape(solution[i]);
-        return result;
-    }
-    
-    
-    
-    
-    
-    private bool RayIntersectsSegment(Point16 point, Point16 segmentStart, Point16 segmentEnd)
-    {
-        if (segmentStart.Y > segmentEnd.Y)
-            (segmentStart, segmentEnd) = (segmentEnd, segmentStart);
-
-        // check if the point is outside the segment's Y range
-        if (point.Y <= segmentStart.Y || point.Y > segmentEnd.Y)
-            return false;
-
-        // check if the point is to the right of the segment
-        if (point.X >= Math.Max(segmentStart.X, segmentEnd.X))
-            return false;
-
-        // check for intersection
-        double slope = (segmentEnd.X - segmentStart.X) / (double)(segmentEnd.Y - segmentStart.Y);
-        double intersectX = segmentStart.X + (point.Y - segmentStart.Y) * slope;
-
-        return point.X < intersectX;
-    }
-    
-    private List<Point16> GetUniqueAxes(Shape shape)
-    {
-        List<Point16> axes = [];
-
-        for (int i = 0; i < shape.Points.Length; i++)
+        for (int i = 0; i < Points.Length; i++)
         {
-            Point16 p1 = shape.Points[i];
-            Point16 p2 = shape.Points[(i + 1) % shape.Points.Length]; // Next vertex (looping)
+            Point16 current = Points[i];
+            Point16 next = Points[(i + 1) % Points.Length];
 
-            Point16 edge = p2 - p1;
-            Point16 normal = new Point16(-edge.Y, edge.X); // Perpendicular normal
+            bool currentInside = IsInside(current, cutXAxis, cutCoord, keepLower);
+            bool nextInside = IsInside(next, cutXAxis, cutCoord, keepLower);
 
-            double length = Math.Sqrt(normal.X * normal.X + normal.Y * normal.Y);
-            Point16 normalized = length == 0 ? new Point16(0, 0) : new Point16((int)(normal.X / length), (int)(normal.Y / length));
+            if (currentInside)
+                outputList.Add(current);  // always keep the current point if it's inside
 
-            axes.Add(normalized);
+            if (currentInside != nextInside) // edge crosses the clipping boundary
+            {
+                Point16? possibleIntersectPoint = Intersect(current, next, cutXAxis, cutCoord);
+                if (possibleIntersectPoint.HasValue)
+                {
+                    Point16 intersectPoint = possibleIntersectPoint.Value;
+                    
+                    // move the intersect point so that it's outside the cut instead of directly on it
+                    if (!includeCut)
+                        if (cutXAxis)
+                            intersectPoint = keepLower ? new Point16(intersectPoint.X, intersectPoint.Y - 1) :
+                                new Point16(intersectPoint.X, intersectPoint.Y + 1);
+                        else
+                            intersectPoint = keepLower ? new Point16(intersectPoint.X - 1, intersectPoint.Y) :
+                                new Point16(intersectPoint.X + 1, intersectPoint.Y);
+                    outputList.Add(intersectPoint);
+                }
+            }
         }
-
-        return axes;
-    }
-
-    private Projection ProjectOntoAxis(Shape shape, Point16 axis)
-    {
-        double min = double.MaxValue;
-        double max = double.MinValue;
-
-        foreach (var point in shape.Points)
-        {
-            double projection = point.X * axis.X + point.Y * axis.Y;
-            min = Math.Min(min, projection);
-            max = Math.Max(max, projection);
-        }
-
-        return new Projection(min, max);
+        return outputList.Count < 3 ? null : new Shape(outputList);
     }
     
-    private class Projection(double min, double max)
+    private bool IsInside(Point16 p, bool cutXAxis, int cutCoord, bool keepLower)
     {
-        private double Min { get; } = min;
-        private double Max { get; } = max;
+        if (cutXAxis)
+            return keepLower? p.Y <= cutCoord : p.Y >= cutCoord;
+        return keepLower? p.X <= cutCoord : p.X >= cutCoord;
+    }
+    
+    private Point16? Intersect(Point16 p1, Point16 p2, bool cutXAxis, int cutCoord)
+    {
+        int dx = p2.X - p1.X;
+        int dy = p2.Y - p1.Y;
 
-        public bool Overlaps(Projection other)
+        if (cutXAxis)
         {
-            return !(Max < other.Min || other.Max < Min);
+            if (dy == 0) return new Point16(p1.X, cutCoord);  // Horizontal line edge case
+            double t = (cutCoord - p1.Y) / (double)dy;
+            int newX = (int)Math.Round(p1.X + t * dx);
+            return new Point16(newX, cutCoord);
+        }
+        else
+        {
+            if (dx == 0) return new Point16(cutCoord, p1.Y);  // Vertical line edge case
+            double t = (cutCoord - p1.X) / (double)dx;
+            int newY = (int)Math.Round(p1.Y + t * dy);
+            return new Point16(cutCoord, newY);
         }
     }
     
-    private List<IntPoint> GetIntPoints()
-    {
-        List<IntPoint> intPoints = [];
-        foreach (var point in Points)
-            intPoints.Add(new IntPoint(point.X, point.Y));
-        return intPoints;
-    }
-    
+    #endregion
     
 }

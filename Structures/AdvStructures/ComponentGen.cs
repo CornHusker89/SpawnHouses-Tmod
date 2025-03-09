@@ -124,6 +124,12 @@ public static class ComponentGen
         
         
         // ===== backgrounds =====
+        (
+            [
+                StructureTag.HasBackground
+            ],
+            Background1
+        ),
         
         
         
@@ -472,6 +478,21 @@ public static class ComponentGen
     
     
     #region Background Methods
+    
+    public static object Background1(ComponentParams componentParams)
+    {
+        componentParams.MainVolume.ExecuteInArea((x, y) => 
+        {
+            if (y == componentParams.MainVolume.BoundingBox.bottomRight.Y)
+                PaintedType.PlaceWall(x, y, PaintedType.PickRandom(componentParams.TilePalette.BackgroundRoomAlt));
+            else if (y == componentParams.MainVolume.BoundingBox.bottomRight.Y - 1)
+                PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundRoomAccent);
+            else
+                PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundRoomMain);
+        });
+
+        return false;
+    }
     
     #endregion
     

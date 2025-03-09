@@ -15,9 +15,9 @@ using Range = SpawnHouses.Structures.Range;
 
 namespace SpawnHouses.Items.Debug
 {
-	public class SpawnTest : ModItem	
+	public class SpawnTest : ModItem
 	{
-		
+
 		public override void SetDefaults()
 		{
 			Item.useStyle = ItemUseStyleID.Swing;
@@ -25,20 +25,20 @@ namespace SpawnHouses.Items.Debug
 			Item.useAnimation = 20;
 			Item.rare = ItemRarityID.Blue;
 		}
-			
+
 		public override bool AltFunctionUse(Terraria.Player player)
 		{
 			return true;
 		}
-		
-		
-		
-		
+
+
+
+
 		private static void FillComponents(List<Shape> volumes, StructureTag[] tagsRequired, StructureTag[] tagsBlacklist, TilePalette palette)
 		{
 			if (volumes.Count == 0)
 				return;
-        
+
 			ComponentParams componentParams = new ComponentParams(
 				tagsRequired,
 				tagsBlacklist,
@@ -46,36 +46,38 @@ namespace SpawnHouses.Items.Debug
 				palette
 			);
 			var genMethod = ComponentGen.GetRandomMethod(componentParams);
-        
+
 			foreach (var volume in volumes)
 			{
 				componentParams.MainVolume = volume;
 				genMethod(componentParams);
 			}
 		}
-		
-		
-		
-		
+
+
+
+
 		public override bool? UseItem(Terraria.Player player)
 		{
 			int x = (Main.MouseWorld / 16).ToPoint16().X;
 			int y = (Main.MouseWorld / 16).ToPoint16().Y;
-			
+
 			Console.WriteLine(x + ", " + y);
 
 			int length = 30;
-			var palette = TilePalette.Palette1();
-			
+			var palette = TilePalette.Palette1;
+
 			// AdvStructureGen.Layout2(new StructureParams(palette, [], [], new Point16(x, y),
 			// 	new Point16(x + length, y), new Range(175, 1000), new Range(0, 99)));
 
-			var result = RoomGen.Room1(new RoomParams([], [], new Shape(new Point16(x, y), new Point16(x + length, y - length)),
-				palette, 2, 2, 4));
+			var result = RoomLayouts.RoomLayout1(new RoomLayoutParams([], [], new Shape(new Point16(x, y), new Point16(x + length, y - length)),
+				palette, 12, new Range(4, 8), 7, 2, 2));
 
 			FillComponents(result.FloorVolumes, [StructureTag.HasFloor], [], palette);
 			FillComponents(result.WallVolumes, [StructureTag.HasWall], [], palette);
-			
+			FillComponents(result.BackgroundVolumes, [StructureTag.HasBackground], [], palette);
+
+
 			WorldUtils.Gen(new Point(x + length / 2, y - length), new Shapes.Circle((length + 50) / 2), Actions.Chain(
 				new Actions.SetFrames(),
 				new Actions.Custom((i, j, args) =>
@@ -84,7 +86,7 @@ namespace SpawnHouses.Items.Debug
 					return true;
 				})
 			));
-			
+
 			return true;
 		}
 

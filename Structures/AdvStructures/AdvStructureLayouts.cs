@@ -9,23 +9,23 @@ using Terraria.DataStructures;
 
 namespace SpawnHouses.Structures.AdvStructures;
 
-public static class AdvStructureGen
+public static class AdvStructureLayouts
 {
-    public static readonly (StructureTag[] possibleTags, Range? lengthRange, Range? volumeRange, Range? heightRange, 
+    public static readonly (StructureTag[] possibleTags, Range? lengthRange, Range? volumeRange, Range? heightRange,
         Range? housingRange, Func<StructureParams, AdvStructure> method)[] GenMethods =
         [
             (
                 [],
                 null, null, null, null,
-                Layout1
+                StructureLayout1
             )
         ];
 
     public static Func<StructureParams, AdvStructure> GetRandomMethod(StructureParams structureParams)
     {
-        List<(StructureTag[] possibleTags, Range? lengthRange, Range? volumeRange, Range? heightRange, 
+        List<(StructureTag[] possibleTags, Range? lengthRange, Range? volumeRange, Range? heightRange,
             Range? housingRange, Func<StructureParams, AdvStructure> method)> methodTuples = [];
-        
+
         foreach (var tuple in GenMethods)
         {
             if (tuple.lengthRange?.InRange(structureParams.Length) is !true)
@@ -66,12 +66,12 @@ public static class AdvStructureGen
         );
         return boundingShape;
     }
-    
+
     private static void FillComponents(List<Shape> volumes, StructureTag[] tagsRequired, StructureTag[] tagsBlacklist, TilePalette palette)
     {
         if (volumes.Count == 0)
             return;
-        
+
         ComponentParams componentParams = new ComponentParams(
             tagsRequired,
             tagsBlacklist,
@@ -79,7 +79,7 @@ public static class AdvStructureGen
             palette
         );
         var genMethod = ComponentGen.GetRandomMethod(componentParams);
-        
+
         foreach (var volume in volumes)
         {
             componentParams.MainVolume = volume;
@@ -87,40 +87,40 @@ public static class AdvStructureGen
         }
     }
 
-    private static void FillRooms(List<Shape> volumes, StructureTag[] tagsRequired, StructureTag[] tagsBlacklist,
-        TilePalette palette)
-    {
-        if (volumes.Count == 0)
-            return;
+    // private static void FillRooms(List<Shape> volumes, StructureTag[] tagsRequired, StructureTag[] tagsBlacklist,
+    //     TilePalette palette)
+    // {
+    //     if (volumes.Count == 0)
+    //         return;
+    //
+    //     RoomLayoutParams roomLayoutParams = new RoomLayoutParams(
+    //         tagsRequired,
+    //         tagsBlacklist,
+    //         volumes[0],
+    //         palette,
+    //         1,
+    //         1,
+    //         1
+    //     );
+    //     var genMethod = RoomLayouts.GetRandomMethod(roomLayoutParams);
+    //
+    //     foreach (var volume in volumes)
+    //     {
+    //         roomLayoutParams.MainVolume = volume;
+    //         genMethod(roomLayoutParams);
+    //     }
+    // }
 
-        RoomParams roomParams = new RoomParams(
-            tagsRequired,
-            tagsBlacklist,
-            volumes[0],
-            palette,
-            1,
-            1,
-            1
-        );
-        var genMethod = RoomGen.GetRandomMethod(roomParams);
 
-        foreach (var volume in volumes)
-        {
-            roomParams.MainVolume = volume;
-            genMethod(roomParams);
-        }
-    }
-
-    
     /// <summary>
     /// a house with a tall side, and possible extrusions on tall side. generally quite large and medieval looking
     /// </summary>
-    public static AdvStructure Layout1(StructureParams structureParams)
+    public static AdvStructure StructureLayout1(StructureParams structureParams)
     {
         List<Shape> roomVolumes = [];
         List<Shape> wallVolumes = [];
         List<Shape> floorVolumes = [];
-        
+
         bool leftTall = Terraria.WorldGen.genRand.NextBool();
         int leftHeight = !leftTall? (int)Math.Round(structureParams.Height * 1.33) - 4 : (int)Math.Round(structureParams.Height * 0.66) - 4;
         int rightHeight = leftTall? (int)Math.Round(structureParams.Height * 1.33) - 4 : (int)Math.Round(structureParams.Height * 0.66) - 4;
@@ -224,12 +224,12 @@ public static class AdvStructureGen
         return new AdvStructure();
     }
 
-    
-    
+
+
     /// <summary>
     /// a basic vertical house, expands as much as needed vertically but poor horizontal expansion
     /// </summary>
-    public static AdvStructure Layout2(StructureParams structureParams)
+    public static AdvStructure StructureLayout2(StructureParams structureParams)
     {
         List<Shape> floorVolumes = [];
         Shape bottomFloorVolume;
@@ -237,7 +237,7 @@ public static class AdvStructureGen
         List<Shape> wallVolumes = [];
         List<Shape> wallGapVolumes = [];
         List<Shape> roomVolumes = [];
-        
+
 
         int externalWallThickness = Terraria.WorldGen.genRand.Next(1, 3);
 
@@ -248,7 +248,7 @@ public static class AdvStructureGen
         structureParams.Height -= structureParams.Height % (floorVolumeHeight + roomVolumeHeight);
         for (int y = structureParams.Start.Y; y > structureParams.Start.Y - structureParams.Height; y -= floorVolumeHeight + roomVolumeHeight)
             floorYPositions.Add(y);
-        
+
         // determine floor slope
         bool flatFloor = structureParams.Start.Y == structureParams.End.Y;
         int floorSlopeStartX = !flatFloor? 0 : Terraria.WorldGen.genRand.Next(
@@ -258,7 +258,7 @@ public static class AdvStructureGen
             structureParams.Start.X + 2 + structureParams.Length / 2 + floorSlopeLength, structureParams.End.X - 2);
         bool archedFloors = Terraria.WorldGen.genRand.NextBool();
         int archedFloorLength = archedFloors ? Terraria.WorldGen.genRand.Next(1, 3) : floorSlopeLength;
-        
+
         // set first floor volumes
         int bottomFloorVolumeHeight = Terraria.WorldGen.genRand.Next(2, 4);
         if (flatFloor)
@@ -313,7 +313,7 @@ public static class AdvStructureGen
                 new Point16(structureParams.End.X - 1 + externalWallThickness - 1, structureParams.End.Y - 2)
             ));
         }
-        
+
         for (int floorNumber = 1; floorNumber < floorYPositions.Count; floorNumber++)
         {
             floorVolumes.Add(new Shape(
@@ -326,22 +326,22 @@ public static class AdvStructureGen
                     new Point16(structureParams.End.X - 1, floorYPositions[floorNumber] - 1 - roomVolumeHeight + 1)
                 ));
         }
-        
-        FillComponents([bottomFloorVolume], 
+
+        FillComponents([bottomFloorVolume],
             [StructureTag.HasFloor, bottomFloorVolumeHeight <= 2? StructureTag.FloorThin : StructureTag.FloorThick],
             [], structureParams.Palette);
-        
+
         FillComponents(floorVolumes,
             [StructureTag.HasFloor, StructureTag.FloorElevated, floorVolumeHeight <= 2? StructureTag.FloorThin : StructureTag.FloorThick],
             [], structureParams.Palette);
-        
+
         FillComponents(wallVolumes, [StructureTag.HasWall], [], structureParams.Palette);
-        
+
         FillComponents(wallGapVolumes, [StructureTag.IsWallGap], [], structureParams.Palette);
-        
-        // FillRooms(roomVolumes, [StructureTag.HasRoom], [], structureParams.Palette, 
+
+        // FillRooms(roomVolumes, [StructureTag.HasRoom], [], structureParams.Palette,
         //     structureParams.Housing, Math.Min(externalWallThickness, Terraria.WorldGen.genRand.Next(1, 3)));
-        
+
         return new AdvStructure();
     }
 }

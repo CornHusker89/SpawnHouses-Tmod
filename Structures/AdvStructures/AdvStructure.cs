@@ -42,7 +42,7 @@ public class AdvStructure
         Position = new Point16(Params.Start.X, Params.Start.Y);
         XSize = Params.End.X - Params.Start.X;
 
-        var method = AdvStructureGen.GetRandomMethod(structureParams);
+        var method = AdvStructureLayouts.GetRandomMethod(structureParams);
     }
     
     

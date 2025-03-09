@@ -11,32 +11,32 @@ namespace SpawnHouses.Structures.AdvStructures;
 
 
 public enum StructureTag
-{    
-    // ===== structure =====
+{
+    // ===== structureLayout =====
     HasHousing,
     IsSymmetric,
     /// structure is categorized as being above ground (typically has a roof)
-    AboveGround, 
+    AboveGround,
     /// structure is categorized as being below ground (typically has a no roof)
-    UnderGround, 
-    /// structure is categorized as having an overall forest theme 
+    UnderGround,
+    /// structure is categorized as having an overall forest theme
     Forest,
-    /// structure is categorized as having an overall icy/cold theme 
+    /// structure is categorized as having an overall icy/cold theme
     Ice,
     /// structure is categorized as having an overall beach theme
     Beach,
-    /// structure is categorized as having an overall jungle theme 
-    Jungle, 
-    /// structure is categorized as having an overall cavern/underground theme 
-    Cavern, 
-    
-    
-    // ===== room =====
+    /// structure is categorized as having an overall jungle theme
+    Jungle,
+    /// structure is categorized as having an overall cavern/underground theme
+    Cavern,
+
+
+    // ===== roomLayout =====
     HasRoom,
     PrebuiltRoom,
     ProceduralRoom,
-    
-    
+
+
     // ===== floor =====
     HasFloor,
     IsFloorGap,
@@ -48,31 +48,37 @@ public enum StructureTag
     FloorThin,
     /// floor is larger than 2 tiles thick
     FloorThick,
-    
-    
+
+
     // ===== wall =====
     HasWall,
     IsWallGap,
     WallGroundLevel,
     WallElevated,
-    
-    
+
+
     // ===== decor =====
     HasDecor,
-    DecorHasWindow,
     DecorIsUnderGround,
     DecorGroundLevel,
     DecorElevated,
-    
-    
+
+
     // ===== stairway =====
     HasStairway,
-    
-    
+    /// stairway is 3 or fewer tiles wide
+    StairwayNarrow,
+    /// stairway is greater than 3 tiles wide
+    StairwayWide,
+
+
     // ===== background =====
     HasBackground,
-    
-    
+    BackgroundHasWindow,
+    BackgroundGroundLevel,
+    BackgroundElevated,
+
+
     // ===== roof =====
     HasRoof,
     RoofTall,
@@ -82,7 +88,7 @@ public enum StructureTag
     RoofSlopeLessThan1,
     RoofSlopeGreaterThan1,
     RoofSlopeNone
-    
+
 }
 
 public enum PaletteTag
@@ -106,8 +112,8 @@ public struct StructureParams
     {
         return tags1.Any(tag => tags2.Contains(tag));
     }
-    
-    public TilePalette Palette; 
+
+    public TilePalette Palette;
     public StructureTag[] TagsRequired;
     public StructureTag[] TagBlacklist;
     public Point16 Start;
@@ -138,15 +144,15 @@ public struct StructureParams
         Length = End.X - Start.X;
         VolumeRange = volumeRange;
         HousingRange = housingRange;
-        
+
         if (VolumeRange.Min / HousingRange.Min < 50)
             throw new ArgumentException("Volume minimum is too small given the housing minimum");
         if (VolumeRange.Max / HousingRange.Max < 50)
             throw new ArgumentException("Volume maximum is too small given the housing maximum");
-        
+
         ReRollRanges();
     }
-    
+
     public void ReRollRanges()
     {
         double scale = Terraria.WorldGen.genRand.NextDouble();
@@ -168,23 +174,31 @@ public struct StructureParams
     }
 }
 
-public struct RoomParams(
+public struct RoomLayoutParams(
     StructureTag[] tagsRequired,
     StructureTag[] tagsBlacklist,
     Shape mainVolume,
     TilePalette tilePalette,
+    int housing,
+    Range roomHeight,
+    int roomMinWidth,
     int floorWidth,
     int wallWidth,
-    int housing
+    int roomMinVolume = 30,
+    int attempts = 5
 )
 {
     public readonly StructureTag[] TagsRequired = tagsRequired;
     public readonly StructureTag[] TagsBlacklist = tagsBlacklist;
     public Shape MainVolume = mainVolume;
     public readonly TilePalette TilePalette = tilePalette;
+    public readonly int Housing = housing;
+    public readonly Range RoomHeight = roomHeight;
+    public readonly int RoomMinWidth = roomMinWidth;
     public readonly int FloorWidth = floorWidth;
     public readonly int WallWidth = wallWidth;
-    public readonly int Housing = housing;
+    public readonly int RoomMinVolume = roomMinVolume;
+    public readonly int Attempts = attempts;
 }
 
 public class RoomLayout(
@@ -225,13 +239,13 @@ public struct PaintedType(ushort type, byte paintType = PaintID.None, short styl
     public ushort Type = type;
     public byte PaintType = paintType;
     public short Style = style;
-    
+
     public static PaintedType PickRandom(PaintedType[] paintedTypes)
     {
         int index = Terraria.WorldGen.genRand.Next(paintedTypes.Length);
         return paintedTypes[index];
     }
-    
+
     public static void PlaceTile(int x, int y, PaintedType paintedType, BlockType blockType = BlockType.Solid)
     {
         if (paintedType.Style == -1)
@@ -249,19 +263,19 @@ public struct PaintedType(ushort type, byte paintType = PaintID.None, short styl
             tile.TileColor = paintedType.PaintType;
         }
     }
-    
+
     public static void PlaceTile(Point16 position, PaintedType paintedType, BlockType blockType = BlockType.Solid)
     {
         PlaceTile(position.X, position.Y, paintedType, blockType);
     }
-    
+
     public static void PlaceWall(int x, int y, PaintedType paintedType)
     {
         Tile tile = Main.tile[x, y];
         tile.WallType = paintedType.Type;
         tile.WallColor = paintedType.PaintType;
     }
-    
+
     public static void PlaceWall(Point16 position, PaintedType paintedType)
     {
         PlaceWall(position.X, position.Y, paintedType);

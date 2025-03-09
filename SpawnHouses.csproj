@@ -20,9 +20,6 @@
       <HintPath>..\..\ModSources\WorldGenTesting\bin\Debug\net8.0\WorldGenTesting.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Clipper" Version="6.4.0" />
-  </ItemGroup>
 <!--  <ItemGroup>-->
 <!--    <PackageReference Include="tModLoader.CodeAssist" Version="0.1.*" />-->
 <!--  </ItemGroup>-->
