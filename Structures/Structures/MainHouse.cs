@@ -3,6 +3,7 @@ using Terraria.ID;
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Helpers;
 using SpawnHouses.Structures;
 
 

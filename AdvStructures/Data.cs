@@ -1,13 +1,14 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using SpawnHouses.Structures.AdvStructures;
 using SpawnHouses.Structures.StructureParts;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
+using Range = SpawnHouses.Structures.Range;
 
-namespace SpawnHouses.Structures.AdvStructures;
+namespace SpawnHouses.AdvStructures;
 
 
 public enum StructureTag
@@ -35,6 +36,8 @@ public enum StructureTag
     HasRoom,
     PrebuiltRoom,
     ProceduralRoom,
+    HasStorageRoom,
+    HasNoStorageRoom,
 
 
     // ===== floor =====
@@ -181,10 +184,10 @@ public struct RoomLayoutParams(
     TilePalette tilePalette,
     int housing,
     Range roomHeight,
-    int roomMinWidth,
+    Range roomWidth,
     int floorWidth,
     int wallWidth,
-    int roomMinVolume = 30,
+    float largeRoomChance = 0.2f,
     int attempts = 5
 )
 {
@@ -194,10 +197,10 @@ public struct RoomLayoutParams(
     public readonly TilePalette TilePalette = tilePalette;
     public readonly int Housing = housing;
     public readonly Range RoomHeight = roomHeight;
-    public readonly int RoomMinWidth = roomMinWidth;
+    public readonly Range RoomWidth = roomWidth;
     public readonly int FloorWidth = floorWidth;
     public readonly int WallWidth = wallWidth;
-    public readonly int RoomMinVolume = roomMinVolume;
+    public readonly float LargeRoomChance = largeRoomChance;
     public readonly int Attempts = attempts;
 }
 
@@ -208,7 +211,8 @@ public class RoomLayout(
     List<Shape> wallGapVolumes,
     List<Shape> decorVolumes,
     List<Shape> stairwayVolumes,
-    List<Shape> backgroundVolumes
+    List<Shape> backgroundVolumes,
+    int largeRoomCount
 )
 {
     public readonly List<Shape> FloorVolumes = floorVolumes;
@@ -218,6 +222,7 @@ public class RoomLayout(
     public readonly List<Shape> DecorVolumes = decorVolumes;
     public readonly List<Shape> StairwayVolumes = stairwayVolumes;
     public readonly List<Shape> BackgroundVolumes = backgroundVolumes;
+    public readonly int LargeRoomCount = largeRoomCount;
 }
 
 public struct ComponentParams

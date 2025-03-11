@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Tasks.Deployment.Bootstrapper;
 using Microsoft.Xna.Framework;
+using SpawnHouses.AdvStructures;
 using SpawnHouses.Structures;
 using SpawnHouses.Structures.AdvStructures;
 using SpawnHouses.Structures.StructureParts;
@@ -70,8 +71,8 @@ namespace SpawnHouses.Items.Debug
 			// AdvStructureGen.Layout2(new StructureParams(palette, [], [], new Point16(x, y),
 			// 	new Point16(x + length, y), new Range(175, 1000), new Range(0, 99)));
 
-			var result = RoomLayouts.RoomLayout1(new RoomLayoutParams([], [], new Shape(new Point16(x, y), new Point16(x + length, y - length)),
-				palette, 12, new Range(4, 8), 7, 2, 2));
+			var result = RoomLayoutGen.RoomLayout1(new RoomLayoutParams([], [], new Shape(new Point16(x, y), new Point16(x + length, y - length)),
+				palette, 11, new Range(4, 18), new Range(7, 24), 2, 2, 0.3f));
 
 			FillComponents(result.FloorVolumes, [StructureTag.HasFloor], [], palette);
 			FillComponents(result.WallVolumes, [StructureTag.HasWall], [], palette);

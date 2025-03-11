@@ -22,12 +22,12 @@ public class Shape
         Color.Aquamarine,
         Color.Red,
     ];
-    
+
     private static Color GetColor(int index)
     {
         return Colors[index % Colors.Length];
     }
-    
+
     /// <param name="shapes">shapes to create outline with</param>
     /// <param name="duration">effect duration, in seconds</param>
     public static void CreateOutline(Shape[] shapes, int duration = 10)
@@ -40,12 +40,12 @@ public class Shape
                 for (int i = 0; i < shapes.Length; i++)
                 {
                     for (int j = 0; j < shapes[i].Points.Length - 1; j++)
-                        Dust.QuickDustLine(shapes[i].Points[j].ToVector2() * 16 - new Vector2(8, 8), 
+                        Dust.QuickDustLine(shapes[i].Points[j].ToVector2() * 16 - new Vector2(8, 8),
                         shapes[i].Points[j + 1].ToVector2() * 16 - new Vector2(8, 8), 20f, GetColor(i));
-                    
-                    Dust.QuickDustLine(shapes[i].Points[0].ToVector2() * 16 - new Vector2(8, 8), 
+
+                    Dust.QuickDustLine(shapes[i].Points[0].ToVector2() * 16 - new Vector2(8, 8),
                         shapes[i].Points[^1].ToVector2() * 16 - new Vector2(8, 8), 20f, GetColor(i));
-                    
+
                 }
                 Thread.Sleep(200);
             }
@@ -55,17 +55,18 @@ public class Shape
 
     public (Point16 topLeft, Point16 bottomRight) BoundingBox;
     public Point16[] Points;
+    public Point16 Size;
     public bool IsBox = false; // because many of the shapes will be boxes, introduce optimizations for boxes
-   
+
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-    
+
     /// <param name="points">If only 2 points are passed, will assume a box</param>
     /// <returns></returns>
     public Shape(params Point16[] points)
     {
         Init(points);
     }
-    
+
     /// <param name="points">If only 2 points are passed, will assume a box</param>
     /// <returns></returns>
 
@@ -75,9 +76,9 @@ public class Shape
         Point16[] pointsArray = points.ToArray();
         Init(pointsArray);
     }
-    
+
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-    
+
     private void Init(Point16[] points)
     {
         switch (points.Length)
@@ -85,7 +86,7 @@ public class Shape
             case < 2:
                 throw new ArgumentException("Shape must have at least 2 points.");
             case 2:
-                Points = 
+                Points =
                 [
                     new Point16(points[0].X, points[0].Y),
                     new Point16(points[1].X, points[0].Y),
@@ -107,6 +108,7 @@ public class Shape
             maxY = Math.Max(point.Y, maxY);
         }
         BoundingBox = (new Point16(minX, minY), new Point16(maxX, maxY));
+        Size = new Point16(maxX - minX, maxY - minY);
     }
 
     public override string ToString()
@@ -133,17 +135,17 @@ public class Shape
         }
         return (int)Math.Abs(area / 2);
     }
-    
-    
-    
+
+
+
     #region Intersection Methods
-    
+
     public bool Contains(Point16 point)
     {
         if (IsBox)
             return point.X >= BoundingBox.topLeft.X && point.X <= BoundingBox.bottomRight.X &&
                    point.Y >= BoundingBox.topLeft.Y && point.Y <= BoundingBox.bottomRight.Y;
-        
+
         int crossingCount = 0;
         for (int i = 0; i < Points.Length; i++)
         {
@@ -157,13 +159,13 @@ public class Shape
         // a point is inside the polygon if it crosses the edges an odd number of times when raycasting in a single direction
         return crossingCount % 2 == 1;
     }
-    
+
     public bool HasIntersection(Shape other)
     {
         if (IsBox && other.IsBox)
             return BoundingBox.topLeft.X <= other.BoundingBox.bottomRight.X && BoundingBox.bottomRight.X >= other.BoundingBox.topLeft.X &&
                    BoundingBox.topLeft.Y <= other.BoundingBox.bottomRight.Y && BoundingBox.bottomRight.Y >= other.BoundingBox.topLeft.Y;
-        
+
         List<Point16> axes = GetUniqueAxes(this).Concat(GetUniqueAxes(other)).ToList();
 
         foreach (var axis in axes)
@@ -176,7 +178,7 @@ public class Shape
         }
         return true;
     }
-    
+
         private bool RayIntersectsSegment(Point16 point, Point16 segmentStart, Point16 segmentEnd)
     {
         if (segmentStart.Y > segmentEnd.Y)
@@ -196,7 +198,7 @@ public class Shape
 
         return point.X < intersectX;
     }
-    
+
     private List<Point16> GetUniqueAxes(Shape shape)
     {
         List<Point16> axes = [];
@@ -232,7 +234,7 @@ public class Shape
 
         return new Projection(min, max);
     }
-    
+
     private class Projection(double min, double max)
     {
         private double Min { get; } = min;
@@ -242,12 +244,12 @@ public class Shape
         {
             return !(Max < other.Min || other.Max < Min);
         }
-    }  
-    
+    }
+
     #endregion
-    
-    
-    
+
+
+
     #region ExecuteIn Methods
 
     public void ExecuteOnPerimeter(Action<int, int> action, bool completeLoop = true)
@@ -329,7 +331,7 @@ public class Shape
             }
         }
     }
-    
+
     public void ExecuteInArea(Action<int, int> action)
     {
         if (IsBox)
@@ -385,13 +387,13 @@ public class Shape
             }
         }
     }
-    
+
     #endregion
-    
-    
-    
-    #region boolean methods
-    
+
+
+
+    #region Boolean methods
+
     public (Shape? lower, Shape? middle, Shape? higher) CutTwice(bool cutXAxis, int cutCoord1, int cutCoord2)
     {
         if (cutCoord2 < cutCoord1)
@@ -411,7 +413,7 @@ public class Shape
 
         return (shapeA, shapeB, shapeC);
     }
-    
+
     private Shape? ClipPolygon(bool cutXAxis, int cutCoord, bool keepLower, bool includeCut)
     {
         var outputList = new List<Point16>();
@@ -433,7 +435,7 @@ public class Shape
                 if (possibleIntersectPoint.HasValue)
                 {
                     Point16 intersectPoint = possibleIntersectPoint.Value;
-                    
+
                     // move the intersect point so that it's outside the cut instead of directly on it
                     if (!includeCut)
                         if (cutXAxis)
@@ -448,14 +450,14 @@ public class Shape
         }
         return outputList.Count < 3 ? null : new Shape(outputList);
     }
-    
+
     private bool IsInside(Point16 p, bool cutXAxis, int cutCoord, bool keepLower)
     {
         if (cutXAxis)
             return keepLower? p.Y <= cutCoord : p.Y >= cutCoord;
         return keepLower? p.X <= cutCoord : p.X >= cutCoord;
     }
-    
+
     private Point16? Intersect(Point16 p1, Point16 p2, bool cutXAxis, int cutCoord)
     {
         int dx = p2.X - p1.X;
@@ -476,7 +478,7 @@ public class Shape
             return new Point16(cutCoord, newY);
         }
     }
-    
+
     #endregion
-    
+
 }

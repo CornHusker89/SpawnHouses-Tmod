@@ -2,12 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SpawnHouses.Structures.AdvStructures;
 using SpawnHouses.Structures.StructureParts;
-using Stubble.Core.Classes;
 using Terraria;
 using Terraria.DataStructures;
+using Range = SpawnHouses.Structures.Range;
 
-namespace SpawnHouses.Structures.AdvStructures;
+namespace SpawnHouses.AdvStructures;
 
 public static class AdvStructureLayouts
 {

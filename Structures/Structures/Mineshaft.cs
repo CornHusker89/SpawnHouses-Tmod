@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using ReLogic.Utilities;
+using SpawnHouses.Helpers;
 using Terraria.ID;
 using SpawnHouses.Structures;
 
