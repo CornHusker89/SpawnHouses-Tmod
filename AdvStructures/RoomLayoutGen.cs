@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.Helpers;
+using SpawnHouses.Types;
 
 namespace SpawnHouses.AdvStructures;
 
@@ -12,8 +13,10 @@ public class RoomLayoutGen
     [
         (
             [
-                StructureTag.HasRoom,
-                StructureTag.ProceduralRoom
+                StructureTag.HasRoomLayout,
+                StructureTag.ProceduralRoomLayout,
+                StructureTag.HasLargeRoom,
+                StructureTag.HasFlatFloors
             ],
             RoomLayout1
         )
@@ -49,27 +52,27 @@ public class RoomLayoutGen
     {
         var corners = RoomLayoutHelper.GetCorners(roomLayoutParams.MainVolume);
 
-        RoomLayout[] possibleLayouts = new RoomLayout[roomLayoutParams.Attempts];
+        RoomLayoutVolumes[] possibleLayouts = new RoomLayoutVolumes[roomLayoutParams.Attempts];
         for (int attempt = 0; attempt < roomLayoutParams.Attempts; attempt++)
         {
-            RoomLayout layout = RoomLayoutHelper.SplitBsp(roomLayoutParams, corners.xCoords, corners.yCoords);
-            if (layout.BackgroundVolumes.Count == roomLayoutParams.Housing)
-                return layout;
-            possibleLayouts[attempt] = layout;
+            RoomLayoutVolumes volumes = RoomLayoutHelper.SplitBsp(roomLayoutParams, corners.xCoords, corners.yCoords);
+            if (volumes.RoomVolumes.Count == roomLayoutParams.Housing)
+                return RoomLayoutHelper.CreateGaps(volumes);
+            possibleLayouts[attempt] = volumes;
         }
 
         // find the layout with the closest housing to the requested amount
-        int closetHousingCount = Math.Abs(possibleLayouts[0].BackgroundVolumes.Count - roomLayoutParams.Housing);
+        int closetHousingCount = Math.Abs(possibleLayouts[0].RoomVolumes.Count - roomLayoutParams.Housing);
         int closetHousingIndex = 0;
         for (int i = 0; i < possibleLayouts.Length; i++)
         {
-            if (Math.Abs(possibleLayouts[i].BackgroundVolumes.Count - roomLayoutParams.Housing) < closetHousingCount)
+            if (Math.Abs(possibleLayouts[i].RoomVolumes.Count - roomLayoutParams.Housing) < closetHousingCount)
             {
-                closetHousingCount = Math.Abs(possibleLayouts[i].BackgroundVolumes.Count - roomLayoutParams.Housing);
+                closetHousingCount = Math.Abs(possibleLayouts[i].RoomVolumes.Count - roomLayoutParams.Housing);
                 closetHousingIndex = i;
             }
         }
 
-        return possibleLayouts[closetHousingIndex];
+        return RoomLayoutHelper.CreateGaps(possibleLayouts[closetHousingIndex]);
     }
 }

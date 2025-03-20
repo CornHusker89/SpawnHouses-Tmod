@@ -4,9 +4,10 @@ using System.Linq;
 using Microsoft.Build.Tasks.Deployment.Bootstrapper;
 using Microsoft.Xna.Framework;
 using SpawnHouses.AdvStructures;
+using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Structures;
-using SpawnHouses.Structures.AdvStructures;
 using SpawnHouses.Structures.StructureParts;
+using SpawnHouses.Types;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -72,11 +73,11 @@ namespace SpawnHouses.Items.Debug
 			// 	new Point16(x + length, y), new Range(175, 1000), new Range(0, 99)));
 
 			var result = RoomLayoutGen.RoomLayout1(new RoomLayoutParams([], [], new Shape(new Point16(x, y), new Point16(x + length, y - length)),
-				palette, 11, new Range(4, 18), new Range(7, 24), 2, 2, 0.3f));
+				palette, 11, new Range(4, 18), new Range(7, 24), new Range(1, 2), new Range(1, 2), 0.3f));
 
 			FillComponents(result.FloorVolumes, [StructureTag.HasFloor], [], palette);
 			FillComponents(result.WallVolumes, [StructureTag.HasWall], [], palette);
-			FillComponents(result.BackgroundVolumes, [StructureTag.HasBackground], [], palette);
+			FillComponents((List<Shape>)result.Rooms.Select(room => room.Volume), [StructureTag.HasBackground], [], palette);
 
 
 			WorldUtils.Gen(new Point(x + length / 2, y - length), new Shapes.Circle((length + 50) / 2), Actions.Chain(

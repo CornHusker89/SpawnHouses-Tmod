@@ -1,5 +1,6 @@
 #nullable enable
 
+using SpawnHouses.Types;
 using Terraria.ID;
 
 namespace SpawnHouses.AdvStructures;

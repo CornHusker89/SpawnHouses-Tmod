@@ -1,12 +1,10 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using SpawnHouses.AdvStructures;
+using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Structures.StructureParts;
-using Terraria;
+using SpawnHouses.Types;
 using Terraria.DataStructures;
 
-namespace SpawnHouses.Structures.AdvStructures;
+namespace SpawnHouses.AdvStructures;
 
 public class AdvStructure
 {
@@ -22,38 +20,38 @@ public class AdvStructure
     public double Scale;
 
     private Point16[] chairPositions;
-    
+
     /// approximate height of the structure
     private int _approxHeight;
     /// bounding box which determines the boundary of rooms; rooms can stop before this, but cannot extend beyond
     public Shape OuterBoundingShape;
-    
+
     public AdvStructure() {}
-    
-    
+
+
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="structureParams"></param>
     public void Calculate(StructureParams structureParams)
     {
         // calculate dimensions
         Params = structureParams;
-            
+
         Position = new Point16(Params.Start.X, Params.Start.Y);
         XSize = Params.End.X - Params.Start.X;
 
         var method = AdvStructureLayouts.GetRandomMethod(structureParams);
     }
-    
-    
+
+
     public void RebuildDimensions()
     {
-        
+
     }
-    
+
     public void FinishHousing()
     {
-        
+
     }
 }

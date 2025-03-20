@@ -2,8 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SpawnHouses.Structures.AdvStructures;
+using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Structures.StructureParts;
+using SpawnHouses.Types;
 using Terraria;
 using Terraria.DataStructures;
 using Range = SpawnHouses.Structures.Range;

@@ -6,11 +6,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Structures;
 using Terraria;
 using Terraria.DataStructures;
-using Terraria.ModLoader;
 
-namespace SpawnHouses.Structures.StructureParts;
+namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
 /// constructors are static methods
 public class Shape
@@ -56,6 +56,30 @@ public class Shape
     public (Point16 topLeft, Point16 bottomRight) BoundingBox;
     public Point16[] Points;
     public Point16 Size;
+
+    private int _area = -1;
+    public int Area
+    {
+        get
+        {
+            if (_area == -1)
+                _area = GetArea();
+            return _area;
+        }
+    }
+
+    private Point16 _center = new Point16(-1, -1);
+    public Point16 Center
+    {
+        get
+        {
+            if (_center == new Point16(-1, -1))
+                _center = GetCenter();
+            return _center;
+        }
+    }
+
+
     public bool IsBox = false; // because many of the shapes will be boxes, introduce optimizations for boxes
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
@@ -119,7 +143,7 @@ public class Shape
         return pointsStr;
     }
 
-    public int GetArea()
+    private int GetArea()
     {
         if (IsBox)
             return (BoundingBox.bottomRight.X - BoundingBox.topLeft.X) *
@@ -134,6 +158,11 @@ public class Shape
             area += current.X * next.Y - next.X * current.Y;
         }
         return (int)Math.Abs(area / 2);
+    }
+
+    private Point16 GetCenter()
+    {
+        return BoundingBox.topLeft + Size / new Point16(2, 2);
     }
 
 
@@ -179,7 +208,7 @@ public class Shape
         return true;
     }
 
-        private bool RayIntersectsSegment(Point16 point, Point16 segmentStart, Point16 segmentEnd)
+    private bool RayIntersectsSegment(Point16 point, Point16 segmentStart, Point16 segmentEnd)
     {
         if (segmentStart.Y > segmentEnd.Y)
             (segmentStart, segmentEnd) = (segmentEnd, segmentStart);
@@ -252,38 +281,40 @@ public class Shape
 
     #region ExecuteIn Methods
 
-    public void ExecuteOnPerimeter(Action<int, int> action, bool completeLoop = true)
+    /// <param name="action">(int x, int y, byte direction</param>
+    /// <param name="completeLoop"></param>
+    public void ExecuteOnPerimeter(Action<int, int, byte> action, bool completeLoop = true)
     {
+        Point16 middle = new Point16(
+            BoundingBox.topLeft.X + (BoundingBox.bottomRight.X - BoundingBox.topLeft.X) / 2,
+            BoundingBox.topLeft.Y + (BoundingBox.bottomRight.Y - BoundingBox.topLeft.Y) / 2
+        );
+
         if (IsBox)
         {
             for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
             {
-                action(x, BoundingBox.topLeft.Y);
+                action(x, BoundingBox.topLeft.Y, x > middle.X? Directions.Right: Directions.Left);
                 if (completeLoop)
-                    action(x, BoundingBox.bottomRight.Y);
+                    action(x, BoundingBox.bottomRight.Y, x > middle.X? Directions.Right: Directions.Left);
             }
             for (int y = BoundingBox.topLeft.Y + 1; y < BoundingBox.bottomRight.Y; y++)
             {
-                action(BoundingBox.topLeft.X, y);
-                action(BoundingBox.bottomRight.X, y);
+                action(BoundingBox.topLeft.X, y, y > middle.Y? Directions.Down: Directions.Up);
+                action(BoundingBox.bottomRight.X, y, y > middle.Y? Directions.Down: Directions.Up);
             }
         }
         else
         {
-            Point16 middle = new Point16(
-                BoundingBox.topLeft.X + (BoundingBox.bottomRight.X - BoundingBox.topLeft.X) / 2,
-                BoundingBox.topLeft.Y + (BoundingBox.bottomRight.Y - BoundingBox.topLeft.Y) / 2
-            );
-
             for (int pointNum = 0; pointNum < Points.Length - 1; pointNum++)
             {
                 // test for a vertical line
-                if (Points[pointNum].X - Points[pointNum + 1].X == 0)
+                if (Points[pointNum].X == Points[pointNum + 1].X)
                 {
                     int lowerY = Math.Min(Points[pointNum].Y, Points[pointNum + 1].Y);
                     int higherY = Math.Max(Points[pointNum].Y, Points[pointNum + 1].Y);
                     for (int y = lowerY; y < higherY; y++)
-                        action(Points[pointNum].X, y);
+                        action(Points[pointNum].X, y, Points[pointNum].X > middle.X? Directions.Right: Directions.Left);
                 }
                 else
                 {
@@ -305,9 +336,9 @@ public class Shape
                             // round towards the middle
                             double x = startingX + slope * (y - lowerY);
                             if (x < middle.X)
-                                action((int)Math.Floor(x), y);
+                                action((int)Math.Floor(x), y, Directions.Left);
                             else
-                                action((int)Math.Ceiling(x), y);
+                                action((int)Math.Ceiling(x), y, Directions.Right);
                         }
                     }
                     else
@@ -322,9 +353,9 @@ public class Shape
                         {
                             double y = startingY + slope * (x - lowerX);
                             if (y < middle.Y)
-                                action(x, (int)Math.Floor(y));
+                                action(x, (int)Math.Floor(y), Directions.Up);
                             else
-                                action(x, (int)Math.Ceiling(y));
+                                action(x, (int)Math.Ceiling(y), Directions.Down);
                         }
                     }
                 }
@@ -393,6 +424,66 @@ public class Shape
 
 
     #region Boolean methods
+
+    /// <summary>
+    /// Shapes must not overlap
+    /// </summary>
+    public static Shape Union(List<Shape> shapes)
+    {
+        // Step 1: Collect all points
+        var allPoints = new List<Point16>();
+        foreach (var shape in shapes)
+            allPoints.AddRange(shape.Points);
+
+        // Step 2: Convex hull (Graham's scan) to order the points into a single polygon
+        var result = ConvexHull(allPoints);
+
+        return new Shape(result);
+    }
+
+    private static List<Point16> ConvexHull(List<Point16> points)
+    {
+        if (points.Count <= 1) return points;
+
+        // Sort points by x (then y) to get consistent ordering
+        points = points.OrderBy(p => p.X).ThenBy(p => p.Y).ToList();
+
+        var lower = new List<Point16>();
+        foreach (var p in points)
+        {
+            while (lower.Count >= 2 &&
+                   Cross(lower[lower.Count - 2], lower[lower.Count - 1], p) <= 0)
+            {
+                lower.RemoveAt(lower.Count - 1);
+            }
+            lower.Add(p);
+        }
+
+        var upper = new List<Point16>();
+        for (int i = points.Count - 1; i >= 0; i--)
+        {
+            var p = points[i];
+            while (upper.Count >= 2 &&
+                   Cross(upper[upper.Count - 2], upper[upper.Count - 1], p) <= 0)
+            {
+                upper.RemoveAt(upper.Count - 1);
+            }
+            upper.Add(p);
+        }
+
+        // Remove the last point of each half because it's repeated at the beginning of the other half
+        lower.RemoveAt(lower.Count - 1);
+        upper.RemoveAt(upper.Count - 1);
+
+        // Combine lower and upper parts into a single looped shape
+        lower.AddRange(upper);
+        return lower;
+    }
+
+    private static int Cross(Point16 o, Point16 a, Point16 b)
+    {
+        return (a.X - o.X) * (b.Y - o.Y) - (a.Y - o.Y) * (b.X - o.X);
+    }
 
     public (Shape? lower, Shape? middle, Shape? higher) CutTwice(bool cutXAxis, int cutCoord1, int cutCoord2)
     {

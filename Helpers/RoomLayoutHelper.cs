@@ -1,9 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using SpawnHouses.AdvStructures;
-using SpawnHouses.Structures.AdvStructures;
+using SpawnHouses.AdvStructures.AdvStructureParts;
+using SpawnHouses.Structures;
 using SpawnHouses.Structures.StructureParts;
+using SpawnHouses.Types;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Range = SpawnHouses.Structures.Range;
 
@@ -76,11 +80,14 @@ public static class RoomLayoutHelper
     /// <param name="priorityXSplits"></param>
     /// <param name="priorityYSplits"></param>
     /// <returns></returns>
-    public static RoomLayout SplitBsp(RoomLayoutParams roomLayoutParams, List<int> priorityXSplits, List<int> priorityYSplits)
+    public static RoomLayoutVolumes SplitBsp(RoomLayoutParams roomLayoutParams, List<int> priorityXSplits, List<int> priorityYSplits)
     {
-        if (roomLayoutParams.RoomHeight.Max < roomLayoutParams.FloorWidth + 2 * roomLayoutParams.RoomHeight.Min)
+        if (roomLayoutParams.RoomHeight.Max < roomLayoutParams.FloorWidth.Max + 2 * roomLayoutParams.RoomHeight.Min)
             ModContent.GetInstance<SpawnHouses>().Logger.Warn(
-                $"a max room height of {roomLayoutParams.RoomHeight.Max} was given, but at least {roomLayoutParams.FloorWidth + 2 * roomLayoutParams.RoomHeight.Min} is required");
+                $"a max room height of {roomLayoutParams.RoomHeight.Max} was given, but at least {roomLayoutParams.FloorWidth.Max + 2 * roomLayoutParams.RoomHeight.Min} is required");
+        if (roomLayoutParams.RoomWidth.Max < roomLayoutParams.WallWidth.Max + 2 * roomLayoutParams.RoomWidth.Min)
+            ModContent.GetInstance<SpawnHouses>().Logger.Warn(
+                $"a max room height of {roomLayoutParams.RoomWidth.Max} was given, but at least {roomLayoutParams.WallWidth.Max + 2 * roomLayoutParams.RoomWidth.Min} is required");
 
         List<Shape> floorVolumes = [];
         List<Shape> floorGapVolumes = [];
@@ -101,8 +108,14 @@ public static class RoomLayoutHelper
             else
                 break;
 
-            bool canSplitAlongX = roomVolume.Size.Y >= roomLayoutParams.FloorWidth + 2 * roomLayoutParams.RoomHeight.Min;
-            bool canSplitAlongY = roomVolume.Size.X >= roomLayoutParams.WallWidth + 2 * roomLayoutParams.RoomWidth.Min;
+            double inverseProgressFactor = double.Max(1 - (double)curHousing / roomLayoutParams.Housing, 0);
+            int iterationFloorWidth = (int)Math.Round((roomLayoutParams.FloorWidth.Max - roomLayoutParams.FloorWidth.Min) * inverseProgressFactor) +
+                roomLayoutParams.FloorWidth.Min;
+            int iterationWallWidth = (int)Math.Round((roomLayoutParams.WallWidth.Max - roomLayoutParams.WallWidth.Min) * inverseProgressFactor) +
+                roomLayoutParams.WallWidth.Min;
+
+            bool canSplitAlongX = roomVolume.Size.Y >= iterationFloorWidth + 2 * roomLayoutParams.RoomHeight.Min;
+            bool canSplitAlongY = roomVolume.Size.X >= iterationWallWidth + 2 * roomLayoutParams.RoomWidth.Min;
 
             bool splitAlongX;
 
@@ -137,7 +150,7 @@ public static class RoomLayoutHelper
             Range validCutRange = new Range(
                 (splitAlongX ? roomVolume.BoundingBox.topLeft.Y : roomVolume.BoundingBox.topLeft.X) + outerBoundaryWidth,
                 (splitAlongX ? roomVolume.BoundingBox.bottomRight.Y : roomVolume.BoundingBox.bottomRight.X) -
-                outerBoundaryWidth - (splitAlongX ? roomLayoutParams.FloorWidth : roomLayoutParams.WallWidth)
+                outerBoundaryWidth - (splitAlongX ? iterationFloorWidth : iterationWallWidth)
             );
 
             List<int> predeterminedSplits = [];
@@ -149,8 +162,8 @@ public static class RoomLayoutHelper
                 ? Terraria.WorldGen.genRand.Next(validCutRange.Min, validCutRange.Max + 1)
                 : predeterminedSplits[Terraria.WorldGen.genRand.Next(predeterminedSplits.Count)];
             int splitEnd = splitAlongX
-                ? splitStart + roomLayoutParams.FloorWidth - 1
-                : splitStart + roomLayoutParams.WallWidth - 1;
+                ? splitStart + iterationFloorWidth - 1
+                : splitStart + iterationWallWidth - 1;
 
             var roomSubsections = roomVolume.CutTwice(splitAlongX, splitStart, splitEnd);
             if (roomSubsections.lower is not null)
@@ -190,16 +203,165 @@ public static class RoomLayoutHelper
             }
         }
         finishedRoomVolumes.AddRange(roomQueue);
+        return new RoomLayoutVolumes(floorVolumes, wallVolumes, finishedRoomVolumes);
+    }
 
-        return new RoomLayout(
-            floorVolumes,
-            null,
-            wallVolumes,
-            null,
-            null,
-            null,
-            finishedRoomVolumes,
-            largeRoomCount
-        );
+    /// <summary>
+    /// gets closest room to the point
+    /// </summary>
+    /// <param name="roomLayout"></param>
+    /// <param name="point"></param>
+    /// <returns></returns>
+    public static Room GetClosestRoom(RoomLayout roomLayout, Point16 point)
+    {
+        if (roomLayout.Rooms.Count == 0)
+            throw new Exception("BackgroundVolumes in given room layout was empty");
+
+        int closestIndex = -1;
+        double closestDistance = double.MaxValue;
+
+        for (int i = 0; i < roomLayout.Rooms.Count; i++)
+        {
+            double closestDistanceInShape = double.MaxValue;
+            roomLayout.Rooms[i].Volume.ExecuteOnPerimeter((x, y, _) =>
+            {
+                double distance = Math.Sqrt(Math.Pow(point.X - x, 2) + Math.Pow(point.Y - y, 2));
+                if (distance < closestDistanceInShape)
+                    closestDistanceInShape = distance;
+            });
+
+            if (closestDistanceInShape < closestDistance)
+            {
+                closestDistance = closestDistanceInShape;
+                closestIndex = i;
+            }
+        }
+        return roomLayout.Rooms[closestIndex];
+    }
+
+    public static bool InFloor(RoomLayoutVolumes roomLayoutVolumes, Point16 point)
+    {
+        foreach (var floorVolume in roomLayoutVolumes.FloorVolumes)
+            if (floorVolume.Contains(point))
+                return true;
+        return false;
+    }
+
+    public static bool InWall(RoomLayoutVolumes roomLayoutVolumes, Point16 point)
+    {
+        foreach (var floorVolume in roomLayoutVolumes.FloorVolumes)
+            if (floorVolume.Contains(point))
+                return true;
+        return false;
+    }
+
+    /// <returns>null if no room found</returns>
+    public static Room GetRoomFromPos(List<Room> rooms, Point16 point)
+    {
+        foreach (var room in rooms)
+            if (room.Volume.Contains(point))
+                return room;
+
+        return null;
+    }
+
+    public static List<(Room otherRoom, Shape volume)> OptimizeGapVolumes(List<(Room otherRoom, List<Shape> volumes)> gapSections)
+    {
+        List<(Room otherRoom, Shape volume)> gaps = [];
+        foreach(var incompleteGapSection in gapSections)
+            gaps.Add((incompleteGapSection.otherRoom, Shape.Union(incompleteGapSection.volumes)));
+
+        return gaps;
+    }
+
+    /// <summary>
+    /// adds gaps between rooms in a <see cref="RoomLayoutVolumes"/> for doors, etc.
+    /// </summary>
+    /// <param name="roomLayoutVolumes"></param>
+    /// <returns></returns>
+    public static RoomLayout CreateGaps(RoomLayoutVolumes roomLayoutVolumes)
+    {
+        List<Room> rooms = (List<Room>)roomLayoutVolumes.RoomVolumes.Select(roomVolume => new Room(roomVolume, []));
+        List<Gap> gaps = [];
+
+        foreach(Room room in rooms)
+        {
+            List<(Room otherRoom, List<Shape> volumes)> gapSections = [];
+            (Room otherRoom, List<Shape> volumes) curGapSection = (null, []);
+            byte lastDirection = Directions.None;
+
+            room.Volume.ExecuteOnPerimeter((x, y, direction) =>
+            {
+                Point16 pos = new Point16(x, y);
+                Point16 step = new Point16(0, 0);
+                switch (direction)
+                {
+                    case Directions.Up:
+                        step = new Point16(0, -1);
+                        break;
+                    case Directions.Down:
+                        step = new Point16(0, 1);
+                        break;
+                    case Directions.Left:
+                        step = new Point16(-1, 0);
+                        break;
+                    case Directions.Right:
+                        step = new Point16(1, 0);
+                        break;
+                }
+
+                do
+                    pos += step;
+                while (direction is Directions.Up or Directions.Down? InFloor(roomLayoutVolumes, pos): InWall(roomLayoutVolumes, pos));
+                Room foundRoom = GetRoomFromPos(rooms, pos);
+
+                if (direction != lastDirection)
+                {
+                    if (curGapSection.volumes.Count != 0)
+                    {
+                        gapSections.Add(curGapSection);
+                        curGapSection = (null, []);
+                    }
+                }
+
+                if (foundRoom != null)
+                {
+                    if (curGapSection.volumes.Count == 0)
+                        curGapSection.otherRoom = foundRoom;
+                    curGapSection.volumes.Add(new Shape(pos - step, new Point16(x, y) + step));
+                }
+                else
+                {
+                    // reset curGapSection
+                    if (curGapSection.volumes.Count != 0)
+                    {
+                        gapSections.Add(curGapSection);
+                        curGapSection = (null, []);
+                    }
+                }
+                lastDirection = direction;
+            });
+
+            // create list of gaps for the room
+            var optimizedGapSections = OptimizeGapVolumes(gapSections);
+            foreach(var optimizedGapSection in optimizedGapSections)
+            {
+                Room lowerRoom, higherRoom;
+                if (room.Volume.Center.Max(optimizedGapSection.otherRoom.Volume.Center) == room.Volume.Center)
+                {
+                    lowerRoom = optimizedGapSection.otherRoom;
+                    higherRoom = room;
+                }
+                else
+                {
+                    lowerRoom = room;
+                    higherRoom = optimizedGapSection.otherRoom;
+                }
+                Gap gap = new Gap(optimizedGapSection.volume, lowerRoom, higherRoom);
+                room.Gaps.Add(gap);
+                gaps.Add(gap);
+            }
+        }
+        return new RoomLayout(roomLayoutVolumes.FloorVolumes, roomLayoutVolumes.WallVolumes, rooms, gaps);
     }
 }
