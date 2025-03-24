@@ -1,8 +1,45 @@
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
-public class Gap(Shape volume, Room lowerRoom, Room higherRoom)
+public class Gap
 {
-    public Shape Volume = volume;
-    public Room LowerRoom = lowerRoom;
-    public Room HigherRoom = higherRoom;
+    public Shape Volume;
+    public Room LowerRoom;
+    public Room HigherRoom;
+    public bool IsHorizontal;
+
+    /// <summary>
+    /// higher/lower room is determined by the sum of the center coordinates for both room
+    /// </summary>
+    /// <param name="volume"></param>
+    /// <param name="room1"></param>
+    /// <param name="room2"></param>
+    /// <param name="isHorizontal"></param>
+    public Gap(Shape volume, Room room1, Room room2, bool isHorizontal)
+    {
+        Volume = volume;
+        IsHorizontal = isHorizontal;
+
+        if (room1.Volume.Center.X + room1.Volume.Center.Y >= room2.Volume.Center.X + room2.Volume.Center.Y)
+        {
+            LowerRoom = room2;
+            HigherRoom = room1;
+        }
+        else
+        {
+            LowerRoom = room1;
+            HigherRoom = room2;
+        }
+    }
+
+    /// <summary>
+    /// tests if the rooms and direction are the same, and the volumes collide
+    /// </summary>
+    public bool RepresentsSimilarGap(Gap other)
+    {
+        if (LowerRoom != other.LowerRoom || HigherRoom != other.HigherRoom || IsHorizontal != other.IsHorizontal)
+            return false;
+        return (Volume.HasIntersection(other.Volume));
+    }
+
+
 }

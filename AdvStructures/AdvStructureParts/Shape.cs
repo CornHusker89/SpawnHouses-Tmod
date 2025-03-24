@@ -1,4 +1,5 @@
 #nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,6 +12,8 @@ using Terraria;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
+
+#pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
 
 /// constructors are static methods
 public class Shape
@@ -121,6 +124,45 @@ public class Shape
                 break;
             default:
                 Points = points;
+
+                // test if there is only 2 unique x and y's, indicating if its a box
+                IsBox = true;
+                int x1 = Points[0].X, x2 = -1, y1 = Points[0].Y, y2 = -1;
+                foreach(Point16 point in Points)
+                {
+                    if (point.X != x1)
+                        if (x2 == -1)
+                            x2 = point.X;
+                        else if (point.X != x2)
+                        {
+                            IsBox = false;
+                            break;
+                        }
+                    if (point.Y != y1)
+                        if (y2 == -1)
+                            y2 = point.Y;
+                        else if (point.Y != y2)
+                        {
+                            IsBox = false;
+                            break;
+                        }
+                }
+
+                // optimize points if box
+                if (IsBox)
+                {
+                    if (x2 == -1)
+                        x2 = x1;
+                    if (y2 == -1)
+                        y2 = y1;
+                    Points =
+                    [
+                        new Point16(x1, y1),
+                        new Point16(x2, y1),
+                        new Point16(x2, y2),
+                        new Point16(x1, y2)
+                    ];
+                }
                 break;
         }
         int minX = Main.maxTilesX, maxX = 0, minY = Main.maxTilesY, maxY = 0;
@@ -132,7 +174,7 @@ public class Shape
             maxY = Math.Max(point.Y, maxY);
         }
         BoundingBox = (new Point16(minX, minY), new Point16(maxX, maxY));
-        Size = new Point16(maxX - minX, maxY - minY);
+        Size = new Point16(1 + maxX - minX, 1 + maxY - minY);
     }
 
     public override string ToString()
@@ -141,6 +183,17 @@ public class Shape
         for (int i = 0; i < Points.Length; i++)
             pointsStr += $"point {i}: {Points[i]}\n";
         return pointsStr;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is not Shape otherShape || otherShape.Points.Length != Points.Length) return false;
+
+        for (int i = 0; i < otherShape.Points.Length; i++)
+            if (Points[i] != otherShape.Points[i])
+                return false;
+
+        return true;
     }
 
     private int GetArea()
@@ -285,24 +338,18 @@ public class Shape
     /// <param name="completeLoop"></param>
     public void ExecuteOnPerimeter(Action<int, int, byte> action, bool completeLoop = true)
     {
-        Point16 middle = new Point16(
-            BoundingBox.topLeft.X + (BoundingBox.bottomRight.X - BoundingBox.topLeft.X) / 2,
-            BoundingBox.topLeft.Y + (BoundingBox.bottomRight.Y - BoundingBox.topLeft.Y) / 2
-        );
-
         if (IsBox)
         {
+            // go line-by-line
             for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
-            {
-                action(x, BoundingBox.topLeft.Y, x > middle.X? Directions.Right: Directions.Left);
-                if (completeLoop)
-                    action(x, BoundingBox.bottomRight.Y, x > middle.X? Directions.Right: Directions.Left);
-            }
-            for (int y = BoundingBox.topLeft.Y + 1; y < BoundingBox.bottomRight.Y; y++)
-            {
-                action(BoundingBox.topLeft.X, y, y > middle.Y? Directions.Down: Directions.Up);
-                action(BoundingBox.bottomRight.X, y, y > middle.Y? Directions.Down: Directions.Up);
-            }
+                action(x, BoundingBox.topLeft.Y, Directions.Up);
+            if (completeLoop)
+                for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
+                    action(x, BoundingBox.bottomRight.Y, Directions.Down);
+            for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
+                action(BoundingBox.topLeft.X, y, Directions.Left);
+            for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
+                action(BoundingBox.bottomRight.X, y, Directions.Right);
         }
         else
         {
@@ -314,7 +361,7 @@ public class Shape
                     int lowerY = Math.Min(Points[pointNum].Y, Points[pointNum + 1].Y);
                     int higherY = Math.Max(Points[pointNum].Y, Points[pointNum + 1].Y);
                     for (int y = lowerY; y < higherY; y++)
-                        action(Points[pointNum].X, y, Points[pointNum].X > middle.X? Directions.Right: Directions.Left);
+                        action(Points[pointNum].X, y, Points[pointNum].X > Center.X? Directions.Right: Directions.Left);
                 }
                 else
                 {
@@ -335,7 +382,7 @@ public class Shape
                         {
                             // round towards the middle
                             double x = startingX + slope * (y - lowerY);
-                            if (x < middle.X)
+                            if (x < Center.X)
                                 action((int)Math.Floor(x), y, Directions.Left);
                             else
                                 action((int)Math.Ceiling(x), y, Directions.Right);
@@ -352,7 +399,7 @@ public class Shape
                         for (int x = lowerX; x < higherX; x++)
                         {
                             double y = startingY + slope * (x - lowerX);
-                            if (y < middle.Y)
+                            if (y < Center.Y)
                                 action(x, (int)Math.Floor(y), Directions.Up);
                             else
                                 action(x, (int)Math.Ceiling(y), Directions.Down);
@@ -514,42 +561,46 @@ public class Shape
             Point16 current = Points[i];
             Point16 next = Points[(i + 1) % Points.Length];
 
-            bool currentInside = IsInside(current, cutXAxis, cutCoord, keepLower);
-            bool nextInside = IsInside(next, cutXAxis, cutCoord, keepLower);
+            bool currentInside = IsInside(current, cutXAxis, cutCoord, keepLower, includeCut);
+            bool nextInside = IsInside(next, cutXAxis, cutCoord, keepLower, includeCut);
 
             if (currentInside)
                 outputList.Add(current);  // always keep the current point if it's inside
 
             if (currentInside != nextInside) // edge crosses the clipping boundary
             {
-                Point16? possibleIntersectPoint = Intersect(current, next, cutXAxis, cutCoord);
-                if (possibleIntersectPoint.HasValue)
-                {
-                    Point16 intersectPoint = possibleIntersectPoint.Value;
+                Point16 intersectPoint = Intersect(current, next, cutXAxis, cutCoord);
 
-                    // move the intersect point so that it's outside the cut instead of directly on it
-                    if (!includeCut)
-                        if (cutXAxis)
-                            intersectPoint = keepLower ? new Point16(intersectPoint.X, intersectPoint.Y - 1) :
-                                new Point16(intersectPoint.X, intersectPoint.Y + 1);
-                        else
-                            intersectPoint = keepLower ? new Point16(intersectPoint.X - 1, intersectPoint.Y) :
-                                new Point16(intersectPoint.X + 1, intersectPoint.Y);
-                    outputList.Add(intersectPoint);
-                }
+                // move the intersect point so that it's outside the cut instead of directly on it
+                if (!includeCut)
+                    if (cutXAxis)
+                        intersectPoint = keepLower ? new Point16(intersectPoint.X, intersectPoint.Y - 1) :
+                            new Point16(intersectPoint.X, intersectPoint.Y + 1);
+                    else
+                        intersectPoint = keepLower ? new Point16(intersectPoint.X - 1, intersectPoint.Y) :
+                            new Point16(intersectPoint.X + 1, intersectPoint.Y);
+
+                outputList.Add(intersectPoint);
             }
         }
         return outputList.Count < 3 ? null : new Shape(outputList);
     }
 
-    private bool IsInside(Point16 p, bool cutXAxis, int cutCoord, bool keepLower)
+    private bool IsInside(Point16 point, bool cutXAxis, int cutCoord, bool keepLower, bool includeCut)
     {
+        if (includeCut)
+        {
+            if (cutXAxis)
+                return keepLower ? point.Y <= cutCoord : point.Y >= cutCoord;
+            return keepLower ? point.X <= cutCoord : point.X >= cutCoord;
+        }
+
         if (cutXAxis)
-            return keepLower? p.Y <= cutCoord : p.Y >= cutCoord;
-        return keepLower? p.X <= cutCoord : p.X >= cutCoord;
+            return keepLower ? point.Y < cutCoord : point.Y > cutCoord;
+        return keepLower ? point.X < cutCoord : point.X > cutCoord;
     }
 
-    private Point16? Intersect(Point16 p1, Point16 p2, bool cutXAxis, int cutCoord)
+    private Point16 Intersect(Point16 p1, Point16 p2, bool cutXAxis, int cutCoord)
     {
         int dx = p2.X - p1.X;
         int dy = p2.Y - p1.Y;
