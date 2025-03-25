@@ -114,8 +114,8 @@ Mods: {
 					Tooltip: If ON, the Spawn Point House will set the world spawn to itself
 				}
 
-				MainBasementShape: {
-					Label: Main Basement Shape
+				SpawnPointBasementShape: {
+					Label: Spawn Point Basement Shape
 					Tooltip: 0.5 will not favor any direction. Values closer to 0 generate the basement more vertically, values closer to 1 generate the basement more horizontally. In upside-down seeds, value won't go below 0.4
 				}
 
@@ -137,11 +137,6 @@ Mods: {
 				EnableMineshaft: {
 					Label: Enable Mineshaft
 					Tooltip: If ON, a mineshaft will generate near the world spawn.
-				}
-
-				SpawnPointBasementShape: {
-					Label: Spawn Point Basement Shape
-					Tooltip: ""
 				}
 			}
 		}
