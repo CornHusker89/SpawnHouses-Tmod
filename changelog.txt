@@ -1,4 +1,3 @@
-Version 1.0.13
+Version 1.0.14
 Minor Changes
-- Removed music boxes from basement
-- Fixed wiring problem in basement
+- Fixed localization mistake causing no description for "Spawn Point Basement Shape"

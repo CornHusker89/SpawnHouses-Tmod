@@ -1,4 +1,4 @@
 displayName = Generated Housing
 author = CornHusker and Duck
-version = 1.0.13
+version = 1.0.14
 weakReferences = MagicStorage, WorldGenTesting
