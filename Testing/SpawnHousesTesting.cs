@@ -34,15 +34,15 @@ public class SpawnHousesTesting {
     #region Test Helpers
 
     private static string? ScreenshotMainHouse() {
-        if (SpawnHousesSystem.MainHouse is null)
+        if (StructureManager.MainHouse is null)
             return "No Main House";
 
         TestingHelper.TakeScreenshot(
             new Rectangle(
-                SpawnHousesSystem.MainHouse.X - 30,
-                SpawnHousesSystem.MainHouse.Y - 20,
-                SpawnHousesSystem.MainHouse.StructureXSize + 60,
-                SpawnHousesSystem.MainHouse.StructureYSize + 40
+                StructureManager.MainHouse.X - 30,
+                StructureManager.MainHouse.Y - 20,
+                StructureManager.MainHouse.StructureXSize + 60,
+                StructureManager.MainHouse.StructureYSize + 40
             ),
             Main.ActiveWorldFileData.Seed + "_MainHouse"
         );
@@ -50,15 +50,15 @@ public class SpawnHousesTesting {
     }
 
     private static string? ScreenshotBeachHouse() {
-        if (SpawnHousesSystem.BeachHouse is null)
+        if (StructureManager.BeachHouse is null)
             return "No Beach House";
 
         TestingHelper.TakeScreenshot(
             new Rectangle(
-                SpawnHousesSystem.BeachHouse.X - 30,
-                SpawnHousesSystem.BeachHouse.Y - 30,
-                SpawnHousesSystem.BeachHouse.StructureXSize + 60,
-                SpawnHousesSystem.BeachHouse.StructureYSize + 60
+                StructureManager.BeachHouse.X - 30,
+                StructureManager.BeachHouse.Y - 30,
+                StructureManager.BeachHouse.StructureXSize + 60,
+                StructureManager.BeachHouse.StructureYSize + 60
             ),
             Main.ActiveWorldFileData.Seed + "_BeachHouse"
         );
@@ -66,13 +66,13 @@ public class SpawnHousesTesting {
     }
 
     private static string? ScreenshotMainBasement() {
-        if (SpawnHousesSystem.MainBasement is null)
+        if (StructureManager.MainBasement is null)
             return "No Main Basement";
 
         TestingHelper.TakeScreenshot(
             new Rectangle(
-                SpawnHousesSystem.MainBasement.EntryPosX - 60,
-                SpawnHousesSystem.MainBasement.EntryPosY - 20,
+                StructureManager.MainBasement.EntryPosX - 60,
+                StructureManager.MainBasement.EntryPosY - 20,
                 120,
                 200
             ),
@@ -82,14 +82,14 @@ public class SpawnHousesTesting {
     }
 
     private static string? ScreenshotMineshaft() {
-        if (SpawnHousesSystem.Mineshaft is null)
+        if (StructureManager.Mineshaft is null)
             return "No Mineshaft";
 
         TestingHelper.TakeScreenshot(
             new Rectangle(
-                SpawnHousesSystem.Mineshaft.X - 10,
-                SpawnHousesSystem.Mineshaft.Y - 6,
-                SpawnHousesSystem.Mineshaft.StructureXSize + 20,
+                StructureManager.Mineshaft.X - 10,
+                StructureManager.Mineshaft.Y - 6,
+                StructureManager.Mineshaft.StructureXSize + 20,
                 200
             ),
             Main.ActiveWorldFileData.Seed + "_Mineshaft"
@@ -125,11 +125,15 @@ public class SpawnHousesTesting {
     public static string? TestAll() {
         TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
         var output = string.Empty;
-        output += "\n" + ScreenshotMainHouse();
-        output += "\n" + ScreenshotBeachHouse();
-        output += "\n" + ScreenshotMainBasement();
-        output += "\n" + ScreenshotMineshaft();
-        return output;
+        string? result = ScreenshotMainHouse();
+        output += result == null ? "" : result + "\n";
+        result = ScreenshotBeachHouse();
+        output += result == null ? "" : result + "\n";
+        result = ScreenshotMainBasement();
+        output += result == null ? "" : result + "\n";
+        result = ScreenshotMineshaft();
+        output += result == null ? "" : result + "\n";
+        return output.Length > 0 ? output : null;
     }
 
     #endregion

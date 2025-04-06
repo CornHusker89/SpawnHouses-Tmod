@@ -23,20 +23,20 @@ public class Player : ModPlayer {
             var x = (int)Player.Center.X / 16;
             var y = (int)Player.Center.Y / 16;
 
-            if (SpawnHousesSystem.MainBasement is not null &&
-                SpawnHousesSystem.MainBasement.Status == StructureStatus.GeneratedButNotFound)
+            if (StructureManager.MainBasement is not null &&
+                StructureManager.MainBasement.Status == StructureStatus.GeneratedButNotFound)
                 if (
-                    x > SpawnHousesSystem.MainBasement.EntryPosX - 7
-                    && x < SpawnHousesSystem.MainBasement.EntryPosX + 7
-                    && y > SpawnHousesSystem.MainBasement.EntryPosY + 6
-                    && y < SpawnHousesSystem.MainBasement.EntryPosY + 20
+                    x > StructureManager.MainBasement.EntryPosX - 7
+                    && x < StructureManager.MainBasement.EntryPosX + 7
+                    && y > StructureManager.MainBasement.EntryPosY + 6
+                    && y < StructureManager.MainBasement.EntryPosY + 20
                 )
-                    SpawnHousesSystem.MainBasement.OnFound();
+                    StructureManager.MainBasement.OnFound();
 
-            if (SpawnHousesSystem.BeachHouse is not null &&
-                SpawnHousesSystem.BeachHouse.Status == StructureStatus.GeneratedButNotFound) {
-                var houseCenterX = SpawnHousesSystem.BeachHouse.X + BeachHouse._structureXSize / 2;
-                var houseCenterY = SpawnHousesSystem.BeachHouse.Y + BeachHouse._structureYSize / 2;
+            if (StructureManager.BeachHouse is not null &&
+                StructureManager.BeachHouse.Status == StructureStatus.GeneratedButNotFound) {
+                var houseCenterX = StructureManager.BeachHouse.X + BeachHouse._structureXSize / 2;
+                var houseCenterY = StructureManager.BeachHouse.Y + BeachHouse._structureYSize / 2;
 
                 if (
                     x > houseCenterX - 70
@@ -44,7 +44,7 @@ public class Player : ModPlayer {
                     && y > houseCenterY - 44
                     && y < houseCenterY + 44
                 )
-                    SpawnHousesSystem.BeachHouse.OnFound();
+                    StructureManager.BeachHouse.OnFound();
             }
         }
     }

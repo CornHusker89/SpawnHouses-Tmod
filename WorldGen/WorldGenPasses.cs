@@ -44,18 +44,18 @@ public class WorldGenPasses : ModSystem {
     }
 
     public override void PreWorldGen() {
-        SpawnHousesSystem.WorldVersion = new Version(ModInstance.Mod.Version.ToString());
+        StructureManager.WorldVersion = new Version(ModInstance.Mod.Version.ToString());
     }
 
     public override void PostWorldGen() {
         // move guide into the main house (if it's there)
-        if (SpawnHousesSystem.MainHouse is not null)
+        if (StructureManager.MainHouse is not null)
             foreach (var npc in Main.npc)
                 // 688 is magic storage's automaton
                 if (npc.type is NPCID.Guide or NPCID.TaxCollector or 688) {
-                    npc.position.X = (SpawnHousesSystem.MainHouse.X + SpawnHousesSystem.MainHouse.LeftSize - 1 +
+                    npc.position.X = (StructureManager.MainHouse.X + StructureManager.MainHouse.LeftSize - 1 +
                                       Terraria.WorldGen.genRand.Next(-8, 9)) * 16; // tiles to pixels
-                    npc.position.Y = (SpawnHousesSystem.MainHouse.Y + 13) * 16;
+                    npc.position.Y = (StructureManager.MainHouse.Y + 13) * 16;
                 }
 
         if (Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "").Replace("'", "") == "dontdigup" ||
@@ -68,10 +68,10 @@ public class WorldGenPasses : ModSystem {
             GenerateMainBasement();
 
         WebClientInstance.WebClient.AddSpawnCount(
-            SpawnHousesSystem.MainHouse is not null,
-            SpawnHousesSystem.MainBasement is not null,
-            SpawnHousesSystem.BeachHouse is not null,
-            SpawnHousesSystem.Mineshaft is not null
+            StructureManager.MainHouse is not null,
+            StructureManager.MainBasement is not null,
+            StructureManager.BeachHouse is not null,
+            StructureManager.Mineshaft is not null
         );
     }
 }

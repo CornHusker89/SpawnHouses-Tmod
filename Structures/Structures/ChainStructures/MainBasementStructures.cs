@@ -382,11 +382,11 @@ public class MainBasement_Room5 : CustomChainStructure {
             Terraria.WorldGen.PlaceTile(X + 11, Y + 7, ModHelper.RemoteAccessTileID);
             TileEntity.PlaceEntityNet(X + 10, Y + 6, ModHelper.RemoteAccessTileEntityID);
 
-            if (SpawnHousesSystem.MainHouse is not null &&
-                SpawnHousesSystem.MainHouse.Status != StructureStatus.NotGenerated)
+            if (StructureManager.MainHouse is not null &&
+                StructureManager.MainHouse.Status != StructureStatus.NotGenerated)
                 ModHelper.LinkRemoteStorage(
                     new Point16(X + 10, Y + 6),
-                    SpawnHousesSystem.MainHouse.StorageHeartPos
+                    StructureManager.MainHouse.StorageHeartPos
                 );
 
             Terraria.WorldGen.PlaceTile(X + 9, Y + 4, ModHelper.StorageUnitTileID);

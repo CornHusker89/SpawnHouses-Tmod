@@ -240,7 +240,7 @@ public class MainBasement : StructureChain {
         if (!base.Generate()) return false;
 
         // clear the extra walls on top, if the basement generates directly on the surface
-        if (SpawnHousesSystem.MainHouse is null)
+        if (StructureManager.MainHouse is null)
             for (var i = -6; i <= 6; i++)
                 WorldUtils.ClearWall(EntryPosX + i, EntryPosY);
 

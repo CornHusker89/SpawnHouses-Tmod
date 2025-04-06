@@ -99,7 +99,7 @@ public static class WorldGenHelper {
                 hasBasement: ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement,
                 inUnderworld: spawnUnderworld);
             house.Generate();
-            SpawnHousesSystem.MainHouse = house;
+            StructureManager.MainHouse = house;
 
             // move the spawn point to the upper floor of the house
             if (ModContent.GetInstance<SpawnHousesConfig>().SpawnPointHouseSetsSpawn) {
@@ -134,8 +134,8 @@ public static class WorldGenHelper {
         int x, y;
         try {
             bool FindValidLocation(bool left = true) {
-                if (SpawnHousesSystem.MainHouse != null) {
-                    var centerHouse = SpawnHousesSystem.MainHouse.X + SpawnHousesSystem.MainHouse.StructureXSize / 2;
+                if (StructureManager.MainHouse != null) {
+                    var centerHouse = StructureManager.MainHouse.X + StructureManager.MainHouse.StructureXSize / 2;
                     if (left)
                         x = centerHouse - Terraria.WorldGen.genRand.Next(18, 38) - 35;
                     else
@@ -163,7 +163,7 @@ public static class WorldGenHelper {
             if (FindValidLocation(startLeftSide) || FindValidLocation(!startLeftSide)) {
                 var mineshaft = new Mineshaft((ushort)(x - 13), (ushort)(y - 13));
                 mineshaft.Generate();
-                SpawnHousesSystem.Mineshaft = mineshaft;
+                StructureManager.Mineshaft = mineshaft;
             }
         }
         catch (Exception e) {
@@ -174,17 +174,17 @@ public static class WorldGenHelper {
 
     public static void GenerateMainBasement() {
         BoundingBox[] mineshaftBoundingBox = [];
-        if (SpawnHousesSystem.Mineshaft is not null) {
-            var structure = SpawnHousesSystem.Mineshaft;
+        if (StructureManager.Mineshaft is not null) {
+            var structure = StructureManager.Mineshaft;
             var structureBox = new BoundingBox(structure.X - 8, structure.Y,
                 structure.X + structure.StructureXSize + 8, structure.Y + 200);
             mineshaftBoundingBox = [structureBox];
         }
 
         MainBasement chain;
-        if (SpawnHousesSystem.MainHouse is not null)
-            chain = new MainBasement((ushort)SpawnHousesSystem.MainHouse.BasementEntryPos.X,
-                (ushort)SpawnHousesSystem.MainHouse.BasementEntryPos.Y,
+        if (StructureManager.MainHouse is not null)
+            chain = new MainBasement((ushort)StructureManager.MainHouse.BasementEntryPos.X,
+                (ushort)StructureManager.MainHouse.BasementEntryPos.Y,
                 startingBoundingBoxes: mineshaftBoundingBox);
         else
             chain = new MainBasement((ushort)Main.spawnTileX, (ushort)Main.spawnTileY,
@@ -194,7 +194,7 @@ public static class WorldGenHelper {
             try {
                 chain.CalculateChain();
                 chain.Generate();
-                SpawnHousesSystem.MainBasement = chain;
+                StructureManager.MainBasement = chain;
             }
             catch (Exception e) {
                 ModContent.GetInstance<SpawnHouses>().Logger.Error($"Main basement failed to generate:\n{e}");
@@ -288,7 +288,7 @@ public static class WorldGenHelper {
                     ? new BeachHouse((ushort)(tileX - 9), (ushort)(tileY - 32))
                     : new BeachHouse((ushort)(tileX - 23), (ushort)(tileY - 32), reverse: true);
                 beachHouse.Generate();
-                SpawnHousesSystem.BeachHouse = beachHouse;
+                StructureManager.BeachHouse = beachHouse;
 
                 // firepit generation
                 if (Terraria.WorldGen.genRand.Next(0, 2) == 0) // 1/2 chance

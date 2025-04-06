@@ -11,7 +11,7 @@ namespace SpawnHouses;
 
 #nullable enable
 
-internal class SpawnHousesSystem : ModSystem {
+internal class StructureManager : ModSystem {
     public static Version WorldVersion = new(ModInstance.Mod.Version.ToString());
 
     public static MainHouse? MainHouse;

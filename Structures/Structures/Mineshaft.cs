@@ -35,7 +35,7 @@ public sealed class Mineshaft : CustomStructure {
     public Mineshaft(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated) :
         base(_filePath, _structureXSize, _structureYSize,
             CopyConnectPoints(_connectPoints), status, x, y) {
-        if (SpawnHousesSystem.MainHouse is not null && SpawnHousesSystem.MainHouse.X > X)
+        if (StructureManager.MainHouse is not null && StructureManager.MainHouse.X > X)
             IsLeftSide = true;
     }
 
