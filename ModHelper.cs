@@ -5,6 +5,7 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 using WorldGenTesting.Helpers;
+using WorldGenTesting.Types;
 
 // ReSharper disable InconsistentNaming
 
@@ -31,9 +32,9 @@ public class ModHelper : ModSystem
     public static bool IsRemnantsEnabled;
 
     public static bool IsWorldGenTestingEnabled;
-    
-    
-    
+
+
+
     [JITWhenModsEnabled("MagicStorage")]
     public static void GetMagicStorage()
     {
@@ -53,7 +54,7 @@ public class ModHelper : ModSystem
             StorageUnitTileEntityID = ModContent.TileEntityType<MagicStorage.Components.TEStorageUnit>();
             EnviromentAccessTileID = ModContent.TileType<MagicStorage.Components.EnvironmentAccess>();
             EnviromentAccessTileEntityID = ModContent.TileEntityType<MagicStorage.Components.TEEnvironmentAccess>();
-            
+
             //AutomatonEntityID = ModContent.NPCType<MagicStorage.NPCs.Golem>()
         }
         catch (Exception)
@@ -63,7 +64,7 @@ public class ModHelper : ModSystem
             ModContent.GetInstance<SpawnHouses>().Logger.Error("Failed to retrieve Magic Storage TileIDs. Contact the mod author about this issue");
         }
     }
-    
+
 
     [JITWhenModsEnabled("MagicStorage")]
     public static bool LinkRemoteStorage(Point16 remotePos, Point16 heartPos)
@@ -74,7 +75,7 @@ public class ModHelper : ModSystem
         {
             ModContent.GetInstance<SpawnHouses>().Logger.Error("Failed to link Magic Storage's remote storage to storage heart. Contact the mod author about this issue");
         }
-        
+
         try
         {
             TileEntity.ByPosition.TryGetValue(remotePos, out TileEntity tileEntity);
@@ -101,22 +102,22 @@ public class ModHelper : ModSystem
     {
         IsRemnantsEnabled = true;
     }
-    
-    
+
+
     [JITWhenModsEnabled("WorldGenTesting")]
     public static void GetWorldGenTesting()
     {
         IsWorldGenTestingEnabled = true;
 
-        var consoleInstance = ModContent.GetInstance<WorldGenTesting.UI.MenuConsoleSystem>();
-                
+        var consoleInstance = ModContent.GetInstance<WorldGenTesting.MenuConsoleSystem>();
+
         [JITWhenModsEnabled("WorldGenTesting")]
         string CreateWorld()
         {
-            TestingHelper.MakeWorld("SpawnHousesAutomatedTesting", TestingHelper.WorldSize.Medium);
+            TestingHelper.MakeWorld("SpawnHousesAutomatedTesting", WorldSize.Medium);
             return null;
         }
-                
+
         consoleInstance.AddTest(new Test(
             ModInstance.Mod, [CreateWorld, SpawnHousesTesting.TestMainHouse], "mainhouse"
         ));
@@ -130,12 +131,12 @@ public class ModHelper : ModSystem
             ModInstance.Mod, [CreateWorld, SpawnHousesTesting.TestMineshaft], "mineshaft"
         ));
         consoleInstance.AddTest(new Test(
-            ModInstance.Mod, [CreateWorld, SpawnHousesTesting.TestMainHouse, SpawnHousesTesting.TestBeachHouse, 
+            ModInstance.Mod, [CreateWorld, SpawnHousesTesting.TestMainHouse, SpawnHousesTesting.TestBeachHouse,
                 SpawnHousesTesting.TestMainBasement, SpawnHousesTesting.TestMineshaft], "all"
         ));
     }
-    
-    
+
+
     public override void OnModLoad()
     {
         if (ModLoader.HasMod("MagicStorage") && ModContent.GetInstance<SpawnHousesConfig>().MagicStorageIntegrations)
