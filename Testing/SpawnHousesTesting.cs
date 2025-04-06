@@ -1,5 +1,4 @@
 #nullable enable
-using System;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Structures;
 using Terraria;
@@ -10,9 +9,8 @@ using WorldGenTesting.Types;
 namespace SpawnHouses.Testing;
 
 [JITWhenModsEnabled("WorldGenTesting")]
-public class SpawnHousesTesting
-{
-    public static void Initialize(){
+public class SpawnHousesTesting {
+    public static void Initialize() {
         var testingMod = ModContent.GetInstance<WorldGenTesting.WorldGenTesting>();
 
         testingMod.AddTest(new Test(
@@ -35,8 +33,7 @@ public class SpawnHousesTesting
 
     #region Test Helpers
 
-    private static string? ScreenshotMainHouse()
-    {
+    private static string? ScreenshotMainHouse() {
         if (SpawnHousesSystem.MainHouse is null)
             return "No Main House";
 
@@ -52,12 +49,11 @@ public class SpawnHousesTesting
         return null;
     }
 
-    private static string? ScreenshotBeachHouse()
-    {
+    private static string? ScreenshotBeachHouse() {
         if (SpawnHousesSystem.BeachHouse is null)
             return "No Beach House";
 
-        WorldGenTesting.Helpers.TestingHelper.TakeScreenshot(
+        TestingHelper.TakeScreenshot(
             new Rectangle(
                 SpawnHousesSystem.BeachHouse.X - 30,
                 SpawnHousesSystem.BeachHouse.Y - 30,
@@ -69,12 +65,11 @@ public class SpawnHousesTesting
         return null;
     }
 
-    private static string? ScreenshotMainBasement()
-    {
+    private static string? ScreenshotMainBasement() {
         if (SpawnHousesSystem.MainBasement is null)
             return "No Main Basement";
 
-        WorldGenTesting.Helpers.TestingHelper.TakeScreenshot(
+        TestingHelper.TakeScreenshot(
             new Rectangle(
                 SpawnHousesSystem.MainBasement.EntryPosX - 60,
                 SpawnHousesSystem.MainBasement.EntryPosY - 20,
@@ -86,12 +81,11 @@ public class SpawnHousesTesting
         return null;
     }
 
-    private static string? ScreenshotMineshaft()
-    {
+    private static string? ScreenshotMineshaft() {
         if (SpawnHousesSystem.Mineshaft is null)
             return "No Mineshaft";
 
-        WorldGenTesting.Helpers.TestingHelper.TakeScreenshot(
+        TestingHelper.TakeScreenshot(
             new Rectangle(
                 SpawnHousesSystem.Mineshaft.X - 10,
                 SpawnHousesSystem.Mineshaft.Y - 6,
@@ -109,28 +103,28 @@ public class SpawnHousesTesting
     #region Tests
 
     public static string? TestMainHouse() {
-        TestingHelper.MakeWorld("SpawnHousesAutomatedTesting", WorldSize.Medium);
+        TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
         return ScreenshotMainHouse();
     }
 
     public static string? TestBeachHouse() {
-        TestingHelper.MakeWorld("SpawnHousesAutomatedTesting", WorldSize.Medium);
+        TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
         return ScreenshotBeachHouse();
     }
 
     public static string? TestMainBasement() {
-        TestingHelper.MakeWorld("SpawnHousesAutomatedTesting", WorldSize.Medium);
+        TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
         return ScreenshotMainBasement();
     }
 
     public static string? TestMineshaft() {
-        TestingHelper.MakeWorld("SpawnHousesAutomatedTesting", WorldSize.Medium);
+        TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
         return ScreenshotMineshaft();
     }
 
     public static string? TestAll() {
-        TestingHelper.MakeWorld("SpawnHousesAutomatedTesting", WorldSize.Medium);
-        string output = String.Empty;
+        TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
+        var output = string.Empty;
         output += "\n" + ScreenshotMainHouse();
         output += "\n" + ScreenshotBeachHouse();
         output += "\n" + ScreenshotMainBasement();

@@ -1,104 +1,92 @@
-﻿using System.Collections.Generic;
-using Terraria;
+﻿using Terraria;
 using Terraria.ModLoader.IO;
 
-namespace SpawnHouses.StructureHelper.ChestHelper
-{
-	class ChestRulePoolChance : ChestRule
-	{
-		/// <summary>
-		/// How many items from the pool, picked at random, should be placed in the chest.
-		/// </summary>
-		public int itemsToGenerate;
+namespace SpawnHouses.StructureHelper.ChestHelper;
 
-		/// <summary>
-		/// the chance for this item pool to generate at all.
-		/// </summary>
-		public float chance;
+internal class ChestRulePoolChance : ChestRule {
+	/// <summary>
+	///     the chance for this item pool to generate at all.
+	/// </summary>
+	public float chance;
 
-		public override bool UsesWeight => true;
+	/// <summary>
+	///     How many items from the pool, picked at random, should be placed in the chest.
+	/// </summary>
+	public int itemsToGenerate;
 
-		public override string Name => "Chance + Pool Rule";
+    public override bool UsesWeight => true;
 
-		public override string Tooltip => "Has a configurable chance to generate a \nconfigurable amount of items randomly \nselected from the rule. \nCan make use of weight.";
+    public override string Name => "Chance + Pool Rule";
 
-		public override void PlaceItems(Chest chest, ref int nextIndex)
-		{
-			if (nextIndex >= 40)
-				return;
+    public override string Tooltip =>
+        "Has a configurable chance to generate a \nconfigurable amount of items randomly \nselected from the rule. \nCan make use of weight.";
 
-			if (Terraria.WorldGen.genRand.NextFloat() <= chance)
-			{
-				List<Loot> toLoot = pool;
+    public override void PlaceItems(Chest chest, ref int nextIndex) {
+        if (nextIndex >= 40)
+            return;
 
-				for (int k = 0; k < itemsToGenerate; k++)
-				{
-					if (nextIndex >= 40)
-						return;
+        if (Terraria.WorldGen.genRand.NextFloat() <= chance) {
+            var toLoot = pool;
 
-					int maxWeight = 1;
+            for (var k = 0; k < itemsToGenerate; k++) {
+                if (nextIndex >= 40)
+                    return;
 
-					foreach (Loot loot in toLoot)
-						maxWeight += loot.weight;
+                var maxWeight = 1;
 
-					int selection = Main.rand.Next(maxWeight);
-					int weightTotal = 0;
-					Loot selectedLoot = null;
+                foreach (var loot in toLoot)
+                    maxWeight += loot.weight;
 
-					for (int i = 0; i < toLoot.Count; i++)
-					{
-						weightTotal += toLoot[i].weight;
+                var selection = Main.rand.Next(maxWeight);
+                var weightTotal = 0;
+                Loot selectedLoot = null;
 
-						if (selection < weightTotal + 1)
-						{
-							selectedLoot = toLoot[i];
-							toLoot.Remove(selectedLoot);
-							break;
-						}
-					}
+                for (var i = 0; i < toLoot.Count; i++) {
+                    weightTotal += toLoot[i].weight;
 
-					chest.item[nextIndex] = selectedLoot?.GetLoot();
-					nextIndex++;
-				}
-			}
-		}
+                    if (selection < weightTotal + 1) {
+                        selectedLoot = toLoot[i];
+                        toLoot.Remove(selectedLoot);
+                        break;
+                    }
+                }
 
-		public override TagCompound Serizlize()
-		{
-			var tag = new TagCompound()
-			{
-				{"Type", "PoolChance"},
-				{"Chance", chance},
-				{"ToGenerate", itemsToGenerate},
-				{"Pool", SerializePool()}
-			};
+                chest.item[nextIndex] = selectedLoot?.GetLoot();
+                nextIndex++;
+            }
+        }
+    }
 
-			return tag;
-		}
+    public override TagCompound Serizlize() {
+        var tag = new TagCompound {
+            { "Type", "PoolChance" },
+            { "Chance", chance },
+            { "ToGenerate", itemsToGenerate },
+            { "Pool", SerializePool() }
+        };
 
-		public new static  ChestRule Deserialize(TagCompound tag)
-		{
-			var rule = new ChestRulePoolChance
-			{
-				itemsToGenerate = tag.GetInt("ToGenerate"),
-				chance = tag.GetFloat("Chance"),
-				pool = DeserializePool(tag.GetCompound("Pool"))
-			};
+        return tag;
+    }
 
-			return rule;
-		}
+    public new static ChestRule Deserialize(TagCompound tag) {
+        var rule = new ChestRulePoolChance {
+            itemsToGenerate = tag.GetInt("ToGenerate"),
+            chance = tag.GetFloat("Chance"),
+            pool = DeserializePool(tag.GetCompound("Pool"))
+        };
 
-		public override ChestRule Clone()
-		{
-			var clone = new ChestRulePoolChance();
+        return rule;
+    }
 
-			for (int k = 0; k < pool.Count; k++)
-				clone.pool.Add(pool[k].Clone());
+    public override ChestRule Clone() {
+        var clone = new ChestRulePoolChance();
 
-			clone.itemsToGenerate = itemsToGenerate;
-			clone.chance = chance;
+        for (var k = 0; k < pool.Count; k++)
+            clone.pool.Add(pool[k].Clone());
 
-			return clone;
-		}
-	}
+        clone.itemsToGenerate = itemsToGenerate;
+        clone.chance = chance;
+
+        return clone;
+    }
 }

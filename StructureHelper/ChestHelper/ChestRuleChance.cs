@@ -1,69 +1,58 @@
 using Terraria;
 using Terraria.ModLoader.IO;
 
-namespace SpawnHouses.StructureHelper.ChestHelper
-{
-    class ChestRuleChance : ChestRule
-    {
-        /// <summary>
-        /// the chance for any individual item from this pool to generate, from 0 to 1. (0 = 0%, 1 = 100%) If you want to generate X items from the pool, use ChestRulePool instead. If you want multiple different chances, add another rule of this type.
-        /// </summary>
-        public float chance = 0;
+namespace SpawnHouses.StructureHelper.ChestHelper;
 
-        public override string Name => "Chance Rule";
+internal class ChestRuleChance : ChestRule {
+    /// <summary>
+    ///     the chance for any individual item from this pool to generate, from 0 to 1. (0 = 0%, 1 = 100%) If you want to
+    ///     generate X items from the pool, use ChestRulePool instead. If you want multiple different chances, add another rule
+    ///     of this type.
+    /// </summary>
+    public float chance;
 
-        public override string Tooltip => "Attempts to generate all items in the rule, \nwith a configurable chance to generate each.\nItems are attempted in the order they appear here";
+    public override string Name => "Chance Rule";
 
-        public override void PlaceItems(Chest chest, ref int nextIndex)
-        {
-            if (nextIndex >= 40)
-                return;
+    public override string Tooltip =>
+        "Attempts to generate all items in the rule, \nwith a configurable chance to generate each.\nItems are attempted in the order they appear here";
 
-            for (int k = 0; k < pool.Count; k++)
-            {
-                if (Terraria.WorldGen.genRand.NextFloat(1) <= chance)
-                {
-                    chest.item[nextIndex] = pool[k].GetLoot();
-                    nextIndex++;
-                }
+    public override void PlaceItems(Chest chest, ref int nextIndex) {
+        if (nextIndex >= 40)
+            return;
+
+        for (var k = 0; k < pool.Count; k++)
+            if (Terraria.WorldGen.genRand.NextFloat(1) <= chance) {
+                chest.item[nextIndex] = pool[k].GetLoot();
+                nextIndex++;
             }
-        }
+    }
 
-        public override TagCompound Serizlize()
-        {
-            var tag = new TagCompound()
-            {
-                {"Type", "Chance"},
-                {"Chance", chance},
-                {"Pool", SerializePool()}
-            };
+    public override TagCompound Serizlize() {
+        var tag = new TagCompound {
+            { "Type", "Chance" },
+            { "Chance", chance },
+            { "Pool", SerializePool() }
+        };
 
-            return tag;
-        }
+        return tag;
+    }
 
-        public new static ChestRule Deserialize(TagCompound tag)
-        {
-            var rule = new ChestRuleChance
-            {
-                chance = tag.GetFloat("Chance"),
-                pool = DeserializePool(tag.GetCompound("Pool"))
-            };
+    public new static ChestRule Deserialize(TagCompound tag) {
+        var rule = new ChestRuleChance {
+            chance = tag.GetFloat("Chance"),
+            pool = DeserializePool(tag.GetCompound("Pool"))
+        };
 
-            return rule;
-        }
+        return rule;
+    }
 
-        public override ChestRule Clone()
-        {
-            var clone = new ChestRuleChance();
+    public override ChestRule Clone() {
+        var clone = new ChestRuleChance();
 
-            for (int k = 0; k < pool.Count; k++)
-            {
-                clone.pool.Add(pool[k].Clone());
-            }
+        for (var k = 0; k < pool.Count; k++) clone.pool.Add(pool[k].Clone());
 
-            clone.chance = chance;
+        clone.chance = chance;
 
-            return clone;
-        }
+        return clone;
     }
 }
