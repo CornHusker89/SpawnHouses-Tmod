@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Structures;
+using SpawnHouses.Testing;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
@@ -108,32 +109,7 @@ public class ModHelper : ModSystem
     public static void GetWorldGenTesting()
     {
         IsWorldGenTestingEnabled = true;
-
-        var consoleInstance = ModContent.GetInstance<WorldGenTesting.MenuConsoleSystem>();
-
-        [JITWhenModsEnabled("WorldGenTesting")]
-        string CreateWorld()
-        {
-            TestingHelper.MakeWorld("SpawnHousesAutomatedTesting", WorldSize.Medium);
-            return null;
-        }
-
-        consoleInstance.AddTest(new Test(
-            ModInstance.Mod, [CreateWorld, SpawnHousesTesting.TestMainHouse], "mainhouse"
-        ));
-        consoleInstance.AddTest(new Test(
-            ModInstance.Mod, [CreateWorld, SpawnHousesTesting.TestBeachHouse], "beachhouse"
-        ));
-        consoleInstance.AddTest(new Test(
-            ModInstance.Mod, [CreateWorld, SpawnHousesTesting.TestMainBasement], "mainbasement"
-        ));
-        consoleInstance.AddTest(new Test(
-            ModInstance.Mod, [CreateWorld, SpawnHousesTesting.TestMineshaft], "mineshaft"
-        ));
-        consoleInstance.AddTest(new Test(
-            ModInstance.Mod, [CreateWorld, SpawnHousesTesting.TestMainHouse, SpawnHousesTesting.TestBeachHouse,
-                SpawnHousesTesting.TestMainBasement, SpawnHousesTesting.TestMineshaft], "all"
-        ));
+        SpawnHousesTesting.Initialize();
     }
 
 
