@@ -4,13 +4,13 @@ This mod has Magic Storage integration! A starting setup will spawn with the mai
 
 Use Mod Configs to enable/disable generation of any house.
 
-- Current Compatibilities - 
+- Current Compatibilities -
 - Calamity
-- Spirit
+- Spirit / Spirit Reforged
 - Remnants
 - Start with base (only if spawn point house/basement is disabled in this mod)
 
-Anything else not listed just means I haven't tested whether it's compatible. Any mod that changes anything in the spawn point or beaches has the potential to break the mods.
+Anything else not listed just means I haven't tested whether it's compatible. Any mod that changes anything in the spawn point or beaches has the potential to break the mod.
 
 If you liked the mod, please give a mod a rating! If you didn't like it, that's cool too! If you're willing to, a comment about why you didn't like it would be appreciated!
 

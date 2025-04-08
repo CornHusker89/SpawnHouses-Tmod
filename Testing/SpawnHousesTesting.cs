@@ -14,19 +14,48 @@ public class SpawnHousesTesting {
         var testingMod = ModContent.GetInstance<WorldGenTesting.WorldGenTesting>();
 
         testingMod.AddTest(new Test(
-            ModInstance.Mod, TestMainHouse, "mainhouse"
+            ModInstance.Mod, () => {
+                TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
+                return ScreenshotMainHouse();
+            },
+            "mainhouse"
         ));
         testingMod.AddTest(new Test(
-            ModInstance.Mod, TestBeachHouse, "beachhouse"
+            ModInstance.Mod, () => {
+                TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
+                return ScreenshotBeachHouse();
+            },
+            "beachhouse"
         ));
         testingMod.AddTest(new Test(
-            ModInstance.Mod, TestMainBasement, "mainbasement"
+            ModInstance.Mod, () => {
+                TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
+                return ScreenshotMainBasement();
+            },
+            "mainbasement"
         ));
         testingMod.AddTest(new Test(
-            ModInstance.Mod, TestMineshaft, "mineshaft"
+            ModInstance.Mod, () => {
+                TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
+                return ScreenshotMineshaft();
+            },
+            "mineshaft"
         ));
         testingMod.AddTest(new Test(
-            ModInstance.Mod, TestAll, "all"
+            ModInstance.Mod, () => {
+                TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
+                var output = string.Empty;
+                string? result = ScreenshotMainHouse();
+                output += result == null ? "" : result + "\n";
+                result = ScreenshotBeachHouse();
+                output += result == null ? "" : result + "\n";
+                result = ScreenshotMainBasement();
+                output += result == null ? "" : result + "\n";
+                result = ScreenshotMineshaft();
+                output += result == null ? "" : result + "\n";
+                return output.Length > 0 ? output : null;
+            },
+            "all"
         ));
     }
 
@@ -95,45 +124,6 @@ public class SpawnHousesTesting {
             Main.ActiveWorldFileData.Seed + "_Mineshaft"
         );
         return null;
-    }
-
-    #endregion
-
-
-    #region Tests
-
-    public static string? TestMainHouse() {
-        TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
-        return ScreenshotMainHouse();
-    }
-
-    public static string? TestBeachHouse() {
-        TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
-        return ScreenshotBeachHouse();
-    }
-
-    public static string? TestMainBasement() {
-        TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
-        return ScreenshotMainBasement();
-    }
-
-    public static string? TestMineshaft() {
-        TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
-        return ScreenshotMineshaft();
-    }
-
-    public static string? TestAll() {
-        TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
-        var output = string.Empty;
-        string? result = ScreenshotMainHouse();
-        output += result == null ? "" : result + "\n";
-        result = ScreenshotBeachHouse();
-        output += result == null ? "" : result + "\n";
-        result = ScreenshotMainBasement();
-        output += result == null ? "" : result + "\n";
-        result = ScreenshotMineshaft();
-        output += result == null ? "" : result + "\n";
-        return output.Length > 0 ? output : null;
     }
 
     #endregion
