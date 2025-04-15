@@ -2,7 +2,6 @@ using System;
 using SpawnHouses.Structures.StructureParts;
 using Terraria;
 using Terraria.ID;
-using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
 namespace SpawnHouses.Structures;
 
@@ -16,7 +15,7 @@ public class Bridge {
     public readonly short MinDeltaX;
     public readonly short MinDeltaY;
 
-    public BoundingBox[] BoundingBoxes;
+    public Box[] BoundingBoxes;
     public ushort ID;
     public ConnectPoint Point1;
     public ConnectPoint Point2;
@@ -25,7 +24,7 @@ public class Bridge {
     public Bridge(byte[] inputDirections,
         short minDeltaX, short maxDeltaX, short minDeltaY, short maxDeltaY, sbyte deltaXMultiple = 1,
         sbyte deltaYMultiple = 1,
-        ConnectPoint point1 = null, ConnectPoint point2 = null, BoundingBox[] boundingBoxes = null) {
+        ConnectPoint point1 = null, ConnectPoint point2 = null, Box[] boundingBoxes = null) {
         InputDirections = inputDirections;
         MinDeltaX = minDeltaX;
         MaxDeltaX = maxDeltaX;

@@ -6,20 +6,19 @@ using SpawnHouses.Structures.StructureParts;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
-using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
 namespace SpawnHouses.Structures.Bridges;
 
 public class ParabolaBridge : Bridge {
     private readonly Mod _mod = ModContent.GetInstance<SpawnHouses>();
+    private readonly double AttemptSlope;
+    private readonly byte BoundingBoxYMargin;
 
     public readonly string StructureFilePath;
     public readonly ushort StructureHeight;
     public readonly ushort StructureLength;
     public readonly short StructureYOffset;
-    private readonly double AttemptSlope;
     private bool BackwardsGeneration;
-    private readonly byte BoundingBoxYMargin;
 
     public ParabolaBridge(string structureFilePath, ushort structureLength, ushort structureHeight,
         short structureYOffset, double attemptSlope, byte boundingBoxYMargin,
@@ -70,7 +69,7 @@ public class ParabolaBridge : Bridge {
         Point1 = point1;
         Point2 = point2;
 
-        var boundingBoxesList = new List<BoundingBox>();
+        var boundingBoxesList = new List<Box>();
         var parabola = _CalculateParabolaBridge(AttemptSlope);
         var a = parabola.Item1;
         var b = parabola.Item2;
@@ -89,7 +88,7 @@ public class ParabolaBridge : Bridge {
                 var bridgeStructureY = (ushort)(cumulativeBridgeStructureY / StructureLength);
 
                 boundingBoxesList.Add(
-                    new BoundingBox(
+                    new Box(
                         bridgeStructureX,
                         bridgeStructureY - BoundingBoxYMargin,
                         bridgeStructureX + StructureLength - 1,

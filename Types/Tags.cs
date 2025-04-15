@@ -1,22 +1,28 @@
 namespace SpawnHouses.Types;
 
-public enum StructureTag
-{
+public enum StructureTag {
     // ===== structureLayout =====
     HasHousing,
     IsSymmetric,
+
     /// structure is categorized as being above ground (typically has a roof)
     AboveGround,
-    /// structure is categorized as being below ground (typically has a no roof)
+
+    /// structure is categorized as being below ground (typically has a no dedicated roof)
     UnderGround,
+
     /// structure is categorized as having an overall forest theme
     Forest,
+
     /// structure is categorized as having an overall icy/cold theme
     Ice,
+
     /// structure is categorized as having an overall beach theme
     Beach,
+
     /// structure is categorized as having an overall jungle theme
     Jungle,
+
     /// structure is categorized as having an overall cavern/underground theme
     Cavern,
 
@@ -41,8 +47,10 @@ public enum StructureTag
     FloorHollow,
     FloorGroundLevel,
     FloorElevated,
+
     /// floor is either 1 or 2 tiles thick
     FloorThin,
+
     /// floor is larger than 2 tiles thick
     FloorThick,
 
@@ -63,8 +71,10 @@ public enum StructureTag
 
     // ===== stairway =====
     HasStairway,
+
     /// stairway is 3 or fewer tiles wide
     StairwayNarrow,
+
     /// stairway is greater than 3 tiles wide
     StairwayWide,
 
@@ -87,8 +97,7 @@ public enum StructureTag
     RoofSlopeNone
 }
 
-public enum PaletteTag
-{
+public enum PaletteTag {
     Wood,
     Stone,
     DarkGrey,
@@ -98,5 +107,5 @@ public enum PaletteTag
     LightBrown,
     MediumBrown,
     Red,
-    Turquoise,
+    Turquoise
 }

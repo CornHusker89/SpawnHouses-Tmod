@@ -4,15 +4,15 @@ using Terraria.ModLoader.IO;
 namespace SpawnHouses.StructureHelper.ChestHelper;
 
 internal class ChestRulePoolChance : ChestRule {
-	/// <summary>
-	///     the chance for this item pool to generate at all.
-	/// </summary>
-	public float chance;
+    /// <summary>
+    ///     the chance for this item pool to generate at all.
+    /// </summary>
+    public float chance;
 
-	/// <summary>
-	///     How many items from the pool, picked at random, should be placed in the chest.
-	/// </summary>
-	public int itemsToGenerate;
+    /// <summary>
+    ///     How many items from the pool, picked at random, should be placed in the chest.
+    /// </summary>
+    public int itemsToGenerate;
 
     public override bool UsesWeight => true;
 

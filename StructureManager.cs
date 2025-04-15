@@ -138,7 +138,7 @@ internal class DictionarySerializer : TagSerializer<Dictionary<string, object>, 
 
 internal class MainHouseSerializer : TagSerializer<MainHouse, TagCompound> {
     public override TagCompound Serialize(MainHouse structure) {
-        return new TagCompound() {
+        return new TagCompound {
             ["X"] = structure.X,
             ["Y"] = structure.Y,
             ["Status"] = structure.Status,
@@ -187,7 +187,7 @@ internal class MainBasementSerializer : TagSerializer<MainBasement, TagCompound>
 
 internal class MineshaftSerializer : TagSerializer<Mineshaft, TagCompound> {
     public override TagCompound Serialize(Mineshaft structure) {
-        return new TagCompound() {
+        return new TagCompound {
             ["X"] = structure.X,
             ["Y"] = structure.Y,
             ["Status"] = structure.Status
@@ -205,7 +205,7 @@ internal class MineshaftSerializer : TagSerializer<Mineshaft, TagCompound> {
 
 internal class BeachHouseSerializer : TagSerializer<BeachHouse, TagCompound> {
     public override TagCompound Serialize(BeachHouse structure) {
-        return new TagCompound() {
+        return new TagCompound {
             ["X"] = structure.X,
             ["Y"] = structure.Y,
             ["Status"] = structure.Status,

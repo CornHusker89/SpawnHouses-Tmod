@@ -9,7 +9,7 @@ public class CustomChainStructure : CustomStructure {
     public new ChainConnectPoint[][] ConnectPoints;
     public sbyte Cost;
     public ChainConnectPoint ParentChainConnectPoint;
-    public BoundingBox[] StructureBoundingBoxes;
+    public Box[] StructureBoundingBoxes;
     public ushort Weight;
 
     protected CustomChainStructure(string filePath, ushort structureXSize, ushort structureYSize,
@@ -35,7 +35,7 @@ public class CustomChainStructure : CustomStructure {
                 connectPoint.SetPosition(X, Y);
 
         StructureBoundingBoxes = [
-            new BoundingBox(X, Y, X + StructureXSize - 1, Y + StructureYSize - 1)
+            new Box(X, Y, X + StructureXSize - 1, Y + StructureYSize - 1)
         ];
     }
 

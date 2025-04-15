@@ -10,9 +10,7 @@ using Terraria.ModLoader;
 namespace SpawnHouses.Structures;
 
 // ReSharper disable InconsistentNaming
-
-public enum StructureID : ushort
-{
+public enum StructureID : ushort {
     // normal structures
     MainHouse = 1,
     BeachHouse = 2,
@@ -45,13 +43,13 @@ public enum StructureID : ushort
     TestChainStructure2 = 10002
 }
 
+public static class StructureIDUtils {
+    public static readonly ushort[] BranchingHallwayIDs = [
+        6, 7, 8
+    ];
 
-public static class StructureIDUtils
-{
-    public static Type GetStructureType(StructureID type)
-    {
-        switch (type)
-        {
+    public static Type GetStructureType(StructureID type) {
+        switch (type) {
             // normal structures
             case StructureID.MainHouse:
                 return typeof(MainHouse);
@@ -61,7 +59,7 @@ public static class StructureIDUtils
                 return typeof(Firepit);
             case StructureID.Mineshaft:
                 return typeof(Mineshaft);
-            
+
             // main basement
             case StructureID.MainBasement_Entry1:
                 return typeof(MainBasement_Entry1);
@@ -91,62 +89,53 @@ public static class StructureIDUtils
                 return typeof(MainBasement_Room6);
             case StructureID.MainBasement_Room7:
                 return typeof(MainBasement_Room7);
-            
-            
+
+
             case StructureID.CaveTown1_Test1:
                 return typeof(CaveTown1_Test1);
             case StructureID.CaveTown1_Test2:
                 return typeof(CaveTown1_Test2);
-            
-            
+
+
             case StructureID.BridgeTest:
                 return typeof(BridgeTest);
             case StructureID.TestChainStructure:
                 return typeof(TestChainStructure);
             case StructureID.TestChainStructure2:
                 return typeof(TestChainStructure2);
-            
+
             default:
                 throw new InvalidEnumArgumentException();
         }
     }
-    
-    public static CustomStructure CreateStructure (ushort type, ushort x, ushort y, byte status)
-    {
-        var structureType = StructureIDUtils.GetStructureType((StructureID)type);
-        Object obj;
+
+    public static CustomStructure CreateStructure(ushort type, ushort x, ushort y, byte status) {
+        var structureType = GetStructureType((StructureID)type);
+        object obj;
         if (structureType.BaseType == null)
             obj = Activator.CreateInstance(structureType, x, y, status);
         else
             obj = Activator.CreateInstance(structureType, x, y, status, (sbyte)-1, (ushort)10);
-        
+
         if (obj is null)
             throw new Exception("Structure ID to structure object failed");
-        
-        CustomStructure structure = (CustomStructure)obj;
+
+        var structure = (CustomStructure)obj;
         return structure;
     }
-    
-    public static readonly ushort[] BranchingHallwayIDs =
-    [
-        6, 7, 8
-    ];
 
-    public static bool IsBranchingHallway(CustomChainStructure structure)
-    {
+    public static bool IsBranchingHallway(CustomChainStructure structure) {
         return BranchingHallwayIDs.Contains(structure.ID);
     }
 }
 
-
-public enum BridgeID : ushort
-{
+public enum BridgeID : ushort {
     // empties
     EmptyBridgeHorizontal = 1,
     EmptyBridgeHorizontalAltGen = 2,
     EmptyBridgeVertical = 3,
     EmptyBridgeVerticalAltGen = 4,
-    
+
     // main basement
     MainBasementHallway1 = 5,
     MainBasementHallway1AltGen = 6,
@@ -172,13 +161,13 @@ public enum BridgeID : ushort
     TestBridgeSmallAltGen = 10003
 }
 
+public static class BridgeIDUtils {
+    public static readonly ushort[] BranchingHallwayIDs = [
+        6, 7, 8
+    ];
 
-public static class BridgeIDUtils
-{
-    public static Type GetBridgeType(BridgeID type)
-    {
-        switch (type)
-        {
+    public static Type GetBridgeType(BridgeID type) {
+        switch (type) {
             // empties
             case BridgeID.EmptyBridgeHorizontal:
                 return typeof(SingleStructureBridge.EmptyBridgeHorizontal);
@@ -188,7 +177,7 @@ public static class BridgeIDUtils
                 return typeof(SingleStructureBridge.EmptyBridgeVertical);
             case BridgeID.EmptyBridgeVerticalAltGen:
                 return typeof(SingleStructureBridge.EmptyBridgeVerticalAltGen);
-            
+
             // main basement
             case BridgeID.MainBasementHallway1:
                 return typeof(SingleStructureBridge.MainBasementHallway1);
@@ -222,7 +211,7 @@ public static class BridgeIDUtils
                 return typeof(SingleStructureBridge.MainBasementHallway8);
             case BridgeID.MainBasementHallway8AltGen:
                 return typeof(SingleStructureBridge.MainBasementHallway8AltGen);
-            
+
             // testing structures
             case BridgeID.TestBridgeLarge:
                 return typeof(ParabolaBridge.TestBridgeLarge);
@@ -237,78 +226,61 @@ public static class BridgeIDUtils
                 throw new InvalidEnumArgumentException();
         }
     }
-    
-    public static Bridge CreateBridge (ushort type)
-    {
-        var bridgeType = BridgeIDUtils.GetBridgeType((BridgeID)type);
+
+    public static Bridge CreateBridge(ushort type) {
+        var bridgeType = GetBridgeType((BridgeID)type);
         var obj = Activator.CreateInstance(bridgeType);
         if (obj is null)
             throw new Exception("Structure ID to structure object failed");
-        
-        Bridge bridge = (Bridge)obj;
+
+        var bridge = (Bridge)obj;
         return bridge;
     }
-    
-    public static readonly ushort[] BranchingHallwayIDs =
-    [
-        6, 7, 8
-    ];
 
-    public static bool IsBranchingHallway(CustomChainStructure structure)
-    {
+    public static bool IsBranchingHallway(CustomChainStructure structure) {
         return BranchingHallwayIDs.Contains(structure.ID);
     }
 }
 
-
-public static class Directions 
-{
+public static class Directions {
     public const byte Up = 0;
     public const byte Down = 1;
     public const byte Left = 2;
     public const byte Right = 3;
     public const byte None = 4;
 
-    public static byte FlipDirection(byte direction)
-    {
+    public static byte FlipDirection(byte direction) {
         if (direction is 1 or 3)
             return (byte)(direction - 1);
-        else
-            return (byte)(direction + 1);
+        return (byte)(direction + 1);
     }
 }
 
-public class Range(int min, int max)
-{
-    public int Min = min;
+public class Range(int min, int max) {
     public int Max = max;
-    
-    public bool InRange(int value)
-    {
+    public int Min = min;
+
+    public bool InRange(int value) {
         return value >= Min && value <= Max;
     }
 }
 
-public static class StructureStatus
-{
+public static class StructureStatus {
     public const byte NotGenerated = 0;
     public const byte GeneratedButNotFound = 1;
     public const byte GeneratedAndFound = 2;
 }
 
-public static class GenerateChances
-{
+public static class GenerateChances {
     public const byte Rejected = 0;
     public const byte Neutral = 1;
     public const byte Guaranteed = 2;
 }
 
-public static class ModInstance
-{
+public static class ModInstance {
     public static readonly Mod Mod = ModContent.GetInstance<SpawnHouses>();
 }
 
-public static class WebClientInstance
-{
-    public static readonly WebHelper WebClient = new WebHelper();
+public static class WebClientInstance {
+    public static readonly WebHelper WebClient = new();
 }

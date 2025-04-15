@@ -7,10 +7,8 @@ using SpawnHouses.Types;
 
 namespace SpawnHouses.AdvStructures;
 
-public class RoomLayoutGen
-{
-    public static readonly (StructureTag[] possibleTags, Func<RoomLayoutParams, RoomLayout> method)[] GenMethods =
-    [
+public class RoomLayoutGen {
+    public static readonly (StructureTag[] possibleTags, Func<RoomLayoutParams, RoomLayout> method)[] GenMethods = [
         (
             [
                 StructureTag.HasRoomLayout,
@@ -22,15 +20,12 @@ public class RoomLayoutGen
         )
     ];
 
-    public static Func<RoomLayoutParams, RoomLayout> GetRandomMethod(RoomLayoutParams componentLayoutParams)
-    {
+    public static Func<RoomLayoutParams, RoomLayout> GetRandomMethod(RoomLayoutParams roomLayoutParams) {
         List<(StructureTag[] possibleTags, Func<RoomLayoutParams, RoomLayout> method)> methodTuples = [];
-        foreach (var tuple in GenMethods)
-        {
-            List<StructureTag> requiredTags = componentLayoutParams.TagsRequired.ToList();
-            foreach (var possibleTag in tuple.possibleTags)
-            {
-                if (componentLayoutParams.TagsBlacklist.Contains(possibleTag))
+        foreach (var tuple in GenMethods) {
+            var requiredTags = roomLayoutParams.TagsRequired.ToList();
+            foreach (var possibleTag in tuple.possibleTags) {
+                if (roomLayoutParams.TagsBlacklist.Contains(possibleTag))
                     break;
                 requiredTags.Remove(possibleTag);
             }
@@ -46,33 +41,33 @@ public class RoomLayoutGen
 
 
     /// <summary>
-    /// procedural BSP algorithm to split rooms
+    ///     procedural BSP algorithm to split rooms
     /// </summary>
-    public static RoomLayout RoomLayout1(RoomLayoutParams roomLayoutParams)
-    {
+    public static RoomLayout RoomLayout1(RoomLayoutParams roomLayoutParams) {
         var corners = RoomLayoutHelper.GetCorners(roomLayoutParams.MainVolume);
+        RoomLayoutVolumes? pickedLayout = null;
 
-        RoomLayoutVolumes[] possibleLayouts = new RoomLayoutVolumes[roomLayoutParams.Attempts];
-        for (int attempt = 0; attempt < roomLayoutParams.Attempts; attempt++)
-        {
-            RoomLayoutVolumes volumes = RoomLayoutHelper.SplitBsp(roomLayoutParams, corners.xCoords, corners.yCoords);
-            if (volumes.RoomVolumes.Count == roomLayoutParams.Housing)
-                return RoomLayoutHelper.CreateGaps(volumes);
+        var possibleLayouts = new RoomLayoutVolumes[roomLayoutParams.Attempts];
+        for (var attempt = 0; attempt < roomLayoutParams.Attempts; attempt++) {
+            var volumes = RoomLayoutHelper.SplitBsp(roomLayoutParams, corners.xCoords, corners.yCoords);
+            if (volumes.RoomVolumes.Count == roomLayoutParams.Housing) {
+                pickedLayout = volumes;
+                break;
+            }
+
             possibleLayouts[attempt] = volumes;
         }
 
         // find the layout with the closest housing to the requested amount
-        int closetHousingCount = Math.Abs(possibleLayouts[0].RoomVolumes.Count - roomLayoutParams.Housing);
-        int closetHousingIndex = 0;
-        for (int i = 0; i < possibleLayouts.Length; i++)
-        {
-            if (Math.Abs(possibleLayouts[i].RoomVolumes.Count - roomLayoutParams.Housing) < closetHousingCount)
-            {
-                closetHousingCount = Math.Abs(possibleLayouts[i].RoomVolumes.Count - roomLayoutParams.Housing);
-                closetHousingIndex = i;
-            }
+        if (pickedLayout is null) {
+            var closetHousingCount = Math.Abs(possibleLayouts[0].RoomVolumes.Count - roomLayoutParams.Housing);
+            for (var i = 0; i < possibleLayouts.Length; i++)
+                if (Math.Abs(possibleLayouts[i].RoomVolumes.Count - roomLayoutParams.Housing) < closetHousingCount) {
+                    closetHousingCount = Math.Abs(possibleLayouts[i].RoomVolumes.Count - roomLayoutParams.Housing);
+                    pickedLayout = possibleLayouts[i];
+                }
         }
 
-        return RoomLayoutHelper.CreateGaps(possibleLayouts[closetHousingIndex]);
+        return RoomLayoutHelper.CreateGaps(pickedLayout);
     }
 }

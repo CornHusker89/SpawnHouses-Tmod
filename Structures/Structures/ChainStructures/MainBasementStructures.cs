@@ -1,8 +1,8 @@
 using Microsoft.Xna.Framework;
+using SpawnHouses.Helpers;
 using SpawnHouses.Structures.StructureParts;
 using Terraria;
 using Terraria.DataStructures;
-using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
 namespace SpawnHouses.Structures.Structures.ChainStructures;
 
@@ -69,8 +69,8 @@ public class MainBasement_Entry2 : CustomChainStructure {
         base.SetSubstructurePositions();
 
         StructureBoundingBoxes = [
-            new BoundingBox(X + 1, Y, X + 5, Y + 4),
-            new BoundingBox(X, Y + 5, X + StructureXSize - 1, Y + StructureYSize - 1)
+            new Box(X + 1, Y, X + 5, Y + 4),
+            new Box(X, Y + 5, X + StructureXSize - 1, Y + StructureYSize - 1)
         ];
     }
 }
@@ -143,8 +143,8 @@ public class MainBasement_Hallway5 : CustomChainStructure {
         base.SetSubstructurePositions();
 
         StructureBoundingBoxes = [
-            new BoundingBox(X, Y, X + StructureXSize - 1, Y + 7 - 1),
-            new BoundingBox(X + 1, Y + 7, X - 1 + StructureXSize - 1, Y + StructureYSize - 1)
+            new Box(X, Y, X + StructureXSize - 1, Y + 7 - 1),
+            new Box(X + 1, Y + 7, X - 1 + StructureXSize - 1, Y + StructureYSize - 1)
         ];
     }
 }
@@ -447,8 +447,8 @@ public class MainBasement_Room6 : CustomChainStructure {
         base.SetSubstructurePositions();
 
         StructureBoundingBoxes = [
-            new BoundingBox(X, Y, X + 16 - 1, Y + 7 - 1),
-            new BoundingBox(X, Y + 8, X + StructureXSize - 1, Y + StructureYSize - 1)
+            new Box(X, Y, X + 16 - 1, Y + 7 - 1),
+            new Box(X, Y + 8, X + StructureXSize - 1, Y + StructureYSize - 1)
         ];
     }
 }

@@ -45,7 +45,7 @@ public class SpawnHousesTesting {
             ModInstance.Mod, () => {
                 TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
                 var output = string.Empty;
-                string? result = ScreenshotMainHouse();
+                var result = ScreenshotMainHouse();
                 output += result == null ? "" : result + "\n";
                 result = ScreenshotBeachHouse();
                 output += result == null ? "" : result + "\n";
