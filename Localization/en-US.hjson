@@ -101,7 +101,7 @@ Mods: {
 
 				MagicStorageIntegrations: {
 					Label: Magic Storage Integrations
-					Tooltip: If ON, a Magic Storage starter setup will spawn in the Spawn Point House. In order to spawn, Magic Storage (the mod) must be loaded
+					Tooltip: If ON, a Magic Storage starter setup will spawn in the Spawn Point House. In order to work, Magic Storage (the mod) must be loaded
 				}
 
 				SpawnPointHouseOffset: {
@@ -114,9 +114,9 @@ Mods: {
 					Tooltip: If ON, the Spawn Point House will set the world spawn to itself
 				}
 
-				MainBasementShape: {
-					Label: Main Basement Shape
-					Tooltip: 0.5 will not favor generating in any direction. Values closer to 0 will generate the basement more vertically, while values closer to 1 will generate the basement more horizontally.\nWhen in an upside-down seed, value will not go below 0.4
+				SpawnPointBasementShape: {
+					Label: Spawn Point Basement Shape
+					Tooltip: 0.5 will not favor any direction. Values closer to 0 generate the basement more vertically, values closer to 1 generate the basement more horizontally. In upside-down seeds, value won't go below 0.4
 				}
 
 				EnableSpawnPointHouse: {
