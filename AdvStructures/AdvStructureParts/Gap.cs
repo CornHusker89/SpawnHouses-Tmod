@@ -6,6 +6,7 @@ public class Gap {
     public Room? HigherRoom;
 
     public bool IsExterior;
+    /// <summary>Has rooms on it's left/right</summary>
     public bool IsHorizontal;
     public Room LowerRoom;
     public Shape Volume;
@@ -16,7 +17,7 @@ public class Gap {
     /// <param name="volume"></param>
     /// <param name="room1"></param>
     /// <param name="room2"></param>
-    /// <param name="isHorizontal"></param>
+    /// <param name="isHorizontal">Has rooms on it's left/right</param>
     public Gap(Shape volume, Room room1, Room? room2, bool isHorizontal) {
         Volume = volume;
         IsHorizontal = isHorizontal;

@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Types;
+using Terraria;
 using Terraria.DataStructures;
+using Terraria.WorldBuilding;
 
 namespace SpawnHouses.AdvStructures;
 
 public class AdvStructure {
+    /// <summary>Extends a few blocks out further in each direction</summary>
     public Shape BoundingBox;
     public ExternalLayout ExternalLayout;
     public bool FilledComponents;
@@ -35,6 +38,17 @@ public class AdvStructure {
         var result = method(Params, this);
         if (result)
             HasLayout = true;
+
+        // set the bounding box
+        var edgeVolumes = ExternalLayout.FloorVolumes;
+        edgeVolumes.AddRange(ExternalLayout.FloorGaps.Select(gap => gap.Volume).ToList());
+        edgeVolumes.AddRange(ExternalLayout.WallVolumes);
+        edgeVolumes.AddRange(ExternalLayout.WallGaps.Select(gap => gap.Volume).ToList());
+        BoundingBox = new Shape(
+            new Point16(edgeVolumes.Min(volume => volume.BoundingBox.topLeft.X) - 5, edgeVolumes.Min(volume => volume.BoundingBox.topLeft.Y) - 5),
+            new Point16(edgeVolumes.Max(volume => volume.BoundingBox.bottomRight.X) + 5, edgeVolumes.Max(volume => volume.BoundingBox.bottomRight.Y) + 5)
+        );
+
         return result;
     }
 
@@ -73,26 +87,22 @@ public class AdvStructure {
             Params.Palette);
 
         FillComponentSet(Layout.FloorVolumes, [StructureTag.HasFloor], [], Params.Palette);
-        FillComponentSet(Layout.FloorGaps.Select(gap => gap.Volume).ToList(), [StructureTag.IsFloorGap], [],
-            Params.Palette);
+        // FillComponentSet(Layout.FloorGaps.Select(gap => gap.Volume).ToList(), [StructureTag.DebugBlocks], [],
+        //     Params.Palette);
         FillComponentSet(Layout.WallVolumes, [StructureTag.HasWall], [], Params.Palette);
-        FillComponentSet(Layout.WallGaps.Select(gap => gap.Volume).ToList(), [StructureTag.IsWallGap], [],
+        // FillComponentSet(Layout.WallGaps.Select(gap => gap.Volume).ToList(), [StructureTag.DebugBlocks], [],
+        //     Params.Palette);
+
+        FillComponentSet(Layout.Rooms.Select(room => room.Volume).ToList(), [StructureTag.HasBackground], [],
             Params.Palette);
 
-        FillComponentSet(Layout.Rooms.Select(room => room.Volume).ToList(), [StructureTag.IsWallGap], [],
-            Params.Palette);
+        BoundingBox.ExecuteInArea((x, y) =>
+        {
+            WorldUtils.TileFrame(x, y);
+            Framing.WallFrame(x, y);
+        });
     }
-
 
     public void FinishHousing() {
-    }
-
-    public Shape GetBoundingShape(StructureParams structureParams) {
-        var boundingShape = new Shape(
-            new Point16(structureParams.Start.X, Math.Max(structureParams.Start.Y, structureParams.End.Y)),
-            new Point16(structureParams.End.X,
-                Math.Min(structureParams.Start.Y, structureParams.End.Y) + structureParams.Height + 3)
-        );
-        return boundingShape;
     }
 }

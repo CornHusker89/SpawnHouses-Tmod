@@ -138,8 +138,6 @@ public class TilePalette {
         BackgroundBeam = backgroundBeam ?? BackgroundRoomMain;
         FurnitureStyle = furnitureStyle;
     }
-    // for easy copy-pasting
-    // new PaintedType(TileID, PaintID),
 
     /// <summary>
     ///     A palette with dark stone and wood, medieval looking
@@ -149,22 +147,29 @@ public class TilePalette {
             StructureTag.Forest, StructureTag.Ice, StructureTag.Cavern, StructureTag.AboveGround,
             StructureTag.UnderGround
         ],
-        new PaintedType(TileID.StoneSlab),
+        new PaintedType(TileID.RichMahogany, PaintID.BrownPaint),
         new PaintedType(TileID.GrayBrick),
         new PaintedType(TileID.RedDynastyShingles, PaintID.YellowPaint),
         new PaintedType(WallID.Wood),
         new PaintedType(WallID.GrayBrick),
         new PaintedType(WallID.BlueDungeonSlab, PaintID.GrayPaint),
         new PaintedType(WallID.Wood),
-        null,
-        new PaintedType(TileID.DynastyWood, PaintID.BrownPaint),
+        new PaintedType(TileID.LivingMahogany, PaintID.BrownPaint),
+        new PaintedType(TileID.LivingWood),
         null,
         null,
         null,
         new PaintedType(WallID.Wood),
         null,
-        [new PaintedType(TileID.GrayBrick), new PaintedType(TileID.Stone), new PaintedType(TileID.StoneSlab)],
-        [new PaintedType(TileID.GrayBrick), new PaintedType(TileID.Stone), new PaintedType(TileID.StoneSlab)],
+        [
+            new PaintedType(TileID.LivingWood),
+            new PaintedType(TileID.WoodBlock)
+        ],
+        [
+            new PaintedType(TileID.GrayBrick),
+            new PaintedType(TileID.Stone),
+            new PaintedType(TileID.StoneSlab)
+        ],
         null,
         null,
         [
@@ -181,10 +186,10 @@ public class TilePalette {
         null,
         null,
         null,
-        new PaintedType(TileID.DynastyWood, PaintID.BrownPaint),
         null,
         null,
-        new PaintedType(TileID.DynastyWood, PaintID.BrownPaint),
+        null,
+        null,
         null,
         new PaintedType(WallID.WhiteDynasty),
         null,

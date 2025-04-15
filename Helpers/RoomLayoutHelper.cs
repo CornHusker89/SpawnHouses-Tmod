@@ -77,15 +77,19 @@ public static class RoomLayoutHelper {
             var inverseProgressFactor = double.Max(1 - (double)curHousing / roomLayoutParams.Housing, 0);
             var iterationFloorWidth =
                 (int)Math.Round((roomLayoutParams.FloorWidth.Max - roomLayoutParams.FloorWidth.Min) *
-                                inverseProgressFactor) +
-                roomLayoutParams.FloorWidth.Min;
-            var iterationWallWidth = (int)Math.Round((roomLayoutParams.WallWidth.Max - roomLayoutParams.WallWidth.Min) *
-                                                     inverseProgressFactor) +
-                                     roomLayoutParams.WallWidth.Min;
+                inverseProgressFactor) + roomLayoutParams.FloorWidth.Min;
+            int iterationWallWidth = (int)Math.Round((roomLayoutParams.WallWidth.Max - roomLayoutParams.WallWidth.Min) *
+                inverseProgressFactor) + roomLayoutParams.WallWidth.Min;
 
             var canSplitAlongX = roomVolume.Size.Y >= iterationFloorWidth + 2 * roomLayoutParams.RoomHeight.Min;
+            // ensure ratio of room dimensions isn't out of whack
+            if (canSplitAlongX && roomVolume.Area <= 175 && roomVolume.Size.X > roomVolume.Size.Y * 1.8) {
+                canSplitAlongX = false;
+            }
             var canSplitAlongY = roomVolume.Size.X >= iterationWallWidth + 2 * roomLayoutParams.RoomWidth.Min;
-
+            if (canSplitAlongY && roomVolume.Area <= 175 && roomVolume.Size.Y > roomVolume.Size.X * 1.8) {
+                canSplitAlongY = false;
+            }
             bool splitAlongX;
 
             if (canSplitAlongX && canSplitAlongY) {
@@ -96,9 +100,8 @@ public static class RoomLayoutHelper {
                     var xWeight = Math.Pow(1.0 / (xCutCount + 2), 3);
                     var yWeight = Math.Pow(1.0 / (yCutCount + 1), 3);
                     var totalWeight = xWeight + yWeight;
-                    splitAlongX =
-                        Terraria.WorldGen.genRand.NextDouble() <
-                        xWeight / totalWeight; //xWeight / totalWeight represents chance of picking x cut
+                    // xWeight divided by totalWeight represents chance of picking x cut
+                    splitAlongX = Terraria.WorldGen.genRand.NextDouble() < xWeight / totalWeight;
                 }
             }
             else if (!canSplitAlongX && canSplitAlongY) {
@@ -108,7 +111,7 @@ public static class RoomLayoutHelper {
                 splitAlongX = true;
             }
             else {
-                // if can't split at all, don't add this room back to the queue
+                // if the room can't be split at all, don't add it back to the queue
                 finishedRoomVolumes.Add(roomVolume);
                 extraCuts++;
                 continue;
@@ -144,7 +147,7 @@ public static class RoomLayoutHelper {
                 if (roomLayoutParams.IsWithinMaxSize(roomSubsections.lower) &&
                     Terraria.WorldGen.genRand.NextDouble() <
                     (1 - Math.Pow(1 - roomLayoutParams.LargeRoomChance, roomLayoutParams.Attempts)) * 0.35 &&
-                    largeRoomCount < maxLargeRooms) {
+                    largeRoomCount < maxLargeRooms && inverseProgressFactor < 0.92) {
                     largeRoomCount++;
                     finishedRoomVolumes.Add(roomSubsections.lower);
                     extraCuts++;
@@ -157,7 +160,7 @@ public static class RoomLayoutHelper {
                 if (roomLayoutParams.IsWithinMaxSize(roomSubsections.higher) &&
                     Terraria.WorldGen.genRand.NextDouble() <
                     (1 - Math.Pow(1 - roomLayoutParams.LargeRoomChance, roomLayoutParams.Attempts)) * 0.35 &&
-                    largeRoomCount < maxLargeRooms) {
+                    largeRoomCount < maxLargeRooms && inverseProgressFactor < 0.92) {
                     largeRoomCount++;
                     finishedRoomVolumes.Add(roomSubsections.higher);
                     extraCuts++;
@@ -304,7 +307,7 @@ public static class RoomLayoutHelper {
                 allGaps.RemoveAt(i);
             }
 
-        return new RoomLayout(roomLayoutVolumes.FloorVolumes, allGaps, roomLayoutVolumes.WallVolumes, verticalGaps,
+        return new RoomLayout(roomLayoutVolumes.FloorVolumes, verticalGaps, roomLayoutVolumes.WallVolumes, allGaps,
             rooms);
     }
 }

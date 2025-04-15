@@ -14,7 +14,10 @@ public static class AdvStructureLayouts {
     public static readonly (StructureTag[] possibleTags, Range? lengthRange, Range? volumeRange, Range? heightRange,
         Range? housingRange, Func<StructureParams, AdvStructure, bool> method)[] GenMethods = [
             (
-                [StructureTag.HasHousing],
+                [
+                    StructureTag.IsStructure,
+                    StructureTag.HasHousing
+                ],
                 null, null, null, null,
                 StructureLayout2
             )
@@ -25,13 +28,13 @@ public static class AdvStructureLayouts {
             Range? housingRange, Func<StructureParams, AdvStructure, bool> method)> methodTuples = [];
 
         foreach (var tuple in GenMethods) {
-            if (tuple.lengthRange?.InRange(structureParams.Length) is !true)
+            if (tuple.lengthRange?.InRange(structureParams.Length) is true)
                 continue;
-            if (tuple.volumeRange?.InRange(structureParams.Volume) is !true)
+            if (tuple.volumeRange?.InRange(structureParams.Volume) is true)
                 continue;
-            if (tuple.heightRange?.InRange(structureParams.Height) is !true)
+            if (tuple.heightRange?.InRange(structureParams.Height) is true)
                 continue;
-            if (tuple.housingRange?.InRange(structureParams.Housing) is !true)
+            if (tuple.housingRange?.InRange(structureParams.Housing) is true)
                 continue;
             var requiredTags = structureParams.TagsRequired.ToList();
             var valid = true;
@@ -169,7 +172,24 @@ public static class AdvStructureLayouts {
         List<Shape> exteriorWallVolumes = [];
         List<Shape> exteriorWallGapVolumes = [];
 
-        var externalWallThickness = Terraria.WorldGen.genRand.Next(1, 3);
+        var roomLayoutParams = new RoomLayoutParams(
+            [StructureTag.HasRoomLayout],
+            [],
+            new Shape(
+                new Point16(structureParams.Start.X + 1, structureParams.Start.Y),
+                new Point16(structureParams.End.X - 1, structureParams.End.Y - structureParams.Height)
+            ),
+            structureParams.Palette,
+            structureParams.Housing,
+            new Range(4, 18),
+            new Range(7, structureParams.Length),
+            new Range(1, 2),
+            new Range(1, 2),
+            0.3f
+        );
+        advStructure.Layout = RoomLayoutGen.GetRandomMethod(roomLayoutParams)(roomLayoutParams);
+
+        var externalWallThickness = roomLayoutParams.WallWidth.Max;
         exteriorWallVolumes.Add(new Shape(
             new Point16(structureParams.Start.X + 1 - externalWallThickness, structureParams.Start.Y - 3),
             new Point16(structureParams.Start.X, structureParams.Start.Y - structureParams.Height)
@@ -179,41 +199,25 @@ public static class AdvStructureLayouts {
             new Point16(structureParams.End.X - 1 + externalWallThickness,
                 structureParams.End.Y - structureParams.Height)
         ));
-
-        var roomLayoutParams = new RoomLayoutParams(
-            [StructureTag.HasRoomLayout],
-            [],
-            new Shape(
-                new Point16(structureParams.Start.X + 1, structureParams.Start.Y),
-                new Point16(structureParams.End.X - 1, structureParams.End.Y)
-            ),
-            structureParams.Palette,
-            structureParams.Housing,
-            new Range(4, 18),
-            new Range(4, structureParams.Length),
-            new Range(1, 3),
-            new Range(1, 3)
-        );
-        advStructure.Layout = RoomLayoutGen.GetRandomMethod(roomLayoutParams)(roomLayoutParams);
         advStructure.ExternalLayout = new ExternalLayout([], [], exteriorWallVolumes, [
             new Gap(
                 new Shape(
-                    new Point16(structureParams.Start.X + 1 - externalWallThickness + 1, structureParams.Start.Y),
-                    new Point16(structureParams.Start.X, structureParams.Start.Y - 1)
+                    new Point16(structureParams.Start.X + 1 - externalWallThickness, structureParams.Start.Y),
+                    new Point16(structureParams.Start.X, structureParams.Start.Y - 2)
                 ),
                 advStructure.Layout.GetClosestRoom(structureParams.Start),
                 null,
-                false
+                true
             ),
 
             new Gap(
                 new Shape(
                     new Point16(structureParams.End.X, structureParams.End.Y),
-                    new Point16(structureParams.End.X - 1 + externalWallThickness - 1, structureParams.End.Y - 1)
+                    new Point16(structureParams.End.X - 1 + externalWallThickness, structureParams.End.Y - 2)
                 ),
                 advStructure.Layout.GetClosestRoom(structureParams.End),
                 null,
-                false
+                true
             )
         ]);
 

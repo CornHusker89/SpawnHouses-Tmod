@@ -2,6 +2,7 @@ namespace SpawnHouses.Types;
 
 public enum StructureTag {
     // ===== structureLayout =====
+    IsStructure,
     HasHousing,
     IsSymmetric,
 
@@ -94,7 +95,12 @@ public enum StructureTag {
     RoofSlope1To1,
     RoofSlopeLessThan1,
     RoofSlopeGreaterThan1,
-    RoofSlopeNone
+    RoofSlopeNone,
+
+
+    // ===== debug =====
+    DebugBlocks,
+    DebugWalls
 }
 
 public enum PaletteTag {

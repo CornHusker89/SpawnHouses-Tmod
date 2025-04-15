@@ -28,6 +28,7 @@ public static class ComponentGen {
                 StructureTag.HasFloor,
                 StructureTag.FloorSolid,
                 StructureTag.FloorGroundLevel,
+                StructureTag.FloorElevated,
                 StructureTag.FloorThin,
                 StructureTag.FloorThick
             ],
@@ -147,6 +148,55 @@ public static class ComponentGen {
                 StructureTag.RoofSlopeNone
             ],
             Roof2
+        ),
+
+
+        // ===== debug =====
+        (
+            [
+                StructureTag.DebugBlocks
+            ],
+            DebugBlocks1
+        ),
+
+
+        (
+            [
+                StructureTag.DebugBlocks
+            ],
+            DebugBlocks2
+        ),
+
+
+        (
+            [
+                StructureTag.DebugBlocks
+            ],
+            DebugBlocks3
+        ),
+
+
+        (
+            [
+                StructureTag.DebugWalls
+            ],
+            DebugWalls1
+        ),
+
+
+        (
+            [
+                StructureTag.DebugWalls
+            ],
+            DebugWalls2
+        ),
+
+
+        (
+            [
+                StructureTag.DebugWalls
+            ],
+            DebugWalls3
         )
     ];
 
@@ -673,6 +723,9 @@ public static class ComponentGen {
 
     #region Background Methods
 
+    /// <summary>
+    ///     Fills mostly with random walls, but has specific walls on bottom edge
+    /// </summary>
     public static object Background1(ComponentParams componentParams) {
         componentParams.Volume.ExecuteInArea((x, y) => {
             if (y == componentParams.Volume.BoundingBox.bottomRight.Y)
@@ -686,6 +739,9 @@ public static class ComponentGen {
         return false;
     }
 
+    /// <summary>
+    ///     Fills mostly with random walls, but places main walls on bottom 3
+    /// </summary>
     public static object Background2(ComponentParams componentParams) {
         int bottomY = componentParams.Volume.BoundingBox.bottomRight.Y;
         componentParams.Volume.ExecuteInArea((x, y) => {
@@ -695,6 +751,95 @@ public static class ComponentGen {
                 PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundRoomMain);
         });
 
+        return false;
+    }
+
+    #endregion
+
+
+    #region Debug Methods
+
+    /// <summary>
+    ///     Fills with emerald gem spark
+    /// </summary>
+    public static object DebugBlocks1(ComponentParams componentParams) {
+        componentParams.Volume.ExecuteInArea((x, y) =>
+        {
+            Tile tile = Main.tile[x, y];
+            tile.HasTile = true;
+            tile.BlockType = BlockType.Solid;
+            tile.TileType = TileID.EmeraldGemspark;
+            tile.TileColor = PaintID.None;
+        });
+        return false;
+    }
+
+    /// <summary>
+    ///     Fills with sapphire gem spark
+    /// </summary>
+    public static object DebugBlocks2(ComponentParams componentParams) {
+        componentParams.Volume.ExecuteInArea((x, y) =>
+        {
+            Tile tile = Main.tile[x, y];
+            tile.HasTile = true;
+            tile.BlockType = BlockType.Solid;
+            tile.TileType = TileID.SapphireGemspark;
+            tile.TileColor = PaintID.None;
+        });
+        return false;
+    }
+
+    /// <summary>
+    ///     Fills with ruby gem spark
+    /// </summary>
+    public static object DebugBlocks3(ComponentParams componentParams) {
+        componentParams.Volume.ExecuteInArea((x, y) =>
+        {
+            Tile tile = Main.tile[x, y];
+            tile.HasTile = true;
+            tile.BlockType = BlockType.Solid;
+            tile.TileType = TileID.RubyGemspark;
+            tile.TileColor = PaintID.None;
+        });
+        return false;
+    }
+
+    /// <summary>
+    ///     Fills with emerald gem spark
+    /// </summary>
+    public static object DebugWalls1(ComponentParams componentParams) {
+        componentParams.Volume.ExecuteInArea((x, y) =>
+        {
+            Tile tile = Main.tile[x, y];
+            tile.WallType = WallID.EmeraldGemspark;
+            tile.WallColor = PaintID.None;
+        });
+        return false;
+    }
+
+    /// <summary>
+    ///     Fills with sapphire gem spark
+    /// </summary>
+    public static object DebugWalls2(ComponentParams componentParams) {
+        componentParams.Volume.ExecuteInArea((x, y) =>
+        {
+            Tile tile = Main.tile[x, y];
+            tile.WallType = WallID.SapphireGemspark;
+            tile.WallColor = PaintID.None;
+        });
+        return false;
+    }
+
+    /// <summary>
+    ///     Fills with ruby gem spark
+    /// </summary>
+    public static object DebugWalls3(ComponentParams componentParams) {
+        componentParams.Volume.ExecuteInArea((x, y) =>
+        {
+            Tile tile = Main.tile[x, y];
+            tile.WallType = WallID.RubyGemspark;
+            tile.WallColor = PaintID.None;
+        });
         return false;
     }
 
