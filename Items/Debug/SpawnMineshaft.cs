@@ -21,7 +21,7 @@ public class SpawnMineshaft : ModItem {
     }
 
     public override bool? UseItem(Terraria.Player player) {
-        var foundLocation = false;
+        bool foundLocation = false;
         ushort x = 0;
         ushort y = 0;
         while (!foundLocation) {
@@ -39,7 +39,7 @@ public class SpawnMineshaft : ModItem {
         x = (ushort)(x - 13);
         y = (ushort)(y - 13);
 
-        var structure = new Mineshaft(x, y);
+        Mineshaft structure = new Mineshaft(x, y);
         structure.Generate();
 
         return true;

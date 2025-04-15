@@ -26,9 +26,9 @@ public class WebHelper {
     public Dictionary<string, int> GetSpawnCount() {
         try {
             ModContent.GetInstance<SpawnHouses>().Logger.Info("Getting spawn count info from Web API");
-            var response = Client.GetAsync("https://spawnhousescounter.xyz/api/get").Result;
+            HttpResponseMessage response = Client.GetAsync("https://spawnhousescounter.xyz/api/get").Result;
             response.EnsureSuccessStatusCode();
-            var responseBody = response.Content.ReadAsStringAsync().Result;
+            string responseBody = response.Content.ReadAsStringAsync().Result;
             return JsonSerializer.Deserialize<Dictionary<string, int>>(responseBody);
         }
         catch {
@@ -46,8 +46,9 @@ public class WebHelper {
                 ["beach_house"] = beachHouse ? 1 : 0,
                 ["mineshaft"] = mineshaft ? 1 : 0
             };
-            var content = new StringContent(JsonSerializer.Serialize(dict), Encoding.UTF8, "application/json");
-            var response = Client.PostAsync("https://spawnhousescounter.xyz/api/add", content).Result;
+            StringContent content =
+                new StringContent(JsonSerializer.Serialize(dict), Encoding.UTF8, "application/json");
+            HttpResponseMessage response = Client.PostAsync("https://spawnhousescounter.xyz/api/add", content).Result;
             response.EnsureSuccessStatusCode();
         }
         catch {

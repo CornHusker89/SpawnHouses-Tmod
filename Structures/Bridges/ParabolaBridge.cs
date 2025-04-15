@@ -59,9 +59,9 @@ public class ParabolaBridge : Bridge {
         }
 
         // straight up no clue how this works but make coefficients for ax^2 + bx + c parabola
-        var a = -1 * Math.Abs((maxSlope - 2.0 * (endY - startY) / (endX - startX)) / (endX - startX));
-        var b = (endY - startY - a * (endX * endX - startX * startX)) / (endX - startX);
-        var c = startY - a * startX * startX - b * startX;
+        double a = -1 * Math.Abs((maxSlope - 2.0 * (endY - startY) / (endX - startX)) / (endX - startX));
+        double b = (endY - startY - a * (endX * endX - startX * startX)) / (endX - startX);
+        double c = startY - a * startX * startX - b * startX;
         return Tuple.Create(a, b, c, startX, endX);
     }
 
@@ -71,21 +71,21 @@ public class ParabolaBridge : Bridge {
 
         var boundingBoxesList = new List<Box>();
         var parabola = _CalculateParabolaBridge(AttemptSlope);
-        var a = parabola.Item1;
-        var b = parabola.Item2;
-        var c = parabola.Item3;
-        var startX = parabola.Item4;
-        var endX = parabola.Item5;
+        double a = parabola.Item1;
+        double b = parabola.Item2;
+        double c = parabola.Item3;
+        ushort startX = parabola.Item4;
+        ushort endX = parabola.Item5;
 
         uint cumulativeBridgeStructureY = 0;
         ushort tileCount = 0;
 
-        for (var currentX = (ushort)(startX + 1); currentX < endX; currentX++) {
+        for (ushort currentX = (ushort)(startX + 1); currentX < endX; currentX++) {
             cumulativeBridgeStructureY +=
                 (uint)Math.Floor(a * currentX * currentX + b * currentX + c + StructureYOffset);
             if ((tileCount - 1) % StructureLength == 0) {
-                var bridgeStructureX = (ushort)(currentX - StructureLength + 1);
-                var bridgeStructureY = (ushort)(cumulativeBridgeStructureY / StructureLength);
+                ushort bridgeStructureX = (ushort)(currentX - StructureLength + 1);
+                ushort bridgeStructureY = (ushort)(cumulativeBridgeStructureY / StructureLength);
 
                 boundingBoxesList.Add(
                     new Box(
@@ -115,21 +115,21 @@ public class ParabolaBridge : Bridge {
                 $"Bridge length cannot be resolved with the given BridgeStructure's length, p1: {Point1.X}, p2 {Point2.X}, distance: {Math.Abs(Point1.X - Point2.X) - 1}, structureLength: {StructureLength}");
 
         var parabola = _CalculateParabolaBridge(AttemptSlope);
-        var a = parabola.Item1;
-        var b = parabola.Item2;
-        var c = parabola.Item3;
-        var startX = parabola.Item4;
-        var endX = parabola.Item5;
+        double a = parabola.Item1;
+        double b = parabola.Item2;
+        double c = parabola.Item3;
+        ushort startX = parabola.Item4;
+        ushort endX = parabola.Item5;
 
         uint cumulativeBridgeStructureY = 0;
         ushort tileCount = 0;
 
-        for (var currentX = (ushort)(startX + 1); currentX < endX; currentX++) {
+        for (ushort currentX = (ushort)(startX + 1); currentX < endX; currentX++) {
             cumulativeBridgeStructureY +=
                 (uint)Math.Floor(a * currentX * currentX + b * currentX + c + StructureYOffset);
             if ((tileCount - 1) % StructureLength == 0) {
-                var bridgeStructureX = (ushort)(currentX - StructureLength + 1);
-                var bridgeStructureY = (ushort)(cumulativeBridgeStructureY / StructureLength);
+                ushort bridgeStructureX = (ushort)(currentX - StructureLength + 1);
+                ushort bridgeStructureY = (ushort)(cumulativeBridgeStructureY / StructureLength);
                 Generator.GenerateStructure(StructureFilePath, new Point16(bridgeStructureX, bridgeStructureY), _mod);
                 cumulativeBridgeStructureY = 0;
             }
@@ -137,15 +137,15 @@ public class ParabolaBridge : Bridge {
             tileCount++;
         }
 
-        var centerX = (ushort)((Point1.X + Point2.X) / 2);
-        var centerY = (ushort)((Point1.Y + Point2.Y) / 2);
-        var radius = Math.Abs(Point1.X - Point2.X) + 4;
+        ushort centerX = (ushort)((Point1.X + Point2.X) / 2);
+        ushort centerY = (ushort)((Point1.Y + Point2.Y) / 2);
+        int radius = Math.Abs(Point1.X - Point2.X) + 4;
         WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(radius), new Actions.SetFrames());
     }
 
     public override ParabolaBridge Clone() {
-        var type = GetType();
-        var bridge = (ParabolaBridge)Activator.CreateInstance(type)!;
+        Type type = GetType();
+        ParabolaBridge bridge = (ParabolaBridge)Activator.CreateInstance(type)!;
         //if (Point1 is not null) bridge.Point1 = Point1;
         return bridge;
     }

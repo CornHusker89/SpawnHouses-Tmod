@@ -37,8 +37,8 @@ public static class AdvStructureLayouts {
             if (tuple.housingRange?.InRange(structureParams.Housing) is true)
                 continue;
             var requiredTags = structureParams.TagsRequired.ToList();
-            var valid = true;
-            foreach (var possibleTag in tuple.possibleTags) {
+            bool valid = true;
+            foreach (StructureTag possibleTag in tuple.possibleTags) {
                 if (structureParams.TagBlacklist.Contains(possibleTag)) {
                     valid = false;
                     break;
@@ -64,26 +64,26 @@ public static class AdvStructureLayouts {
         List<Shape> wallVolumes = [];
         List<Shape> floorVolumes = [];
 
-        var leftTall = Terraria.WorldGen.genRand.NextBool();
-        var leftHeight = !leftTall
+        bool leftTall = Terraria.WorldGen.genRand.NextBool();
+        int leftHeight = !leftTall
             ? (int)Math.Round(structureParams.Height * 1.33) - 4
             : (int)Math.Round(structureParams.Height * 0.66) - 4;
-        var rightHeight = leftTall
+        int rightHeight = leftTall
             ? (int)Math.Round(structureParams.Height * 1.33) - 4
             : (int)Math.Round(structureParams.Height * 0.66) - 4;
-        var flangeHeight = (int)(0.85 + Terraria.WorldGen.genRand.NextDouble() * 0.3) * structureParams.Height;
-        var leftFlange = Terraria.WorldGen.genRand.NextBool();
-        var leftFlangeWidth = leftFlange ? 0 : Terraria.WorldGen.genRand.Next(4, 8);
-        var rightFlange = Terraria.WorldGen.genRand.NextBool();
-        var rightFlangeWidth = rightFlange ? 0 : Terraria.WorldGen.genRand.Next(4, 8);
-        var rightSideStartXPos = structureParams.Start.X + (structureParams.End.X - structureParams.Start.X) / 2;
+        int flangeHeight = (int)(0.85 + Terraria.WorldGen.genRand.NextDouble() * 0.3) * structureParams.Height;
+        bool leftFlange = Terraria.WorldGen.genRand.NextBool();
+        int leftFlangeWidth = leftFlange ? 0 : Terraria.WorldGen.genRand.Next(4, 8);
+        bool rightFlange = Terraria.WorldGen.genRand.NextBool();
+        int rightFlangeWidth = rightFlange ? 0 : Terraria.WorldGen.genRand.Next(4, 8);
+        int rightSideStartXPos = structureParams.Start.X + (structureParams.End.X - structureParams.Start.X) / 2;
         if (leftTall)
             rightSideStartXPos += leftFlangeWidth + rightFlangeWidth;
         else
             rightSideStartXPos -= leftFlangeWidth + rightFlangeWidth;
 
-        var firstFloorHeight = Terraria.WorldGen.genRand.Next(6, 9);
-        var nonFirstFloorHeight = firstFloorHeight >= 8 ? firstFloorHeight - 2 : firstFloorHeight - 3;
+        int firstFloorHeight = Terraria.WorldGen.genRand.Next(6, 9);
+        int nonFirstFloorHeight = firstFloorHeight >= 8 ? firstFloorHeight - 2 : firstFloorHeight - 3;
         List<int> leftSideFloorYPositions = [structureParams.Start.Y];
         List<int> rightSideFloorYPositions = [structureParams.End.Y];
 
@@ -172,7 +172,7 @@ public static class AdvStructureLayouts {
         List<Shape> exteriorWallVolumes = [];
         List<Shape> exteriorWallGapVolumes = [];
 
-        var roomLayoutParams = new RoomLayoutParams(
+        RoomLayoutParams roomLayoutParams = new RoomLayoutParams(
             [StructureTag.HasRoomLayout],
             [],
             new Shape(
@@ -189,7 +189,7 @@ public static class AdvStructureLayouts {
         );
         advStructure.Layout = RoomLayoutGen.GetRandomMethod(roomLayoutParams)(roomLayoutParams);
 
-        var externalWallThickness = roomLayoutParams.WallWidth.Max;
+        int externalWallThickness = roomLayoutParams.WallWidth.Max;
         exteriorWallVolumes.Add(new Shape(
             new Point16(structureParams.Start.X + 1 - externalWallThickness, structureParams.Start.Y - 3),
             new Point16(structureParams.Start.X, structureParams.Start.Y - structureParams.Height)

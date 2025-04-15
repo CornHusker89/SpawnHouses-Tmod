@@ -40,7 +40,7 @@ public sealed class Firepit : CustomStructure {
         WorldUtils.Gen(new Point(X, Y - 9), new Shapes.Rectangle(7, 9),
             new Actions.ClearTile());
 
-        var blendTileID = Main.tile[X + 3, Y + 7].TileType;
+        ushort blendTileID = Main.tile[X + 3, Y + 7].TileType;
         if (blendTileID == TileID.ShellPile)
             blendTileID = TileID.Sand;
 
@@ -48,17 +48,17 @@ public sealed class Firepit : CustomStructure {
         StructureGenHelper.Blend(ConnectPoints[3][0], 5, blendTileID, blendLeftSide: false);
 
         // make sure that blending doesn't fuck up the tiles next to the chairs
-        var tile = Main.tile[X - 1, Y + 2];
+        Tile tile = Main.tile[X - 1, Y + 2];
         tile.Slope = SlopeType.Solid;
         tile.IsHalfBlock = false;
         tile = Main.tile[X + 7, Y + 2];
         tile.Slope = SlopeType.Solid;
         tile.IsHalfBlock = false;
 
-        var leftX = (ushort)(X - Terraria.WorldGen.genRand.Next(2, 6));
-        var rightX = (ushort)(X + 6 + Terraria.WorldGen.genRand.Next(2, 6));
-        var curLeftY = (ushort)(Y - 8);
-        var curRightY = (ushort)(Y - 8);
+        ushort leftX = (ushort)(X - Terraria.WorldGen.genRand.Next(2, 6));
+        ushort rightX = (ushort)(X + 6 + Terraria.WorldGen.genRand.Next(2, 6));
+        ushort curLeftY = (ushort)(Y - 8);
+        ushort curRightY = (ushort)(Y - 8);
         while (!Terraria.WorldGen.SolidTile(leftX, curLeftY))
             curLeftY++;
         while (!Terraria.WorldGen.SolidTile(rightX, curRightY))

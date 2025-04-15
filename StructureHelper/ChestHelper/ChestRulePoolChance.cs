@@ -28,20 +28,20 @@ internal class ChestRulePoolChance : ChestRule {
         if (Terraria.WorldGen.genRand.NextFloat() <= chance) {
             var toLoot = pool;
 
-            for (var k = 0; k < itemsToGenerate; k++) {
+            for (int k = 0; k < itemsToGenerate; k++) {
                 if (nextIndex >= 40)
                     return;
 
-                var maxWeight = 1;
+                int maxWeight = 1;
 
-                foreach (var loot in toLoot)
+                foreach (Loot loot in toLoot)
                     maxWeight += loot.weight;
 
-                var selection = Main.rand.Next(maxWeight);
-                var weightTotal = 0;
+                int selection = Main.rand.Next(maxWeight);
+                int weightTotal = 0;
                 Loot selectedLoot = null;
 
-                for (var i = 0; i < toLoot.Count; i++) {
+                for (int i = 0; i < toLoot.Count; i++) {
                     weightTotal += toLoot[i].weight;
 
                     if (selection < weightTotal + 1) {
@@ -58,7 +58,7 @@ internal class ChestRulePoolChance : ChestRule {
     }
 
     public override TagCompound Serizlize() {
-        var tag = new TagCompound {
+        TagCompound tag = new TagCompound {
             { "Type", "PoolChance" },
             { "Chance", chance },
             { "ToGenerate", itemsToGenerate },
@@ -69,7 +69,7 @@ internal class ChestRulePoolChance : ChestRule {
     }
 
     public new static ChestRule Deserialize(TagCompound tag) {
-        var rule = new ChestRulePoolChance {
+        ChestRulePoolChance rule = new ChestRulePoolChance {
             itemsToGenerate = tag.GetInt("ToGenerate"),
             chance = tag.GetFloat("Chance"),
             pool = DeserializePool(tag.GetCompound("Pool"))
@@ -79,9 +79,9 @@ internal class ChestRulePoolChance : ChestRule {
     }
 
     public override ChestRule Clone() {
-        var clone = new ChestRulePoolChance();
+        ChestRulePoolChance clone = new ChestRulePoolChance();
 
-        for (var k = 0; k < pool.Count; k++)
+        for (int k = 0; k < pool.Count; k++)
             clone.pool.Add(pool[k].Clone());
 
         clone.itemsToGenerate = itemsToGenerate;

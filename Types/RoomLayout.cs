@@ -15,14 +15,14 @@ public class RoomLayoutVolumes(
     public readonly List<Shape> WallVolumes = wallVolumes;
 
     public bool InFloor(Point16 point) {
-        foreach (var floorVolume in FloorVolumes)
+        foreach (Shape floorVolume in FloorVolumes)
             if (floorVolume.Contains(point))
                 return true;
         return false;
     }
 
     public bool InWall(Point16 point) {
-        foreach (var wallVolume in WallVolumes)
+        foreach (Shape wallVolume in WallVolumes)
             if (wallVolume.Contains(point))
                 return true;
         return false;
@@ -52,13 +52,13 @@ public class RoomLayout(
         if (Rooms.Count == 0)
             throw new Exception("BackgroundVolumes in given room layout was empty");
 
-        var closestIndex = -1;
-        var closestDistance = double.MaxValue;
+        int closestIndex = -1;
+        double closestDistance = double.MaxValue;
 
-        for (var i = 0; i < Rooms.Count; i++) {
-            var closestDistanceInShape = double.MaxValue;
+        for (int i = 0; i < Rooms.Count; i++) {
+            double closestDistanceInShape = double.MaxValue;
             Rooms[i].Volume.ExecuteOnPerimeter((x, y, _) => {
-                var distance = Math.Sqrt(Math.Pow(point.X - x, 2) + Math.Pow(point.Y - y, 2));
+                double distance = Math.Sqrt(Math.Pow(point.X - x, 2) + Math.Pow(point.Y - y, 2));
                 if (distance < closestDistanceInShape)
                     closestDistanceInShape = distance;
             });

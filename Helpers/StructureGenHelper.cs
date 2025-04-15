@@ -17,7 +17,7 @@ public static class StructureGenHelper {
     /// <param name="y"></param>
     public static void ClearChest(int x, int y) {
         void Clear(int chestX, int chestY) {
-            var id = Chest.FindChest(chestX, chestY);
+            int id = Chest.FindChest(chestX, chestY);
             Chest.DestroyChestDirect(chestX, chestY, id);
             WorldUtils.ClearTile(chestX, chestY, true);
             WorldUtils.ClearTile(chestX + 1, chestY, true);
@@ -53,13 +53,13 @@ public static class StructureGenHelper {
     /// <param name="wallBlacklistIDs"></param>
     public static void PlaceBush(Point start, ushort tileID = WallID.LivingLeaf, params ushort[] wallBlacklistIDs) {
         void PlaceWall(int i, int j) {
-            var tile = Main.tile[i, j];
+            Tile tile = Main.tile[i, j];
             if (!wallBlacklistIDs.Contains(tile.WallType))
                 tile.WallType = tileID;
         }
 
-        var x = start.X;
-        var y = start.Y;
+        int x = start.X;
+        int y = start.Y;
 
         switch (Terraria.WorldGen.genRand.Next(0, 6)) {
             case 0:
@@ -130,7 +130,7 @@ public static class StructureGenHelper {
                         if (wallWhitelistIDs.Length > 0) // if whitelist mode is on
                         {
                             if (wallWhitelistIDs.Contains(Main.tile[i, j].WallType)) {
-                                var tile = Main.tile[i, j];
+                                Tile tile = Main.tile[i, j];
                                 tile.HasTile = true;
                                 tile.TileType = TileID.Cobweb;
                                 tile.Slope = SlopeType.Solid;
@@ -138,7 +138,7 @@ public static class StructureGenHelper {
                             }
                         }
                         else {
-                            var tile = Main.tile[i, j];
+                            Tile tile = Main.tile[i, j];
                             tile.HasTile = true;
                             tile.TileType = TileID.Cobweb;
                             tile.Slope = SlopeType.Solid;
@@ -164,10 +164,10 @@ public static class StructureGenHelper {
     /// <param name="stopOnNonSolidTile"></param>
     public static void GenerateBeams(Point start, Tile beamTile, ushort beamInterval, ushort beamsCount,
         ushort maxBeamSize = 50, bool stopOnNonSolidTile = false) {
-        for (var i = 0; i < beamsCount; i++) {
-            var validBeamLocation = true;
-            var y2 = 1; //put us 1 below the floor
-            var x2 = start.X + i * beamInterval;
+        for (int i = 0; i < beamsCount; i++) {
+            bool validBeamLocation = true;
+            int y2 = 1; //put us 1 below the floor
+            int x2 = start.X + i * beamInterval;
 
             //if there's a tile there already, don't place a beam
             if (Terraria.WorldGen.SolidTile(x2, start.Y + y2)) continue;
@@ -183,8 +183,8 @@ public static class StructureGenHelper {
             }
 
             if (validBeamLocation) {
-                for (var j = 0; j < y2; j++) {
-                    var tile = Main.tile[x2, start.Y + j];
+                for (int j = 0; j < y2; j++) {
+                    Tile tile = Main.tile[x2, start.Y + j];
                     tile.HasTile = beamTile.HasTile;
                     tile.Slope = SlopeType.Solid;
                     tile.IsHalfBlock = false;
@@ -193,7 +193,7 @@ public static class StructureGenHelper {
                 }
 
                 //make the tile beneath the beam (and the one just above) a full block
-                var bottomTerrainTile = Main.tile[x2, start.Y + y2];
+                Tile bottomTerrainTile = Main.tile[x2, start.Y + y2];
                 bottomTerrainTile.Slope = SlopeType.Solid;
                 bottomTerrainTile.IsHalfBlock = false;
             }
@@ -217,7 +217,7 @@ public static class StructureGenHelper {
                 new Modifiers.Flip(false, true),
                 new Actions.Custom((i, j, args) => {
                     {
-                        var tile = Main.tile[i, j];
+                        Tile tile = Main.tile[i, j];
                         tile.HasTile = true;
                         tile.TileType = tileID;
                         tile.Slope = SlopeType.Solid;
@@ -230,7 +230,7 @@ public static class StructureGenHelper {
             WorldUtils.Gen(start, new Shapes.Circle(foundationRadius),
                 new Actions.Custom((i, j, args) => {
                     {
-                        var tile = Main.tile[i, j];
+                        Tile tile = Main.tile[i, j];
                         tile.HasTile = true;
                         tile.TileType = tileID;
                         tile.Slope = SlopeType.Solid;
@@ -248,11 +248,11 @@ public static class StructureGenHelper {
     /// <param name="randomStepOffset"></param>
     /// <param name="steps"></param>
     public static void DigVerticalTunnel(Point start, int randomStepOffset, int steps) {
-        var initialYOffset = 0;
-        for (var i = 0; i < steps; i++) {
-            var width = Terraria.WorldGen.genRand.Next(7, 17);
-            var toleranceFactor = width / 16.0;
-            var baseXOffset = i == 0
+        int initialYOffset = 0;
+        for (int i = 0; i < steps; i++) {
+            int width = Terraria.WorldGen.genRand.Next(7, 17);
+            double toleranceFactor = width / 16.0;
+            int baseXOffset = i == 0
                 ? 0
                 : (int)(Terraria.WorldGen.genRand.Next(-randomStepOffset, randomStepOffset + 1) * toleranceFactor);
             double vectorXOffset = i == 0
@@ -304,7 +304,8 @@ public static class StructureGenHelper {
             startX = endX + blendDistance;
             startY = RaycastHelper.SurfaceRaycast(startX, endY - maxHeight).yCoord;
 
-            var possibleDeeperCast = RaycastHelper.SurfaceRaycastFromInsideTile(startX, startY, 20);
+            (bool found, int distance, int yCoord) possibleDeeperCast =
+                RaycastHelper.SurfaceRaycastFromInsideTile(startX, startY, 20);
             if (possibleDeeperCast is { found: true, distance: < 20 })
                 startY = possibleDeeperCast.yCoord;
         }
@@ -315,7 +316,8 @@ public static class StructureGenHelper {
             endX = startX - blendDistance;
             endY = RaycastHelper.SurfaceRaycast(endX, startY - maxHeight).yCoord;
 
-            var possibleDeeperCast = RaycastHelper.SurfaceRaycastFromInsideTile(endX, endY, 20);
+            (bool found, int distance, int yCoord) possibleDeeperCast =
+                RaycastHelper.SurfaceRaycastFromInsideTile(endX, endY, 20);
             if (possibleDeeperCast is { found: true, distance: < 20 })
                 endY = possibleDeeperCast.yCoord;
         }
@@ -331,18 +333,18 @@ public static class StructureGenHelper {
                 fillTileID = topTileID;
         }
 
-        var slope = (double)(endY - startY) / (endX - startX) * -1;
+        double slope = (double)(endY - startY) / (endX - startX) * -1;
 
         // initialize the center tiles for when we call frametiles()
-        var frameCenterX = 0;
-        var frameCenterY = 0;
+        int frameCenterX = 0;
+        int frameCenterY = 0;
 
         // keep track of how far we filled the last tile down
-        var lastTileVerticalFillLen = 1;
+        int lastTileVerticalFillLen = 1;
 
         for (int dX = blendDistance; dX >= 0; dX--) {
             // get the top tile of the final slope, change its values
-            var topTileY = startY + (int)Math.Round(dX * slope);
+            int topTileY = startY + (int)Math.Round(dX * slope);
 
             // when we're roughly in the center of the blend, make the center of the frame
             // for when we call frametiles()
@@ -352,7 +354,7 @@ public static class StructureGenHelper {
             }
 
             // make the top tile
-            var tile = Main.tile[startX - dX, topTileY];
+            Tile tile = Main.tile[startX - dX, topTileY];
             tile.HasTile = true;
             tile.BlockType = BlockType.Solid;
             tile.TileType = topTileID;
@@ -360,13 +362,13 @@ public static class StructureGenHelper {
                 tile.WallType = WallID.None;
 
             // give the top tile a random slope if it's in the right spot
-            var nextTileDx = 1;
+            int nextTileDx = 1;
             if (slope < 0) nextTileDx = -1;
-            var nextTileY = startY + (int)Math.Round((dX + nextTileDx) * slope);
+            int nextTileY = startY + (int)Math.Round((dX + nextTileDx) * slope);
 
             if (canUsePartialTiles && topTileY != nextTileY) {
                 // val of 0-2 --> full tile, 3 --> slope right/left, 4 --> half tile
-                var randomVal = Terraria.WorldGen.genRand.Next(2, 6);
+                int randomVal = Terraria.WorldGen.genRand.Next(2, 6);
                 if (randomVal == 3 || randomVal == 4) {
                     if (slope > 0) {
                         tile.IsHalfBlock = false;
@@ -392,7 +394,7 @@ public static class StructureGenHelper {
             byte airCounter = 0;
             if (removeWalls)
                 while (airCounter < 10 || Main.tile[startX - dX, topTileY - dYUp].WallType != 0) {
-                    var upperTile = Main.tile[startX - dX, topTileY - dYUp];
+                    Tile upperTile = Main.tile[startX - dX, topTileY - dYUp];
                     upperTile.HasTile = false;
                     upperTile.WallType = WallID.None;
                     dYUp++;
@@ -402,7 +404,7 @@ public static class StructureGenHelper {
                 }
             else
                 while (airCounter < 10) {
-                    var upperTile = Main.tile[startX - dX, topTileY - dYUp];
+                    Tile upperTile = Main.tile[startX - dX, topTileY - dYUp];
                     upperTile.HasTile = false;
                     dYUp++;
 
@@ -417,7 +419,7 @@ public static class StructureGenHelper {
             while (((!Terraria.WorldGen.SolidTile(startX - dX, topTileY + dYDown) &&
                      dYDown <= lastTileVerticalFillLen * 1.3 + 2) || dYDown <= lastTileVerticalFillLen * 0.6) &&
                    fillCount < 25) {
-                var lowerTile = Main.tile[startX - dX, topTileY + dYDown];
+                Tile lowerTile = Main.tile[startX - dX, topTileY + dYDown];
                 lowerTile.HasTile = true;
                 lowerTile.BlockType = BlockType.Solid;
                 lowerTile.TileType = fillTileID;
@@ -430,9 +432,9 @@ public static class StructureGenHelper {
 
             // make sure that the tile we found at the bottom is full
             // 'dyDown' will end up as the y-coord of the lowest tile
-            var lowestTile = Main.tile[startX - dX, topTileY + dYDown];
+            Tile lowestTile = Main.tile[startX - dX, topTileY + dYDown];
 
-            var overwriteTileType = !lowestTile.HasTile;
+            bool overwriteTileType = !lowestTile.HasTile;
             lowestTile.HasTile = true;
             lowestTile.BlockType = BlockType.Solid;
             if (overwriteTileType)

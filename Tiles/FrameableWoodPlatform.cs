@@ -32,8 +32,8 @@ public class FrameableWoodPlatform : ModTile {
     }
 
     public override void PlaceInWorld(int i, int j, Item item) {
-        var style = Main.LocalPlayer.HeldItem.placeStyle;
-        var tile = Main.tile[i, j];
+        int style = Main.LocalPlayer.HeldItem.placeStyle;
+        Tile tile = Main.tile[i, j];
         tile.TileFrameY = (short)(style * 18);
         tile.TileFrameX = 0;
 
@@ -42,14 +42,14 @@ public class FrameableWoodPlatform : ModTile {
     }
 
     public override IEnumerable<Item> GetItemDrops(int i, int j) {
-        var t = Main.tile[i, j];
-        var style = t.TileFrameY / 18;
-        var dropItem = TileLoader.GetItemDropFromTypeAndStyle(TileID.Platforms, style);
+        Tile t = Main.tile[i, j];
+        int style = t.TileFrameY / 18;
+        int dropItem = TileLoader.GetItemDropFromTypeAndStyle(TileID.Platforms, style);
         yield return new Item(dropItem);
     }
 
     public override bool Slope(int i, int j) {
-        var tile = Framing.GetTileSafely(i, j);
+        Tile tile = Framing.GetTileSafely(i, j);
         tile.TileFrameX = (short)((tile.TileFrameX + 18) % 630); //33 * 18
         tile.IsHalfBlock = tile.TileFrameX is 540 or 522 or 504 or 486;
         if (tile.TileFrameX is 144 or 342 or 378 or 414 or 450)

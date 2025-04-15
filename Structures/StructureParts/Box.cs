@@ -30,8 +30,8 @@ public class Box {
     }
 
     public static bool IsAnyBoundingBoxesColliding(Box[] structureBoundingBoxes, Box[] otherBoundingBoxes) {
-        foreach (var structureBoundingBox in structureBoundingBoxes)
-        foreach (var otherBoundingBox in otherBoundingBoxes)
+        foreach (Box structureBoundingBox in structureBoundingBoxes)
+        foreach (Box otherBoundingBox in otherBoundingBoxes)
             if (IsBoundingBoxColliding(structureBoundingBox, otherBoundingBox))
                 return true;
         return false;
@@ -42,10 +42,10 @@ public class Box {
     }
 
     public static void Visualize(Box[] boundingBoxes, ushort tileID = TileID.Adamantite) {
-        foreach (var boundingBox in boundingBoxes)
+        foreach (Box boundingBox in boundingBoxes)
             for (int x = boundingBox.Point1.X; x <= boundingBox.Point2.X; x++)
             for (int y = boundingBox.Point1.Y; y <= boundingBox.Point2.Y; y++) {
-                var tile = Main.tile[x, y];
+                Tile tile = Main.tile[x, y];
                 tile.HasTile = true;
                 tile.Slope = SlopeType.Solid;
                 tile.IsHalfBlock = false;
@@ -55,20 +55,20 @@ public class Box {
 
     public static void VisualizeCollision(Box[] boundingBoxes1, Box[] boundingBoxes2,
         ushort tileID1 = TileID.Adamantite, ushort tileID2 = TileID.Cobalt, ushort collisionTileID = TileID.Dirt) {
-        foreach (var boundingBox in boundingBoxes1)
+        foreach (Box boundingBox in boundingBoxes1)
             for (int x = boundingBox.Point1.X; x <= boundingBox.Point2.X; x++)
             for (int y = boundingBox.Point1.Y; y <= boundingBox.Point2.Y; y++) {
-                var tile = Main.tile[x, y];
+                Tile tile = Main.tile[x, y];
                 tile.HasTile = true;
                 tile.Slope = SlopeType.Solid;
                 tile.IsHalfBlock = false;
                 tile.TileType = tileID1;
             }
 
-        foreach (var boundingBox in boundingBoxes2)
+        foreach (Box boundingBox in boundingBoxes2)
             for (int x = boundingBox.Point1.X; x <= boundingBox.Point2.X; x++)
             for (int y = boundingBox.Point1.Y; y <= boundingBox.Point2.Y; y++) {
-                var tile = Main.tile[x, y];
+                Tile tile = Main.tile[x, y];
                 tile.HasTile = true;
                 tile.Slope = SlopeType.Solid;
                 tile.IsHalfBlock = false;

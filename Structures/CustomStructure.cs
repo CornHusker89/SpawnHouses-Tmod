@@ -42,7 +42,7 @@ public abstract class CustomStructure {
 
     protected virtual void SetSubstructurePositions() {
         for (byte direction = 0; direction < 4; direction++)
-            foreach (var connectPoint in ConnectPoints[direction])
+            foreach (ConnectPoint connectPoint in ConnectPoints[direction])
                 connectPoint.SetPosition(X, Y);
     }
 
@@ -53,8 +53,8 @@ public abstract class CustomStructure {
     }
 
     public void FrameTiles() {
-        var centerX = X + StructureXSize / 2;
-        var centerY = Y + StructureXSize / 2;
+        int centerX = X + StructureXSize / 2;
+        int centerY = Y + StructureXSize / 2;
 
         WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(StructureXSize + StructureYSize), Actions.Chain(
             new Actions.SetFrames(),
@@ -112,13 +112,13 @@ public abstract class CustomStructure {
     }
 
     public virtual CustomStructure Clone() {
-        var type = GetType();
+        Type type = GetType();
         return (CustomStructure)Activator.CreateInstance(type, X, Y, Status)!;
     }
 
     public void ActionOnEachConnectPoint(Action<ConnectPoint> function) {
         for (byte direction = 0; direction < 4; direction++)
-            foreach (var connectPoint in ConnectPoints[direction])
+            foreach (ConnectPoint connectPoint in ConnectPoints[direction])
                 function(connectPoint);
     }
 }

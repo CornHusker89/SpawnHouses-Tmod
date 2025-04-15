@@ -53,7 +53,7 @@ public class StructureParams {
     }
 
     public void ReRollRanges() {
-        var scale = Terraria.WorldGen.genRand.NextDouble();
+        double scale = Terraria.WorldGen.genRand.NextDouble();
         Volume = (int)(VolumeRange.Min + (VolumeRange.Max - VolumeRange.Min) * scale);
         Height = Volume / (End.X - Start.X);
         if (Height <= 4)

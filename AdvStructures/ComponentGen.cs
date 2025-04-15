@@ -210,8 +210,8 @@ public static class ComponentGen {
         List<(StructureTag[] possibleTags, Func<ComponentParams, object> method)> methodTuples = [];
         foreach (var tuple in GenMethods) {
             var requiredTags = componentParams.TagsRequired.ToList();
-            var valid = true;
-            foreach (var possibleTag in tuple.possibleTags) {
+            bool valid = true;
+            foreach (StructureTag possibleTag in tuple.possibleTags) {
                 if (componentParams.TagsBlacklist.Contains(possibleTag)) {
                     valid = false;
                     break;
@@ -245,7 +245,7 @@ public static class ComponentGen {
             else
                 PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundRoomMain);
 
-            var tile = Main.tile[x, y];
+            Tile tile = Main.tile[x, y];
             tile.HasTile = false;
         });
 
@@ -261,22 +261,22 @@ public static class ComponentGen {
     ///     basic roof, capable of handling most roof shapes
     /// </summary>
     public static object Roof2(ComponentParams componentParams) {
-        var palette = componentParams.TilePalette;
+        TilePalette palette = componentParams.TilePalette;
 
-        var roofStart = new Point16(componentParams.Volume.BoundingBox.topLeft.X,
+        Point16 roofStart = new Point16(componentParams.Volume.BoundingBox.topLeft.X,
             componentParams.Volume.BoundingBox.bottomRight.Y);
-        var roofLength = componentParams.Volume.BoundingBox.bottomRight.X - roofStart.X;
+        int roofLength = componentParams.Volume.BoundingBox.bottomRight.X - roofStart.X;
         var roofBottom = RaycastHelper.GetTopTilesPos(roofStart, roofLength);
         roofStart = new Point16(roofStart.X, roofBottom.pos[0]);
 
         var roofBottomFlats = RaycastHelper.GetFlatTiles(roofBottom);
-        var isTallRoof = roofBottomFlats.flatLengths.Sum() > roofLength / 2 &&
-                         roofLength > 30 &&
-                         Terraria.WorldGen.genRand.Next(0, 4) == 0;
-        var hasEndCaps = Terraria.WorldGen.genRand.Next(0, 5) != 0;
+        bool isTallRoof = roofBottomFlats.flatLengths.Sum() > roofLength / 2 &&
+                          roofLength > 30 &&
+                          Terraria.WorldGen.genRand.Next(0, 4) == 0;
+        bool hasEndCaps = Terraria.WorldGen.genRand.Next(0, 5) != 0;
 
         // pass 1: make roof shape
-        var index = -1;
+        int index = -1;
         for (int x = roofStart.X; x < roofStart.X + roofLength; x++) {
             index++;
             if (index != 0 && index != roofLength - 1)
@@ -316,7 +316,7 @@ public static class ComponentGen {
         var roofTop =
             RaycastHelper.GetTopTilesPos(roofStart + new Point16(0, -2), roofLength);
         index = 0;
-        for (var x = roofStart.X + 1; x < roofStart.X + roofLength - 1; x++) {
+        for (int x = roofStart.X + 1; x < roofStart.X + roofLength - 1; x++) {
             index++;
             if (Main.tile[x, roofTop.pos[index]].BlockType == BlockType.SlopeDownLeft &&
                 Main.tile[x - 1, roofTop.pos[index] + 1].BlockType == BlockType.SlopeDownRight) {
@@ -330,7 +330,7 @@ public static class ComponentGen {
         index = -1;
         for (int x = roofStart.X; x < roofStart.X + roofLength; x++) {
             index++;
-            var tile = Main.tile[x, roofTop.pos[index]];
+            Tile tile = Main.tile[x, roofTop.pos[index]];
             switch (tile.BlockType) {
                 case BlockType.SlopeDownRight: // up
                     PaintedType.PlaceTile(x, roofTop.pos[index], palette.RoofMain);
@@ -365,18 +365,18 @@ public static class ComponentGen {
                 tranitions.Add((roofStart.X + 1, roofTop.pos[0]));
             }
 
-        for (var flatIndex = 0; flatIndex < roofTopFlats.flatStartIndexes.Count; flatIndex++) {
+        for (int flatIndex = 0; flatIndex < roofTopFlats.flatStartIndexes.Count; flatIndex++) {
             // if the correct slope to left or right of flat, create transition
-            var furthestLeftIndex = roofTopFlats.flatStartIndexes[flatIndex];
-            var leftTile = Main.tile[roofStart.X + furthestLeftIndex - 1,
+            int furthestLeftIndex = roofTopFlats.flatStartIndexes[flatIndex];
+            Tile leftTile = Main.tile[roofStart.X + furthestLeftIndex - 1,
                 roofTop.pos[furthestLeftIndex] - 1];
             if (leftTile is { HasTile: true, BlockType: BlockType.SlopeDownLeft }) {
                 leftTile.BlockType = BlockType.Solid;
                 tranitions.Add((roofStart.X + furthestLeftIndex - 1, roofTop.pos[furthestLeftIndex] - 1));
             }
 
-            var furthestRightIndex = roofTopFlats.flatStartIndexes[flatIndex] + roofTopFlats.flatLengths[flatIndex] - 1;
-            var rightTile = Main.tile[roofStart.X + furthestRightIndex + 1,
+            int furthestRightIndex = roofTopFlats.flatStartIndexes[flatIndex] + roofTopFlats.flatLengths[flatIndex] - 1;
+            Tile rightTile = Main.tile[roofStart.X + furthestRightIndex + 1,
                 roofTop.pos[furthestRightIndex] - 1];
             if (rightTile is { HasTile: true, BlockType: BlockType.SlopeDownRight }) {
                 rightTile.BlockType = BlockType.Solid;
@@ -385,8 +385,8 @@ public static class ComponentGen {
         }
 
         // 5th pass: actually add the half blocks
-        for (var flatIndex = 0; flatIndex < roofTopFlats.flatStartIndexes.Count; flatIndex++)
-        for (var xIndex = roofTopFlats.flatStartIndexes[flatIndex];
+        for (int flatIndex = 0; flatIndex < roofTopFlats.flatStartIndexes.Count; flatIndex++)
+        for (int xIndex = roofTopFlats.flatStartIndexes[flatIndex];
              xIndex < roofTopFlats.flatStartIndexes[flatIndex] + roofTopFlats.flatLengths[flatIndex];
              xIndex++)
             // ensure the tile underneath is solid (and not a transition tile)
@@ -396,11 +396,11 @@ public static class ComponentGen {
                     BlockType.HalfBlock);
 
         // 6th pass: create endcaps
-        var anySideEndsWithSlope = Math.Abs(roofBottom.slope[0]) > 0.05 || Math.Abs(roofBottom.slope[^1]) > 0.05;
-        var hasTallEndCaps = anySideEndsWithSlope || Terraria.WorldGen.genRand.NextBool();
+        bool anySideEndsWithSlope = Math.Abs(roofBottom.slope[0]) > 0.05 || Math.Abs(roofBottom.slope[^1]) > 0.05;
+        bool hasTallEndCaps = anySideEndsWithSlope || Terraria.WorldGen.genRand.NextBool();
         if (hasEndCaps) {
             // left cap
-            var leftTestTile = Main.tile[roofStart.X - 1, roofStart.Y - 2];
+            Tile leftTestTile = Main.tile[roofStart.X - 1, roofStart.Y - 2];
             if (!leftTestTile.HasTile || leftTestTile.BlockType != BlockType.Solid) {
                 if (hasTallEndCaps) {
                     PaintedType.PlaceTile(roofStart.X - 1, roofStart.Y - 2, palette.RoofMain,
@@ -433,8 +433,8 @@ public static class ComponentGen {
             }
 
             // right cap
-            var rightPosX = roofStart.X + roofLength - 1;
-            var rightTestTile = Main.tile[rightPosX + 1, roofBottom.pos[^1] - 2];
+            int rightPosX = roofStart.X + roofLength - 1;
+            Tile rightTestTile = Main.tile[rightPosX + 1, roofBottom.pos[^1] - 2];
             if (!rightTestTile.HasTile || rightTestTile.BlockType != BlockType.Solid) {
                 if (hasTallEndCaps) {
                     PaintedType.PlaceTile(rightPosX + 1, roofBottom.pos[^1] - 2, palette.RoofMain,
@@ -498,10 +498,10 @@ public static class ComponentGen {
     ///     Fills a volume with random blocks, but the top block consistent. great for base-layer floors
     /// </summary>
     public static object Floor3(ComponentParams componentParams) {
-        var elevated = componentParams.TagsRequired.Contains(StructureTag.FloorElevated);
+        bool elevated = componentParams.TagsRequired.Contains(StructureTag.FloorElevated);
         int xStart = componentParams.Volume.BoundingBox.topLeft.X;
-        var xSize = componentParams.Volume.BoundingBox.bottomRight.X - xStart + 1;
-        var topY = new int[xSize];
+        int xSize = componentParams.Volume.BoundingBox.bottomRight.X - xStart + 1;
+        int[] topY = new int[xSize];
 
         componentParams.Volume.ExecuteInArea((x, y) => {
             PaintedType.PlaceTile(x, y,
@@ -516,7 +516,7 @@ public static class ComponentGen {
                 topY[x - xStart] = y;
         });
 
-        for (var index = 0; index < topY.Length; index++)
+        for (int index = 0; index < topY.Length; index++)
             PaintedType.PlaceTile(xStart + index, topY[index],
                 elevated ? componentParams.TilePalette.FloorMainElevated : componentParams.TilePalette.FloorMain);
 
@@ -527,12 +527,12 @@ public static class ComponentGen {
     ///     Fills top and bottom of volume, adds support struts in the middle
     /// </summary>
     public static object Floor4(ComponentParams componentParams) {
-        var elevated = componentParams.TagsRequired.Contains(StructureTag.FloorElevated);
+        bool elevated = componentParams.TagsRequired.Contains(StructureTag.FloorElevated);
         int xStart = componentParams.Volume.BoundingBox.topLeft.X;
-        var xSize = componentParams.Volume.BoundingBox.bottomRight.X - xStart + 1;
-        var topY = new int[xSize];
-        var bottomY = new int[xSize];
-        var supportInterval = Terraria.WorldGen.genRand.Next(3, 5);
+        int xSize = componentParams.Volume.BoundingBox.bottomRight.X - xStart + 1;
+        int[] topY = new int[xSize];
+        int[] bottomY = new int[xSize];
+        int supportInterval = Terraria.WorldGen.genRand.Next(3, 5);
 
         componentParams.Volume.ExecuteInArea((x, y) => {
             if ((x - xStart - 2) % supportInterval == 0 || x == xStart ||
@@ -542,7 +542,7 @@ public static class ComponentGen {
             }
             else {
                 PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundFloorMain);
-                var tile = Main.tile[x, y];
+                Tile tile = Main.tile[x, y];
                 if (Terraria.WorldGen.genRand.Next(0, 3) == 0) {
                     tile.HasTile = true;
                     tile.TileType = TileID.Cobweb;
@@ -563,7 +563,7 @@ public static class ComponentGen {
                 bottomY[x - xStart] = y;
         });
 
-        for (var index = 0; index < topY.Length; index++) {
+        for (int index = 0; index < topY.Length; index++) {
             PaintedType.PlaceTile(xStart + index, topY[index],
                 elevated ? componentParams.TilePalette.FloorMainElevated : componentParams.TilePalette.FloorMain);
             PaintedType.PlaceTile(xStart + index, bottomY[index],
@@ -578,13 +578,13 @@ public static class ComponentGen {
     /// </summary>
     public static object FloorGap1(ComponentParams componentParams) {
         int xStart = componentParams.Volume.BoundingBox.topLeft.X;
-        var xSize = componentParams.Volume.BoundingBox.bottomRight.X - xStart + 1;
-        var topY = new int[xSize];
-        var bottomY = new int[xSize];
+        int xSize = componentParams.Volume.BoundingBox.bottomRight.X - xStart + 1;
+        int[] topY = new int[xSize];
+        int[] bottomY = new int[xSize];
 
         componentParams.Volume.ExecuteInArea((x, y) => {
             PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundFloorMain);
-            var tile = Main.tile[x, y];
+            Tile tile = Main.tile[x, y];
             tile.HasTile = false;
 
             if (topY[x - xStart] == 0)
@@ -598,7 +598,7 @@ public static class ComponentGen {
                 bottomY[x - xStart] = y;
         });
 
-        for (var index = 0; index < topY.Length; index++) {
+        for (int index = 0; index < topY.Length; index++) {
             PaintedType.PlaceTile(xStart + index, topY[index], componentParams.TilePalette.Platform);
             PaintedType.PlaceTile(xStart + index, bottomY[index], componentParams.TilePalette.Platform);
         }
@@ -615,11 +615,11 @@ public static class ComponentGen {
     ///     Fills a volume with the same wall blocks, with special blocks at regular intervals
     /// </summary>
     public static object Wall1(ComponentParams componentParams) {
-        var elevated = componentParams.TagsRequired.Contains(StructureTag.WallElevated);
+        bool elevated = componentParams.TagsRequired.Contains(StructureTag.WallElevated);
         int yStart = componentParams.Volume.BoundingBox.topLeft.Y;
-        var ySize = componentParams.Volume.BoundingBox.bottomRight.Y - yStart + 1;
-        var lowX = new int[ySize];
-        var highX = new int[ySize];
+        int ySize = componentParams.Volume.BoundingBox.bottomRight.Y - yStart + 1;
+        int[] lowX = new int[ySize];
+        int[] highX = new int[ySize];
         componentParams.Volume.ExecuteInArea((x, y) => {
             PaintedType.PlaceTile(x, y,
                 elevated ? componentParams.TilePalette.WallMainElevated : componentParams.TilePalette.WallMain);
@@ -635,7 +635,7 @@ public static class ComponentGen {
                 highX[y - yStart] = x;
         });
 
-        for (var index = 0; index < lowX.Length; index++) {
+        for (int index = 0; index < lowX.Length; index++) {
             PaintedType.PlaceTile(yStart + index, lowX[index], componentParams.TilePalette.WallSpecial);
             PaintedType.PlaceTile(yStart + index, highX[index], componentParams.TilePalette.WallSpecial);
         }
@@ -647,11 +647,11 @@ public static class ComponentGen {
     ///     Fills a volume with random wall blocks, with special blocks at regular intervals
     /// </summary>
     public static object Wall2(ComponentParams componentParams) {
-        var elevated = componentParams.TagsRequired.Contains(StructureTag.WallElevated);
+        bool elevated = componentParams.TagsRequired.Contains(StructureTag.WallElevated);
         int yStart = componentParams.Volume.BoundingBox.topLeft.Y;
-        var ySize = componentParams.Volume.BoundingBox.bottomRight.Y - yStart + 1;
-        var lowX = new int[ySize];
-        var highX = new int[ySize];
+        int ySize = componentParams.Volume.BoundingBox.bottomRight.Y - yStart + 1;
+        int[] lowX = new int[ySize];
+        int[] highX = new int[ySize];
         componentParams.Volume.ExecuteInArea((x, y) => {
             PaintedType.PlaceTile(x, y, PaintedType.PickRandom(
                 elevated ? componentParams.TilePalette.WallAltElevated : componentParams.TilePalette.WallAlt));
@@ -667,7 +667,7 @@ public static class ComponentGen {
                 highX[y - yStart] = x;
         });
 
-        for (var index = 0; index < lowX.Length; index++) {
+        for (int index = 0; index < lowX.Length; index++) {
             PaintedType.PlaceTile(yStart + index, lowX[index], componentParams.TilePalette.WallSpecial);
             PaintedType.PlaceTile(yStart + index, highX[index], componentParams.TilePalette.WallSpecial);
         }
@@ -679,10 +679,10 @@ public static class ComponentGen {
     ///     Fills a volume with random blocks, but the bottom block consistent
     /// </summary>
     public static object Wall3(ComponentParams componentParams) {
-        var elevated = componentParams.TagsRequired.Contains(StructureTag.WallElevated);
+        bool elevated = componentParams.TagsRequired.Contains(StructureTag.WallElevated);
         int xStart = componentParams.Volume.BoundingBox.topLeft.X;
-        var xSize = componentParams.Volume.BoundingBox.bottomRight.X - xStart + 1;
-        var bottomY = new int[xSize];
+        int xSize = componentParams.Volume.BoundingBox.bottomRight.X - xStart + 1;
+        int[] bottomY = new int[xSize];
 
         componentParams.Volume.ExecuteInArea((x, y) => {
             PaintedType.PlaceTile(x, y, PaintedType.PickRandom(
@@ -695,7 +695,7 @@ public static class ComponentGen {
                 bottomY[x - xStart] = y;
         });
 
-        for (var index = 0; index < bottomY.Length; index++)
+        for (int index = 0; index < bottomY.Length; index++)
             PaintedType.PlaceTile(xStart + index, bottomY[index],
                 elevated ? componentParams.TilePalette.WallAccentElevated : componentParams.TilePalette.WallAccent);
 
@@ -763,8 +763,7 @@ public static class ComponentGen {
     ///     Fills with emerald gem spark
     /// </summary>
     public static object DebugBlocks1(ComponentParams componentParams) {
-        componentParams.Volume.ExecuteInArea((x, y) =>
-        {
+        componentParams.Volume.ExecuteInArea((x, y) => {
             Tile tile = Main.tile[x, y];
             tile.HasTile = true;
             tile.BlockType = BlockType.Solid;
@@ -778,8 +777,7 @@ public static class ComponentGen {
     ///     Fills with sapphire gem spark
     /// </summary>
     public static object DebugBlocks2(ComponentParams componentParams) {
-        componentParams.Volume.ExecuteInArea((x, y) =>
-        {
+        componentParams.Volume.ExecuteInArea((x, y) => {
             Tile tile = Main.tile[x, y];
             tile.HasTile = true;
             tile.BlockType = BlockType.Solid;
@@ -793,8 +791,7 @@ public static class ComponentGen {
     ///     Fills with ruby gem spark
     /// </summary>
     public static object DebugBlocks3(ComponentParams componentParams) {
-        componentParams.Volume.ExecuteInArea((x, y) =>
-        {
+        componentParams.Volume.ExecuteInArea((x, y) => {
             Tile tile = Main.tile[x, y];
             tile.HasTile = true;
             tile.BlockType = BlockType.Solid;
@@ -808,8 +805,7 @@ public static class ComponentGen {
     ///     Fills with emerald gem spark
     /// </summary>
     public static object DebugWalls1(ComponentParams componentParams) {
-        componentParams.Volume.ExecuteInArea((x, y) =>
-        {
+        componentParams.Volume.ExecuteInArea((x, y) => {
             Tile tile = Main.tile[x, y];
             tile.WallType = WallID.EmeraldGemspark;
             tile.WallColor = PaintID.None;
@@ -821,8 +817,7 @@ public static class ComponentGen {
     ///     Fills with sapphire gem spark
     /// </summary>
     public static object DebugWalls2(ComponentParams componentParams) {
-        componentParams.Volume.ExecuteInArea((x, y) =>
-        {
+        componentParams.Volume.ExecuteInArea((x, y) => {
             Tile tile = Main.tile[x, y];
             tile.WallType = WallID.SapphireGemspark;
             tile.WallColor = PaintID.None;
@@ -834,8 +829,7 @@ public static class ComponentGen {
     ///     Fills with ruby gem spark
     /// </summary>
     public static object DebugWalls3(ComponentParams componentParams) {
-        componentParams.Volume.ExecuteInArea((x, y) =>
-        {
+        componentParams.Volume.ExecuteInArea((x, y) => {
             Tile tile = Main.tile[x, y];
             tile.WallType = WallID.RubyGemspark;
             tile.WallColor = PaintID.None;

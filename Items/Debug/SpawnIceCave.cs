@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using ReLogic.Utilities;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
@@ -23,17 +24,17 @@ public class SpawnIceCave : ModItem {
     }
 
     public override bool? UseItem(Terraria.Player player) {
-        var point = (Main.MouseWorld / 16).ToPoint16();
+        Point16 point = (Main.MouseWorld / 16).ToPoint16();
         int x = point.X;
         int y = point.Y;
 
-        var w = 23;
-        var h = 17;
-        var pondDiff = 7;
-        var tunnelHeight = 10;
+        int w = 23;
+        int h = 17;
+        int pondDiff = 7;
+        int tunnelHeight = 10;
         byte bleed = 10;
 
-        var facingLeft = Terraria.WorldGen.genRand.Next(0, 2) == 0;
+        bool facingLeft = Terraria.WorldGen.genRand.Next(0, 2) == 0;
 
         // cave floor
         WorldUtils.Gen(new Point((int)(x - w * 1.35), y), new Shapes.Rectangle((int)((w + 3) * 2.5), bleed),
@@ -82,9 +83,9 @@ public class SpawnIceCave : ModItem {
 
 
         //hanging icicles
-        var iterations = Terraria.WorldGen.genRand.Next(w / 20 + 2, w / 10 + 3);
+        int iterations = Terraria.WorldGen.genRand.Next(w / 20 + 2, w / 10 + 3);
         for (byte i = 0; i < iterations; i++) {
-            var tailXOffset = w * 1.5 / iterations * i + Terraria.WorldGen.genRand.Next(-3, 3) - w / 2;
+            double tailXOffset = w * 1.5 / iterations * i + Terraria.WorldGen.genRand.Next(-3, 3) - w / 2;
             double pointXOffset = Terraria.WorldGen.genRand.Next(-(w / 15) - 1, w / 15 + 2);
 
             WorldUtils.Gen(new Point(x + (int)tailXOffset, y - h - tunnelHeight), new Shapes.Tail(w / 8 + 5,
@@ -99,7 +100,7 @@ public class SpawnIceCave : ModItem {
 
 
         // entry cave
-        var caveNum = (byte)Terraria.WorldGen.genRand.Next(1, 3);
+        byte caveNum = (byte)Terraria.WorldGen.genRand.Next(1, 3);
         if (facingLeft)
             for (byte i = 0; i < caveNum; i++)
                 Terraria.WorldGen.digTunnel(x - w, y - tunnelHeight / 2, -1.2, 0, 140,

@@ -6,8 +6,10 @@ public class Gap {
     public Room? HigherRoom;
 
     public bool IsExterior;
+
     /// <summary>Has rooms on it's left/right</summary>
     public bool IsHorizontal;
+
     public Room LowerRoom;
     public Shape Volume;
 

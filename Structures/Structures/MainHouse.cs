@@ -285,15 +285,15 @@ public sealed class MainHouse : CustomStructure {
         Generator.GenerateStructure(RightFilePath, new Point16(X + LeftSize, Y), ModInstance.Mod);
         Generator.GenerateStructure(TopFilePath, new Point16(X + LeftSize - 14, Y - 10), ModInstance.Mod);
 
-        var signString = "All good adventures start in a tavern...To bad this isn't a tavern :(";
-        var rnd = new Random();
-        for (var i = 0; i < 25; i++) {
-            var possibleString = _signQuotes[rnd.Next(0, _signQuotes.Count)];
+        string signString = "All good adventures start in a tavern...To bad this isn't a tavern :(";
+        Random rnd = new Random();
+        for (int i = 0; i < 25; i++) {
+            string possibleString = _signQuotes[rnd.Next(0, _signQuotes.Count)];
             if (possibleString.Contains('~'))
                 try {
                     var dict = WebClientInstance.WebClient.GetSpawnCount();
                     if (dict is not null) {
-                        dict.TryGetValue("main_houses_extrapolated", out var value);
+                        dict.TryGetValue("main_houses_extrapolated", out int value);
                         if (value is not -1) {
                             signString = possibleString.Replace("~", value.ToString());
                             break;
@@ -310,7 +310,7 @@ public sealed class MainHouse : CustomStructure {
             break;
         }
 
-        var signIndex = Sign.ReadSign(SignPos.X, SignPos.Y);
+        int signIndex = Sign.ReadSign(SignPos.X, SignPos.Y);
         if (signIndex != -1)
             Sign.TextSign(signIndex, signString);
 
@@ -322,16 +322,16 @@ public sealed class MainHouse : CustomStructure {
         if (!InUnderworld) {
             ushort[] blacklistWallIDs =
                 [WallID.StoneSlab, WallID.PearlstoneBrick, WallID.SnowBrick, WallID.RichMaogany];
-            var leftBushCount = Terraria.WorldGen.genRand.Next(2, 5);
-            for (var i = 0; i < leftBushCount; i++) {
-                var xOffset = Terraria.WorldGen.genRand.Next(0, 12);
+            int leftBushCount = Terraria.WorldGen.genRand.Next(2, 5);
+            for (int i = 0; i < leftBushCount; i++) {
+                int xOffset = Terraria.WorldGen.genRand.Next(0, 12);
                 StructureGenHelper.PlaceBush(new Point(X + xOffset, Y + 15 + Terraria.WorldGen.genRand.Next(0, 2)),
                     wallBlacklistIDs: blacklistWallIDs);
             }
 
-            var rightBushCount = Terraria.WorldGen.genRand.Next(2, 5);
-            for (var i = 0; i < rightBushCount; i++) {
-                var xOffset = Terraria.WorldGen.genRand.Next(0, 12);
+            int rightBushCount = Terraria.WorldGen.genRand.Next(2, 5);
+            for (int i = 0; i < rightBushCount; i++) {
+                int xOffset = Terraria.WorldGen.genRand.Next(0, 12);
                 StructureGenHelper.PlaceBush(
                     new Point(X + StructureXSize - 1 - xOffset, Y + 15 + Terraria.WorldGen.genRand.Next(0, 2)),
                     wallBlacklistIDs: blacklistWallIDs);

@@ -16,14 +16,14 @@ public static class WorldGenHelper {
     private static byte _mainHouseOffsetDirection = Directions.None;
 
     public static void GenerateMainHouse() {
-        var spawnUnderworld =
+        bool spawnUnderworld =
             Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "").Replace("'", "") == "dontdigup" ||
             Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "") == "getfixedboi";
 
-        var initialX = 1;
-        var initialY = 1;
+        int initialX = 1;
+        int initialY = 1;
 
-        var foundValidSpot = false;
+        bool foundValidSpot = false;
 
         for (ushort counts = 0; counts < 10; counts++) {
             initialX = Terraria.WorldGen.genRand.Next(Main.spawnTileX - 25, Main.spawnTileX + 25);
@@ -48,9 +48,11 @@ public static class WorldGenHelper {
             // Move out of the way of the big spawn tree or just offset it
             try {
                 if (ModHelper.IsRemnantsEnabled || ModContent.GetInstance<SpawnHousesConfig>().SpawnPointHouseOffset) {
-                    var leftSurface = RaycastHelper.GetSurfaceLevel(initialX - 120 - 30, initialX - 120 + 30,
+                    (double average, double sd) leftSurface = RaycastHelper.GetSurfaceLevel(initialX - 120 - 30,
+                        initialX - 120 + 30,
                         initialY, maxCastDistance: 400);
-                    var rightSurface = RaycastHelper.GetSurfaceLevel(initialX + 120 - 30, initialX + 120 + 30,
+                    (double average, double sd) rightSurface = RaycastHelper.GetSurfaceLevel(initialX + 120 - 30,
+                        initialX + 120 + 30,
                         initialY, maxCastDistance: 400);
                     if (leftSurface.sd < rightSurface.sd) {
                         initialX -= 120;
@@ -64,7 +66,8 @@ public static class WorldGenHelper {
                     }
                 }
                 else {
-                    var surface = RaycastHelper.GetSurfaceLevel(initialX - 30, initialX + 30, initialY,
+                    (double average, double sd) surface = RaycastHelper.GetSurfaceLevel(initialX - 30, initialX + 30,
+                        initialY,
                         maxCastDistance: 400);
                     initialY = (int)surface.average;
                 }
@@ -96,7 +99,7 @@ public static class WorldGenHelper {
         }
 
         try {
-            var house = new MainHouse((ushort)(initialX - 31), (ushort)(initialY - 16),
+            MainHouse house = new MainHouse((ushort)(initialX - 31), (ushort)(initialY - 16),
                 hasBasement: ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement,
                 inUnderworld: spawnUnderworld);
             house.Generate();
@@ -113,12 +116,12 @@ public static class WorldGenHelper {
                 WorldUtils.Gen(new Point(initialX, initialY), new Shapes.Circle(150, 100), Actions.Chain(
                     new Actions.Custom((i, j, args) => {
                         if (Main.tile[i, j].HasTile && Main.tile[i, j].TileType == TileID.Dirt) {
-                            var tile = Main.tile[i, j];
+                            Tile tile = Main.tile[i, j];
                             tile.TileType = TileID.Ash;
                         }
 
                         if (Main.tile[i, j].HasTile && Main.tile[i, j].TileType == TileID.Grass) {
-                            var tile = Main.tile[i, j];
+                            Tile tile = Main.tile[i, j];
                             tile.TileType = TileID.AshGrass;
                         }
 
@@ -136,7 +139,7 @@ public static class WorldGenHelper {
         try {
             bool FindValidLocation(bool left = true) {
                 if (StructureManager.MainHouse != null) {
-                    var centerHouse = StructureManager.MainHouse.X + StructureManager.MainHouse.StructureXSize / 2;
+                    int centerHouse = StructureManager.MainHouse.X + StructureManager.MainHouse.StructureXSize / 2;
                     if (left)
                         x = centerHouse - Terraria.WorldGen.genRand.Next(18, 38) - 35;
                     else
@@ -149,7 +152,8 @@ public static class WorldGenHelper {
                         x = Main.spawnTileX + Terraria.WorldGen.genRand.Next(18, 34) + 35;
                 }
 
-                var surfaceLevel = RaycastHelper.GetSurfaceLevel(x - 10, x + 11, Main.spawnTileY - 24);
+                (double average, double sd) surfaceLevel =
+                    RaycastHelper.GetSurfaceLevel(x - 10, x + 11, Main.spawnTileY - 24);
                 y = (int)surfaceLevel.average;
 
                 return surfaceLevel.sd <= 2.8;
@@ -162,7 +166,7 @@ public static class WorldGenHelper {
                 startLeftSide = _mainHouseOffsetDirection == Directions.Left;
 
             if (FindValidLocation(startLeftSide) || FindValidLocation(!startLeftSide)) {
-                var mineshaft = new Mineshaft((ushort)(x - 13), (ushort)(y - 13));
+                Mineshaft mineshaft = new Mineshaft((ushort)(x - 13), (ushort)(y - 13));
                 mineshaft.Generate();
                 StructureManager.Mineshaft = mineshaft;
             }
@@ -177,7 +181,7 @@ public static class WorldGenHelper {
         Box[] mineshaftBoundingBox = [];
         if (StructureManager.Mineshaft is not null) {
             Mineshaft structure = StructureManager.Mineshaft;
-            var structureBox = new Box(structure.X - 8, structure.Y,
+            Box structureBox = new Box(structure.X - 8, structure.Y,
                 structure.X + structure.StructureXSize + 8, structure.Y + 200);
             mineshaftBoundingBox = [structureBox];
         }
@@ -206,7 +210,7 @@ public static class WorldGenHelper {
     public static void GenerateBeachHouse() {
         ushort tileX = 0, tileY = 0;
         short yModifier = 0;
-        var fillTileType = TileID.Sand;
+        ushort fillTileType = TileID.Sand;
 
         bool FindLeft(bool reverse = false, bool force = false) {
             ushort x, y;
@@ -234,7 +238,7 @@ public static class WorldGenHelper {
                             !Terraria.WorldGen.SolidTile(x, y + 28)) // if we're on an "island" keep going
                             break;
 
-                        var type = Main.tile[x, y].TileType;
+                        ushort type = Main.tile[x, y].TileType;
                         if (type is TileID.Sand or TileID.ShellPile or TileID.Crimsand or TileID.Ebonsand
                                 or TileID.Pearlsand || force) {
                             tileX = x;
@@ -261,12 +265,12 @@ public static class WorldGenHelper {
             return FindLeft(true, force);
         }
 
-        var dungeonIsLeftSide = Main.dungeonX < Main.maxTilesX / 2;
+        bool dungeonIsLeftSide = Main.dungeonX < Main.maxTilesX / 2;
 
-        var spawnDungeonSide = Terraria.WorldGen.genRand.Next(0, 4) == 0; // 1 out of 4
+        bool spawnDungeonSide = Terraria.WorldGen.genRand.Next(0, 4) == 0; // 1 out of 4
 
         // initally set it to the same side, then swap it if we aren't spawning on the DungeonSide
-        var leftSide = dungeonIsLeftSide;
+        bool leftSide = dungeonIsLeftSide;
         if (!spawnDungeonSide)
             leftSide = !leftSide;
 
@@ -285,7 +289,7 @@ public static class WorldGenHelper {
 
         if (tileX != 0 && tileY != 0)
             try {
-                var beachHouse = leftSide
+                BeachHouse beachHouse = leftSide
                     ? new BeachHouse((ushort)(tileX - 9), (ushort)(tileY - 32))
                     : new BeachHouse((ushort)(tileX - 23), (ushort)(tileY - 32), reverse: true);
                 beachHouse.Generate();
@@ -294,7 +298,7 @@ public static class WorldGenHelper {
                 // firepit generation
                 if (Terraria.WorldGen.genRand.Next(0, 2) == 0) // 1/2 chance
                 {
-                    var foundLocation = false;
+                    bool foundLocation = false;
                     ushort x;
 
                     if (leftSide)
@@ -316,7 +320,7 @@ public static class WorldGenHelper {
                     y = (ushort)(y - 2);
                     x = (ushort)(x - 3);
 
-                    var structure = new Firepit(x, y);
+                    Firepit structure = new Firepit(x, y);
                     structure.Generate();
                 }
 
@@ -326,7 +330,7 @@ public static class WorldGenHelper {
                         new Actions.Custom((i, j, args) => {
                             if (Terraria.WorldGen.InWorld(i, j) && Main.tile[i, j].HasTile &&
                                 Main.tile[i, j].TileType == TileID.Sand) {
-                                var tile = Main.tile[i, j];
+                                Tile tile = Main.tile[i, j];
                                 tile.TileType = fillTileType;
                             }
 

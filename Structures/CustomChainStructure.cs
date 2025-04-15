@@ -22,7 +22,7 @@ public class CustomChainStructure : CustomStructure {
         Weight = weight;
 
         for (byte direction = 0; direction < 4; direction++)
-            foreach (var connectPoint in ConnectPoints[direction])
+            foreach (ChainConnectPoint connectPoint in ConnectPoints[direction])
                 connectPoint.ParentStructure = this;
 
         SetSubstructurePositions();
@@ -31,7 +31,7 @@ public class CustomChainStructure : CustomStructure {
     protected override void SetSubstructurePositions() {
         // can't inherit because the ConnectPoint type changes
         for (byte direction = 0; direction < 4; direction++)
-            foreach (var connectPoint in ConnectPoints[direction])
+            foreach (ChainConnectPoint connectPoint in ConnectPoints[direction])
                 connectPoint.SetPosition(X, Y);
 
         StructureBoundingBoxes = [
@@ -47,7 +47,7 @@ public class CustomChainStructure : CustomStructure {
 
     public ChainConnectPoint GetRootConnectPoint() {
         for (byte direction = 0; direction < 4; direction++)
-            foreach (var connectPoint in ConnectPoints[direction])
+            foreach (ChainConnectPoint connectPoint in ConnectPoints[direction])
                 if (connectPoint.RootPoint)
                     return connectPoint;
         return null;
@@ -68,7 +68,7 @@ public class CustomChainStructure : CustomStructure {
     public static List<byte> CloneBridgeDirectionHistory(CustomChainStructure structure) {
         List<byte> newHistory = [];
 
-        foreach (var direction in structure.BridgeDirectionHistory)
+        foreach (byte direction in structure.BridgeDirectionHistory)
             newHistory.Add(direction);
 
         return newHistory;
@@ -82,13 +82,13 @@ public class CustomChainStructure : CustomStructure {
     }
 
     public override CustomChainStructure Clone() {
-        var type = GetType();
+        Type type = GetType();
         return (CustomChainStructure)Activator.CreateInstance(type, X, Y, Status, Cost, Weight)!;
     }
 
     public void ActionOnEachConnectPoint(Action<ChainConnectPoint> function) {
         for (byte direction = 0; direction < 4; direction++)
-            foreach (var connectPoint in ConnectPoints[direction])
+            foreach (ChainConnectPoint connectPoint in ConnectPoints[direction])
                 function(connectPoint);
     }
 }

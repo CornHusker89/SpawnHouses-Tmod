@@ -110,7 +110,7 @@ public static class StructureIDUtils {
     }
 
     public static CustomStructure CreateStructure(ushort type, ushort x, ushort y, byte status) {
-        var structureType = GetStructureType((StructureID)type);
+        Type structureType = GetStructureType((StructureID)type);
         object obj;
         if (structureType.BaseType == null)
             obj = Activator.CreateInstance(structureType, x, y, status);
@@ -120,7 +120,7 @@ public static class StructureIDUtils {
         if (obj is null)
             throw new Exception("Structure ID to structure object failed");
 
-        var structure = (CustomStructure)obj;
+        CustomStructure structure = (CustomStructure)obj;
         return structure;
     }
 
@@ -228,12 +228,12 @@ public static class BridgeIDUtils {
     }
 
     public static Bridge CreateBridge(ushort type) {
-        var bridgeType = GetBridgeType((BridgeID)type);
-        var obj = Activator.CreateInstance(bridgeType);
+        Type bridgeType = GetBridgeType((BridgeID)type);
+        object obj = Activator.CreateInstance(bridgeType);
         if (obj is null)
             throw new Exception("Structure ID to structure object failed");
 
-        var bridge = (Bridge)obj;
+        Bridge bridge = (Bridge)obj;
         return bridge;
     }
 

@@ -22,7 +22,7 @@ public class SpawnFirepit : ModItem {
 
 
     public override bool? UseItem(Terraria.Player player) {
-        var foundLocation = false;
+        bool foundLocation = false;
         ushort x = 0;
         ushort y = 0;
         while (!foundLocation) {
@@ -40,7 +40,7 @@ public class SpawnFirepit : ModItem {
         y = (ushort)(y - 2);
         x = (ushort)(x - 3);
 
-        var structure = new Firepit(x, y);
+        Firepit structure = new Firepit(x, y);
         structure.Generate();
 
         return true;

@@ -24,7 +24,7 @@ public class RoomLayoutGen {
         List<(StructureTag[] possibleTags, Func<RoomLayoutParams, RoomLayout> method)> methodTuples = [];
         foreach (var tuple in GenMethods) {
             var requiredTags = roomLayoutParams.TagsRequired.ToList();
-            foreach (var possibleTag in tuple.possibleTags) {
+            foreach (StructureTag possibleTag in tuple.possibleTags) {
                 if (roomLayoutParams.TagsBlacklist.Contains(possibleTag))
                     break;
                 requiredTags.Remove(possibleTag);
@@ -48,8 +48,8 @@ public class RoomLayoutGen {
         RoomLayoutVolumes? pickedLayout = null;
 
         var possibleLayouts = new RoomLayoutVolumes[roomLayoutParams.Attempts];
-        for (var attempt = 0; attempt < roomLayoutParams.Attempts; attempt++) {
-            var volumes = RoomLayoutHelper.SplitBsp(roomLayoutParams, corners.xCoords, corners.yCoords);
+        for (int attempt = 0; attempt < roomLayoutParams.Attempts; attempt++) {
+            RoomLayoutVolumes? volumes = RoomLayoutHelper.SplitBsp(roomLayoutParams, corners.xCoords, corners.yCoords);
             if (volumes.RoomVolumes.Count == roomLayoutParams.Housing) {
                 pickedLayout = volumes;
                 break;
@@ -60,8 +60,8 @@ public class RoomLayoutGen {
 
         // find the layout with the closest housing to the requested amount
         if (pickedLayout is null) {
-            var closetHousingCount = Math.Abs(possibleLayouts[0].RoomVolumes.Count - roomLayoutParams.Housing);
-            for (var i = 0; i < possibleLayouts.Length; i++)
+            int closetHousingCount = Math.Abs(possibleLayouts[0].RoomVolumes.Count - roomLayoutParams.Housing);
+            for (int i = 0; i < possibleLayouts.Length; i++)
                 if (Math.Abs(possibleLayouts[i].RoomVolumes.Count - roomLayoutParams.Housing) < closetHousingCount) {
                     closetHousingCount = Math.Abs(possibleLayouts[i].RoomVolumes.Count - roomLayoutParams.Housing);
                     pickedLayout = possibleLayouts[i];

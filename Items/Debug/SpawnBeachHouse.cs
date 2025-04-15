@@ -22,7 +22,7 @@ public class SpawnBeachHouse : ModItem {
 
 
     public override bool? UseItem(Terraria.Player player) {
-        var foundLocation = false;
+        bool foundLocation = false;
         ushort x = 0;
         ushort y = 0;
         while (!foundLocation) {
@@ -40,9 +40,9 @@ public class SpawnBeachHouse : ModItem {
         y = (ushort)(y - 29); //the structure spawning has an offset + we want it to be a little off the ground
         x = (ushort)(x - 18); //center the struct
 
-        var reverse = x > Main.LocalPlayer.position.X / 16;
+        bool reverse = x > Main.LocalPlayer.position.X / 16;
 
-        var structure = new BeachHouse(x, y, 0, reverse);
+        BeachHouse structure = new BeachHouse(x, y, 0, reverse);
         structure.Generate();
         //structure._GenerateStructure();
 

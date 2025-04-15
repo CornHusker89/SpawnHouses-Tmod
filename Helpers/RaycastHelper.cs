@@ -19,16 +19,16 @@ public static class RaycastHelper {
     public static (double average, double sd) GetSurfaceLevel(
         int x1, int x2, int y, byte step = 1, ushort maxCastDistance = 50) {
         List<double> surfaceLevels = [];
-        for (var i = x1; i <= x2; i += step)
-        for (var j = 0; j < maxCastDistance; j++)
+        for (int i = x1; i <= x2; i += step)
+        for (int j = 0; j < maxCastDistance; j++)
             if (Terraria.WorldGen.SolidTile(i, y + j)) {
                 surfaceLevels.Add(y + j);
                 break;
             }
 
-        var average = surfaceLevels.Average();
-        var sumOfSquaresOfDifferences = surfaceLevels.Select(val => (val - average) * (val - average)).Sum();
-        var sd = Math.Sqrt(sumOfSquaresOfDifferences / surfaceLevels.Count);
+        double average = surfaceLevels.Average();
+        double sumOfSquaresOfDifferences = surfaceLevels.Select(val => (val - average) * (val - average)).Sum();
+        double sd = Math.Sqrt(sumOfSquaresOfDifferences / surfaceLevels.Count);
         return (average, sd);
     }
 
@@ -42,7 +42,7 @@ public static class RaycastHelper {
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
     public static (int distance, int yCoord) SurfaceRaycast(int x, int y, int maxCastDistance = 100) {
-        for (var i = 0; i < maxCastDistance; i++)
+        for (int i = 0; i < maxCastDistance; i++)
             if (Terraria.WorldGen.SolidTile(x, y + i))
                 return (i, y + i);
         throw new Exception("surface not found within " + maxCastDistance + " tiles");
@@ -60,8 +60,8 @@ public static class RaycastHelper {
     /// <exception cref="Exception"></exception>
     public static (bool found, int distance, int yCoord) SurfaceRaycastFromInsideTile(int x, int y,
         int maxCastDistance = 40) {
-        var inSolid = true;
-        for (var i = 0; i < maxCastDistance; i++)
+        bool inSolid = true;
+        for (int i = 0; i < maxCastDistance; i++)
             if (Terraria.WorldGen.SolidTile(x, y + i)) {
                 if (!inSolid)
                     return (true, i, y + i);
@@ -91,9 +91,9 @@ public static class RaycastHelper {
         }
 
         // get the pos
-        var pos = new int[length];
+        int[] pos = new int[length];
         int lastY = start.Y;
-        for (var i = 0; i < length; i++) {
+        for (int i = 0; i < length; i++) {
             /*
             if cur target has a tile
                 go up until we find air
@@ -103,7 +103,7 @@ public static class RaycastHelper {
                 go down until tile is found
             */
 
-            var jumpDist = 0;
+            int jumpDist = 0;
 
             if (IsValidTile(Main.tile[start.X + i, lastY])) {
                 do {
@@ -126,17 +126,17 @@ public static class RaycastHelper {
         }
 
         // get the slope
-        var slope = new double[length];
-        var lastChangeIndex = 0;
-        for (var i = 0; i < length - 1; i++)
+        double[] slope = new double[length];
+        int lastChangeIndex = 0;
+        for (int i = 0; i < length - 1; i++)
             if (pos[i] == pos[i + 1]) {
                 slope[i] = 0;
             }
             else {
                 // if we've had a flat part, not followed by a jump of > 1
                 if (lastChangeIndex != i - 1 && Math.Abs(pos[i] - pos[lastChangeIndex]) > 1.05) {
-                    var newSlope = (double)(pos[i] - pos[lastChangeIndex]) / (i - lastChangeIndex);
-                    for (var j = lastChangeIndex + 1; j <= i; j++)
+                    double newSlope = (double)(pos[i] - pos[lastChangeIndex]) / (i - lastChangeIndex);
+                    for (int j = lastChangeIndex + 1; j <= i; j++)
                         slope[j] = newSlope;
                 }
                 else {
@@ -159,8 +159,8 @@ public static class RaycastHelper {
     public static (List<int> flatStartIndexes, List<int> flatLengths) GetFlatTiles((int[] pos, double[] slope) tiles) {
         List<int> flatLengths = [];
         List<int> flatStartIndexes = [];
-        var currentFlatStartIndex = 0;
-        for (var i = 1; i < tiles.pos.Length; i++)
+        int currentFlatStartIndex = 0;
+        for (int i = 1; i < tiles.pos.Length; i++)
             if (tiles.pos[i] != tiles.pos[i - 1]) {
                 // remove flats with length of 1
                 if (i - currentFlatStartIndex != 1) {
@@ -191,10 +191,10 @@ public static class RaycastHelper {
     public static (List<int> jumpIndexes, int lowestStart, int lowestLength) GetJumpsInfo(
         (int[] pos, double[] slope) tiles, int threshold = 4) {
         List<int> jumpIndexes = [];
-        var lowestPos = tiles.pos[0];
-        var highestStart = 0;
-        var highestLength = 1;
-        for (var i = 1; i < tiles.pos.Length; i++) {
+        int lowestPos = tiles.pos[0];
+        int highestStart = 0;
+        int highestLength = 1;
+        for (int i = 1; i < tiles.pos.Length; i++) {
             if (Math.Abs(tiles.pos[i] - tiles.pos[i - 1]) >= 4)
                 jumpIndexes.Add(i);
             if (tiles.pos[i] < lowestPos) {

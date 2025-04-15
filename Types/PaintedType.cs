@@ -10,13 +10,13 @@ public struct PaintedType(ushort type, byte paintType = PaintID.None, short styl
     public short Style = style;
 
     public static PaintedType PickRandom(PaintedType[] paintedTypes) {
-        var index = Terraria.WorldGen.genRand.Next(paintedTypes.Length);
+        int index = Terraria.WorldGen.genRand.Next(paintedTypes.Length);
         return paintedTypes[index];
     }
 
     public static void PlaceTile(int x, int y, PaintedType paintedType, BlockType blockType = BlockType.Solid) {
         if (paintedType.Style == -1) {
-            var tile = Main.tile[x, y];
+            Tile tile = Main.tile[x, y];
             tile.HasTile = true;
             tile.BlockType = blockType;
             tile.TileType = paintedType.Type;
@@ -24,7 +24,7 @@ public struct PaintedType(ushort type, byte paintType = PaintID.None, short styl
         }
         else {
             Terraria.WorldGen.PlaceTile(x, y, paintedType.Type, true, true, style: paintedType.Style);
-            var tile = Main.tile[x, y];
+            Tile tile = Main.tile[x, y];
             tile.TileColor = paintedType.PaintType;
         }
     }
@@ -34,7 +34,7 @@ public struct PaintedType(ushort type, byte paintType = PaintID.None, short styl
     }
 
     public static void PlaceWall(int x, int y, PaintedType paintedType) {
-        var tile = Main.tile[x, y];
+        Tile tile = Main.tile[x, y];
         tile.WallType = paintedType.Type;
         tile.WallColor = paintedType.PaintType;
     }

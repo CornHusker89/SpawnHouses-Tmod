@@ -52,7 +52,7 @@ public class Bridge {
     }
 
     public void ShowConnectPoints() {
-        var tile = Main.tile[Point1.X, Point1.Y];
+        Tile tile = Main.tile[Point1.X, Point1.Y];
         tile.HasTile = true;
         tile.Slope = SlopeType.Solid;
         tile.IsHalfBlock = false;
@@ -66,7 +66,7 @@ public class Bridge {
     }
 
     public virtual Bridge Clone() {
-        var type = GetType();
+        Type type = GetType();
         return (Bridge)Activator.CreateInstance(type)!;
     }
 }

@@ -59,10 +59,10 @@ public class Shape {
     /// <param name="duration">effect duration, in seconds</param>
     public static void CreateOutline(Shape[] shapes, int duration = 10) {
         Task.Run(() => {
-            var stopwatch = Stopwatch.StartNew();
+            Stopwatch stopwatch = Stopwatch.StartNew();
             while (stopwatch.ElapsedMilliseconds / 1000 < duration) {
-                for (var i = 0; i < shapes.Length; i++) {
-                    for (var j = 0; j < shapes[i].Points.Length - 1; j++)
+                for (int i = 0; i < shapes.Length; i++) {
+                    for (int j = 0; j < shapes[i].Points.Length - 1; j++)
                         Dust.QuickDustLine(shapes[i].Points[j].ToVector2() * 16 - new Vector2(8, 8),
                             shapes[i].Points[j + 1].ToVector2() * 16 - new Vector2(8, 8), 20f, GetColor(i));
 
@@ -94,7 +94,7 @@ public class Shape {
                 // test if there is only 2 unique x and y's, indicating if its a box
                 IsBox = true;
                 int x1 = Points[0].X, x2 = -1, y1 = Points[0].Y, y2 = -1;
-                foreach (var point in Points) {
+                foreach (Point16 point in Points) {
                     if (point.X != x1)
                         if (x2 == -1) {
                             x2 = point.X;
@@ -132,7 +132,7 @@ public class Shape {
         }
 
         int minX = Main.maxTilesX, maxX = 0, minY = Main.maxTilesY, maxY = 0;
-        foreach (var point in Points) {
+        foreach (Point16 point in Points) {
             minX = Math.Min(point.X, minX);
             maxX = Math.Max(point.X, maxX);
             minY = Math.Min(point.Y, minY);
@@ -144,8 +144,8 @@ public class Shape {
     }
 
     public override string ToString() {
-        var pointsStr = string.Empty;
-        for (var i = 0; i < Points.Length; i++)
+        string pointsStr = string.Empty;
+        for (int i = 0; i < Points.Length; i++)
             pointsStr += $"point {i}: {Points[i]}\n";
         return pointsStr;
     }
@@ -153,7 +153,7 @@ public class Shape {
     public override bool Equals(object? obj) {
         if (obj is not Shape otherShape || otherShape.Points.Length != Points.Length) return false;
 
-        for (var i = 0; i < otherShape.Points.Length; i++)
+        for (int i = 0; i < otherShape.Points.Length; i++)
             if (Points[i] != otherShape.Points[i])
                 return false;
 
@@ -166,9 +166,9 @@ public class Shape {
                    (BoundingBox.bottomRight.Y - BoundingBox.topLeft.Y);
 
         double area = 0;
-        for (var i = 0; i < Points.Length; i++) {
-            var current = Points[i];
-            var next = Points[(i + 1) % Points.Length];
+        for (int i = 0; i < Points.Length; i++) {
+            Point16 current = Points[i];
+            Point16 next = Points[(i + 1) % Points.Length];
 
             area += current.X * next.Y - next.X * current.Y;
         }
@@ -205,10 +205,10 @@ public class Shape {
             return point.X >= BoundingBox.topLeft.X && point.X <= BoundingBox.bottomRight.X &&
                    point.Y >= BoundingBox.topLeft.Y && point.Y <= BoundingBox.bottomRight.Y;
 
-        var crossingCount = 0;
-        for (var i = 0; i < Points.Length; i++) {
-            var point1 = Points[i];
-            var point2 = Points[(i + 1) % Points.Length];
+        int crossingCount = 0;
+        for (int i = 0; i < Points.Length; i++) {
+            Point16 point1 = Points[i];
+            Point16 point2 = Points[(i + 1) % Points.Length];
 
             if (RayIntersectsSegment(point, point1, point2))
                 crossingCount++;
@@ -227,9 +227,9 @@ public class Shape {
 
         var axes = GetUniqueAxes(this).Concat(GetUniqueAxes(other)).ToList();
 
-        foreach (var axis in axes) {
-            var projection1 = ProjectOntoAxis(this, axis);
-            var projection2 = ProjectOntoAxis(other, axis);
+        foreach (Point16 axis in axes) {
+            Projection projection1 = ProjectOntoAxis(this, axis);
+            Projection projection2 = ProjectOntoAxis(other, axis);
 
             if (!projection1.Overlaps(projection2))
                 return false;
@@ -251,8 +251,8 @@ public class Shape {
             return false;
 
         // check for intersection
-        var slope = (segmentEnd.X - segmentStart.X) / (double)(segmentEnd.Y - segmentStart.Y);
-        var intersectX = segmentStart.X + (point.Y - segmentStart.Y) * slope;
+        double slope = (segmentEnd.X - segmentStart.X) / (double)(segmentEnd.Y - segmentStart.Y);
+        double intersectX = segmentStart.X + (point.Y - segmentStart.Y) * slope;
 
         return point.X < intersectX;
     }
@@ -260,15 +260,15 @@ public class Shape {
     private List<Point16> GetUniqueAxes(Shape shape) {
         List<Point16> axes = [];
 
-        for (var i = 0; i < shape.Points.Length; i++) {
-            var p1 = shape.Points[i];
-            var p2 = shape.Points[(i + 1) % shape.Points.Length]; // Next vertex (looping)
+        for (int i = 0; i < shape.Points.Length; i++) {
+            Point16 p1 = shape.Points[i];
+            Point16 p2 = shape.Points[(i + 1) % shape.Points.Length]; // Next vertex (looping)
 
-            var edge = p2 - p1;
-            var normal = new Point16(-edge.Y, edge.X); // Perpendicular normal
+            Point16 edge = p2 - p1;
+            Point16 normal = new Point16(-edge.Y, edge.X); // Perpendicular normal
 
-            var length = Math.Sqrt(normal.X * normal.X + normal.Y * normal.Y);
-            var normalized = length == 0
+            double length = Math.Sqrt(normal.X * normal.X + normal.Y * normal.Y);
+            Point16 normalized = length == 0
                 ? new Point16(0, 0)
                 : new Point16((int)(normal.X / length), (int)(normal.Y / length));
 
@@ -279,10 +279,10 @@ public class Shape {
     }
 
     private Projection ProjectOntoAxis(Shape shape, Point16 axis) {
-        var min = double.MaxValue;
-        var max = double.MinValue;
+        double min = double.MaxValue;
+        double max = double.MinValue;
 
-        foreach (var point in shape.Points) {
+        foreach (Point16 point in shape.Points) {
             double projection = point.X * axis.X + point.Y * axis.Y;
             min = Math.Min(min, projection);
             max = Math.Max(max, projection);
@@ -321,18 +321,18 @@ public class Shape {
                 action(BoundingBox.bottomRight.X, y, Directions.Right);
         }
         else {
-            for (var pointNum = 0; pointNum < Points.Length - 1; pointNum++)
+            for (int pointNum = 0; pointNum < Points.Length - 1; pointNum++)
                 // test for a vertical line
                 if (Points[pointNum].X == Points[pointNum + 1].X) {
                     int lowerY = Math.Min(Points[pointNum].Y, Points[pointNum + 1].Y);
                     int higherY = Math.Max(Points[pointNum].Y, Points[pointNum + 1].Y);
-                    for (var y = lowerY; y < higherY; y++)
+                    for (int y = lowerY; y < higherY; y++)
                         action(Points[pointNum].X, y,
                             Points[pointNum].X > Center.X ? Directions.Right : Directions.Left);
                 }
                 else {
-                    var slope = (double)(Points[pointNum].Y - Points[pointNum + 1].Y) /
-                                (Points[pointNum].X - Points[pointNum + 1].X);
+                    double slope = (double)(Points[pointNum].Y - Points[pointNum + 1].Y) /
+                                   (Points[pointNum].X - Points[pointNum + 1].X);
 
                     // determine whether to iterate along x/y-axis
                     if (Math.Abs(slope) > 1) {
@@ -343,9 +343,9 @@ public class Shape {
                         int startingX = Points[pointNum].Y < Points[pointNum + 1].Y
                             ? Points[pointNum + 1].X
                             : Points[pointNum].X;
-                        for (var y = lowerY; y < higherY; y++) {
+                        for (int y = lowerY; y < higherY; y++) {
                             // round towards the middle
-                            var x = startingX + slope * (y - lowerY);
+                            double x = startingX + slope * (y - lowerY);
                             if (x < Center.X)
                                 action((int)Math.Floor(x), y, Directions.Left);
                             else
@@ -359,8 +359,8 @@ public class Shape {
                         int startingY = Points[pointNum].X < Points[pointNum + 1].X
                             ? Points[pointNum + 1].Y
                             : Points[pointNum].Y;
-                        for (var x = lowerX; x < higherX; x++) {
-                            var y = startingY + slope * (x - lowerX);
+                        for (int x = lowerX; x < higherX; x++) {
+                            double y = startingY + slope * (x - lowerX);
                             if (y < Center.Y)
                                 action(x, (int)Math.Floor(y), Directions.Up);
                             else
@@ -380,9 +380,9 @@ public class Shape {
             for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++) {
                 var intersections = new List<int>();
 
-                for (var i = 0; i < Points.Length; i++) {
-                    var p1 = Points[i];
-                    var p2 = Points[(i + 1) % Points.Length];
+                for (int i = 0; i < Points.Length; i++) {
+                    Point16 p1 = Points[i];
+                    Point16 p2 = Points[(i + 1) % Points.Length];
 
                     // **Handle horizontal edges properly**
                     if (p1.Y == p2.Y) {
@@ -390,7 +390,7 @@ public class Shape {
                         {
                             int startX = Math.Min(p1.X, p2.X);
                             int endX = Math.Max(p1.X, p2.X);
-                            for (var x = startX; x <= endX; x++)
+                            for (int x = startX; x <= endX; x++)
                                 action(x, y);
                         }
 
@@ -399,20 +399,20 @@ public class Shape {
 
                     // **Find intersection of edge with the current scanline**
                     if ((p1.Y <= y && p2.Y > y) || (p2.Y <= y && p1.Y > y)) {
-                        var intersectX = (int)Math.Round(p1.X + (double)(y - p1.Y) * (p2.X - p1.X) / (p2.Y - p1.Y));
+                        int intersectX = (int)Math.Round(p1.X + (double)(y - p1.Y) * (p2.X - p1.X) / (p2.Y - p1.Y));
                         intersections.Add(intersectX);
                     }
                 }
 
                 intersections.Sort();
 
-                for (var i = 0; i < intersections.Count; i += 2) {
+                for (int i = 0; i < intersections.Count; i += 2) {
                     if (i + 1 >= intersections.Count) break;
 
-                    var startX = intersections[i];
-                    var endX = intersections[i + 1];
+                    int startX = intersections[i];
+                    int endX = intersections[i + 1];
 
-                    for (var x = startX; x <= endX; x++)
+                    for (int x = startX; x <= endX; x++)
                         action(x, y);
                 }
             }
@@ -429,7 +429,7 @@ public class Shape {
     public static Shape Union(List<Shape> shapes) {
         // Step 1: Collect all points
         var allPoints = new List<Point16>();
-        foreach (var shape in shapes)
+        foreach (Shape shape in shapes)
             allPoints.AddRange(shape.Points);
 
         // Step 2: Convex hull (Graham's scan) to order the points into a single polygon
@@ -445,7 +445,7 @@ public class Shape {
         points = points.OrderBy(p => p.X).ThenBy(p => p.Y).ToList();
 
         var lower = new List<Point16>();
-        foreach (var p in points) {
+        foreach (Point16 p in points) {
             while (lower.Count >= 2 &&
                    Cross(lower[lower.Count - 2], lower[lower.Count - 1], p) <= 0)
                 lower.RemoveAt(lower.Count - 1);
@@ -453,8 +453,8 @@ public class Shape {
         }
 
         var upper = new List<Point16>();
-        for (var i = points.Count - 1; i >= 0; i--) {
-            var p = points[i];
+        for (int i = points.Count - 1; i >= 0; i--) {
+            Point16 p = points[i];
             while (upper.Count >= 2 &&
                    Cross(upper[upper.Count - 2], upper[upper.Count - 1], p) <= 0)
                 upper.RemoveAt(upper.Count - 1);
@@ -479,16 +479,16 @@ public class Shape {
             (cutCoord1, cutCoord2) = (cutCoord2, cutCoord1);
 
         // upper left piece
-        var shapeA = ClipPolygon(cutXAxis, cutCoord1, true, false);
+        Shape? shapeA = ClipPolygon(cutXAxis, cutCoord1, true, false);
 
         // remainder after the first cut
-        var remainder = ClipPolygon(cutXAxis, cutCoord1, false, true);
+        Shape? remainder = ClipPolygon(cutXAxis, cutCoord1, false, true);
 
         // middle piece (clip remainder again)
-        var shapeB = remainder?.ClipPolygon(cutXAxis, cutCoord2, true, true);
+        Shape? shapeB = remainder?.ClipPolygon(cutXAxis, cutCoord2, true, true);
 
         // lower right piece
-        var shapeC = remainder?.ClipPolygon(cutXAxis, cutCoord2, false, false);
+        Shape? shapeC = remainder?.ClipPolygon(cutXAxis, cutCoord2, false, false);
 
         return (shapeA, shapeB, shapeC);
     }
@@ -496,19 +496,19 @@ public class Shape {
     private Shape? ClipPolygon(bool cutXAxis, int cutCoord, bool keepLower, bool includeCut) {
         var outputList = new List<Point16>();
 
-        for (var i = 0; i < Points.Length; i++) {
-            var current = Points[i];
-            var next = Points[(i + 1) % Points.Length];
+        for (int i = 0; i < Points.Length; i++) {
+            Point16 current = Points[i];
+            Point16 next = Points[(i + 1) % Points.Length];
 
-            var currentInside = IsInside(current, cutXAxis, cutCoord, keepLower, includeCut);
-            var nextInside = IsInside(next, cutXAxis, cutCoord, keepLower, includeCut);
+            bool currentInside = IsInside(current, cutXAxis, cutCoord, keepLower, includeCut);
+            bool nextInside = IsInside(next, cutXAxis, cutCoord, keepLower, includeCut);
 
             if (currentInside)
                 outputList.Add(current); // always keep the current point if it's inside
 
             if (currentInside != nextInside) // edge crosses the clipping boundary
             {
-                var intersectPoint = Intersect(current, next, cutXAxis, cutCoord);
+                Point16 intersectPoint = Intersect(current, next, cutXAxis, cutCoord);
 
                 // move the intersect point so that it's outside the cut instead of directly on it
                 if (!includeCut)
@@ -541,19 +541,19 @@ public class Shape {
     }
 
     private Point16 Intersect(Point16 p1, Point16 p2, bool cutXAxis, int cutCoord) {
-        var dx = p2.X - p1.X;
-        var dy = p2.Y - p1.Y;
+        int dx = p2.X - p1.X;
+        int dy = p2.Y - p1.Y;
 
         if (cutXAxis) {
             if (dy == 0) return new Point16(p1.X, cutCoord); // Horizontal line edge case
-            var t = (cutCoord - p1.Y) / (double)dy;
-            var newX = (int)Math.Round(p1.X + t * dx);
+            double t = (cutCoord - p1.Y) / (double)dy;
+            int newX = (int)Math.Round(p1.X + t * dx);
             return new Point16(newX, cutCoord);
         }
         else {
             if (dx == 0) return new Point16(cutCoord, p1.Y); // Vertical line edge case
-            var t = (cutCoord - p1.X) / (double)dx;
-            var newY = (int)Math.Round(p1.Y + t * dy);
+            double t = (cutCoord - p1.X) / (double)dx;
+            int newY = (int)Math.Round(p1.Y + t * dy);
             return new Point16(cutCoord, newY);
         }
     }

@@ -12,6 +12,7 @@ namespace SpawnHouses.AdvStructures;
 public class AdvStructure {
     /// <summary>Extends a few blocks out further in each direction</summary>
     public Shape BoundingBox;
+
     public ExternalLayout ExternalLayout;
     public bool FilledComponents;
     public bool HasLayout;
@@ -35,7 +36,7 @@ public class AdvStructure {
     /// <param name="method">method to be used. leave null for a random method</param>
     public bool ApplyLayoutMethod(Func<StructureParams, AdvStructure, bool> method = null) {
         method ??= AdvStructureLayouts.GetRandomMethod(Params);
-        var result = method(Params, this);
+        bool result = method(Params, this);
         if (result)
             HasLayout = true;
 
@@ -45,8 +46,10 @@ public class AdvStructure {
         edgeVolumes.AddRange(ExternalLayout.WallVolumes);
         edgeVolumes.AddRange(ExternalLayout.WallGaps.Select(gap => gap.Volume).ToList());
         BoundingBox = new Shape(
-            new Point16(edgeVolumes.Min(volume => volume.BoundingBox.topLeft.X) - 5, edgeVolumes.Min(volume => volume.BoundingBox.topLeft.Y) - 5),
-            new Point16(edgeVolumes.Max(volume => volume.BoundingBox.bottomRight.X) + 5, edgeVolumes.Max(volume => volume.BoundingBox.bottomRight.Y) + 5)
+            new Point16(edgeVolumes.Min(volume => volume.BoundingBox.topLeft.X) - 5,
+                edgeVolumes.Min(volume => volume.BoundingBox.topLeft.Y) - 5),
+            new Point16(edgeVolumes.Max(volume => volume.BoundingBox.bottomRight.X) + 5,
+                edgeVolumes.Max(volume => volume.BoundingBox.bottomRight.Y) + 5)
         );
 
         return result;
@@ -57,7 +60,7 @@ public class AdvStructure {
         if (volumes.Count == 0)
             return;
 
-        var componentParams = new ComponentParams(
+        ComponentParams componentParams = new ComponentParams(
             tagsRequired,
             tagsBlacklist,
             volumes[0],
@@ -65,7 +68,7 @@ public class AdvStructure {
         );
         var genMethod = ComponentGen.GetRandomMethod(componentParams);
 
-        foreach (var volume in volumes) {
+        foreach (Shape volume in volumes) {
             componentParams.Volume = volume;
             genMethod(componentParams);
         }
@@ -96,8 +99,7 @@ public class AdvStructure {
         FillComponentSet(Layout.Rooms.Select(room => room.Volume).ToList(), [StructureTag.HasBackground], [],
             Params.Palette);
 
-        BoundingBox.ExecuteInArea((x, y) =>
-        {
+        BoundingBox.ExecuteInArea((x, y) => {
             WorldUtils.TileFrame(x, y);
             Framing.WallFrame(x, y);
         });

@@ -28,7 +28,7 @@ public static class RoomLayoutHelper {
         List<int> cornersX = [];
         List<int> cornersY = [];
 
-        foreach (var point in shape.Points) {
+        foreach (Point16 point in shape.Points) {
             if (point.X != shape.BoundingBox.topLeft.X &&
                 point.X != shape.BoundingBox.bottomRight.X && !cornersX.Contains(point.X))
                 cornersX.Add(point.X);
@@ -62,34 +62,32 @@ public static class RoomLayoutHelper {
         List<Shape> wallGapVolumes = [];
         var roomQueue = new Queue<Shape>([roomLayoutParams.MainVolume]);
         List<Shape> finishedRoomVolumes = [];
-        var extraCuts = 0;
-        var largeRoomCount = 0;
-        var xCutCount = 0;
-        var yCutCount = 0;
-        var maxLargeRooms = (int)Math.Ceiling(roomLayoutParams.LargeRoomChance * roomLayoutParams.Housing);
-        for (var curHousing = 0; curHousing < roomLayoutParams.Housing + extraCuts - 1; curHousing++) {
+        int extraCuts = 0;
+        int largeRoomCount = 0;
+        int xCutCount = 0;
+        int yCutCount = 0;
+        int maxLargeRooms = (int)Math.Ceiling(roomLayoutParams.LargeRoomChance * roomLayoutParams.Housing);
+        for (int curHousing = 0; curHousing < roomLayoutParams.Housing + extraCuts - 1; curHousing++) {
             Shape roomVolume;
             if (roomQueue.Count > 0)
                 roomVolume = roomQueue.Dequeue();
             else
                 break;
 
-            var inverseProgressFactor = double.Max(1 - (double)curHousing / roomLayoutParams.Housing, 0);
-            var iterationFloorWidth =
+            double inverseProgressFactor = double.Max(1 - (double)curHousing / roomLayoutParams.Housing, 0);
+            int iterationFloorWidth =
                 (int)Math.Round((roomLayoutParams.FloorWidth.Max - roomLayoutParams.FloorWidth.Min) *
-                inverseProgressFactor) + roomLayoutParams.FloorWidth.Min;
+                                inverseProgressFactor) + roomLayoutParams.FloorWidth.Min;
             int iterationWallWidth = (int)Math.Round((roomLayoutParams.WallWidth.Max - roomLayoutParams.WallWidth.Min) *
-                inverseProgressFactor) + roomLayoutParams.WallWidth.Min;
+                                                     inverseProgressFactor) + roomLayoutParams.WallWidth.Min;
 
-            var canSplitAlongX = roomVolume.Size.Y >= iterationFloorWidth + 2 * roomLayoutParams.RoomHeight.Min;
+            bool canSplitAlongX = roomVolume.Size.Y >= iterationFloorWidth + 2 * roomLayoutParams.RoomHeight.Min;
             // ensure ratio of room dimensions isn't out of whack
-            if (canSplitAlongX && roomVolume.Area <= 175 && roomVolume.Size.X > roomVolume.Size.Y * 1.8) {
+            if (canSplitAlongX && roomVolume.Area <= 175 && roomVolume.Size.X > roomVolume.Size.Y * 1.8)
                 canSplitAlongX = false;
-            }
-            var canSplitAlongY = roomVolume.Size.X >= iterationWallWidth + 2 * roomLayoutParams.RoomWidth.Min;
-            if (canSplitAlongY && roomVolume.Area <= 175 && roomVolume.Size.Y > roomVolume.Size.X * 1.8) {
+            bool canSplitAlongY = roomVolume.Size.X >= iterationWallWidth + 2 * roomLayoutParams.RoomWidth.Min;
+            if (canSplitAlongY && roomVolume.Area <= 175 && roomVolume.Size.Y > roomVolume.Size.X * 1.8)
                 canSplitAlongY = false;
-            }
             bool splitAlongX;
 
             if (canSplitAlongX && canSplitAlongY) {
@@ -97,9 +95,9 @@ public static class RoomLayoutHelper {
                     splitAlongX = true;
                 }
                 else {
-                    var xWeight = Math.Pow(1.0 / (xCutCount + 2), 3);
-                    var yWeight = Math.Pow(1.0 / (yCutCount + 1), 3);
-                    var totalWeight = xWeight + yWeight;
+                    double xWeight = Math.Pow(1.0 / (xCutCount + 2), 3);
+                    double yWeight = Math.Pow(1.0 / (yCutCount + 1), 3);
+                    double totalWeight = xWeight + yWeight;
                     // xWeight divided by totalWeight represents chance of picking x cut
                     splitAlongX = Terraria.WorldGen.genRand.NextDouble() < xWeight / totalWeight;
                 }
@@ -122,8 +120,8 @@ public static class RoomLayoutHelper {
             else
                 yCutCount++;
 
-            var outerBoundaryWidth = splitAlongX ? roomLayoutParams.RoomHeight.Min : roomLayoutParams.RoomWidth.Min;
-            var validCutRange = new Range(
+            int outerBoundaryWidth = splitAlongX ? roomLayoutParams.RoomHeight.Min : roomLayoutParams.RoomWidth.Min;
+            Range validCutRange = new(
                 (splitAlongX ? roomVolume.BoundingBox.topLeft.Y : roomVolume.BoundingBox.topLeft.X) +
                 outerBoundaryWidth,
                 (splitAlongX ? roomVolume.BoundingBox.bottomRight.Y : roomVolume.BoundingBox.bottomRight.X) -
@@ -131,18 +129,19 @@ public static class RoomLayoutHelper {
             );
 
             List<int> predeterminedSplits = [];
-            foreach (var predeterminedSplit in splitAlongX ? priorityXSplits : priorityYSplits)
+            foreach (int predeterminedSplit in splitAlongX ? priorityXSplits : priorityYSplits)
                 if (validCutRange.InRange(predeterminedSplit))
                     predeterminedSplits.Add(predeterminedSplit);
 
-            var splitStart = predeterminedSplits.Count == 0
+            int splitStart = predeterminedSplits.Count == 0
                 ? Terraria.WorldGen.genRand.Next(validCutRange.Min, validCutRange.Max + 1)
                 : predeterminedSplits[Terraria.WorldGen.genRand.Next(predeterminedSplits.Count)];
-            var splitEnd = splitAlongX
+            int splitEnd = splitAlongX
                 ? splitStart + iterationFloorWidth - 1
                 : splitStart + iterationWallWidth - 1;
 
-            var roomSubsections = roomVolume.CutTwice(splitAlongX, splitStart, splitEnd);
+            (Shape lower, Shape middle, Shape higher) roomSubsections =
+                roomVolume.CutTwice(splitAlongX, splitStart, splitEnd);
             if (roomSubsections.lower is not null)
                 if (roomLayoutParams.IsWithinMaxSize(roomSubsections.lower) &&
                     Terraria.WorldGen.genRand.NextDouble() <
@@ -183,7 +182,7 @@ public static class RoomLayoutHelper {
 
     /// <returns>null if no room found</returns>
     public static Room GetRoomFromPos(List<Room> rooms, Point16 point) {
-        foreach (var room in rooms)
+        foreach (Room room in rooms)
             if (room.Volume.Contains(point))
                 return room;
 
@@ -211,16 +210,16 @@ public static class RoomLayoutHelper {
         var rooms = roomLayoutVolumes.RoomVolumes.Select(roomVolume => new Room(roomVolume, [])).ToList();
         List<Gap> allGaps = [];
 
-        foreach (var room in rooms) {
+        foreach (Room room in rooms) {
             List<Gap> roomGaps = [];
             Room lastRoom = null;
             List<Shape> curGapVolumes = [];
-            var isHorizontal = false;
-            var lastDirection = Directions.None;
+            bool isHorizontal = false;
+            byte lastDirection = Directions.None;
 
             room.Volume.ExecuteOnPerimeter((x, y, direction) => {
-                var pos = new Point16(x, y);
-                var step = new Point16(0, 0);
+                Point16 pos = new(x, y);
+                Point16 step = new(0, 0);
                 if (lastDirection == Directions.None)
                     lastDirection = direction;
                 switch (direction) {
@@ -244,7 +243,7 @@ public static class RoomLayoutHelper {
                            : roomLayoutVolumes.InWall(pos))
                     pos += step;
 
-                var foundRoom = GetRoomFromPos(rooms, pos);
+                Room foundRoom = GetRoomFromPos(rooms, pos);
                 if (foundRoom == room)
                     foundRoom = null; // invalidate casts that find its own room
 
@@ -273,7 +272,7 @@ public static class RoomLayoutHelper {
             });
 
             // prune gaps the player can't fit through
-            for (var i = 0; i < roomGaps.Count; i++)
+            for (int i = 0; i < roomGaps.Count; i++)
                 if ((roomGaps[i].Volume.Size.Y < 3 && roomGaps[i].IsHorizontal) ||
                     (roomGaps[i].Volume.Size.X < 2 && !roomGaps[i].IsHorizontal)) {
                     roomGaps.RemoveAt(i);
@@ -285,10 +284,10 @@ public static class RoomLayoutHelper {
         }
 
         // optimize gaps
-        for (var i = allGaps.Count - 1; i >= 0; i--)
-        for (var j = i - 1; j >= 0; j--) {
-            var gap = allGaps[i];
-            var otherGap = allGaps[j];
+        for (int i = allGaps.Count - 1; i >= 0; i--)
+        for (int j = i - 1; j >= 0; j--) {
+            Gap gap = allGaps[i];
+            Gap otherGap = allGaps[j];
 
             if (gap.RepresentsSimilarGap(otherGap)) {
                 otherGap.LowerRoom.Gaps.Add(gap);
@@ -301,7 +300,7 @@ public static class RoomLayoutHelper {
         }
 
         List<Gap> verticalGaps = [];
-        for (var i = allGaps.Count - 1; i >= 0; i--)
+        for (int i = allGaps.Count - 1; i >= 0; i--)
             if (!allGaps[i].IsHorizontal) {
                 verticalGaps.Add(allGaps[i]);
                 allGaps.RemoveAt(i);

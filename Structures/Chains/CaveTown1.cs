@@ -27,8 +27,8 @@ public class CaveTown1 : StructureChain {
     // Only lets 1 structure to the left and right of the root structure
     protected override bool IsConnectPointValid(ChainConnectPoint connectPoint, ChainConnectPoint targetConnectPoint,
         CustomChainStructure targetStructure) {
-        var netSideDistance = 0;
-        foreach (var direction in connectPoint.ParentStructure.BridgeDirectionHistory) {
+        int netSideDistance = 0;
+        foreach (byte direction in connectPoint.ParentStructure.BridgeDirectionHistory) {
             if (direction == Directions.Left) netSideDistance--;
             if (direction == Directions.Right) netSideDistance++;
         }
@@ -46,7 +46,7 @@ public class CaveTown1 : StructureChain {
             newBridgeList = _bridgeListLarge;
 
         for (ushort i = 0; i < 5000; i++) {
-            var index = Terraria.WorldGen.genRand.Next(0, newBridgeList.Length);
+            int index = Terraria.WorldGen.genRand.Next(0, newBridgeList.Length);
             if (newBridgeList[index].InputDirections[0] == direction)
                 return newBridgeList[index];
         }

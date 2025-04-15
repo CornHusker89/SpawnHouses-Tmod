@@ -1,12 +1,10 @@
 using System;
-using Microsoft.Xna.Framework;
 using SpawnHouses.AdvStructures;
 using SpawnHouses.Types;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.WorldBuilding;
 using Range = SpawnHouses.Structures.Range;
 
 namespace SpawnHouses.Items.Debug;
@@ -40,7 +38,7 @@ public class SpawnTest : ModItem {
 
         Console.WriteLine(x + ", " + y);
 
-        var structureLayoutParams = new StructureParams(
+        StructureParams structureLayoutParams = new StructureParams(
             TilePalette.Palette1,
             [StructureTag.IsStructure, StructureTag.HasHousing],
             [],
@@ -50,7 +48,7 @@ public class SpawnTest : ModItem {
             new Range(9, 15)
         );
 
-        var structure = new AdvStructure(structureLayoutParams);
+        AdvStructure structure = new AdvStructure(structureLayoutParams);
         structure.ApplyLayoutMethod();
         structure.FillComponents();
 

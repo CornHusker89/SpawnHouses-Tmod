@@ -22,20 +22,20 @@ internal class ChestRulePool : ChestRule {
 
         var toLoot = pool;
 
-        for (var k = 0; k < itemsToGenerate; k++) {
+        for (int k = 0; k < itemsToGenerate; k++) {
             if (nextIndex >= 40)
                 return;
 
-            var maxWeight = 1;
+            int maxWeight = 1;
 
-            foreach (var loot in toLoot)
+            foreach (Loot loot in toLoot)
                 maxWeight += loot.weight;
 
-            var selection = Main.rand.Next(maxWeight);
-            var weightTotal = 0;
+            int selection = Main.rand.Next(maxWeight);
+            int weightTotal = 0;
             Loot selectedLoot = null;
 
-            for (var i = 0; i < toLoot.Count; i++) {
+            for (int i = 0; i < toLoot.Count; i++) {
                 weightTotal += toLoot[i].weight;
 
                 if (selection < weightTotal + 1) {
@@ -51,7 +51,7 @@ internal class ChestRulePool : ChestRule {
     }
 
     public override TagCompound Serizlize() {
-        var tag = new TagCompound {
+        TagCompound tag = new TagCompound {
             { "Type", "Pool" },
             { "ToGenerate", itemsToGenerate },
             { "Pool", SerializePool() }
@@ -61,7 +61,7 @@ internal class ChestRulePool : ChestRule {
     }
 
     public new static ChestRule Deserialize(TagCompound tag) {
-        var rule = new ChestRulePool {
+        ChestRulePool rule = new ChestRulePool {
             itemsToGenerate = tag.GetInt("ToGenerate"),
             pool = DeserializePool(tag.GetCompound("Pool"))
         };
@@ -70,9 +70,9 @@ internal class ChestRulePool : ChestRule {
     }
 
     public override ChestRule Clone() {
-        var clone = new ChestRulePool();
+        ChestRulePool clone = new ChestRulePool();
 
-        for (var k = 0; k < pool.Count; k++) clone.pool.Add(pool[k].Clone());
+        for (int k = 0; k < pool.Count; k++) clone.pool.Add(pool[k].Clone());
 
         clone.itemsToGenerate = itemsToGenerate;
 
