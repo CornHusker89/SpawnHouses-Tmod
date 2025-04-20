@@ -329,22 +329,15 @@ public static class RoomLayoutHelper {
         List<Gap> wallGaps = [];
         int maxFloorGapSize = gaps.Where(gap => !gap.IsHorizontal).Select(gap => gap.Volume.Size.X).Max();
 
-        // filter out gaps which are too small, before attempting to chain
-        for (int i = gaps.Count - 1; i >= 0; i--) {
-            if (gaps[i].IsHorizontal) {
-                if (gaps[i].Volume.Size.Y < 3) {
-                    gaps.RemoveAt(i);
-                }
-            }
-            else {
-                if (gaps[i].Volume.Size.X < 2) {
-                    gaps.RemoveAt(i);
-                }
-            }
-        }
-
-        foreach (Gap gap in gaps) {
+        // filter out gaps which are too small and resize gaps
+        for (int gapIndex = gaps.Count - 1; gapIndex >= 0; gapIndex--) {
+            Gap gap = gaps[gapIndex];
             if (gap.IsHorizontal) {
+                if (gap.Volume.Size.Y < 3) {
+                    gaps.RemoveAt(gapIndex);
+                    continue;
+                }
+
                 var points = gap.Volume.Points;
                 for (int i = 0; i < gap.Volume.Points.Length; i++) {
                     // ensure doors aren't too tall
@@ -354,6 +347,40 @@ public static class RoomLayoutHelper {
                 }
 
                 gap.Volume = new Shape(points);
+            }
+            else {
+                if (gap.Volume.Size.X < 2) {
+                    gaps.RemoveAt(gapIndex);
+                    continue;
+                }
+
+                int suggestedSize = (int)(gap.Volume.Size.X / (float)maxFloorGapSize * 2 + 2);
+                // randomly move the gap, if there's space to do so
+                if (suggestedSize < gap.Volume.Size.X) {
+                    int gapCenter = (int)(Terraria.WorldGen.genRand.NextDouble() * gap.Volume.Size.X) + gap.Volume.BoundingBox.topLeft.X;
+                    int leftX = gapCenter - (int)Math.Floor((double)suggestedSize / 2);
+                    int outOfBoundsDistance = Math.Max(0, gap.Volume.BoundingBox.topLeft.X - leftX);
+                    leftX = Math.Max(leftX, gap.Volume.BoundingBox.topLeft.X);
+                    int rightX = gapCenter + (int)Math.Ceiling((double)suggestedSize / 2) + outOfBoundsDistance;
+                    var points = gap.Volume.Points;
+                    for (int pointIndex = 0; pointIndex < gap.Volume.Points.Length; pointIndex++) {
+                        if (points[pointIndex].X < leftX) {
+                            points[pointIndex] = new Point16(leftX, points[pointIndex].Y);
+                        }
+
+                        if (points[pointIndex].X > rightX) {
+                            points[pointIndex] = new Point16(rightX, points[pointIndex].Y);
+                        }
+                    }
+
+                    gap.Volume = new Shape(points);
+                }
+            }
+        }
+
+        // attempt to chain vertical gaps
+        foreach (Gap gap in gaps) {
+            if (gap.IsHorizontal) {
                 wallGaps.Add(gap);
             }
             else {
@@ -382,29 +409,7 @@ public static class RoomLayoutHelper {
 
                     gap.Volume = new Shape(points);
                 }
-                else {
-                    int suggestedSize = (int)(gap.Volume.Size.X / (float)maxFloorGapSize * 2 + 2);
-                    // randomly move the gap, if there's space to do so
-                    if (suggestedSize < gap.Volume.Size.X) {
-                        int gapCenter = (int)(Terraria.WorldGen.genRand.NextDouble() * gap.Volume.Size.X) + gap.Volume.BoundingBox.topLeft.X;
-                        int leftX = gapCenter - (int)Math.Floor((double)suggestedSize / 2);
-                        int outOfBoundsDistance = Math.Max(0, gap.Volume.BoundingBox.topLeft.X - leftX);
-                        leftX = Math.Max(leftX, gap.Volume.BoundingBox.topLeft.X);
-                        int rightX = gapCenter + (int)Math.Ceiling((double)suggestedSize / 2) + outOfBoundsDistance;
-                        var points = gap.Volume.Points;
-                        for (int i = 0; i < gap.Volume.Points.Length; i++) {
-                            if (points[i].X < leftX) {
-                                points[i] = new Point16(leftX, points[i].Y);
-                            }
 
-                            if (points[i].X > rightX) {
-                                points[i] = new Point16(rightX, points[i].Y);
-                            }
-                        }
-
-                        gap.Volume = new Shape(points);
-                    }
-                }
                 floorGaps.Add(gap);
             }
         }
