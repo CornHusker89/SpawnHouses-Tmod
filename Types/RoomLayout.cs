@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using Terraria.DataStructures;
 
@@ -15,32 +16,39 @@ public class RoomLayoutVolumes(
     public readonly List<Shape> WallVolumes = wallVolumes;
 
     public bool InFloor(Point16 point) {
-        foreach (Shape floorVolume in FloorVolumes)
-            if (floorVolume.Contains(point))
-                return true;
-        return false;
+        return FloorVolumes.Any(floorVolume => floorVolume.Contains(point));
     }
 
     public bool InWall(Point16 point) {
-        foreach (Shape wallVolume in WallVolumes)
-            if (wallVolume.Contains(point))
-                return true;
-        return false;
+        return WallVolumes.Any(wallVolume => wallVolume.Contains(point));
+    }
+
+    public bool InRoom(Point16 point) {
+        return RoomVolumes.Any(roomVolume => roomVolume.Contains(point));
+    }
+
+    /// <summary>
+    ///     checks if the point is contained within any volume
+    /// </summary>
+    /// <param name="point"></param>
+    /// <returns></returns>
+    public bool InStructure(Point16 point) {
+        return FloorVolumes.Any(floorVolume => floorVolume.Contains(point)) || WallVolumes.Any(floorVolume => floorVolume.Contains(point)) || RoomVolumes.Any(floorVolume => floorVolume.Contains(point));
     }
 }
 
 public class RoomLayout(
-    List<Shape> floorVolumes,
+    List<Floor> floors,
     List<Gap> floorGaps,
-    List<Shape> wallVolumes,
+    List<Wall> walls,
     List<Gap> wallGaps,
     List<Room> rooms
 ) {
     public readonly List<Gap> FloorGaps = floorGaps;
-    public readonly List<Shape> FloorVolumes = floorVolumes;
-    public readonly List<Room> Rooms = rooms;
+    public readonly List<Floor> Floors = floors;
     public readonly List<Gap> WallGaps = wallGaps;
-    public readonly List<Shape> WallVolumes = wallVolumes;
+    public readonly List<Wall> Walls = walls;
+    public readonly List<Room> Rooms = rooms;
 
     /// <summary>
     ///     gets closest room to the point
@@ -74,13 +82,13 @@ public class RoomLayout(
 }
 
 public class ExternalLayout(
-    List<Shape> floorVolumes,
+    List<Floor> floors,
     List<Gap> floorGaps,
-    List<Shape> wallVolumes,
+    List<Wall> walls,
     List<Gap> wallGaps
 ) {
     public readonly List<Gap> FloorGaps = floorGaps;
-    public readonly List<Shape> FloorVolumes = floorVolumes;
+    public readonly List<Floor> Floors = floors;
     public readonly List<Gap> WallGaps = wallGaps;
-    public readonly List<Shape> WallVolumes = wallVolumes;
+    public readonly List<Wall> Walls = walls;
 }

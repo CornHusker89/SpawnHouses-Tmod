@@ -12,9 +12,7 @@ public class RoomLayoutGen {
         (
             [
                 StructureTag.HasRoomLayout,
-                StructureTag.ProceduralRoomLayout,
-                StructureTag.HasLargeRoom,
-                StructureTag.HasFlatFloors
+                StructureTag.RoomLayoutHasFlatFloors
             ],
             RoomLayout1
         )
@@ -49,7 +47,7 @@ public class RoomLayoutGen {
 
         var possibleLayouts = new RoomLayoutVolumes[roomLayoutParams.Attempts];
         for (int attempt = 0; attempt < roomLayoutParams.Attempts; attempt++) {
-            RoomLayoutVolumes? volumes = RoomLayoutHelper.SplitBsp(roomLayoutParams, corners.xCoords, corners.yCoords);
+            RoomLayoutVolumes volumes = RoomLayoutHelper.SplitBsp(roomLayoutParams, corners.xCoords, corners.yCoords);
             if (volumes.RoomVolumes.Count == roomLayoutParams.Housing) {
                 pickedLayout = volumes;
                 break;
@@ -61,13 +59,14 @@ public class RoomLayoutGen {
         // find the layout with the closest housing to the requested amount
         if (pickedLayout is null) {
             int closetHousingCount = Math.Abs(possibleLayouts[0].RoomVolumes.Count - roomLayoutParams.Housing);
-            for (int i = 0; i < possibleLayouts.Length; i++)
+            pickedLayout = possibleLayouts[0]; // default to the first
+            for (int i = 1; i < possibleLayouts.Length; i++)
                 if (Math.Abs(possibleLayouts[i].RoomVolumes.Count - roomLayoutParams.Housing) < closetHousingCount) {
                     closetHousingCount = Math.Abs(possibleLayouts[i].RoomVolumes.Count - roomLayoutParams.Housing);
                     pickedLayout = possibleLayouts[i];
                 }
         }
 
-        return RoomLayoutHelper.CreateGaps(pickedLayout);
+        return RoomLayoutHelper.CreateRoomLayout(pickedLayout, roomLayoutParams);
     }
 }

@@ -15,7 +15,6 @@ namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
 #pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
 
-/// constructors are static methods
 public class Shape {
     private static readonly Color[] Colors = [
         Color.White,
@@ -91,7 +90,12 @@ public class Shape {
             default:
                 Points = points;
 
-                // test if there is only 2 unique x and y's, indicating if its a box
+                // ensure triangles don't get counted as boxes
+                if (Points.Length <= 3) {
+                    break;
+                }
+
+                // test if there is only 2 unique x and y's, indicating it's a box
                 IsBox = true;
                 int x1 = Points[0].X, x2 = -1, y1 = Points[0].Y, y2 = -1;
                 foreach (Point16 point in Points) {

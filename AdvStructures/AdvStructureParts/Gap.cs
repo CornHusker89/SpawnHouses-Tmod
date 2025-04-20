@@ -7,8 +7,15 @@ public class Gap {
 
     public bool IsExterior;
 
-    /// <summary>Has rooms on it's left/right</summary>
+    /// <summary>If the gap rooms on it's left/right</summary>
     public bool IsHorizontal;
+
+    /// <summary>If the gap is vertical and is horizontally aligned with a gap, this is the next gap with a lower y in the chain</summary>
+    public Gap? VerticalChainLower;
+    /// <summary>If the gap is vertical and is horizontally aligned with a gap, this is the next gap with a higher y in the chain</summary>
+    public Gap? VerticalChainHigher;
+
+    public bool IsChain;
 
     public Room LowerRoom;
     public Shape Volume;

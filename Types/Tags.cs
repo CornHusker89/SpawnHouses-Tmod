@@ -3,8 +3,15 @@ namespace SpawnHouses.Types;
 public enum StructureTag {
     // ===== structureLayout =====
     IsStructure,
-    HasHousing,
     IsSymmetric,
+    StructureHasLargeRoom,
+    StructureHasNoLargeRoom,
+    StructureHasFlatFloors,
+    StructureHasNoFlatFloors,
+    StructureHasSomeFlatFloors,
+    FirstFloorStorage,
+    /// the first floor has horizontal gaps wherever possible
+    FirstFloorConnected,
 
     /// structure is categorized as being above ground (typically has a roof)
     AboveGround,
@@ -29,16 +36,12 @@ public enum StructureTag {
 
 
     // ===== roomLayout =====
+    // these are specific to each roomLayout, and not necessarily the whole structure
     HasRoomLayout,
-    PrebuiltRoomLayout,
-    ProceduralRoomLayout,
-    HasStorageRoom,
-    HasNoStorageRoom,
-    HasLargeRoom,
-    HasNoLargeRoom,
-    HasFlatFloors,
-    HasNoFlatFloors,
-    HasSomeFlatFloors,
+    HasHousing,
+    RoomLayoutHasFlatFloors,
+    RoomLayoutHasNoFlatFloors,
+    RoomLayoutHasSomeFlatFloors,
 
 
     // ===== floor =====
@@ -76,7 +79,10 @@ public enum StructureTag {
     /// stairway is 3 or fewer tiles wide
     StairwayNarrow,
 
-    /// stairway is greater than 3 tiles wide
+    /// stairway is 4 or 5 tiles wide
+    StairwayMedium,
+
+    /// stairway is 6 or greater tiles wide
     StairwayWide,
 
 

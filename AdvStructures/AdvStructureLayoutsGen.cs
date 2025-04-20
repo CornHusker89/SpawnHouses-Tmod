@@ -10,7 +10,7 @@ using Range = SpawnHouses.Structures.Range;
 
 namespace SpawnHouses.AdvStructures;
 
-public static class AdvStructureLayouts {
+public static class AdvStructureLayoutsGen {
     public static readonly (StructureTag[] possibleTags, Range? lengthRange, Range? volumeRange, Range? heightRange,
         Range? housingRange, Func<StructureParams, AdvStructure, bool> method)[] GenMethods = [
             (
@@ -169,9 +169,6 @@ public static class AdvStructureLayouts {
     ///     a basic vertical house, expands as much as needed vertically but poor horizontal expansion
     /// </summary>
     public static bool StructureLayout2(StructureParams structureParams, AdvStructure advStructure) {
-        List<Shape> exteriorWallVolumes = [];
-        List<Shape> exteriorWallGapVolumes = [];
-
         RoomLayoutParams roomLayoutParams = new RoomLayoutParams(
             [StructureTag.HasRoomLayout],
             [],
@@ -190,16 +187,25 @@ public static class AdvStructureLayouts {
         advStructure.Layout = RoomLayoutGen.GetRandomMethod(roomLayoutParams)(roomLayoutParams);
 
         int externalWallThickness = roomLayoutParams.WallWidth.Max;
-        exteriorWallVolumes.Add(new Shape(
-            new Point16(structureParams.Start.X + 1 - externalWallThickness, structureParams.Start.Y - 3),
-            new Point16(structureParams.Start.X, structureParams.Start.Y - structureParams.Height)
-        ));
-        exteriorWallVolumes.Add(new Shape(
-            new Point16(structureParams.End.X, structureParams.End.Y - 3),
-            new Point16(structureParams.End.X - 1 + externalWallThickness,
-                structureParams.End.Y - structureParams.Height)
-        ));
-        advStructure.ExternalLayout = new ExternalLayout([], [], exteriorWallVolumes, [
+        advStructure.ExternalLayout = new ExternalLayout([], [],
+        [
+            new Wall(
+                new Shape(
+                    new Point16(structureParams.Start.X + 1 - externalWallThickness, structureParams.Start.Y - 3),
+                    new Point16(structureParams.Start.X, structureParams.Start.Y - structureParams.Height)
+                ),
+                true
+            ),
+            new Wall(
+                new Shape(
+                    new Point16(structureParams.End.X, structureParams.End.Y - 3),
+                    new Point16(structureParams.End.X - 1 + externalWallThickness, structureParams.End.Y - structureParams.Height)
+                ),
+                true
+            )
+        ],
+
+        [
             new Gap(
                 new Shape(
                     new Point16(structureParams.Start.X + 1 - externalWallThickness, structureParams.Start.Y),
@@ -209,7 +215,6 @@ public static class AdvStructureLayouts {
                 null,
                 true
             ),
-
             new Gap(
                 new Shape(
                     new Point16(structureParams.End.X, structureParams.End.Y),
@@ -220,7 +225,6 @@ public static class AdvStructureLayouts {
                 true
             )
         ]);
-
         return true;
     }
 }

@@ -16,15 +16,15 @@ public static class RaycastHelper {
     /// <param name="step">each time it measures, increase target x by this</param>
     /// <param name="maxCastDistance"></param>
     /// <returns></returns>
-    public static (double average, double sd) GetSurfaceLevel(
-        int x1, int x2, int y, byte step = 1, ushort maxCastDistance = 50) {
+    public static (double average, double sd) GetSurfaceLevel(int x1, int x2, int y, byte step = 1, ushort maxCastDistance = 50) {
         List<double> surfaceLevels = [];
         for (int i = x1; i <= x2; i += step)
-        for (int j = 0; j < maxCastDistance; j++)
+        for (int j = 0; j < maxCastDistance; j++) {
             if (Terraria.WorldGen.SolidTile(i, y + j)) {
                 surfaceLevels.Add(y + j);
                 break;
             }
+        }
 
         double average = surfaceLevels.Average();
         double sumOfSquaresOfDifferences = surfaceLevels.Select(val => (val - average) * (val - average)).Sum();
@@ -42,9 +42,11 @@ public static class RaycastHelper {
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
     public static (int distance, int yCoord) SurfaceRaycast(int x, int y, int maxCastDistance = 100) {
-        for (int i = 0; i < maxCastDistance; i++)
-            if (Terraria.WorldGen.SolidTile(x, y + i))
+        for (int i = 0; i < maxCastDistance; i++) {
+            if (Terraria.WorldGen.SolidTile(x, y + i)) {
                 return (i, y + i);
+            }
+        }
         throw new Exception("surface not found within " + maxCastDistance + " tiles");
     }
 
@@ -61,14 +63,16 @@ public static class RaycastHelper {
     public static (bool found, int distance, int yCoord) SurfaceRaycastFromInsideTile(int x, int y,
         int maxCastDistance = 40) {
         bool inSolid = true;
-        for (int i = 0; i < maxCastDistance; i++)
+        for (int i = 0; i < maxCastDistance; i++) {
             if (Terraria.WorldGen.SolidTile(x, y + i)) {
-                if (!inSolid)
+                if (!inSolid) {
                     return (true, i, y + i);
+                }
             }
             else if (inSolid) {
                 inSolid = false;
             }
+        }
 
         return (false, -1, -1);
     }
@@ -84,8 +88,7 @@ public static class RaycastHelper {
     ///     WorldGen.SolidTile(tile)
     /// </param>
     /// <returns>y-position and slope of every tile along length. Remember that a positive slope results in going down, not up</returns>
-    public static (int[] pos, double[] slope)
-        GetTopTilesPos(Point16 start, int length, bool requiresSolidTiles = false) {
+    public static (int[] pos, double[] slope) GetTopTilesPos(Point16 start, int length, bool requiresSolidTiles = false) {
         bool IsValidTile(Tile tile) {
             return tile.HasTile && (!requiresSolidTiles || Terraria.WorldGen.SolidTile(tile));
         }
@@ -113,8 +116,9 @@ public static class RaycastHelper {
                 jumpDist++;
             }
             else {
-                if (IsValidTile(Main.tile[start.X + i, lastY - 1]))
+                if (IsValidTile(Main.tile[start.X + i, lastY - 1])) {
                     jumpDist--;
+                }
                 else
                     do {
                         jumpDist++;
@@ -128,7 +132,7 @@ public static class RaycastHelper {
         // get the slope
         double[] slope = new double[length];
         int lastChangeIndex = 0;
-        for (int i = 0; i < length - 1; i++)
+        for (int i = 0; i < length - 1; i++) {
             if (pos[i] == pos[i + 1]) {
                 slope[i] = 0;
             }
@@ -145,6 +149,7 @@ public static class RaycastHelper {
 
                 lastChangeIndex = i;
             }
+        }
 
         slope[length - 1] = slope[length - 2];
 
@@ -188,23 +193,24 @@ public static class RaycastHelper {
     /// <param name="tiles"></param>
     /// <param name="threshold"></param>
     /// <returns>indexes of the jumps, index of the start of the highest point, and it's length</returns>
-    public static (List<int> jumpIndexes, int lowestStart, int lowestLength) GetJumpsInfo(
-        (int[] pos, double[] slope) tiles, int threshold = 4) {
+    public static (List<int> jumpIndexes, int lowestStart, int lowestLength) GetJumpsInfo((int[] pos, double[] slope) tiles, int threshold = 4) {
         List<int> jumpIndexes = [];
         int lowestPos = tiles.pos[0];
         int highestStart = 0;
         int highestLength = 1;
         for (int i = 1; i < tiles.pos.Length; i++) {
-            if (Math.Abs(tiles.pos[i] - tiles.pos[i - 1]) >= 4)
+            if (Math.Abs(tiles.pos[i] - tiles.pos[i - 1]) >= 4) {
                 jumpIndexes.Add(i);
+            }
             if (tiles.pos[i] < lowestPos) {
                 lowestPos = tiles.pos[i];
                 highestLength = 0;
                 highestStart = i;
             }
 
-            if (tiles.pos[i] == lowestPos)
+            if (tiles.pos[i] == lowestPos) {
                 highestLength += 1;
+            }
         }
 
         return (jumpIndexes, highestStart, highestLength);

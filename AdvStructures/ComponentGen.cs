@@ -495,13 +495,12 @@ public static class ComponentGen {
     }
 
     /// <summary>
-    ///     Fills a volume with random blocks, but the top block consistent. great for base-layer floors
+    ///     Fills a volume with random blocks, but the top block consistent
     /// </summary>
     public static object Floor3(ComponentParams componentParams) {
         bool elevated = componentParams.TagsRequired.Contains(StructureTag.FloorElevated);
         int xStart = componentParams.Volume.BoundingBox.topLeft.X;
-        int xSize = componentParams.Volume.BoundingBox.bottomRight.X - xStart + 1;
-        int[] topY = new int[xSize];
+        int[] topY = new int[componentParams.Volume.Size.X];
 
         componentParams.Volume.ExecuteInArea((x, y) => {
             PaintedType.PlaceTile(x, y,
@@ -529,9 +528,8 @@ public static class ComponentGen {
     public static object Floor4(ComponentParams componentParams) {
         bool elevated = componentParams.TagsRequired.Contains(StructureTag.FloorElevated);
         int xStart = componentParams.Volume.BoundingBox.topLeft.X;
-        int xSize = componentParams.Volume.BoundingBox.bottomRight.X - xStart + 1;
-        int[] topY = new int[xSize];
-        int[] bottomY = new int[xSize];
+        int[] topY = new int[componentParams.Volume.Size.X];
+        int[] bottomY = new int[componentParams.Volume.Size.X];
         int supportInterval = Terraria.WorldGen.genRand.Next(3, 5);
 
         componentParams.Volume.ExecuteInArea((x, y) => {
@@ -578,9 +576,8 @@ public static class ComponentGen {
     /// </summary>
     public static object FloorGap1(ComponentParams componentParams) {
         int xStart = componentParams.Volume.BoundingBox.topLeft.X;
-        int xSize = componentParams.Volume.BoundingBox.bottomRight.X - xStart + 1;
-        int[] topY = new int[xSize];
-        int[] bottomY = new int[xSize];
+        int[] topY = new int[componentParams.Volume.Size.X];
+        int[] bottomY = new int[componentParams.Volume.Size.X];
 
         componentParams.Volume.ExecuteInArea((x, y) => {
             PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundFloorMain);
@@ -617,9 +614,8 @@ public static class ComponentGen {
     public static object Wall1(ComponentParams componentParams) {
         bool elevated = componentParams.TagsRequired.Contains(StructureTag.WallElevated);
         int yStart = componentParams.Volume.BoundingBox.topLeft.Y;
-        int ySize = componentParams.Volume.BoundingBox.bottomRight.Y - yStart + 1;
-        int[] lowX = new int[ySize];
-        int[] highX = new int[ySize];
+        int[] lowX = new int[componentParams.Volume.Size.Y];
+        int[] highX = new int[componentParams.Volume.Size.Y];
         componentParams.Volume.ExecuteInArea((x, y) => {
             PaintedType.PlaceTile(x, y,
                 elevated ? componentParams.TilePalette.WallMainElevated : componentParams.TilePalette.WallMain);
@@ -649,9 +645,8 @@ public static class ComponentGen {
     public static object Wall2(ComponentParams componentParams) {
         bool elevated = componentParams.TagsRequired.Contains(StructureTag.WallElevated);
         int yStart = componentParams.Volume.BoundingBox.topLeft.Y;
-        int ySize = componentParams.Volume.BoundingBox.bottomRight.Y - yStart + 1;
-        int[] lowX = new int[ySize];
-        int[] highX = new int[ySize];
+        int[] lowX = new int[componentParams.Volume.Size.Y];
+        int[] highX = new int[componentParams.Volume.Size.Y];
         componentParams.Volume.ExecuteInArea((x, y) => {
             PaintedType.PlaceTile(x, y, PaintedType.PickRandom(
                 elevated ? componentParams.TilePalette.WallAltElevated : componentParams.TilePalette.WallAlt));
@@ -681,8 +676,7 @@ public static class ComponentGen {
     public static object Wall3(ComponentParams componentParams) {
         bool elevated = componentParams.TagsRequired.Contains(StructureTag.WallElevated);
         int xStart = componentParams.Volume.BoundingBox.topLeft.X;
-        int xSize = componentParams.Volume.BoundingBox.bottomRight.X - xStart + 1;
-        int[] bottomY = new int[xSize];
+        int[] bottomY = new int[componentParams.Volume.Size.X];
 
         componentParams.Volume.ExecuteInArea((x, y) => {
             PaintedType.PlaceTile(x, y, PaintedType.PickRandom(
