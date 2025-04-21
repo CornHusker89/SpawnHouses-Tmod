@@ -15,7 +15,6 @@ public static class AdvStructureLayoutsGen {
         Range? housingRange, Func<StructureParams, AdvStructure, bool> method)[] GenMethods = [
             (
                 [
-                    StructureTag.IsStructure,
                     StructureTag.HasHousing
                 ],
                 null, null, null, null,
@@ -170,12 +169,13 @@ public static class AdvStructureLayoutsGen {
     /// </summary>
     public static bool StructureLayout2(StructureParams structureParams, AdvStructure advStructure) {
         RoomLayoutParams roomLayoutParams = new RoomLayoutParams(
-            [StructureTag.HasRoomLayout],
+            [],
             [],
             new Shape(
                 new Point16(structureParams.Start.X + 1, structureParams.Start.Y),
                 new Point16(structureParams.End.X - 1, structureParams.End.Y - structureParams.Height)
             ),
+            structureParams.EntryPoints,
             structureParams.Palette,
             structureParams.Housing,
             new Range(4, 18),

@@ -391,8 +391,9 @@ public static class RoomLayoutHelper {
                     gap.Volume.BoundingBox.topLeft.X <= potentialGap.Volume.BoundingBox.topLeft.X &&
                     gap.Volume.BoundingBox.bottomRight.X >= potentialGap.Volume.BoundingBox.bottomRight.X
                 );
+
+                // 60% chance to go for chain gaps
                 if (potentialChainGap != null && Terraria.WorldGen.genRand.NextDouble() < 0.6) {
-                    // 60% chance to go for chain gaps
                     gap.IsChain = true;
                     gap.VerticalChainLower = potentialChainGap;
                     potentialChainGap.VerticalChainHigher = gap;
@@ -431,32 +432,12 @@ public static class RoomLayoutHelper {
         allGaps = [];
         allGaps.AddRange(floorGaps);
         allGaps.AddRange(wallGaps);
+
         // randomize so future iteration won't favor horizontal/vertical
         allGaps = allGaps.OrderBy(_ => Terraria.WorldGen.genRand.NextDouble()).ToList();
 
-        // dither excessive gaps
-        // double tallestVerticalGapReach = floorGaps.Max(gap => gap.LowerRoom.Volume.Size.Y);
-        // for (int i = allGaps.Count - 1; i >= 0; i--) {
-        //     Console.WriteLine(allGaps[i].LowerRoom.Gaps.Count < 2 || allGaps[i].HigherRoom!.Gaps.Count < 2);
-        //     if (allGaps[i].LowerRoom.Gaps.Count < 2 || allGaps[i].HigherRoom!.Gaps.Count < 2) continue;
-        //
-        //     if (allGaps[i].IsHorizontal) {
-        //         if (Terraria.WorldGen.genRand.NextDouble() < 0.4) {
-        //             allGaps[i].LowerRoom.Gaps.Remove(allGaps[i]);
-        //             allGaps[i].HigherRoom!.Gaps.Remove(allGaps[i]); // because these are all internal rooms, gap.HigherRoom will never be null
-        //             wallGaps.Remove(allGaps[i]);
-        //             allGaps.RemoveAt(i);
-        //         }
-        //     }
-        //     else {
-        //         if (Terraria.WorldGen.genRand.NextDouble() < allGaps[i].LowerRoom.Volume.Size.Y / tallestVerticalGapReach) {
-        //             allGaps[i].LowerRoom.Gaps.Remove(allGaps[i]);
-        //             allGaps[i].HigherRoom!.Gaps.Remove(allGaps[i]);
-        //             floorGaps.Remove(allGaps[i]);
-        //             allGaps.RemoveAt(i);
-        //         }
-        //     }
-        // }
+        // create tree for rooms
+
 
         return (floorGaps, wallGaps, rooms);
     }

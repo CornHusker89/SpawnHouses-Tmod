@@ -1,5 +1,7 @@
 using System;
 using SpawnHouses.AdvStructures;
+using SpawnHouses.AdvStructures.AdvStructureParts;
+using SpawnHouses.Structures;
 using SpawnHouses.Types;
 using Terraria;
 using Terraria.DataStructures;
@@ -39,11 +41,27 @@ public class SpawnTest : ModItem {
         Console.WriteLine(x + ", " + y);
 
         StructureParams structureLayoutParams = new StructureParams(
-            TilePalette.Palette1,
-            [StructureTag.IsStructure, StructureTag.HasHousing],
+            [StructureTag.HasHousing],
             [],
             new Point16(x, y),
             new Point16(x + 25, y),
+            [
+                new EntryPoint(
+                    new Shape(
+                        new Point16(x, y),
+                        new Point16(x, y - 2)
+                    ),
+                    Directions.Right
+                ),
+                new EntryPoint(
+                    new Shape(
+                        new Point16(x + 25, y),
+                        new Point16(x + 25, y - 2)
+                    ),
+                    Directions.Left
+                )
+            ],
+            TilePalette.Palette1,
             new Range(600, 1000),
             new Range(9, 15)
         );

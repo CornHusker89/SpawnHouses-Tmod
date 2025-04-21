@@ -10,60 +10,60 @@ using Terraria.ID;
 namespace SpawnHouses.AdvStructures;
 
 public static class ComponentGen {
-    public static readonly (StructureTag[] possibleTags, Func<ComponentParams, object> method)[] GenMethods = [
+    public static readonly (ComponentTag[] possibleTags, Func<ComponentParams, object> method)[] GenMethods = [
         // ===== floors =====
         (
             [
-                StructureTag.HasFloor,
-                StructureTag.FloorSolid,
-                StructureTag.FloorGroundLevel,
-                StructureTag.FloorThin,
-                StructureTag.FloorThick
+                ComponentTag.IsFloor,
+                ComponentTag.FloorSolid,
+                ComponentTag.FloorGroundLevel,
+                ComponentTag.FloorThin,
+                ComponentTag.FloorThick
             ],
             Floor1
         ),
 
         (
             [
-                StructureTag.HasFloor,
-                StructureTag.FloorSolid,
-                StructureTag.FloorGroundLevel,
-                StructureTag.FloorElevated,
-                StructureTag.FloorThin,
-                StructureTag.FloorThick
+                ComponentTag.IsFloor,
+                ComponentTag.FloorSolid,
+                ComponentTag.FloorGroundLevel,
+                ComponentTag.FloorElevated,
+                ComponentTag.FloorThin,
+                ComponentTag.FloorThick
             ],
             Floor2
         ),
 
         (
             [
-                StructureTag.HasFloor,
-                StructureTag.FloorSolid,
-                StructureTag.FloorGroundLevel,
-                StructureTag.FloorElevated,
-                StructureTag.FloorThin,
-                StructureTag.FloorThick
+                ComponentTag.IsFloor,
+                ComponentTag.FloorSolid,
+                ComponentTag.FloorGroundLevel,
+                ComponentTag.FloorElevated,
+                ComponentTag.FloorThin,
+                ComponentTag.FloorThick
             ],
             Floor3
         ),
 
         (
             [
-                StructureTag.HasFloor,
-                StructureTag.FloorHollow,
-                StructureTag.FloorElevated,
-                StructureTag.FloorThick
+                ComponentTag.IsFloor,
+                ComponentTag.FloorHollow,
+                ComponentTag.FloorElevated,
+                ComponentTag.FloorThick
             ],
             Floor4
         ),
 
         (
             [
-                StructureTag.IsFloorGap,
-                StructureTag.FloorGroundLevel,
-                StructureTag.FloorElevated,
-                StructureTag.FloorThin,
-                StructureTag.FloorThick
+                ComponentTag.IsFloorGap,
+                ComponentTag.FloorGroundLevel,
+                ComponentTag.FloorElevated,
+                ComponentTag.FloorThin,
+                ComponentTag.FloorThick
             ],
             FloorGap1
         ),
@@ -72,36 +72,36 @@ public static class ComponentGen {
         // ===== walls =====
         (
             [
-                StructureTag.HasWall,
-                StructureTag.WallGroundLevel,
-                StructureTag.WallElevated
+                ComponentTag.IsWall,
+                ComponentTag.WallGroundLevel,
+                ComponentTag.WallElevated
             ],
             Wall1
         ),
 
         (
             [
-                StructureTag.HasWall,
-                StructureTag.WallGroundLevel,
-                StructureTag.WallElevated
+                ComponentTag.IsWall,
+                ComponentTag.WallGroundLevel,
+                ComponentTag.WallElevated
             ],
             Wall2
         ),
 
         (
             [
-                StructureTag.HasWall,
-                StructureTag.WallGroundLevel,
-                StructureTag.WallElevated
+                ComponentTag.IsWall,
+                ComponentTag.WallGroundLevel,
+                ComponentTag.WallElevated
             ],
             Wall3
         ),
 
         (
             [
-                StructureTag.IsWallGap,
-                StructureTag.WallGroundLevel,
-                StructureTag.WallElevated
+                ComponentTag.IsWallGap,
+                ComponentTag.WallGroundLevel,
+                ComponentTag.WallElevated
             ],
             WallGap1
         ),
@@ -110,9 +110,9 @@ public static class ComponentGen {
         // ===== decor =====
         (
             [
-                StructureTag.HasDecor,
-                StructureTag.DecorGroundLevel,
-                StructureTag.DecorElevated
+                ComponentTag.HasDecor,
+                ComponentTag.DecorGroundLevel,
+                ComponentTag.DecorElevated
             ],
             Decor1
         ),
@@ -124,14 +124,14 @@ public static class ComponentGen {
         // ===== backgrounds =====
         (
             [
-                StructureTag.HasBackground
+                ComponentTag.IsBackground
             ],
             Background1
         ),
 
         (
             [
-                StructureTag.HasBackground
+                ComponentTag.IsBackground
             ],
             Background2
         ),
@@ -140,12 +140,12 @@ public static class ComponentGen {
         // ===== roofs =====
         (
             [
-                StructureTag.HasRoof,
-                StructureTag.RoofShort,
-                StructureTag.RoofTall,
-                StructureTag.RoofSlope1To1,
-                StructureTag.RoofSlopeLessThan1,
-                StructureTag.RoofSlopeNone
+                ComponentTag.IsRoof,
+                ComponentTag.RoofShort,
+                ComponentTag.RoofTall,
+                ComponentTag.RoofSlope1To1,
+                ComponentTag.RoofSlopeLessThan1,
+                ComponentTag.RoofSlopeNone
             ],
             Roof2
         ),
@@ -154,7 +154,7 @@ public static class ComponentGen {
         // ===== debug =====
         (
             [
-                StructureTag.DebugBlocks
+                ComponentTag.IsDebugBlocks
             ],
             DebugBlocks1
         ),
@@ -162,7 +162,7 @@ public static class ComponentGen {
 
         (
             [
-                StructureTag.DebugBlocks
+                ComponentTag.IsDebugBlocks
             ],
             DebugBlocks2
         ),
@@ -170,7 +170,7 @@ public static class ComponentGen {
 
         (
             [
-                StructureTag.DebugBlocks
+                ComponentTag.IsDebugBlocks
             ],
             DebugBlocks3
         ),
@@ -178,7 +178,7 @@ public static class ComponentGen {
 
         (
             [
-                StructureTag.DebugWalls
+                ComponentTag.IsDebugWalls
             ],
             DebugWalls1
         ),
@@ -186,7 +186,7 @@ public static class ComponentGen {
 
         (
             [
-                StructureTag.DebugWalls
+                ComponentTag.IsDebugWalls
             ],
             DebugWalls2
         ),
@@ -194,7 +194,7 @@ public static class ComponentGen {
 
         (
             [
-                StructureTag.DebugWalls
+                ComponentTag.IsDebugWalls
             ],
             DebugWalls3
         )
@@ -207,11 +207,11 @@ public static class ComponentGen {
     /// <returns></returns>
     /// <exception cref="Exception">When no components can be found for the given tags</exception>
     public static Func<ComponentParams, object> GetRandomMethod(ComponentParams componentParams) {
-        List<(StructureTag[] possibleTags, Func<ComponentParams, object> method)> methodTuples = [];
+        List<(ComponentTag[] possibleTags, Func<ComponentParams, object> method)> methodTuples = [];
         foreach (var tuple in GenMethods) {
             var requiredTags = componentParams.TagsRequired.ToList();
             bool valid = true;
-            foreach (StructureTag possibleTag in tuple.possibleTags) {
+            foreach (ComponentTag possibleTag in tuple.possibleTags) {
                 if (componentParams.TagsBlacklist.Contains(possibleTag)) {
                     valid = false;
                     break;
@@ -498,7 +498,7 @@ public static class ComponentGen {
     ///     Fills a volume with random blocks, but the top block consistent
     /// </summary>
     public static object Floor3(ComponentParams componentParams) {
-        bool elevated = componentParams.TagsRequired.Contains(StructureTag.FloorElevated);
+        bool elevated = componentParams.TagsRequired.Contains(ComponentTag.FloorElevated);
         int xStart = componentParams.Volume.BoundingBox.topLeft.X;
         int[] topY = new int[componentParams.Volume.Size.X];
 
@@ -526,7 +526,7 @@ public static class ComponentGen {
     ///     Fills top and bottom of volume, adds support struts in the middle
     /// </summary>
     public static object Floor4(ComponentParams componentParams) {
-        bool elevated = componentParams.TagsRequired.Contains(StructureTag.FloorElevated);
+        bool elevated = componentParams.TagsRequired.Contains(ComponentTag.FloorElevated);
         int xStart = componentParams.Volume.BoundingBox.topLeft.X;
         int[] topY = new int[componentParams.Volume.Size.X];
         int[] bottomY = new int[componentParams.Volume.Size.X];
@@ -612,7 +612,7 @@ public static class ComponentGen {
     ///     Fills a volume with the same wall blocks, with special blocks at regular intervals
     /// </summary>
     public static object Wall1(ComponentParams componentParams) {
-        bool elevated = componentParams.TagsRequired.Contains(StructureTag.WallElevated);
+        bool elevated = componentParams.TagsRequired.Contains(ComponentTag.WallElevated);
         int yStart = componentParams.Volume.BoundingBox.topLeft.Y;
         int[] lowX = new int[componentParams.Volume.Size.Y];
         int[] highX = new int[componentParams.Volume.Size.Y];
@@ -643,7 +643,7 @@ public static class ComponentGen {
     ///     Fills a volume with random wall blocks, with special blocks at regular intervals
     /// </summary>
     public static object Wall2(ComponentParams componentParams) {
-        bool elevated = componentParams.TagsRequired.Contains(StructureTag.WallElevated);
+        bool elevated = componentParams.TagsRequired.Contains(ComponentTag.WallElevated);
         int yStart = componentParams.Volume.BoundingBox.topLeft.Y;
         int[] lowX = new int[componentParams.Volume.Size.Y];
         int[] highX = new int[componentParams.Volume.Size.Y];
@@ -674,7 +674,7 @@ public static class ComponentGen {
     ///     Fills a volume with random blocks, but the bottom block consistent
     /// </summary>
     public static object Wall3(ComponentParams componentParams) {
-        bool elevated = componentParams.TagsRequired.Contains(StructureTag.WallElevated);
+        bool elevated = componentParams.TagsRequired.Contains(ComponentTag.WallElevated);
         int xStart = componentParams.Volume.BoundingBox.topLeft.X;
         int[] bottomY = new int[componentParams.Volume.Size.X];
 

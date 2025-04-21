@@ -2,14 +2,15 @@ namespace SpawnHouses.Types;
 
 public enum StructureTag {
     // ===== structureLayout =====
-    IsStructure,
     IsSymmetric,
-    StructureHasLargeRoom,
-    StructureHasNoLargeRoom,
-    StructureHasFlatFloors,
-    StructureHasNoFlatFloors,
-    StructureHasSomeFlatFloors,
+    HasHousing,
+    HasLargeRoom,
+    HasNoLargeRoom,
+    HasFlatFloors,
+    HasNoFlatFloors,
+    HasSomeFlatFloors,
     FirstFloorStorage,
+
     /// the first floor has horizontal gaps wherever possible
     FirstFloorConnected,
 
@@ -33,19 +34,30 @@ public enum StructureTag {
 
     /// structure is categorized as having an overall cavern/underground theme
     Cavern,
+}
 
-
-    // ===== roomLayout =====
+public enum RoomLayoutTag {
     // these are specific to each roomLayout, and not necessarily the whole structure
-    HasRoomLayout,
     HasHousing,
-    RoomLayoutHasFlatFloors,
-    RoomLayoutHasNoFlatFloors,
-    RoomLayoutHasSomeFlatFloors,
+    HasFlatFloors,
+    NoFlatFloors,
+    SomeFlatFloors,
 
+    /// room layout has entry points that go left/right (ex. is a door)
+    HorizontalEntryPoints,
 
+    /// room layout has entry points that go up/down (ex. is a platform)
+    HasVerticalEntryPoints,
+
+    FirstFloorStorage,
+
+    /// the first floor has horizontal gaps wherever possible
+    FirstFloorConnected,
+}
+
+public enum ComponentTag {
     // ===== floor =====
-    HasFloor,
+    IsFloor,
     IsFloorGap,
     FloorSolid,
     FloorHollow,
@@ -60,7 +72,7 @@ public enum StructureTag {
 
 
     // ===== wall =====
-    HasWall,
+    IsWall,
     IsWallGap,
     WallGroundLevel,
     WallElevated,
@@ -74,7 +86,7 @@ public enum StructureTag {
 
 
     // ===== stairway =====
-    HasStairway,
+    IsStairway,
 
     /// stairway is 3 or fewer tiles wide
     StairwayNarrow,
@@ -87,17 +99,17 @@ public enum StructureTag {
 
 
     // ===== background =====
-    HasBackground,
+    IsBackground,
     BackgroundHasWindow,
     BackgroundGroundLevel,
     BackgroundElevated,
 
 
     // ===== roof =====
-    HasRoof,
+    IsRoof,
     RoofTall,
     RoofShort,
-    HasChimney,
+    RoofHasChimney,
     RoofSlope1To1,
     RoofSlopeLessThan1,
     RoofSlopeGreaterThan1,
@@ -105,8 +117,8 @@ public enum StructureTag {
 
 
     // ===== debug =====
-    DebugBlocks,
-    DebugWalls
+    IsDebugBlocks,
+    IsDebugWalls
 }
 
 public enum PaletteTag {

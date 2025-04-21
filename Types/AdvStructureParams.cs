@@ -8,75 +8,80 @@ using Range = SpawnHouses.Structures.Range;
 namespace SpawnHouses.Types;
 
 public class StructureParams {
-    public Point16 End;
-    public int Height;
-    public int Housing;
-    public Range HousingRange;
-    public int Length;
-
-    public TilePalette Palette;
-    public Point16 Start;
     public StructureTag[] TagBlacklist;
     public StructureTag[] TagsRequired;
-    public int Volume;
+    public Point16 Start;
+    public Point16 End;
+    public EntryPoint[] EntryPoints;
+    public TilePalette Palette;
     public Range VolumeRange;
+    public Range HousingRange;
+
+    public int Length;
+
+    public int Housing;
+    public int Height;
+    public int Volume;
 
     public StructureParams(
-        TilePalette tilePalette,
         StructureTag[] tagsRequired,
         StructureTag[] tagBlacklist,
         Point16 start,
         Point16 end,
+        EntryPoint[] entryPoints,
+        TilePalette tilePalette,
         Range volumeRange,
         Range housingRange) {
-        Palette = tilePalette;
         TagsRequired = tagsRequired;
         TagBlacklist = tagBlacklist;
         Start = start;
         End = end;
-        if (Start.X > End.X)
+        if (Start.X > End.X) {
             (Start, End) = (End, Start);
+        }
         Length = End.X - Start.X;
+        EntryPoints = entryPoints;
+        Palette = tilePalette;
         VolumeRange = volumeRange;
         HousingRange = housingRange;
 
-        if (VolumeRange.Min / HousingRange.Min < 50)
-            throw new ArgumentException("Volume minimum is too small given the housing minimum");
-        if (VolumeRange.Max / HousingRange.Max < 50)
-            throw new ArgumentException("Volume maximum is too small given the housing maximum");
+        if (VolumeRange.Min / HousingRange.Min < 60)
+            throw new ArgumentException($"Volume minimum of {VolumeRange.Min} is too small given the housing minimum of {HousingRange.Min}");
+        if (VolumeRange.Max / HousingRange.Max < 60)
+            throw new ArgumentException($"Volume maximum of {VolumeRange.Max} is too small given the housing maximum of {HousingRange.Max}");
 
         ReRollRanges();
-    }
-
-    public static bool ContainsAny(StructureTag[] tags1, StructureTag[] tags2) {
-        return tags1.Any(tag => tags2.Contains(tag));
     }
 
     public void ReRollRanges() {
         double scale = Terraria.WorldGen.genRand.NextDouble();
         Volume = (int)(VolumeRange.Min + (VolumeRange.Max - VolumeRange.Min) * scale);
         Height = Volume / (End.X - Start.X);
-        if (Height <= 4)
-            throw new ArgumentException(
-                $"Volume ({Volume}) is too small compared to the length ({Length}) of the structure, resulting in a height of {Height}");
+        if (Height <= 4) {
+            throw new ArgumentException($"Volume ({Volume}) is too small compared to the length ({Length}) of the structure, resulting in a height of {Height}");
+        }
 
-        if (HousingRange.Min < 0)
+        if (HousingRange.Min < 0) {
             throw new ArgumentException("Min housing cannot be less than 0");
-        if (HousingRange.Max < 0)
+        }
+        if (HousingRange.Max < 0) {
             throw new ArgumentException("Max housing cannot be less than 0");
-        if (HousingRange.Max < HousingRange.Min)
+        }
+        if (HousingRange.Max < HousingRange.Min) {
             throw new ArgumentException("Max Housing is less than min housing");
-        if (HousingRange.Max == 0 && TagBlacklist.Contains(StructureTag.HasHousing))
-            throw new ArgumentException(
-                "Adv structure cannot have a max housing of 0 while blacklisting components with housing");
+        }
+        if (HousingRange.Max == 0 && TagBlacklist.Contains(StructureTag.HasHousing)) {
+            throw new ArgumentException("Adv structure cannot have a max housing of 0 while blacklisting components with housing");
+        }
         Housing = (int)(HousingRange.Min + (HousingRange.Max - HousingRange.Min) * scale);
     }
 }
 
 public class RoomLayoutParams(
-    StructureTag[] tagsRequired,
-    StructureTag[] tagsBlacklist,
+    RoomLayoutTag[] tagsRequired,
+    RoomLayoutTag[] tagsBlacklist,
     Shape mainVolume,
+    EntryPoint[] entryPoints,
     TilePalette tilePalette,
     int housing,
     Range roomHeight,
@@ -86,17 +91,18 @@ public class RoomLayoutParams(
     float largeRoomChance = 0.2f,
     int attempts = 5
 ) {
-    public readonly int Attempts = attempts;
-    public readonly Range FloorWidth = floorWidth;
-    public readonly int Housing = housing;
-    public readonly float LargeRoomChance = largeRoomChance;
-    public readonly Range RoomHeight = roomHeight;
-    public readonly Range RoomWidth = roomWidth;
-    public readonly StructureTag[] TagsBlacklist = tagsBlacklist;
-    public readonly StructureTag[] TagsRequired = tagsRequired;
-    public readonly TilePalette TilePalette = tilePalette;
-    public readonly Range WallWidth = wallWidth;
+    public RoomLayoutTag[] TagsBlacklist = tagsBlacklist;
+    public RoomLayoutTag[] TagsRequired = tagsRequired;
     public Shape MainVolume = mainVolume;
+    public EntryPoint[] EntryPoints = entryPoints;
+    public TilePalette TilePalette = tilePalette;
+    public int Housing = housing;
+    public Range FloorWidth = floorWidth;
+    public Range RoomHeight = roomHeight;
+    public Range RoomWidth = roomWidth;
+    public Range WallWidth = wallWidth;
+    public float LargeRoomChance = largeRoomChance;
+    public int Attempts = attempts;
 
     /// <summary>
     ///     true if volume's dimensions are not smaller than min sizes
@@ -105,29 +111,26 @@ public class RoomLayoutParams(
     /// <param name="roomLayoutParams"></param>
     /// <returns></returns>
     public bool IsWithinMinSize(Shape volume) {
-        return volume.Size.X >= RoomWidth.Min &&
-               volume.Size.Y >= RoomHeight.Min;
+        return volume.Size.X >= RoomWidth.Min && volume.Size.Y >= RoomHeight.Min;
     }
 
     /// <summary>
     ///     true if volume's dimensions are not larger than max sizes
     /// </summary>
     /// <param name="volume"></param>
-    /// <param name="roomLayoutParams"></param>
     /// <returns></returns>
     public bool IsWithinMaxSize(Shape volume) {
-        return volume.Size.X <= RoomWidth.Max &&
-               volume.Size.Y <= RoomHeight.Max;
+        return volume.Size.X <= RoomWidth.Max && volume.Size.Y <= RoomHeight.Max;
     }
 }
 
 public class ComponentParams(
-    StructureTag[] tagsRequired,
-    StructureTag[] tagsBlacklist,
+    ComponentTag[] tagsRequired,
+    ComponentTag[] tagsBlacklist,
     Shape volume,
     TilePalette tilePalette) {
-    public readonly StructureTag[] TagsBlacklist = tagsBlacklist;
-    public readonly StructureTag[] TagsRequired = tagsRequired;
+    public readonly ComponentTag[] TagsBlacklist = tagsBlacklist;
+    public readonly ComponentTag[] TagsRequired = tagsRequired;
     public readonly TilePalette TilePalette = tilePalette;
     public Shape Volume = volume;
 }

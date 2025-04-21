@@ -55,7 +55,7 @@ public class AdvStructure {
         return result;
     }
 
-    private void FillComponentSet(List<Shape> volumes, StructureTag[] tagsRequired, StructureTag[] tagsBlacklist,
+    private void FillComponentSet(List<Shape> volumes, ComponentTag[] tagsRequired, ComponentTag[] tagsBlacklist,
         TilePalette palette) {
         if (volumes.Count == 0)
             return;
@@ -82,21 +82,21 @@ public class AdvStructure {
         if (!HasLayout)
             throw new Exception("No layout has been set");
 
-        FillComponentSet(ExternalLayout.Floors.Select(floor => floor.Volume).ToList(), [StructureTag.HasWall], [], Params.Palette);
-        FillComponentSet(ExternalLayout.FloorGaps.Select(gap => gap.Volume).ToList(), [StructureTag.IsWallGap], [],
+        FillComponentSet(ExternalLayout.Floors.Select(floor => floor.Volume).ToList(), [ComponentTag.IsWall], [], Params.Palette);
+        FillComponentSet(ExternalLayout.FloorGaps.Select(gap => gap.Volume).ToList(), [ComponentTag.IsWallGap], [],
             Params.Palette);
-        FillComponentSet(ExternalLayout.Walls.Select(wall => wall.Volume).ToList(), [StructureTag.HasWall], [], Params.Palette);
-        FillComponentSet(ExternalLayout.WallGaps.Select(gap => gap.Volume).ToList(), [StructureTag.IsWallGap], [],
-            Params.Palette);
-
-        FillComponentSet(Layout.Floors.Select(floor => floor.Volume).ToList(), [StructureTag.HasFloor], [], Params.Palette);
-        FillComponentSet(Layout.FloorGaps.Select(gap => gap.Volume).ToList(), [StructureTag.DebugBlocks], [],
-            Params.Palette);
-        FillComponentSet(Layout.Walls.Select(wall => wall.Volume).ToList(), [StructureTag.HasWall], [], Params.Palette);
-        FillComponentSet(Layout.WallGaps.Select(gap => gap.Volume).ToList(), [StructureTag.DebugBlocks], [],
+        FillComponentSet(ExternalLayout.Walls.Select(wall => wall.Volume).ToList(), [ComponentTag.IsWall], [], Params.Palette);
+        FillComponentSet(ExternalLayout.WallGaps.Select(gap => gap.Volume).ToList(), [ComponentTag.IsWallGap], [],
             Params.Palette);
 
-        FillComponentSet(Layout.Rooms.Select(room => room.Volume).ToList(), [StructureTag.HasBackground], [],
+        FillComponentSet(Layout.Floors.Select(floor => floor.Volume).ToList(), [ComponentTag.IsFloor], [], Params.Palette);
+        FillComponentSet(Layout.FloorGaps.Select(gap => gap.Volume).ToList(), [ComponentTag.IsDebugBlocks], [],
+            Params.Palette);
+        FillComponentSet(Layout.Walls.Select(wall => wall.Volume).ToList(), [ComponentTag.IsWall], [], Params.Palette);
+        FillComponentSet(Layout.WallGaps.Select(gap => gap.Volume).ToList(), [ComponentTag.IsDebugBlocks], [],
+            Params.Palette);
+
+        FillComponentSet(Layout.Rooms.Select(room => room.Volume).ToList(), [ComponentTag.IsBackground], [],
             Params.Palette);
 
         BoundingBox.ExecuteInArea((x, y) => {

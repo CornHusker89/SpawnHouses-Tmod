@@ -8,21 +8,22 @@ using SpawnHouses.Types;
 namespace SpawnHouses.AdvStructures;
 
 public class RoomLayoutGen {
-    public static readonly (StructureTag[] possibleTags, Func<RoomLayoutParams, RoomLayout> method)[] GenMethods = [
+    public static readonly (RoomLayoutTag[] possibleTags, Func<RoomLayoutParams, RoomLayout> method)[] GenMethods = [
         (
             [
-                StructureTag.HasRoomLayout,
-                StructureTag.RoomLayoutHasFlatFloors
+                RoomLayoutTag.HasFlatFloors,
+                RoomLayoutTag.FirstFloorConnected,
+                RoomLayoutTag.FirstFloorStorage
             ],
             RoomLayout1
         )
     ];
 
     public static Func<RoomLayoutParams, RoomLayout> GetRandomMethod(RoomLayoutParams roomLayoutParams) {
-        List<(StructureTag[] possibleTags, Func<RoomLayoutParams, RoomLayout> method)> methodTuples = [];
+        List<(RoomLayoutTag[] possibleTags, Func<RoomLayoutParams, RoomLayout> method)> methodTuples = [];
         foreach (var tuple in GenMethods) {
             var requiredTags = roomLayoutParams.TagsRequired.ToList();
-            foreach (StructureTag possibleTag in tuple.possibleTags) {
+            foreach (RoomLayoutTag possibleTag in tuple.possibleTags) {
                 if (roomLayoutParams.TagsBlacklist.Contains(possibleTag))
                     break;
                 requiredTags.Remove(possibleTag);
