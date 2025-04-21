@@ -56,13 +56,15 @@ public enum RoomLayoutTag {
 }
 
 public enum ComponentTag {
+    // ===== all =====
+    Elevated,
+
     // ===== floor =====
     IsFloor,
     IsFloorGap,
     FloorSolid,
     FloorHollow,
     FloorGroundLevel,
-    FloorElevated,
 
     /// floor is either 1 or 2 tiles thick
     FloorThin,
@@ -75,7 +77,6 @@ public enum ComponentTag {
     IsWall,
     IsWallGap,
     WallGroundLevel,
-    WallElevated,
 
 
     // ===== decor =====
@@ -102,7 +103,6 @@ public enum ComponentTag {
     IsBackground,
     BackgroundHasWindow,
     BackgroundGroundLevel,
-    BackgroundElevated,
 
 
     // ===== roof =====
