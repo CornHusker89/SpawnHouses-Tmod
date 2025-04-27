@@ -14,7 +14,7 @@ namespace SpawnHouses;
 public class SpawnHousesModMenu : ModMenu
 {
     public override bool IsAvailable => true;
-    
+
     public override string DisplayName => "Generated Housing";
     //public override int Music => MusicLoader.GetMusicSlot(Mod, "Sounds/Music/YourMenuTheme"); // Optional custom music
 
@@ -25,18 +25,30 @@ public class SpawnHousesModMenu : ModMenu
 public class CustomMenuBackgroundStyle : ModSurfaceBackgroundStyle
 {
     private Stopwatch _stopwatch;
-    
-    private Asset<Texture2D> _backgroundTexture;
-    private Asset<Texture2D>[] _foregroundTextures;
 
-    private double _frameInterval = 1000.0 / 9;
+    private Asset<Texture2D> _skyBackTexture;
+    private Asset<Texture2D>[] _skyDetailTextures = new Asset<Texture2D>[55];
+    private Asset<Texture2D> _backTexture;
+    private Asset<Texture2D>[] _frontTextures;
+
+    private readonly double _frontFrameInterval = 1000.0 / 9;
+    private readonly double _skyDetailFrameInterval = 1000.0 / 5;
 
     public override void Load()
-    {        
+    {
         _stopwatch = Stopwatch.StartNew();
-                
-        _backgroundTexture = ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/back0050");
-        _foregroundTextures =
+
+        _skyBackTexture = ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/sky_back0050");
+        for (int i = 0; i < _skyDetailTextures.Length; i++)
+        {
+            string name = i + "";
+            if (name.Length == 1)
+                name = "0" + name;
+            _skyDetailTextures[i] = ModContent.Request<Texture2D>($"SpawnHouses/Assets/Menu/sky_detail00{name}");
+        }
+
+        _backTexture = ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/back0050");
+        _frontTextures =
         [
             ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/front0050"),
             ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/front0051"),
@@ -49,23 +61,41 @@ public class CustomMenuBackgroundStyle : ModSurfaceBackgroundStyle
 
     public override void Unload()
     {
-        _backgroundTexture.Dispose();
-        foreach (var texture in _foregroundTextures)
-            texture.Dispose();
-        _backgroundTexture = null;
-        _foregroundTextures = null;
+        // force this to main thread because sometimes unloading is done on separate thread
+        Main.RunOnMainThread(() =>
+        {
+            _skyBackTexture?.Dispose();
+            foreach (var texture in _skyDetailTextures)
+                texture?.Dispose();
+            _backTexture?.Dispose();
+            foreach (var texture in _frontTextures)
+                texture?.Dispose();
+        });
     }
 
     public override bool PreDrawCloseBackground(SpriteBatch spriteBatch)
     {
+
         spriteBatch.Draw(
-            _backgroundTexture.Value,
+            _skyBackTexture.Value,
             new Rectangle(0, 0, Main.screenWidth, Main.screenHeight),
             Color.White
         );
-        
+
         spriteBatch.Draw(
-            _foregroundTextures[(int)Math.Round(_stopwatch.ElapsedMilliseconds / _frameInterval) % 6].Value,
+            _skyDetailTextures[(int)Math.Round(_stopwatch.ElapsedMilliseconds / _skyDetailFrameInterval) % 55].Value,
+            new Rectangle(0, 0, Main.screenWidth, Main.screenHeight),
+            Color.White
+        );
+
+        spriteBatch.Draw(
+            _backTexture.Value,
+            new Rectangle(0, 0, Main.screenWidth, Main.screenHeight),
+            Color.White
+        );
+
+        spriteBatch.Draw(
+            _frontTextures[(int)Math.Round(_stopwatch.ElapsedMilliseconds / _frontFrameInterval) % 6].Value,
             new Rectangle(0, 0, Main.screenWidth, Main.screenHeight),
             Color.White
         );
