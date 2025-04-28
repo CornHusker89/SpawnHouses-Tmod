@@ -35,7 +35,7 @@ public sealed class Firepit : CustomStructure {
             CopyConnectPoints(_connectPoints), status, x, y) {
     }
 
-    public override void Generate() {
+    public override void Generate(bool bare = false) {
         WorldUtils.Gen(new Point(X, Y - 9), new Shapes.Rectangle(7, 9),
             new Actions.ClearTile());
 

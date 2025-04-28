@@ -5,7 +5,11 @@ Mods: {
 		Items: {
 			SpawnMainHouse: {
 				DisplayName: Spawn Main House
-				Tooltip: Spawns the Main House (with current configs) on the ground underneath the cursor
+				Tooltip:
+				    '''
+				    Spawns the Main House (with current configs) at the cursor.
+				    When held, the yellow region represents the aboveground section, and blue is the floor
+				    '''
 			}
 
 			SpawnTestHouse: {
@@ -55,12 +59,12 @@ Mods: {
 
 			FrameableBorealPlatform: {
 				DisplayName: Frameable Boreal Platform
-				Tooltip: A platform that can be hammered through all frames of vanilla platforms (some frames are invisible)
+				Tooltip: A Boreal platform that can be hammered through all frames of vanilla platforms (some frames are invisible)
 			}
 
 			FrameableBorealPlatformNoCollide: {
 				DisplayName: Frameable Boreal Platform No Collide
-				Tooltip: A platform that can be hammered through all frames of vanilla platforms (some frames are invisible), but has no collision
+				Tooltip: A Boreal platform that can be hammered through all frames of vanilla platforms (some frames are invisible), but has no collision
 			}
 
 			SpawnCaveTown1: {
@@ -116,7 +120,7 @@ Mods: {
 
 				SpawnPointBasementShape: {
 					Label: Spawn Point Basement Shape
-					Tooltip: 0.5 will not favor any direction. Values closer to 0 generate the basement more vertically, values closer to 1 generate the basement more horizontally. In upside-down seeds, value won't go below 0.4
+					Tooltip: A value of 0.5 will not favor any direction. Values closer to 0 generate the basement more vertically, values closer to 1 generate the basement more horizontally. In upside-down seeds, value won't go below 0.4
 				}
 
 				EnableSpawnPointHouse: {

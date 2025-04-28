@@ -33,7 +33,7 @@ public sealed class BridgeTest : CustomStructure {
             CopyConnectPoints(_connectPoints), status, x, y) {
     }
 
-    public override void Generate() {
+    public override void Generate(bool bare = false) {
         StructureGenHelper.GenerateFoundation(new Point(X, Y + 9), TileID.Dirt, 4);
 
         base.Generate();

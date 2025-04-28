@@ -112,9 +112,7 @@ public sealed class MainHouse : CustomStructure {
     private readonly bool RightSmall;
     private readonly bool generatedBasement;
 
-    public MainHouse(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated,
-        bool hasBasement = false, bool inUnderworld = false, byte leftType = _type_not_generated,
-        byte rightType = _type_not_generated) :
+    public MainHouse(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, bool hasBasement = false, bool inUnderworld = false, byte leftType = _type_not_generated, byte rightType = _type_not_generated) :
         base("Structures/", _structureXSize, _structureYSize,
             CopyConnectPoints(_connectPoints), status, x, y) {
         InUnderworld = inUnderworld;
@@ -271,14 +269,16 @@ public sealed class MainHouse : CustomStructure {
     }
 
     [NoJIT]
-    public override void Generate() {
-        StructureGenHelper.GenerateFoundation(new Point(X + StructureXSize / 2, Y + 16), TileID.Dirt,
-            StructureXSize / 2 + 7, true);
+    public override void Generate(bool bare = false) {
+        if (!bare) {
+            StructureGenHelper.GenerateFoundation(new Point(X + StructureXSize / 2, Y + 16), TileID.Dirt,
+                StructureXSize / 2 + 7, true);
 
-        StructureGenHelper.Blend(ConnectPoints[2][0], 20, TileID.Grass,
-            maxHeight: InUnderworld ? (ushort)10 : (ushort)38);
-        StructureGenHelper.Blend(ConnectPoints[3][0], 20, TileID.Grass,
-            maxHeight: InUnderworld ? (ushort)10 : (ushort)38, blendLeftSide: false);
+            StructureGenHelper.Blend(ConnectPoints[2][0], 20, TileID.Grass,
+                maxHeight: InUnderworld ? (ushort)10 : (ushort)38);
+            StructureGenHelper.Blend(ConnectPoints[3][0], 20, TileID.Grass,
+                maxHeight: InUnderworld ? (ushort)10 : (ushort)38, blendLeftSide: false);
+        }
 
         _GenerateStructure(); // generates the left side
         Generator.GenerateStructure(RightFilePath, new Point16(X + LeftSize, Y), ModInstance.Mod);
@@ -318,7 +318,7 @@ public sealed class MainHouse : CustomStructure {
             new Point16(X + LeftSize - 1, Y + 8), ModInstance.Mod);
 
         // bushes
-        if (!InUnderworld) {
+        if (!InUnderworld && !bare) {
             ushort[] blacklistWallIDs =
                 [WallID.StoneSlab, WallID.PearlstoneBrick, WallID.SnowBrick, WallID.RichMaogany];
             var leftBushCount = Terraria.WorldGen.genRand.Next(2, 5);
