@@ -101,15 +101,19 @@ Mods: {
 
 				MagicStorageIntegrations: {
 					Label: Magic Storage Integrations
-					Tooltip: If ON, a Magic Storage starter setup will spawn in the Spawn Point House. In order to work, Magic Storage (the mod) must be loaded
+					Tooltip: '''
+					    If ON, a Magic Storage starter setup will spawn in the Spawn Point House.
+					    In order to work, Magic Storage (the mod) must be loaded
+					    '''
 				}
 
 				SpawnPointHouseOffset: {
 					Label: Spawn Point House Offset
-					Tooltip: '''
-					    If ON, the Spawn Point House will generate ~120 tiles away from the spawn point.
-					    This can be useful for compatability with other mods that place tiles at the world spawn
-					    '''
+					Tooltip:
+						'''
+						If ON, the Spawn Point House will generate ~120 tiles away from the spawn point.
+						This can be useful for compatability with other mods that place tiles at the world spawn
+						'''
 				}
 
 				SpawnPointHouseSetsSpawn: {
@@ -119,12 +123,13 @@ Mods: {
 
 				SpawnPointBasementShape: {
 					Label: Spawn Point Basement Shape
-					Tooltip: '''
-					    A value of 0.5 will not favor any direction.
-					    Values closer to 0 generate the basement more vertically,
-					    values closer to 1 generate the basement more horizontally.
-					    In upside-down seeds, value won't go below 0.4
-					    '''
+					Tooltip:
+						'''
+						A value of 0.5 will not favor any direction.
+						Values closer to 0 generate the basement more vertically,
+						values closer to 1 generate the basement more horizontally.
+						In upside-down seeds, value won't go below 0.4
+						'''
 				}
 
 				EnableSpawnPointHouse: {
@@ -134,10 +139,11 @@ Mods: {
 
 				EnableSpawnPointBasement: {
 					Label: Enable Spawn Point Basement
-					Tooltip: '''
-					    If ON, a random basement will generate under the spawn point house.
-					    If there isn't a spawn point house, it will generate in the ground.
-					    '''
+					Tooltip:
+						'''
+						If ON, a random basement will generate under the spawn point house.
+						If there isn't a spawn point house, it will generate in the ground.
+						'''
 				}
 
 				EnableBeachHouse: {
