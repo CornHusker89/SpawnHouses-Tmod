@@ -15,5 +15,3 @@ Anything else not listed just means I haven't tested whether it's compatible. An
 If you come across any bugged world generation, be sure to leave a comment with the world seed and your configs on this mod's steam page, along with any other useful information such as other world generation mods or location of the bugged generation.
 
 Huge thanks to ScalarVector1's Structure Helper, this wouldn't be possible without it!
-
-Expect much, much more in the coming weeks! We've got a lot of new things coming up.
