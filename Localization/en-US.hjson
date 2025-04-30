@@ -101,10 +101,11 @@ Mods: {
 
 				MagicStorageIntegrations: {
 					Label: Magic Storage Integrations
-					Tooltip: '''
-					    If ON, a Magic Storage starter setup will spawn in the Spawn Point House.
-					    In order to work, Magic Storage (the mod) must be loaded
-					    '''
+					Tooltip:
+						'''
+						If ON, a Magic Storage starter setup will spawn in the Spawn Point House.
+						In order to work, Magic Storage (the mod) must be loaded
+						'''
 				}
 
 				SpawnPointHouseOffset: {
