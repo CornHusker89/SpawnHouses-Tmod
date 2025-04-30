@@ -6,10 +6,10 @@ Mods: {
 			SpawnMainHouse: {
 				DisplayName: Spawn Main House
 				Tooltip:
-				    '''
-				    Spawns the Main House (with current configs) at the cursor.
-				    When held, the yellow region represents the aboveground section, and blue is the floor
-				    '''
+					'''
+					Spawns the Main House (with current configs) at the cursor.
+					When held, the yellow region represents the aboveground section, and blue is the floor
+					'''
 			}
 
 			SpawnTestHouse: {

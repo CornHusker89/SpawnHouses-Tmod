@@ -21,6 +21,7 @@ namespace SpawnHouses.Items.StructureSpawns {
             Item.useTime = 20;
             Item.useAnimation = 20;
             Item.rare = ItemRarityID.Blue;
+            Item.consumable = true;
         }
 
         public override void Load()
@@ -30,6 +31,13 @@ namespace SpawnHouses.Items.StructureSpawns {
         }
 
         public override void AddRecipes() {
+            Recipe recipe = Recipe.Create(ModContent.ItemType<SpawnMainHouse>());
+            recipe.AddIngredient(ItemID.Silk, 5);
+            recipe.AddIngredient(ItemID.IronBar, 10);
+            recipe.AddIngredient(ItemID.Wood, 400);
+            recipe.AddIngredient(ItemID.StoneBlock, 500);
+            recipe.AddTile(TileID.WorkBenches);
+            recipe.Register();
         }
 
         public override bool AltFunctionUse(Terraria.Player player) {
@@ -41,8 +49,10 @@ namespace SpawnHouses.Items.StructureSpawns {
             int mouseX = mousePos.X;
             int mouseY = mousePos.Y;
 
-            MainHouse structure = new MainHouse((ushort)(mouseX - Math.Floor(_xSize / 2.0)), (ushort)(mouseY - Math.Floor(_ySize / 2.0) + 10));
-            structure.Generate(true);
+            MainHouse house = new MainHouse((ushort)(mouseX - Math.Floor(_xSize / 2.0)), (ushort)(mouseY - Math.Floor(_ySize / 2.0) + 10));
+            house.Generate(true);
+
+            //NetMessage.SendTileSquare(-1, house.X, house.X, house.StructureXSize, house.StructureYSize);
 
             return true;
         }
