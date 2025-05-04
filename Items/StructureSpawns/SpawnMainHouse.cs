@@ -52,7 +52,7 @@ namespace SpawnHouses.Items.StructureSpawns {
             MainHouse house = new MainHouse((ushort)(mouseX - Math.Floor(_xSize / 2.0)), (ushort)(mouseY - Math.Floor(_ySize / 2.0) + 10));
             house.Generate(true);
 
-            //NetMessage.SendTileSquare(-1, house.X, house.X, house.StructureXSize, house.StructureYSize);
+            NetMessage.SendTileSquare(-1, house.X, house.Y, house.StructureXSize, house.StructureYSize);
 
             return true;
         }
