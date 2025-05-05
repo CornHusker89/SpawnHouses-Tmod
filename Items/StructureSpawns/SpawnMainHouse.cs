@@ -24,8 +24,7 @@ namespace SpawnHouses.Items.StructureSpawns {
             Item.consumable = true;
         }
 
-        public override void Load()
-        {
+        public override void Load() {
             On_Main.DrawPlayers_AfterProjectiles += DrawOutline;
             _pixelTexture = ModContent.Request<Texture2D>("SpawnHouses/Items/StructureSpawns/Pixel");
         }
@@ -45,20 +44,21 @@ namespace SpawnHouses.Items.StructureSpawns {
         }
 
         public override bool? UseItem(Terraria.Player player) {
-            Point16 mousePos = (Main.MouseWorld / 16).ToPoint16();
-            int mouseX = mousePos.X;
-            int mouseY = mousePos.Y;
+            if (player.whoAmI == Main.myPlayer) {
+                Point16 mousePos = (Main.MouseWorld / 16).ToPoint16();
+                int mouseX = mousePos.X;
+                int mouseY = mousePos.Y;
 
-            MainHouse house = new MainHouse((ushort)(mouseX - Math.Floor(_xSize / 2.0)), (ushort)(mouseY - Math.Floor(_ySize / 2.0) + 10));
-            house.Generate(true);
+                MainHouse house = new MainHouse((ushort)(mouseX - Math.Floor(_xSize / 2.0)), (ushort)(mouseY - Math.Floor(_ySize / 2.0) + 10));
+                house.Generate(true);
 
-            NetMessage.SendTileSquare(-1, house.X, house.Y, house.StructureXSize, house.StructureYSize);
+                NetMessage.SendTileSquare(-1, house.X, house.Y, house.StructureXSize, house.StructureYSize);
+            }
 
             return true;
         }
 
-        private void DrawOutline(On_Main.orig_DrawPlayers_AfterProjectiles orig, Main self)
-        {
+        private void DrawOutline(On_Main.orig_DrawPlayers_AfterProjectiles orig, Main self) {
             orig(self);
 
             if (Main.LocalPlayer.HeldItem.type != ModContent.ItemType<SpawnMainHouse>()) {
