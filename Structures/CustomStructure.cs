@@ -90,7 +90,8 @@ public abstract class CustomStructure {
     /// <summary>
     ///     Calls _GenerateStructure and changes structure status
     /// </summary>
-    public virtual void Generate() {
+    /// <param name="bare"></param>
+    public virtual void Generate(bool bare = false) {
         _GenerateStructure();
         Status = StructureStatus.GeneratedButNotFound;
     }

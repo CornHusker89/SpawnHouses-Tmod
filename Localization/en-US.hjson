@@ -4,8 +4,12 @@ Mods: {
 
 		Items: {
 			SpawnMainHouse: {
-				DisplayName: Spawn Main House
-				Tooltip: Spawns the Main House (with current configs) on the ground underneath the cursor
+				DisplayName: Spawn Point House
+				Tooltip:
+					'''
+					Creates Generated Housing's Spawn Point House (with currently set configs) at the cursor.
+					When held, the yellow region represents the aboveground section, and blue is the floor
+					'''
 			}
 
 			SpawnTestHouse: {
@@ -55,12 +59,12 @@ Mods: {
 
 			FrameableBorealPlatform: {
 				DisplayName: Frameable Boreal Platform
-				Tooltip: A platform that can be hammered through all frames of vanilla platforms (some frames are invisible)
+				Tooltip: A Boreal platform that can be hammered through all frames of vanilla platforms (some frames are invisible)
 			}
 
 			FrameableBorealPlatformNoCollide: {
 				DisplayName: Frameable Boreal Platform No Collide
-				Tooltip: A platform that can be hammered through all frames of vanilla platforms (some frames are invisible), but has no collision
+				Tooltip: A Boreal platform that can be hammered through all frames of vanilla platforms (some frames are invisible), but has no collision
 			}
 
 			SpawnCaveTown1: {

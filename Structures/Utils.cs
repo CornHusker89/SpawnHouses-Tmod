@@ -5,6 +5,7 @@ using SpawnHouses.Structures.Bridges;
 using SpawnHouses.Structures.ChainStructures;
 using SpawnHouses.Structures.Structures;
 using SpawnHouses.Structures.Structures.ChainStructures;
+using Terraria;
 using Terraria.ModLoader;
 
 namespace SpawnHouses.Structures;

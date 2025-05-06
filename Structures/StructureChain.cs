@@ -289,7 +289,7 @@ public abstract class StructureChain {
 
         _currentCost += newStructure.Cost;
 
-        // reduce the weighting of the chosen structure so that we don't get 5 in a row 
+        // reduce the weighting of the chosen structure so that we don't get 5 in a row
         _copiedStructureList.First(curStructure => curStructure.ID == newStructure.ID).Weight /= 2;
         CalculateWeights();
 

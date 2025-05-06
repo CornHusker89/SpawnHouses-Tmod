@@ -39,7 +39,7 @@ public sealed class Mineshaft : CustomStructure {
             IsLeftSide = true;
     }
 
-    public override void Generate() {
+    public override void Generate(bool bare = false) {
         StructureGenHelper.Blend(ConnectPoints[2][0], 7, TileID.Grass);
         StructureGenHelper.Blend(ConnectPoints[3][0], 7, TileID.Grass, blendLeftSide: false);
 

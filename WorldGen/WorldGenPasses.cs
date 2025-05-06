@@ -53,8 +53,7 @@ public class WorldGenPasses : ModSystem {
             foreach (var npc in Main.npc)
                 // 688 is magic storage's automaton
                 if (npc.type is NPCID.Guide or NPCID.TaxCollector or 688) {
-                    npc.position.X = (StructureManager.MainHouse.X + StructureManager.MainHouse.LeftSize - 1 +
-                                      Terraria.WorldGen.genRand.Next(-8, 9)) * 16; // tiles to pixels
+                    npc.position.X = (StructureManager.MainHouse.X + StructureManager.MainHouse.LeftSize - 1 + Terraria.WorldGen.genRand.Next(-8, 9)) * 16; // tiles to pixels
                     npc.position.Y = (StructureManager.MainHouse.Y + 13) * 16;
                 }
 
