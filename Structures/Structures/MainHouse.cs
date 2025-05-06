@@ -320,7 +320,7 @@ public sealed class MainHouse : CustomStructure {
             int leftBushCount = Terraria.WorldGen.genRand.Next(2, 5);
             for (int i = 0; i < leftBushCount; i++) {
                 int xOffset = Terraria.WorldGen.genRand.Next(0, 12);
-                StructureGenHelper.PlaceBush(new Point(X + xOffset, Y + 15 + Terraria.WorldGen.genRand.Next(0, 2)),
+                StructureGenHelper.PlaceBush(new Point(X + xOffset, Y + 25 + Terraria.WorldGen.genRand.Next(0, 2)),
                     wallBlacklistIDs: blacklistWallIDs);
             }
 
@@ -328,7 +328,7 @@ public sealed class MainHouse : CustomStructure {
             for (int i = 0; i < rightBushCount; i++) {
                 int xOffset = Terraria.WorldGen.genRand.Next(0, 12);
                 StructureGenHelper.PlaceBush(
-                    new Point(X + StructureXSize - 1 - xOffset, Y + 15 + Terraria.WorldGen.genRand.Next(0, 2)),
+                    new Point(X + StructureXSize - 1 - xOffset, Y + 25 + Terraria.WorldGen.genRand.Next(0, 2)),
                     wallBlacklistIDs: blacklistWallIDs);
             }
         }

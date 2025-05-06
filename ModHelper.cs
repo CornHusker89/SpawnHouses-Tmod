@@ -24,6 +24,7 @@ public class ModHelper : ModSystem {
     public static int StorageUnitTileEntityID;
     public static int EnviromentAccessTileID;
     public static int EnviromentAccessTileEntityID;
+    public static int AutomatonNpcID;
 
     public static bool IsRemnantsEnabled;
 
@@ -47,14 +48,13 @@ public class ModHelper : ModSystem {
             StorageUnitTileEntityID = ModContent.TileEntityType<TEStorageUnit>();
             EnviromentAccessTileID = ModContent.TileType<EnvironmentAccess>();
             EnviromentAccessTileEntityID = ModContent.TileEntityType<TEEnvironmentAccess>();
-
-            //AutomatonEntityID = ModContent.NPCType<MagicStorage.NPCs.Golem>()
+            AutomatonNpcID = ModContent.Find<ModNPC>("MagicStorage/Golem").Type;
         }
         catch (Exception) {
             IsMSEnabled = false;
             ErrorLoadingMS = true;
             ModContent.GetInstance<SpawnHouses>().Logger
-                .Error("Failed to retrieve Magic Storage TileIDs. Contact the mod author about this issue");
+                .Error("Failed to retrieve Magic Storage IDs. Contact the mod author about this issue");
         }
     }
 
