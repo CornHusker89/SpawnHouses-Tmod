@@ -1,2 +1,3 @@
 Version 1.1.0
-Minor Changes
+Major Changes
+- Added an item to create more Spawn Point Houses, craftable with 500 stone, 350 wood, and 10 iron bars.

@@ -4,10 +4,10 @@ Mods: {
 
 		Items: {
 			SpawnMainHouse: {
-				DisplayName: Spawn Main House
+				DisplayName: Spawn Point House
 				Tooltip:
 					'''
-					Spawns the Main House (with current configs) at the cursor.
+					Creates Generated Housing's Spawn Point House (with currently set configs) at the cursor.
 					When held, the yellow region represents the aboveground section, and blue is the floor
 					'''
 			}

@@ -95,9 +95,7 @@ public static class WorldGenHelper {
         }
 
         try {
-            var house = new MainHouse((ushort)(initialX - 31), (ushort)(initialY - 16),
-                hasBasement: ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement,
-                inUnderworld: spawnUnderworld);
+            MainHouse house = new MainHouse((ushort)(initialX - 31), (ushort)(initialY - 26), hasBasement: ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement, inUnderworld: spawnUnderworld);
             house.Generate();
             StructureManager.MainHouse = house;
 

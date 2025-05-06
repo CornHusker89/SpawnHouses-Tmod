@@ -31,9 +31,8 @@ namespace SpawnHouses.Items.StructureSpawns {
 
         public override void AddRecipes() {
             Recipe recipe = Recipe.Create(ModContent.ItemType<SpawnMainHouse>());
-            recipe.AddIngredient(ItemID.Silk, 5);
             recipe.AddIngredient(ItemID.IronBar, 10);
-            recipe.AddIngredient(ItemID.Wood, 400);
+            recipe.AddIngredient(ItemID.Wood, 350);
             recipe.AddIngredient(ItemID.StoneBlock, 500);
             recipe.AddTile(TileID.WorkBenches);
             recipe.Register();
@@ -44,16 +43,20 @@ namespace SpawnHouses.Items.StructureSpawns {
         }
 
         public override bool? UseItem(Terraria.Player player) {
+
+
             if (player.whoAmI == Main.myPlayer) {
                 Point16 mousePos = (Main.MouseWorld / 16).ToPoint16();
                 int mouseX = mousePos.X;
                 int mouseY = mousePos.Y;
 
-                MainHouse house = new MainHouse((ushort)(mouseX - Math.Floor(_xSize / 2.0)), (ushort)(mouseY - Math.Floor(_ySize / 2.0) + 10));
+                MainHouse house = new MainHouse((ushort)(mouseX - Math.Floor(_xSize / 2.0)), (ushort)(mouseY - Math.Floor(_ySize / 2.0)));
                 house.Generate(true);
 
                 NetMessage.SendTileSquare(-1, house.X, house.Y, house.StructureXSize, house.StructureYSize);
             }
+
+
 
             return true;
         }

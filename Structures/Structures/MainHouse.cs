@@ -84,12 +84,12 @@ public sealed class MainHouse : CustomStructure {
 
         // left
         [
-            new ConnectPoint(0, 16, Directions.Left)
+            new ConnectPoint(0, 26, Directions.Left)
         ],
 
         // right
         [
-            new ConnectPoint(62, 16, Directions.Right)
+            new ConnectPoint(62, 26, Directions.Right)
         ]
     ];
 
@@ -113,8 +113,7 @@ public sealed class MainHouse : CustomStructure {
     private readonly bool generatedBasement;
 
     public MainHouse(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, bool hasBasement = false, bool inUnderworld = false, byte leftType = _type_not_generated, byte rightType = _type_not_generated) :
-        base("Structures/", _structureXSize, _structureYSize,
-            CopyConnectPoints(_connectPoints), status, x, y) {
+        base("Structures/", _structureXSize, _structureYSize, CopyConnectPoints(_connectPoints), status, x, y) {
         InUnderworld = inUnderworld;
         HasBasement = hasBasement;
 
@@ -171,32 +170,32 @@ public sealed class MainHouse : CustomStructure {
             case _type_left:
                 LeftFilePath = _filePath_left;
                 LeftSize = 33;
-                SignPos = new Point16(X + 7, Y + 10);
+                SignPos = new Point16(X + 7, Y + 20);
                 break;
             case _type_small_left:
                 LeftFilePath = _filePath_small_left;
                 LeftSize = 20;
                 LeftSmall = true;
-                SignPos = new Point16(X + 1, Y + 10);
+                SignPos = new Point16(X + 1, Y + 20);
                 break;
             case _type_small_basement_left:
                 LeftFilePath = _filePath_small_basement_left;
                 LeftSize = 20;
                 LeftSmall = true;
-                BasementEntryPos = new Point16(X + 10, Y + 24);
-                SignPos = new Point16(X + 1, Y + 10);
+                BasementEntryPos = new Point16(X + 10, Y + 34);
+                SignPos = new Point16(X + 1, Y + 20);
                 break;
             case _type_magicstorage_left:
                 LeftFilePath = _filePath_magicstorage_left;
                 LeftSize = 33;
-                StorageHeartPos = new Point16(X + 25, Y + 17);
-                SignPos = new Point16(X + 7, Y + 10);
+                StorageHeartPos = new Point16(X + 25, Y + 27);
+                SignPos = new Point16(X + 7, Y + 20);
                 break;
             case _type_basement_left:
                 LeftFilePath = _filePath_basement_left;
                 LeftSize = 33;
-                BasementEntryPos = new Point16(X + 22, Y + 24);
-                SignPos = new Point16(X + 7, Y + 10);
+                BasementEntryPos = new Point16(X + 22, Y + 34);
+                SignPos = new Point16(X + 7, Y + 20);
                 break;
         }
 
@@ -232,7 +231,7 @@ public sealed class MainHouse : CustomStructure {
             case _type_basement_right:
                 RightFilePath = _filePath_basement_right;
                 RightSize = 30;
-                BasementEntryPos = new Point16(X + LeftSize + 9, Y + 24);
+                BasementEntryPos = new Point16(X + LeftSize + 9, Y + 34);
                 break;
             case _type_small_right:
                 RightFilePath = _filePath_small_right;
@@ -243,12 +242,12 @@ public sealed class MainHouse : CustomStructure {
                 RightFilePath = _filePath_small_magicstorage_right;
                 RightSize = 21;
                 RightSmall = true;
-                StorageHeartPos = new Point16(X + LeftSize + 4, Y + 17);
+                StorageHeartPos = new Point16(X + LeftSize + 4, Y + 27);
                 break;
             case _type_magicstorage_right:
                 RightFilePath = _filePath_magicstorage_right;
                 RightSize = 30;
-                StorageHeartPos = new Point16(X + LeftSize + 4, Y + 17);
+                StorageHeartPos = new Point16(X + LeftSize + 4, Y + 27);
                 break;
         }
 
@@ -271,24 +270,21 @@ public sealed class MainHouse : CustomStructure {
     [NoJIT]
     public override void Generate(bool bare = false) {
         if (!bare) {
-            StructureGenHelper.GenerateFoundation(new Point(X + StructureXSize / 2, Y + 16), TileID.Dirt,
-                StructureXSize / 2 + 7, true);
+            StructureGenHelper.GenerateFoundation(new Point(X + StructureXSize / 2, Y + 26), TileID.Dirt, StructureXSize / 2 + 7, true);
 
-            StructureGenHelper.Blend(ConnectPoints[2][0], 20, TileID.Grass,
-                maxHeight: InUnderworld ? (ushort)10 : (ushort)38);
-            StructureGenHelper.Blend(ConnectPoints[3][0], 20, TileID.Grass,
-                maxHeight: InUnderworld ? (ushort)10 : (ushort)38, blendLeftSide: false);
+            StructureGenHelper.Blend(ConnectPoints[2][0], 20, TileID.Grass,  maxHeight: InUnderworld ? (ushort)10 : (ushort)38);
+            StructureGenHelper.Blend(ConnectPoints[3][0], 20, TileID.Grass, maxHeight: InUnderworld ? (ushort)10 : (ushort)38, blendLeftSide: false);
         }
 
-        _GenerateStructure(); // generates the left side
-        Generator.GenerateStructure(RightFilePath, new Point16(X + LeftSize, Y), ModInstance.Mod);
-        Generator.GenerateStructure(TopFilePath, new Point16(X + LeftSize - 14, Y - 10), ModInstance.Mod);
+        Generator.GenerateStructure(LeftFilePath, new Point16(X, Y + 10), ModInstance.Mod);
+        Generator.GenerateStructure(RightFilePath, new Point16(X + LeftSize, Y + 10), ModInstance.Mod);
+        Generator.GenerateStructure(TopFilePath, new Point16(X + LeftSize - 14, Y), ModInstance.Mod);
 
         var signString = "All good adventures start in a tavern...To bad this isn't a tavern :(";
         var rnd = new Random();
         for (var i = 0; i < 25; i++) {
             var possibleString = _signQuotes[rnd.Next(0, _signQuotes.Count)];
-            if (possibleString.Contains('~'))
+            if (possibleString.Contains('~')) {
                 try {
                     var dict = WebClientInstance.WebClient.GetSpawnCount();
                     if (dict is not null) {
@@ -304,6 +300,7 @@ public sealed class MainHouse : CustomStructure {
                 catch {
                     continue;
                 }
+            }
 
             signString = possibleString;
             break;
@@ -313,9 +310,9 @@ public sealed class MainHouse : CustomStructure {
         if (signIndex != -1)
             Sign.TextSign(signIndex, signString);
 
-        Terraria.WorldGen.PlaceTile(X + LeftSize - 1, Y + 14, TileID.WorkBenches, true, true, style: 0);
+        Terraria.WorldGen.PlaceTile(X + LeftSize - 1, Y + 24, TileID.WorkBenches, true, true, style: 0);
         Generator.GenerateStructure("Structures/StructureFiles/mainHouse/mainHouse_Rose",
-            new Point16(X + LeftSize - 1, Y + 8), ModInstance.Mod);
+            new Point16(X + LeftSize - 1, Y + 18), ModInstance.Mod);
 
         // bushes
         if (!InUnderworld && !bare) {
