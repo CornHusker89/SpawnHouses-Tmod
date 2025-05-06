@@ -11,7 +11,7 @@ namespace SpawnHouses.Testing;
 [JITWhenModsEnabled("WorldGenTesting")]
 public class SpawnHousesTesting {
     public static void Initialize() {
-        var testingMod = ModContent.GetInstance<WorldGenTesting.WorldGenTesting>();
+        WorldGenTesting.WorldGenTesting? testingMod = ModContent.GetInstance<WorldGenTesting.WorldGenTesting>();
 
         testingMod.AddTest(new Test(
             ModInstance.Mod, () => {
@@ -44,7 +44,7 @@ public class SpawnHousesTesting {
         testingMod.AddTest(new Test(
             ModInstance.Mod, () => {
                 TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
-                var output = string.Empty;
+                string output = string.Empty;
                 string? result = ScreenshotMainHouse();
                 output += result == null ? "" : result + "\n";
                 result = ScreenshotBeachHouse();

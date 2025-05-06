@@ -63,7 +63,7 @@ internal static class ChainProcessor {
             ["Status"] = processingStructure.Status
         };
 
-        var i = 0;
+        int i = 0;
         processingStructure.ActionOnEachConnectPoint(connectPoint => {
             if (connectPoint.ChildStructure is not null) {
                 dict[$"Substructure{i}"] = ProcessStructure(connectPoint.ChildStructure);
@@ -83,25 +83,25 @@ internal static class ChainProcessor {
     }
 
     internal static CustomChainStructure ProcessSubstructure(TagCompound structureObj) {
-        var structure = (CustomChainStructure)StructureIDUtils.CreateStructure(
+        CustomChainStructure? structure = (CustomChainStructure)StructureIDUtils.CreateStructure(
             (ushort)(short)structureObj["ID"],
             (ushort)(short)structureObj["X"],
             (ushort)(short)structureObj["Y"],
             (byte)structureObj["Status"]
         );
 
-        var i = 0;
+        int i = 0;
         structure.ActionOnEachConnectPoint(point => {
             if (structureObj.ContainsKey($"Substructure{i}")) {
                 point.ChildStructure = ProcessSubstructure((TagCompound)structureObj[$"Substructure{i}"]);
                 if (structureObj.ContainsKey($"Substructure{i}Bridge")) {
-                    var bridgeObj = (TagCompound)structureObj[$"Substructure{i}Bridge"];
-                    var bridge = BridgeIDUtils.CreateBridge((ushort)(short)bridgeObj["ID"]);
+                    TagCompound? bridgeObj = (TagCompound)structureObj[$"Substructure{i}Bridge"];
+                    Bridge? bridge = BridgeIDUtils.CreateBridge((ushort)(short)bridgeObj["ID"]);
 
                     // get the child connect point
-                    var goalX = (ushort)(short)bridgeObj["X2"];
-                    var goalY = (ushort)(short)bridgeObj["Y2"];
-                    var found = false;
+                    ushort goalX = (ushort)(short)bridgeObj["X2"];
+                    ushort goalY = (ushort)(short)bridgeObj["Y2"];
+                    bool found = false;
                     point.ChildStructure.ActionOnEachConnectPoint(nextPoint => {
                         if (nextPoint.X == goalX && nextPoint.Y == goalY) {
                             found = true;
@@ -125,7 +125,7 @@ internal static class ChainProcessor {
 
 internal class DictionarySerializer : TagSerializer<Dictionary<string, object>, TagCompound> {
     public override TagCompound Serialize(Dictionary<string, object> data) {
-        var tag = new TagCompound();
+        TagCompound tag = new TagCompound();
         foreach (var kvp in data)
             tag[kvp.Key] = kvp.Value;
         return tag;
@@ -138,7 +138,7 @@ internal class DictionarySerializer : TagSerializer<Dictionary<string, object>, 
 
 internal class MainHouseSerializer : TagSerializer<MainHouse, TagCompound> {
     public override TagCompound Serialize(MainHouse structure) {
-        return new TagCompound() {
+        return new TagCompound {
             ["X"] = structure.X,
             ["Y"] = structure.Y,
             ["Status"] = structure.Status,
@@ -175,7 +175,7 @@ internal class MainBasementSerializer : TagSerializer<MainBasement, TagCompound>
     }
 
     public override MainBasement Deserialize(TagCompound tag) {
-        var basement = new MainBasement(
+        MainBasement basement = new MainBasement(
             (ushort)tag.Get<short>("X"),
             (ushort)tag.Get<short>("Y"),
             tag.GetByte("Status")
@@ -187,7 +187,7 @@ internal class MainBasementSerializer : TagSerializer<MainBasement, TagCompound>
 
 internal class MineshaftSerializer : TagSerializer<Mineshaft, TagCompound> {
     public override TagCompound Serialize(Mineshaft structure) {
-        return new TagCompound() {
+        return new TagCompound {
             ["X"] = structure.X,
             ["Y"] = structure.Y,
             ["Status"] = structure.Status
@@ -205,7 +205,7 @@ internal class MineshaftSerializer : TagSerializer<Mineshaft, TagCompound> {
 
 internal class BeachHouseSerializer : TagSerializer<BeachHouse, TagCompound> {
     public override TagCompound Serialize(BeachHouse structure) {
-        return new TagCompound() {
+        return new TagCompound {
             ["X"] = structure.X,
             ["Y"] = structure.Y,
             ["Status"] = structure.Status,

@@ -70,14 +70,14 @@ public class ModHelper : ModSystem {
         }
 
         try {
-            TileEntity.ByPosition.TryGetValue(remotePos, out var tileEntity);
-            var remoteTileEntity = (TERemoteAccess)tileEntity;
+            TileEntity.ByPosition.TryGetValue(remotePos, out TileEntity tileEntity);
+            TERemoteAccess remoteTileEntity = (TERemoteAccess)tileEntity;
             if (remoteTileEntity == null) {
                 SendError();
                 return false;
             }
 
-            var success = remoteTileEntity.TryLocate(heartPos, out var message);
+            bool success = remoteTileEntity.TryLocate(heartPos, out string message);
             if (!success) SendError();
             return success;
         }

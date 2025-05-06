@@ -39,19 +39,19 @@ public class FlipRegion : ModItem {
         ushort width = 100;
         ushort height = 100;
 
-        var startX = (ushort)(Main.MouseWorld / 16).ToPoint16().X;
-        var startY = (ushort)(Main.MouseWorld / 16).ToPoint16().Y;
+        ushort startX = (ushort)(Main.MouseWorld / 16).ToPoint16().X;
+        ushort startY = (ushort)(Main.MouseWorld / 16).ToPoint16().Y;
 
-        for (var x = 0; x < width / 2; x++)
-        for (var y = 0; y < height; y++) {
+        for (int x = 0; x < width / 2; x++)
+        for (int y = 0; y < height; y++) {
             // Calculate opposite x position
-            var oppositeX = width - 1 - x;
+            int oppositeX = width - 1 - x;
 
             // Swap tiles
-            var tempTile = Main.tile[startX + x, startY + y];
+            Tile tempTile = Main.tile[startX + x, startY + y];
 
             Main.tile[startX + x, startY + y].CopyFrom(Main.tile[startX + oppositeX, startY + y]);
-            var tile = Main.tile[startX + x, startY + y];
+            Tile tile = Main.tile[startX + x, startY + y];
             tile.Slope = flipDir(tile.Slope);
 
             Main.tile[startX + oppositeX, startY + y].CopyFrom(tempTile);

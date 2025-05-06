@@ -45,7 +45,7 @@ public sealed class Mineshaft : CustomStructure {
 
         _GenerateStructure();
 
-        var tunnelSteps = Terraria.WorldGen.genRand.Next(7, 11);
+        int tunnelSteps = Terraria.WorldGen.genRand.Next(7, 11);
         WorldUtils.Gen(new Point(X + 9, Y + 13), // make sure rope can fully generate
             new Shapes.Rectangle(2, 10 + tunnelSteps * 15),
             new Actions.ClearTile(true)
@@ -53,8 +53,8 @@ public sealed class Mineshaft : CustomStructure {
         StructureGenHelper.DigVerticalTunnel(new Point(X + 10, Y + 14), 3, tunnelSteps);
 
         // place rope
-        for (var i = 5; i < 300; i++) {
-            var tile = Main.tile[X + 10, Y + i];
+        for (int i = 5; i < 300; i++) {
+            Tile tile = Main.tile[X + 10, Y + i];
 
             if (Terraria.WorldGen.SolidTile(X + 10, Y + i + 3)) break;
 
@@ -64,13 +64,13 @@ public sealed class Mineshaft : CustomStructure {
             tile.TileType = TileID.Rope;
         }
 
-        var leftBushX = X - Terraria.WorldGen.genRand.Next(-2, 2);
-        var surfaceY = Y + 5;
+        int leftBushX = X - Terraria.WorldGen.genRand.Next(-2, 2);
+        int surfaceY = Y + 5;
         while (!Terraria.WorldGen.SolidTile(leftBushX, surfaceY))
             surfaceY++;
         StructureGenHelper.PlaceBush(new Point(leftBushX, surfaceY - 1));
 
-        var rightBushX = X + _structureXSize + Terraria.WorldGen.genRand.Next(-2, 2);
+        int rightBushX = X + _structureXSize + Terraria.WorldGen.genRand.Next(-2, 2);
         surfaceY = Y + 5;
         while (!Terraria.WorldGen.SolidTile(rightBushX, surfaceY))
             surfaceY++;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using SpawnHouses.StructureHelper.ChestHelper;
 using Terraria;
 using Terraria.DataStructures;
@@ -14,26 +15,26 @@ namespace SpawnHouses.StructureHelper;
 /// </summary>
 [Flags]
 public enum GenFlags {
-	/// <summary>
-	///     No special generation
-	/// </summary>
-	None = 0b0,
+    /// <summary>
+    ///     No special generation
+    /// </summary>
+    None = 0b0,
 
-	/// <summary>
-	///     Null tiles will inherit the type of the tile behind them, but keep their slope if that tile is slopable
-	/// </summary>
-	NullsKeepGivenSlope = 0b1,
+    /// <summary>
+    ///     Null tiles will inherit the type of the tile behind them, but keep their slope if that tile is slopable
+    /// </summary>
+    NullsKeepGivenSlope = 0b1,
 
-	/// <summary>
-	///     Null tiles and walls will inherit the type of the tile/wall behind them, but will keep the paint they are given
-	/// </summary>
-	NullsKeepGivenPaint = 0b10,
+    /// <summary>
+    ///     Null tiles and walls will inherit the type of the tile/wall behind them, but will keep the paint they are given
+    /// </summary>
+    NullsKeepGivenPaint = 0b10,
 
-	/// <summary>
-	///     Tile entities will not have their saved data placed in the generated structures, instead falling back to acting as
-	///     if they are newly created
-	/// </summary>
-	IgnoreTileEnttiyData = 0b100
+    /// <summary>
+    ///     Tile entities will not have their saved data placed in the generated structures, instead falling back to acting as
+    ///     if they are newly created
+    /// </summary>
+    IgnoreTileEnttiyData = 0b100
 }
 
 /// <summary>
@@ -67,7 +68,7 @@ public static class Generator {
     /// <returns>If the structure generated successfully or not</returns>
     public static bool GenerateStructure(string path, Point16 pos, Mod mod, bool fullPath = false,
         bool ignoreNull = false, GenFlags flags = GenFlags.None, Dictionary<ushort, byte> tileChances = null) {
-        var tag = GetTag(path, mod, fullPath);
+        TagCompound tag = GetTag(path, mod, fullPath);
 
         if (!tag.ContainsKey("Version") || tag.GetString("Version")[0] <= 1)
             throw new Exception("Legacy structures from 1.3 versions of this mod are not supported.");
@@ -100,7 +101,7 @@ public static class Generator {
     /// <returns>If the structure generated successfully or not</returns>
     public static bool GenerateMultistructureRandom(string path, Point16 pos, Mod mod, bool fullPath = false,
         bool ignoreNull = false, GenFlags flags = GenFlags.None) {
-        var tag = GetTag(path, mod, fullPath);
+        TagCompound tag = GetTag(path, mod, fullPath);
 
         if (!tag.ContainsKey("Version") || tag.GetString("Version")[0] <= 1)
             throw new Exception("Legacy structures from 1.3 versions of this mod are not supported.");
@@ -110,8 +111,8 @@ public static class Generator {
                 $"Attempted to generate a structure '{path}' as a multistructure. use GenerateStructure instead.");
 
         var structures = (List<TagCompound>)tag.GetList<TagCompound>("Structures");
-        var index = Terraria.WorldGen.genRand.Next(structures.Count);
-        var targetStructure = structures[index];
+        int index = Terraria.WorldGen.genRand.Next(structures.Count);
+        TagCompound targetStructure = structures[index];
 
         return Generate(targetStructure, pos, ignoreNull, flags);
     }
@@ -143,7 +144,7 @@ public static class Generator {
     /// <returns>If the structure generated successfully or not</returns>
     public static bool GenerateMultistructureSpecific(string path, Point16 pos, Mod mod, int index,
         bool fullPath = false, bool ignoreNull = false, GenFlags flags = GenFlags.None) {
-        var tag = GetTag(path, mod, fullPath);
+        TagCompound tag = GetTag(path, mod, fullPath);
 
         if (!tag.ContainsKey("Version") || tag.GetString("Version")[0] <= 1)
             throw new Exception("Legacy structures from 1.3 versions of this mod are not supported.");
@@ -152,7 +153,7 @@ public static class Generator {
 
         if (index >= structures.Count || index < 0) return false;
 
-        var targetStructure = structures[index];
+        TagCompound targetStructure = structures[index];
 
         return Generate(targetStructure, pos, ignoreNull, flags);
     }
@@ -172,7 +173,7 @@ public static class Generator {
     /// </param>
     /// <returns></returns>
     public static bool GetDimensions(string path, Mod mod, ref Point16 dims, bool fullPath = false) {
-        var tag = GetTag(path, mod, fullPath);
+        TagCompound tag = GetTag(path, mod, fullPath);
 
         dims = new Point16(tag.GetInt("Width") + 1, tag.GetInt("Height") + 1);
         return true;
@@ -198,7 +199,7 @@ public static class Generator {
     /// <returns></returns>
     public static bool GetMultistructureDimensions(string path, Mod mod, int index, ref Point16 dims,
         bool fullPath = false) {
-        var tag = GetTag(path, mod, fullPath);
+        TagCompound tag = GetTag(path, mod, fullPath);
 
         var structures = (List<TagCompound>)tag.GetList<TagCompound>("Structures");
 
@@ -207,7 +208,7 @@ public static class Generator {
             return false;
         }
 
-        var targetStructure = structures[index];
+        TagCompound targetStructure = structures[index];
 
         dims = new Point16(targetStructure.GetInt("Width") + 1, targetStructure.GetInt("Height") + 1);
         return true;
@@ -221,7 +222,7 @@ public static class Generator {
     /// <param name="mod">The instance of your mod to grab the file from.</param>
     /// <returns>True if the file is a multistructure, False if the file is a structure, null if it is invalid.</returns>
     public static bool? IsMultistructure(string path, Mod mod) {
-        var tag = GetTag(path, mod);
+        TagCompound tag = GetTag(path, mod);
 
         if (tag is null)
             return null;
@@ -248,38 +249,38 @@ public static class Generator {
 
         if (data is null) return false;
 
-        var width = tag.GetInt("Width");
-        var height = tag.GetInt("Height");
+        int width = tag.GetInt("Width");
+        int height = tag.GetInt("Height");
 
-        for (var x = 0; x <= width; x++)
-        for (var y = 0; y <= height; y++) {
-            var index = y + x * (height + 1);
-            var d = data[index];
-            var tile = Framing.GetTileSafely(pos.X + x, pos.Y + y);
+        for (int x = 0; x <= width; x++)
+        for (int y = 0; y <= height; y++) {
+            int index = y + x * (height + 1);
+            TileSaveData d = data[index];
+            Tile tile = Framing.GetTileSafely(pos.X + x, pos.Y + y);
 
-            var isNullTile = false;
+            bool isNullTile = false;
 
-            var isNullWall = false;
-            var oldWall = tile.WallType; //Saved incase there is a null wall and we need to restore
+            bool isNullWall = false;
+            ushort oldWall = tile.WallType; //Saved incase there is a null wall and we need to restore
 
-            if (!int.TryParse(d.tile, out var type)) {
-                var parts = d.tile.Split();
+            if (!int.TryParse(d.tile, out int type)) {
+                string[] parts = d.tile.Split();
 
                 if (parts[0] == "StructureHelper" && parts[1] == "NullBlock" && !ignoreNull)
                     isNullTile = true;
-                else if (parts.Length > 1 && ModLoader.TryGetMod(parts[0], out var mod) &&
+                else if (parts.Length > 1 && ModLoader.TryGetMod(parts[0], out Mod mod) &&
                          mod.TryFind(parts[1], out ModTile modTileType))
                     type = modTileType.Type;
                 else
                     type = 0;
             }
 
-            if (!int.TryParse(d.wall, out var wallType)) {
-                var parts = d.wall.Split();
+            if (!int.TryParse(d.wall, out int wallType)) {
+                string[] parts = d.wall.Split();
 
                 if (parts[0] == "StructureHelper" && parts[1] == "NullWall" && !ignoreNull)
                     isNullWall = true;
-                else if (parts.Length > 1 && ModLoader.TryGetMod(parts[0], out var mod) &&
+                else if (parts.Length > 1 && ModLoader.TryGetMod(parts[0], out Mod mod) &&
                          mod.TryFind(parts[1], out ModWall modWallType))
                     wallType = modWallType.Type;
                 else
@@ -297,20 +298,20 @@ public static class Generator {
                 tile.TileFrameY = d.frameY;
 
                 fixed (void* ptr = &tile.Get<TileWallWireStateData>()) {
-                    var intPtr = (int*)ptr;
+                    int* intPtr = (int*)ptr;
                     intPtr++;
 
                     *intPtr = d.wallWireData;
                 }
 
                 fixed (void* ptr = &tile.Get<LiquidData>()) {
-                    var shortPtr = (short*)ptr;
+                    short* shortPtr = (short*)ptr;
 
                     *shortPtr = d.packedLiquidData;
                 }
 
                 fixed (void* ptr = &tile.Get<TileWallBrightnessInvisibilityData>()) {
-                    var bytePtr = (byte*)ptr;
+                    byte* bytePtr = (byte*)ptr;
 
                     *bytePtr = d.brightInvisibleData;
                 }
@@ -324,17 +325,17 @@ public static class Generator {
                         GenerateChest(new Point16(pos.X + x, pos.Y + y), d.TEData);
                     }
                     else if ((flags & GenFlags.IgnoreTileEnttiyData) == 0) {
-                        if (!int.TryParse(d.TEType, out var typ)) {
-                            var parts = d.TEType.Split();
+                        if (!int.TryParse(d.TEType, out int typ)) {
+                            string[] parts = d.TEType.Split();
 
-                            if (ModLoader.TryGetMod(parts[0], out var mod) &&
+                            if (ModLoader.TryGetMod(parts[0], out Mod mod) &&
                                 mod.TryFind(parts[1], out ModTileEntity te))
                                 typ = te.Type;
                         }
 
                         if (typ != 0) {
-                            if (tileChances != null && tileChances.TryGetValue((ushort)typ, out var value)) {
-                                var targetVal = Terraria.WorldGen.genRand.Next(1, 101);
+                            if (tileChances != null && tileChances.TryGetValue((ushort)typ, out byte value)) {
+                                int targetVal = Terraria.WorldGen.genRand.Next(1, 101);
                                 if (value < targetVal)
                                     continue;
                             }
@@ -354,7 +355,7 @@ public static class Generator {
                 }
             }
 
-            var wallwire = new TileWallWireStateData();
+            TileWallWireStateData wallwire = new TileWallWireStateData();
             wallwire.SetAllBitsClearFrame(d.wallWireData);
 
             if (isNullTile) {
@@ -385,12 +386,12 @@ public static class Generator {
     /// <param name="pos">The position of the top-leftmost corner of the chest</param>
     /// <param name="rules">The TagCompound containing the chest rules you want to generate your chest with</param>
     internal static void GenerateChest(Point16 pos, TagCompound rules) {
-        var i = Chest.CreateChest(pos.X, pos.Y);
+        int i = Chest.CreateChest(pos.X, pos.Y);
 
         if (i == -1)
             return;
 
-        var chest = Main.chest[i];
+        Chest chest = Main.chest[i];
         ChestEntity.SetChest(chest, ChestEntity.LoadChestRules(rules));
     }
 
@@ -405,7 +406,7 @@ public static class Generator {
         TagCompound tag;
 
         if (!fullPath) {
-            var stream = mod.GetFileStream(path);
+            Stream stream = mod.GetFileStream(path);
             tag = TagIO.FromStream(stream);
             stream.Close();
         }

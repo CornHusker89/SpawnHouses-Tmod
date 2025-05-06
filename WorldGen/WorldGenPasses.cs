@@ -25,14 +25,14 @@ public class WorldGenPasses : ModSystem {
     // 4. We use the ModifyWorldGenTasks method to tell the game the order that our world generation code should run
     public override void ModifyWorldGenTasks(List<GenPass> tasks, ref double totalWeight) {
         // 5. We use FindIndex to locate the index of the vanilla world generation task called "Sunflowers". This ensures our code runs at the correct step.
-        var sunflowersIndex = tasks.FindIndex(genpass => genpass.Name.Equals("Sunflowers"));
+        int sunflowersIndex = tasks.FindIndex(genpass => genpass.Name.Equals("Sunflowers"));
         if (sunflowersIndex != -1)
             // 6. We register our world generation pass by passing in an instance of our custom GenPass class below. The GenPass class will execute our world generation code.
             tasks.Insert(sunflowersIndex + 1, new MainHousePass("Main House Pass", 100f));
         else
             tasks.Insert(tasks.Count - 8, new MainHousePass("Main House Pass", 100f));
 
-        var iceIndex = tasks.FindIndex(genpass => genpass.Name.Equals("Ice"));
+        int iceIndex = tasks.FindIndex(genpass => genpass.Name.Equals("Ice"));
         if (iceIndex != -1)
             // 6. We register our world generation pass by passing in an instance of our custom GenPass class below. The GenPass class will execute our world generation code.
             tasks.Insert(iceIndex + 1, new ClearSpawnPointPass("Spawn Point Basement Prep Pass", 100f));
@@ -50,7 +50,7 @@ public class WorldGenPasses : ModSystem {
     public override void PostWorldGen() {
         // move guide into the main house (if it's there)
         if (StructureManager.MainHouse is not null)
-            foreach (var npc in Main.npc)
+            foreach (NPC npc in Main.npc)
                 // 688 is magic storage's automaton
                 if (npc.type is NPCID.Guide or NPCID.TaxCollector or 688) {
                     npc.position.X = (StructureManager.MainHouse.X + StructureManager.MainHouse.LeftSize - 1 + Terraria.WorldGen.genRand.Next(-8, 9)) * 16; // tiles to pixels
@@ -84,8 +84,8 @@ public class ClearSpawnPointPass : GenPass {
         // 9. Finally, we do the actual world generation code.
 
         if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement) {
-            var x = Main.maxTilesX / 2;
-            var y = (int)(Main.worldSurface / 2);
+            int x = Main.maxTilesX / 2;
+            int y = (int)(Main.worldSurface / 2);
 
             //make sure we're not under the surface
             while (!Is40AboveTilesClear(x, y))
@@ -121,7 +121,7 @@ public class MainHousePass : GenPass {
     protected override void ApplyPass(GenerationProgress progress, GameConfiguration configuration) {
         // 9. Finally, we do the actual world generation code.
 
-        var spawnUnderworld =
+        bool spawnUnderworld =
             Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "").Replace("'", "") == "dontdigup" ||
             Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "") == "getfixedboi";
 

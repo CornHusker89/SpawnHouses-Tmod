@@ -20,7 +20,7 @@ internal class ChestRuleChance : ChestRule {
         if (nextIndex >= 40)
             return;
 
-        for (var k = 0; k < pool.Count; k++)
+        for (int k = 0; k < pool.Count; k++)
             if (Terraria.WorldGen.genRand.NextFloat(1) <= chance) {
                 chest.item[nextIndex] = pool[k].GetLoot();
                 nextIndex++;
@@ -28,7 +28,7 @@ internal class ChestRuleChance : ChestRule {
     }
 
     public override TagCompound Serizlize() {
-        var tag = new TagCompound {
+        TagCompound tag = new TagCompound {
             { "Type", "Chance" },
             { "Chance", chance },
             { "Pool", SerializePool() }
@@ -38,7 +38,7 @@ internal class ChestRuleChance : ChestRule {
     }
 
     public new static ChestRule Deserialize(TagCompound tag) {
-        var rule = new ChestRuleChance {
+        ChestRuleChance rule = new ChestRuleChance {
             chance = tag.GetFloat("Chance"),
             pool = DeserializePool(tag.GetCompound("Pool"))
         };
@@ -47,9 +47,9 @@ internal class ChestRuleChance : ChestRule {
     }
 
     public override ChestRule Clone() {
-        var clone = new ChestRuleChance();
+        ChestRuleChance clone = new ChestRuleChance();
 
-        for (var k = 0; k < pool.Count; k++) clone.pool.Add(pool[k].Clone());
+        for (int k = 0; k < pool.Count; k++) clone.pool.Add(pool[k].Clone());
 
         clone.chance = chance;
 

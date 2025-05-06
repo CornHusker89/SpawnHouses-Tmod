@@ -9,6 +9,9 @@ using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 namespace SpawnHouses.Structures;
 
 public abstract class StructureChain {
+    private readonly Bridge[] _bridges;
+    private readonly CustomChainStructure[] _originalStructureList;
+    private readonly CustomChainStructure[] _rootStructureList;
     public readonly ushort EntryPosX;
     public readonly ushort EntryPosY;
     public readonly byte MaxBranchLength;
@@ -17,13 +20,10 @@ public abstract class StructureChain {
     public readonly ushort MinCost;
     private readonly BoundingBox[] StartingBoundingBoxes;
     private List<BoundingBox> _boundingBoxes;
-    private readonly Bridge[] _bridges;
     private CustomChainStructure[] _copiedStructureList;
     private int _currentCost;
     private List<ChainConnectPoint> _failedConnectPointList = [];
-    private readonly CustomChainStructure[] _originalStructureList;
     private List<ChainConnectPoint> _queuedConnectPoints;
-    private readonly CustomChainStructure[] _rootStructureList;
     private int _structureListWeightSum;
     private CustomChainStructure[] _usableStructureList;
 
@@ -55,7 +55,7 @@ public abstract class StructureChain {
     /// </summary>
     /// <exception cref="Exception"></exception>
     public void CalculateChain() {
-        foreach (var structure in _originalStructureList)
+        foreach (CustomChainStructure structure in _originalStructureList)
             if (structure.Cost < 0)
                 throw new Exception("invalid item cost in structureList");
 
@@ -69,9 +69,9 @@ public abstract class StructureChain {
         CalculateWeights();
 
         ChainConnectPoint rootConnectPoint = null;
-        var foundValidStructureChain = false;
+        bool foundValidStructureChain = false;
         // try to find a configuration that satisfies the minCost
-        for (var attempts = 0; attempts < 20000; attempts++) {
+        for (int attempts = 0; attempts < 20000; attempts++) {
             _copiedStructureList = (CustomChainStructure[])_originalStructureList.Clone();
             for (byte i = 0; i < _originalStructureList.Length; i++)
                 _copiedStructureList[i] = _originalStructureList[i].Clone();
@@ -80,7 +80,7 @@ public abstract class StructureChain {
                 RootStructure = PlaceNewStructure(null, false, EntryPosX, EntryPosY);
             }
             else {
-                var index = Terraria.WorldGen.genRand.Next(0, _rootStructureList.Length);
+                int index = Terraria.WorldGen.genRand.Next(0, _rootStructureList.Length);
                 RootStructure = _rootStructureList[index].Clone();
                 RootStructure.SetPosition(EntryPosX, EntryPosY);
             }
@@ -104,7 +104,7 @@ public abstract class StructureChain {
             });
 
             while (_queuedConnectPoints.Count > 0) {
-                var connectPoint = _queuedConnectPoints[0];
+                ChainConnectPoint connectPoint = _queuedConnectPoints[0];
                 CalculateChildrenStructures(connectPoint);
                 _queuedConnectPoints.RemoveAt(0);
             }
@@ -128,7 +128,7 @@ public abstract class StructureChain {
         // prune any dangling branching hallways
         ActionOnEachStructure(structure => {
             if (StructureIDUtils.IsBranchingHallway(structure)) {
-                var count = 0;
+                int count = 0;
                 structure.ActionOnEachConnectPoint(point => {
                     if (point.ChildStructure is not null)
                         count++;
@@ -158,7 +158,7 @@ public abstract class StructureChain {
         //make the weights in useableStructureList cumulative, and make the starting weight 0
         _usableStructureList[0].Weight = 0;
 
-        for (var i = 1; i < _copiedStructureList.Length; i++)
+        for (int i = 1; i < _copiedStructureList.Length; i++)
             _usableStructureList[i].Weight =
                 (ushort)(_usableStructureList[i - 1].Weight + _copiedStructureList[i - 1].Weight);
     }
@@ -167,7 +167,7 @@ public abstract class StructureChain {
         bool closeToMaxBranchLength = false,
         int x = 500, int y = 500) {
         CustomChainStructure structure = null;
-        for (var i = 0; i < 100; i++) {
+        for (int i = 0; i < 100; i++) {
             structure = GetNewStructure(parentConnectPoint, closeToMaxBranchLength, _structureListWeightSum,
                 _usableStructureList);
 
@@ -183,14 +183,14 @@ public abstract class StructureChain {
 
     private void MoveConnectPointAndStructure(CustomChainStructure structure, ChainConnectPoint connectPoint, int x,
         int y) {
-        var deltaX = connectPoint.X - x;
-        var deltaY = connectPoint.Y - y;
+        int deltaX = connectPoint.X - x;
+        int deltaY = connectPoint.Y - y;
         structure.SetPosition(structure.X - deltaX, structure.Y - deltaY);
     }
 
     private void CalculateChildrenStructures(ChainConnectPoint connectPoint) {
-        var currentBranchLength = connectPoint.BranchLength;
-        var targetDirection = connectPoint.Direction;
+        byte currentBranchLength = connectPoint.BranchLength;
+        byte targetDirection = connectPoint.Direction;
 
         if (currentBranchLength > MaxBranchLength) // extra failsafe
         {
@@ -204,10 +204,10 @@ public abstract class StructureChain {
         }
 
         // try to find a structure that won't result in a cost overrun
-        var foundStructure = false;
+        bool foundStructure = false;
         CustomChainStructure newStructure = null;
-        for (var attempts = 0; attempts < 20; attempts++) {
-            var closeToMaxBranchLen = connectPoint.BranchLength >= MaxBranchLength - 1;
+        for (int attempts = 0; attempts < 20; attempts++) {
+            bool closeToMaxBranchLen = connectPoint.BranchLength >= MaxBranchLength - 1;
             newStructure = PlaceNewStructure(connectPoint, closeToMaxBranchLen);
             if (newStructure is null) {
                 _failedConnectPointList.Add(connectPoint);
@@ -227,11 +227,11 @@ public abstract class StructureChain {
 
         ChainConnectPoint targetConnectPoint = null;
         Bridge connectPointBridge = null;
-        var validLocation = false;
+        bool validLocation = false;
 
-        for (var findLocationAttempts = 0; findLocationAttempts < 15; findLocationAttempts++) {
+        for (int findLocationAttempts = 0; findLocationAttempts < 15; findLocationAttempts++) {
             // randomly pick either the top or bottom side
-            var randomSide = 0; //Terraria.WorldGen.genRand.Next(0, 2);
+            int randomSide = 0; //Terraria.WorldGen.genRand.Next(0, 2);
 
             connectPointBridge = GetBridgeOfDirection(_bridges, targetDirection, newStructure);
             if (connectPointBridge is null) {
@@ -239,9 +239,9 @@ public abstract class StructureChain {
                 return;
             }
 
-            var position = SetProspectiveStructurePosition(newStructure, connectPoint, connectPointBridge);
-            var newStructureConnectPointX = position.newStructureConnectPointX;
-            var newStructureConnectPointY = position.newStructureConnectPointY;
+            (int newStructureConnectPointX, int newStructureConnectPointY) position = SetProspectiveStructurePosition(newStructure, connectPoint, connectPointBridge);
+            int newStructureConnectPointX = position.newStructureConnectPointX;
+            int newStructureConnectPointY = position.newStructureConnectPointY;
 
             byte secondConnectPointDirection;
             if (connectPointBridge.InputDirections[0] == targetDirection)
@@ -294,7 +294,7 @@ public abstract class StructureChain {
         CalculateWeights();
 
         for (byte direction = 0; direction < 4; direction++)
-            foreach (var nextConnectPoint in newStructure.ConnectPoints[direction]) {
+            foreach (ChainConnectPoint nextConnectPoint in newStructure.ConnectPoints[direction]) {
                 // if the point already has the bridge on it
                 if (connectPoint.ChildConnectPoint == nextConnectPoint)
                     continue;
@@ -321,7 +321,7 @@ public abstract class StructureChain {
             OnStructureGenerate(structure);
             structure.ActionOnEachConnectPoint(connectPoint => {
                 if (connectPoint.ChildBridge is not null) {
-                    var bridge = connectPoint.ChildBridge;
+                    Bridge bridge = connectPoint.ChildBridge;
                     bridgeList.Add(bridge);
                 }
             });
@@ -329,10 +329,10 @@ public abstract class StructureChain {
         RootStructure.Generate();
         OnStructureGenerate(RootStructure);
 
-        foreach (var bridge in bridgeList)
+        foreach (Bridge bridge in bridgeList)
             bridge.Generate();
 
-        foreach (var connectPoint in _failedConnectPointList)
+        foreach (ChainConnectPoint connectPoint in _failedConnectPointList)
             connectPoint.GenerateSeal();
 
         Status = StructureStatus.GeneratedButNotFound;
@@ -406,9 +406,9 @@ public abstract class StructureChain {
     /// <returns>The new structure to be used for generation</returns>
     protected virtual CustomChainStructure GetNewStructure(ChainConnectPoint parentConnectPoint,
         bool closeToMaxBranchLength, int structureWeightSum, CustomChainStructure[] usableStructureList) {
-        for (var i = 0; i < 50; i++) {
-            var randomValue = Terraria.WorldGen.genRand.NextDouble() * structureWeightSum;
-            var structure = usableStructureList.Last(curStructure => curStructure.Weight <= randomValue).Clone();
+        for (int i = 0; i < 50; i++) {
+            double randomValue = Terraria.WorldGen.genRand.NextDouble() * structureWeightSum;
+            CustomChainStructure structure = usableStructureList.Last(curStructure => curStructure.Weight <= randomValue).Clone();
 
             // don't generate a branching hallway right after another one :)
             if (parentConnectPoint is not null && parentConnectPoint.GenerateChance == GenerateChances.Guaranteed &&
@@ -433,7 +433,7 @@ public abstract class StructureChain {
     /// <returns>The bridge object to be used for the generation</returns>
     protected virtual Bridge GetBridgeOfDirection(Bridge[] bridges, byte direction, CustomChainStructure structure) {
         for (ushort i = 0; i < 5000; i++) {
-            var index = Terraria.WorldGen.genRand.Next(0, bridges.Length);
+            int index = Terraria.WorldGen.genRand.Next(0, bridges.Length);
             if (bridges[index].InputDirections[0] == direction)
                 return bridges[index].Clone();
         }
@@ -452,8 +452,8 @@ public abstract class StructureChain {
         CustomChainStructure structure, ChainConnectPoint connectPoint, Bridge bridge) {
         int deltaX, deltaY;
         if (bridge.DeltaXMultiple != 0) {
-            var minRangeX = bridge.MinDeltaX / bridge.DeltaXMultiple;
-            var maxRangeX = bridge.MaxDeltaX / bridge.DeltaXMultiple;
+            int minRangeX = bridge.MinDeltaX / bridge.DeltaXMultiple;
+            int maxRangeX = bridge.MaxDeltaX / bridge.DeltaXMultiple;
             deltaX = Terraria.WorldGen.genRand.Next(minRangeX, maxRangeX + 1) * bridge.DeltaXMultiple;
         }
         else {
@@ -461,8 +461,8 @@ public abstract class StructureChain {
         }
 
         if (bridge.DeltaYMultiple != 0) {
-            var minRangeY = bridge.MinDeltaY / bridge.DeltaYMultiple;
-            var maxRangeY = bridge.MaxDeltaY / bridge.DeltaYMultiple;
+            int minRangeY = bridge.MinDeltaY / bridge.DeltaYMultiple;
+            int maxRangeY = bridge.MaxDeltaY / bridge.DeltaYMultiple;
             deltaY = Terraria.WorldGen.genRand.Next(minRangeY, maxRangeY + 1) * bridge.DeltaYMultiple;
         }
         else {

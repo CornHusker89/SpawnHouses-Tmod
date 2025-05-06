@@ -12,14 +12,14 @@ namespace SpawnHouses.Structures.Bridges;
 public class SingleStructureBridge : Bridge {
     private readonly Mod _mod = ModContent.GetInstance<SpawnHouses>();
 
+    private readonly BoundingBox[] BoundingBoxOverride;
+    private readonly bool HasBoundingBox;
+
     public readonly string StructureFilePath;
     public readonly ushort StructureHeight;
     public readonly ushort StructureLength;
     public readonly short StructureOffsetX;
     public readonly short StructureOffsetY;
-
-    private readonly BoundingBox[] BoundingBoxOverride;
-    private readonly bool HasBoundingBox;
 
     public SingleStructureBridge(string structureFilePath, ushort structureLength, ushort structureHeight,
         short structureOffsetX, short structureOffsetY, short deltaX, short deltaY,
@@ -49,12 +49,12 @@ public class SingleStructureBridge : Bridge {
         Point1 = point1;
         Point2 = point2;
 
-        var startX = point1.X + StructureOffsetX + 1;
-        var startY = point1.Y + StructureOffsetY + 1;
+        int startX = point1.X + StructureOffsetX + 1;
+        int startY = point1.Y + StructureOffsetY + 1;
 
         if (HasBoundingBox) {
             BoundingBoxes = new BoundingBox[BoundingBoxOverride.Length];
-            for (var i = 0; i < BoundingBoxOverride.Length; i++)
+            for (int i = 0; i < BoundingBoxOverride.Length; i++)
                 BoundingBoxes[i] = new BoundingBox
                 (
                     startX + BoundingBoxOverride[i].Point1.X,
@@ -86,15 +86,15 @@ public class SingleStructureBridge : Bridge {
         Generator.GenerateStructure(StructureFilePath,
             new Point16(Point1.X + StructureOffsetX + 1, Point1.Y + StructureOffsetY + 1), _mod);
 
-        var centerX = (ushort)((Point1.X + Point2.X) / 2);
-        var centerY = (ushort)((Point1.Y + Point2.Y) / 2);
-        var radius = StructureLength + StructureHeight;
+        ushort centerX = (ushort)((Point1.X + Point2.X) / 2);
+        ushort centerY = (ushort)((Point1.Y + Point2.Y) / 2);
+        int radius = StructureLength + StructureHeight;
         WorldUtils.Gen(new Point(centerX, centerY), new Shapes.Circle(radius), new Actions.SetFrames());
     }
 
     public override SingleStructureBridge Clone() {
-        var type = GetType();
-        var bridge = (SingleStructureBridge)Activator.CreateInstance(type)!;
+        Type type = GetType();
+        SingleStructureBridge bridge = (SingleStructureBridge)Activator.CreateInstance(type)!;
         if (Point1 is not null && Point2 is not null)
             bridge.SetPoints(Point1, Point2);
         return bridge;

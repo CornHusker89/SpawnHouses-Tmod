@@ -74,7 +74,7 @@ public class MainBasement : StructureChain {
 
     protected override bool IsChainComplete() {
         if (ModHelper.IsMSEnabled && ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier > 0.60) {
-            var found = false;
+            bool found = false;
             ActionOnEachStructure(structure => {
                 if (structure.ID == (ushort)StructureID.MainBasement_Room5) found = true;
             });
@@ -93,7 +93,7 @@ public class MainBasement : StructureChain {
             return false;
 
         // ensure it's at/under the rootstructure
-        var valid = true;
+        bool valid = true;
         targetStructure.ActionOnEachConnectPoint(point => {
             if (point.Y < RootStructure.Y + 10)
                 valid = false;
@@ -108,7 +108,7 @@ public class MainBasement : StructureChain {
                     return false;
             }
 
-        var maxDistance = 999;
+        int maxDistance = 999;
         if (_shape <= 0.41f) {
             maxDistance = 120;
             if (_shape <= 0.31f) {
@@ -124,7 +124,7 @@ public class MainBasement : StructureChain {
             }
         }
 
-        var direction = connectPoint.Direction;
+        byte direction = connectPoint.Direction;
         if (direction == Directions.Down) direction = Directions.Left;
 
         int startX = RootStructure.ConnectPoints[direction][0].X;
@@ -143,9 +143,9 @@ public class MainBasement : StructureChain {
     protected override CustomChainStructure GetNewStructure(ChainConnectPoint parentConnectPoint,
         bool closeToMaxBranchLength, int structureWeightSum, CustomChainStructure[] usableStructureList) {
         CustomChainStructure chosenStructure = null;
-        for (var i = 0; i < 50; i++) {
-            var randomValue = Terraria.WorldGen.genRand.NextDouble() * structureWeightSum;
-            var structure = usableStructureList.Last(curStructure => curStructure.Weight <= randomValue).Clone();
+        for (int i = 0; i < 50; i++) {
+            double randomValue = Terraria.WorldGen.genRand.NextDouble() * structureWeightSum;
+            CustomChainStructure structure = usableStructureList.Last(curStructure => curStructure.Weight <= randomValue).Clone();
 
             if (structure is null)
                 continue;
@@ -197,18 +197,18 @@ public class MainBasement : StructureChain {
 
     protected override void OnStructureGenerate(CustomChainStructure structure) {
         if (structure.ID != (ushort)StructureID.MainBasement_Room5 || !ModHelper.IsMSEnabled)
-            foreach (var boundingBox in structure.StructureBoundingBoxes)
+            foreach (BoundingBox boundingBox in structure.StructureBoundingBoxes)
                 StructureGenHelper.GenerateCobwebs(new Point(boundingBox.Point1.X, boundingBox.Point1.Y),
                     (ushort)(boundingBox.Point2.X - boundingBox.Point1.X + 1),
                     (ushort)(boundingBox.Point2.Y - boundingBox.Point1.Y + 1));
 
-        var centerX = structure.X + structure.StructureXSize / 2;
-        var centerY = structure.Y + structure.StructureYSize / 2;
+        int centerX = structure.X + structure.StructureXSize / 2;
+        int centerY = structure.Y + structure.StructureYSize / 2;
 
         WorldUtils.Gen(new Point(centerX, centerY),
             new Shapes.Circle((structure.StructureXSize + structure.StructureYSize + 2) / 2), new Actions.Custom(
                 (i, j, args) => {
-                    var tile = Main.tile[i, j];
+                    Tile tile = Main.tile[i, j];
                     if (tile.WallType is WallID.DirtUnsafe or WallID.DirtUnsafe1 or WallID.DirtUnsafe2
                         or WallID.DirtUnsafe3 or
                         WallID.DirtUnsafe4 or WallID.FlowerUnsafe or WallID.RocksUnsafe1 or WallID.RocksUnsafe2 or
@@ -241,7 +241,7 @@ public class MainBasement : StructureChain {
 
         // clear the extra walls on top, if the basement generates directly on the surface
         if (StructureManager.MainHouse is null)
-            for (var i = -6; i <= 6; i++)
+            for (int i = -6; i <= 6; i++)
                 WorldUtils.ClearWall(EntryPosX + i, EntryPosY);
 
         return true;

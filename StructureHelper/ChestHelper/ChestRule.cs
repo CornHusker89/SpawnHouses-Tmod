@@ -14,7 +14,7 @@ internal class ChestRule {
     public virtual string Tooltip => "Probably a bug! Report me!";
 
     public Loot AddItem(Item item) {
-        var loot = new Loot(item.Clone(), 1);
+        Loot loot = new Loot(item.Clone(), 1);
         pool.Add(loot);
 
         return loot;
@@ -32,9 +32,9 @@ internal class ChestRule {
     }
 
     public static ChestRule Deserialize(TagCompound tag) {
-        var str = tag.GetString("Type");
+        string str = tag.GetString("Type");
 
-        var rule = str switch {
+        ChestRule rule = str switch {
             "Guaranteed" => ChestRuleGuaranteed.Deserialize(tag),
             "Chance" => ChestRuleChance.Deserialize(tag),
             "Pool" => ChestRulePool.Deserialize(tag),
@@ -46,28 +46,28 @@ internal class ChestRule {
     }
 
     public TagCompound SerializePool() {
-        var tag = new TagCompound {
+        TagCompound tag = new TagCompound {
             { "Count", pool.Count }
         };
 
-        for (var k = 0; k < pool.Count; k++) tag.Add("Pool" + k, pool[k].Serialize());
+        for (int k = 0; k < pool.Count; k++) tag.Add("Pool" + k, pool[k].Serialize());
 
         return tag;
     }
 
     public static List<Loot> DeserializePool(TagCompound tag) {
         var loot = new List<Loot>();
-        var count = tag.GetInt("Count");
+        int count = tag.GetInt("Count");
 
-        for (var k = 0; k < count; k++) loot.Add(Loot.Deserialze(tag.GetCompound("Pool" + k)));
+        for (int k = 0; k < count; k++) loot.Add(Loot.Deserialze(tag.GetCompound("Pool" + k)));
 
         return loot;
     }
 
     public virtual ChestRule Clone() {
-        var clone = new ChestRule();
+        ChestRule clone = new ChestRule();
 
-        for (var k = 0; k < pool.Count; k++) clone.pool.Add(pool[k].Clone());
+        for (int k = 0; k < pool.Count; k++) clone.pool.Add(pool[k].Clone());
 
         return clone;
     }
@@ -84,19 +84,19 @@ internal class Loot {
         this.max = max == 0 ? min : max;
         this.weight = weight;
 
-        var newItem = item.Clone();
+        Item newItem = item.Clone();
         newItem.stack = 1;
         givenItem = newItem;
     }
 
     public Item GetLoot() {
-        var item = givenItem.Clone();
+        Item item = givenItem.Clone();
         item.stack = Terraria.WorldGen.genRand.Next(min, max);
         return item;
     }
 
     public TagCompound Serialize() {
-        var tag = new TagCompound {
+        TagCompound tag = new TagCompound {
             { "Item", givenItem },
             { "Min", min },
             { "Max", max },

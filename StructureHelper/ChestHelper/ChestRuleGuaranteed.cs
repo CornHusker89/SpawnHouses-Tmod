@@ -13,7 +13,7 @@ internal class ChestRuleGuaranteed : ChestRule {
         if (nextIndex >= 40)
             return;
 
-        for (var k = 0; k < pool.Count; k++) {
+        for (int k = 0; k < pool.Count; k++) {
             if (nextIndex >= 40)
                 return;
 
@@ -23,7 +23,7 @@ internal class ChestRuleGuaranteed : ChestRule {
     }
 
     public override TagCompound Serizlize() {
-        var tag = new TagCompound {
+        TagCompound tag = new TagCompound {
             { "Type", "Guaranteed" },
             { "Pool", SerializePool() }
         };
@@ -32,7 +32,7 @@ internal class ChestRuleGuaranteed : ChestRule {
     }
 
     public new static ChestRule Deserialize(TagCompound tag) {
-        var rule = new ChestRuleGuaranteed {
+        ChestRuleGuaranteed rule = new ChestRuleGuaranteed {
             pool = DeserializePool(tag.GetCompound("Pool"))
         };
 
@@ -40,9 +40,9 @@ internal class ChestRuleGuaranteed : ChestRule {
     }
 
     public override ChestRule Clone() {
-        var clone = new ChestRuleGuaranteed();
+        ChestRuleGuaranteed clone = new ChestRuleGuaranteed();
 
-        for (var k = 0; k < pool.Count; k++) clone.pool.Add(pool[k].Clone());
+        for (int k = 0; k < pool.Count; k++) clone.pool.Add(pool[k].Clone());
 
         return clone;
     }

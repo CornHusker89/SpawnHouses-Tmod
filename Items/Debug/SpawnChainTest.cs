@@ -1,5 +1,6 @@
 using SpawnHouses.Structures.Chains;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -21,9 +22,9 @@ public class SpawnChainTest : ModItem {
     }
 
     public override bool? UseItem(Terraria.Player player) {
-        var point = (Main.MouseWorld / 16).ToPoint16();
+        Point16 point = (Main.MouseWorld / 16).ToPoint16();
 
-        var chain = new TestChain((ushort)point.X, (ushort)point.Y);
+        TestChain chain = new TestChain((ushort)point.X, (ushort)point.Y);
         chain.CalculateChain();
         chain.Generate();
         return true;

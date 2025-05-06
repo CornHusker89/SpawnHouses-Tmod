@@ -20,8 +20,8 @@ public class Player : ModPlayer {
         _frameCounter++;
         if (_frameCounter >= 16) {
             _frameCounter = 0;
-            var x = (int)Player.Center.X / 16;
-            var y = (int)Player.Center.Y / 16;
+            int x = (int)Player.Center.X / 16;
+            int y = (int)Player.Center.Y / 16;
 
             if (StructureManager.MainBasement is not null &&
                 StructureManager.MainBasement.Status == StructureStatus.GeneratedButNotFound)
@@ -35,8 +35,8 @@ public class Player : ModPlayer {
 
             if (StructureManager.BeachHouse is not null &&
                 StructureManager.BeachHouse.Status == StructureStatus.GeneratedButNotFound) {
-                var houseCenterX = StructureManager.BeachHouse.X + BeachHouse._structureXSize / 2;
-                var houseCenterY = StructureManager.BeachHouse.Y + BeachHouse._structureYSize / 2;
+                int houseCenterX = StructureManager.BeachHouse.X + BeachHouse._structureXSize / 2;
+                int houseCenterY = StructureManager.BeachHouse.Y + BeachHouse._structureYSize / 2;
 
                 if (
                     x > houseCenterX - 70
