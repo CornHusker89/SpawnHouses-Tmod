@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using ReLogic.Utilities;
-using SpawnHouses.Structures.StructureParts;
+using SpawnHouses.Types;
 using Terraria;
 using Terraria.ID;
 using Terraria.WorldBuilding;
 
-namespace SpawnHouses.Structures;
+namespace SpawnHouses.Helpers;
 
 public static class StructureGenHelper {
     /// <summary>
@@ -415,7 +415,7 @@ public static class StructureGenHelper {
             // get the top tile of the final slope, change its values
             int topTileY = startY + (int)Math.Round(dX * slope);
 
-            // when we're roughly in the center of the blend, make the center of the frame 
+            // when we're roughly in the center of the blend, make the center of the frame
             // for when we call frametiles()
             if (dX == blendDistance / 2 || dX - 1 == blendDistance / 2) {
                 frameCenterX = startX - dX;

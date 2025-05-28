@@ -1,5 +1,5 @@
 using SpawnHouses.Helpers;
-using SpawnHouses.Structures.StructureParts;
+using SpawnHouses.Types;
 
 namespace SpawnHouses.Structures.Structures.ChainStructures;
 
@@ -7,7 +7,7 @@ namespace SpawnHouses.Structures.Structures.ChainStructures;
 public class CaveTown1_Test1 : CustomChainStructure {
     public CaveTown1_Test1(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
         ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/caveTown1_Test1",
+        base("Assets/StructureFiles/mainBasement/caveTown1_Test1",
             30,
             16,
             [
@@ -35,7 +35,7 @@ public class CaveTown1_Test1 : CustomChainStructure {
 public class CaveTown1_Test2 : CustomChainStructure {
     public CaveTown1_Test2(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
         ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/caveTown1_Test2",
+        base("Assets/StructureFiles/mainBasement/caveTown1_Test2",
             25,
             13,
             [

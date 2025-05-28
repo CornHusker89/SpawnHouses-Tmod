@@ -2,12 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.Helpers;
-using SpawnHouses.Structures.StructureParts;
 using Terraria;
 using Terraria.ModLoader;
-using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
-namespace SpawnHouses.Structures;
+namespace SpawnHouses.Types;
 
 public abstract class StructureChain {
     private readonly Bridge[] _bridges;

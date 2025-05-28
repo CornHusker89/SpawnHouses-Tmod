@@ -1,5 +1,6 @@
 using SpawnHouses.Structures.Bridges;
 using SpawnHouses.Structures.ChainStructures;
+using SpawnHouses.Types;
 
 namespace SpawnHouses.Structures.Chains;
 

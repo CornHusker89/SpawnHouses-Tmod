@@ -1,8 +1,8 @@
 using SpawnHouses.Enums;
 using SpawnHouses.Helpers;
 using SpawnHouses.Structures.Bridges;
-using SpawnHouses.Structures.StructureParts;
 using SpawnHouses.Structures.Structures.ChainStructures;
+using SpawnHouses.Types;
 
 namespace SpawnHouses.Structures.Chains;
 

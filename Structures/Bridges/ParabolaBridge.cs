@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Helpers;
 using SpawnHouses.StructureHelper;
-using SpawnHouses.Structures.StructureParts;
+using SpawnHouses.Types;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
-using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
+using BoundingBox = SpawnHouses.Types.BoundingBox;
 
 namespace SpawnHouses.Structures.Bridges;
 
@@ -155,26 +155,26 @@ public class ParabolaBridge : Bridge {
 
     // --- bridge presets --
     public class TestBridgeLarge : ParabolaBridge {
-        public TestBridgeLarge() : base("Structures/StructureFiles/woodBridge",
+        public TestBridgeLarge() : base("Assets/StructureFiles/woodBridge",
             2, 3, -2, 0.4, 2, 40, 40, -27, 27, 2, 1, false) {
         }
     }
 
     public class TestBridgeLargeAltGen : ParabolaBridge {
-        public TestBridgeLargeAltGen() : base("Structures/StructureFiles/woodBridge",
+        public TestBridgeLargeAltGen() : base("Assets/StructureFiles/woodBridge",
             2, 3, -2, 0.4, 2, -42, -42, -27, 27, 2, 1, true) {
         }
     }
 
 
     public class TestBridgeSmall : ParabolaBridge {
-        public TestBridgeSmall() : base("Structures/StructureFiles/woodBridge",
+        public TestBridgeSmall() : base("Assets/StructureFiles/woodBridge",
             2, 3, -2, 0.4, 2, 35, 35, -27, 27, 2, 1, false) {
         }
     }
 
     public class TestBridgeSmallAltGen : ParabolaBridge {
-        public TestBridgeSmallAltGen() : base("Structures/StructureFiles/woodBridge",
+        public TestBridgeSmallAltGen() : base("Assets/StructureFiles/woodBridge",
             2, 3, -2, 0.4, 2, -37, -37, -27, 27, 2, 1, true) {
         }
     }

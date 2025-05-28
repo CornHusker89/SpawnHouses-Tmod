@@ -2,12 +2,12 @@ using System;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Helpers;
 using SpawnHouses.Structures.Chains;
-using SpawnHouses.Structures.StructureParts;
+using SpawnHouses.Types;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
-using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
+using BoundingBox = SpawnHouses.Types.BoundingBox;
 
 namespace SpawnHouses.Structures.Structures.ChainStructures;
 
@@ -16,7 +16,7 @@ namespace SpawnHouses.Structures.Structures.ChainStructures;
 public class MainBasement_Entry1 : CustomChainStructure {
     public MainBasement_Entry1(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
         ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Entry1",
+        base("Assets/StructureFiles/mainBasement/mainBasement_Entry1",
             10,
             16,
             [
@@ -45,7 +45,7 @@ public class MainBasement_Entry1 : CustomChainStructure {
 public class MainBasement_Entry2 : CustomChainStructure {
     public MainBasement_Entry2(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
         ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Entry2",
+        base("Assets/StructureFiles/mainBasement/mainBasement_Entry2",
             15,
             15,
             [
@@ -83,7 +83,7 @@ public class MainBasement_Entry2 : CustomChainStructure {
 public class MainBasement_Hallway4 : CustomChainStructure {
     public MainBasement_Hallway4(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated,
         sbyte cost = -1, ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Hallway4",
+        base("Assets/StructureFiles/mainBasement/mainBasement_Hallway4",
             6,
             11,
             [
@@ -115,7 +115,7 @@ public class MainBasement_Hallway4 : CustomChainStructure {
 public class MainBasement_Hallway5 : CustomChainStructure {
     public MainBasement_Hallway5(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated,
         sbyte cost = -1, ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Hallway5",
+        base("Assets/StructureFiles/mainBasement/mainBasement_Hallway5",
             8,
             22,
             [
@@ -157,7 +157,7 @@ public class MainBasement_Hallway5 : CustomChainStructure {
 public class MainBasement_Hallway9 : CustomChainStructure {
     public MainBasement_Hallway9(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated,
         sbyte cost = -1, ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Hallway9",
+        base("Assets/StructureFiles/mainBasement/mainBasement_Hallway9",
             6,
             11,
             [
@@ -189,7 +189,7 @@ public class MainBasement_Hallway9 : CustomChainStructure {
 public class MainBasement_Room1 : CustomChainStructure {
     public MainBasement_Room1(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
         ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Room1",
+        base("Assets/StructureFiles/mainBasement/mainBasement_Room1",
             22,
             9,
             [
@@ -216,7 +216,7 @@ public class MainBasement_Room1 : CustomChainStructure {
 public class MainBasement_Room1_WithFloor : CustomChainStructure {
     public MainBasement_Room1_WithFloor(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated,
         sbyte cost = -1, ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Room1_WithFloor",
+        base("Assets/StructureFiles/mainBasement/mainBasement_Room1_WithFloor",
             22,
             9,
             [
@@ -245,7 +245,7 @@ public class MainBasement_Room1_WithFloor : CustomChainStructure {
 public class MainBasement_Room2 : CustomChainStructure {
     public MainBasement_Room2(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
         ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Room2",
+        base("Assets/StructureFiles/mainBasement/mainBasement_Room2",
             23,
             7,
             [
@@ -272,7 +272,7 @@ public class MainBasement_Room2 : CustomChainStructure {
 public class MainBasement_Room2_WithRoof : CustomChainStructure {
     public MainBasement_Room2_WithRoof(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated,
         sbyte cost = -1, ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Room2_WithRoof",
+        base("Assets/StructureFiles/mainBasement/mainBasement_Room2_WithRoof",
             23,
             7,
             [
@@ -301,7 +301,7 @@ public class MainBasement_Room2_WithRoof : CustomChainStructure {
 public class MainBasement_Room3 : CustomChainStructure {
     public MainBasement_Room3(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
         ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Room3",
+        base("Assets/StructureFiles/mainBasement/mainBasement_Room3",
             10,
             7,
             [
@@ -328,7 +328,7 @@ public class MainBasement_Room3 : CustomChainStructure {
 public class MainBasement_Room4 : CustomChainStructure {
     public MainBasement_Room4(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
         ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Room4",
+        base("Assets/StructureFiles/mainBasement/mainBasement_Room4",
             13,
             11,
             [
@@ -357,8 +357,8 @@ public class MainBasement_Room5 : CustomChainStructure {
         ushort weight = 10) :
         base(
             CompatabilityHelper.IsMSEnabled
-                ? "Structures/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage"
-                : "Structures/StructureFiles/mainBasement/mainBasement_Room5",
+                ? "Assets/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage"
+                : "Assets/StructureFiles/mainBasement/mainBasement_Room5",
             22,
             9,
             [
@@ -382,7 +382,7 @@ public class MainBasement_Room5 : CustomChainStructure {
     }
 
     public override void OnFound() {
-        if (CompatabilityHelper.IsMSEnabled && FilePath == "Structures/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage") {
+        if (CompatabilityHelper.IsMSEnabled && FilePath == "Assets/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage") {
             CompatabilityHelper.PlaceMSModule(X + 10, Y + 6, CompatabilityHelper.RemoteAccessTileID, CompatabilityHelper.RemoteAccessTileEntityID);
             if (StructureManager.MainHouse is not null && StructureManager.MainHouse.Status != StructureStatus.NotGenerated) {
                 CompatabilityHelper.LinkRemoteStorage(new Point16(X + 10, Y + 6), StructureManager.MainHouse.StorageHeartPos);
@@ -407,7 +407,7 @@ public class MainBasement_Room5 : CustomChainStructure {
 public class MainBasement_Room6 : CustomChainStructure {
     public MainBasement_Room6(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
         ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Room6",
+        base("Assets/StructureFiles/mainBasement/mainBasement_Room6",
             28,
             15,
             [
@@ -445,7 +445,7 @@ public class MainBasement_Room6 : CustomChainStructure {
 public class MainBasement_Room7 : CustomChainStructure {
     public MainBasement_Room7(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
         ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Room7",
+        base("Assets/StructureFiles/mainBasement/mainBasement_Room7",
             27,
             12,
             [

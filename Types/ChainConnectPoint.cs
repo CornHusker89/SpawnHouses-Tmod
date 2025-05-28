@@ -1,11 +1,12 @@
 using Microsoft.Xna.Framework;
 using SpawnHouses.Helpers;
 using SpawnHouses.StructureHelper;
+using SpawnHouses.Structures;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
 
-namespace SpawnHouses.Structures.StructureParts;
+namespace SpawnHouses.Types;
 
 public class ChainConnectPoint : ConnectPoint {
     private readonly Mod _mod = ModContent.GetInstance<SpawnHousesMod>();

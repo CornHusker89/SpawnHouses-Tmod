@@ -5,6 +5,7 @@ using SpawnHouses.Helpers;
 using SpawnHouses.Structures;
 using SpawnHouses.Structures.Chains;
 using SpawnHouses.Structures.Structures;
+using SpawnHouses.Types;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;

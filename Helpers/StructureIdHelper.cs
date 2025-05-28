@@ -6,6 +6,7 @@ using SpawnHouses.Structures;
 using SpawnHouses.Structures.ChainStructures;
 using SpawnHouses.Structures.Structures;
 using SpawnHouses.Structures.Structures.ChainStructures;
+using SpawnHouses.Types;
 
 namespace SpawnHouses.Helpers;
 

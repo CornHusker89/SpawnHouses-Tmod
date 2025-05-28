@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework;
 using SpawnHouses.Helpers;
-using SpawnHouses.Structures.StructureParts;
+using SpawnHouses.Types;
 using Terraria;
 using Terraria.ID;
 
@@ -8,8 +8,8 @@ namespace SpawnHouses.Structures.Structures;
 
 public sealed class BeachHouse : CustomStructure {
     // constants
-    public static readonly string _filePath = "Structures/StructureFiles/beachHouse/beachHouse_v2";
-    public static readonly string _filePath_r = "Structures/StructureFiles/beachHouse/beachHouse_v2_r";
+    public static readonly string _filePath = "Assets/StructureFiles/beachHouse/beachHouse_v2";
+    public static readonly string _filePath_r = "Assets/StructureFiles/beachHouse/beachHouse_v2_r";
     public static readonly ushort _structureXSize = 35;
     public static readonly ushort _structureYSize = 26;
 

@@ -5,14 +5,14 @@ using Microsoft.Xna.Framework;
 using SpawnHouses.Enums;
 using SpawnHouses.Helpers;
 using SpawnHouses.Structures.Bridges;
-using SpawnHouses.Structures.StructureParts;
 using SpawnHouses.Structures.Structures.ChainStructures;
+using SpawnHouses.Types;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
-using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
+using BoundingBox = SpawnHouses.Types.BoundingBox;
 
 namespace SpawnHouses.Structures.Chains;
 

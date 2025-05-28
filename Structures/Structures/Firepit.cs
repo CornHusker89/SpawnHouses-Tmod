@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework;
 using SpawnHouses.Helpers;
-using SpawnHouses.Structures.StructureParts;
+using SpawnHouses.Types;
 using Terraria;
 using Terraria.ID;
 using Terraria.WorldBuilding;
@@ -9,7 +9,7 @@ namespace SpawnHouses.Structures.Structures;
 
 public sealed class Firepit : CustomStructure {
     // constants
-    public static readonly string _filePath = "Structures/StructureFiles/firepit";
+    public static readonly string _filePath = "Assets/StructureFiles/firepit";
     public static readonly ushort _structureXSize = 7;
     public static readonly ushort _structureYSize = 3;
 

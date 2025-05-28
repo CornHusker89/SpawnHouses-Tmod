@@ -1,4 +1,4 @@
-namespace SpawnHouses.Structures.StructureParts;
+namespace SpawnHouses.Types;
 
 public class ConnectPoint {
     public byte Direction;

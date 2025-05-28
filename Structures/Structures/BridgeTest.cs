@@ -1,13 +1,13 @@
 using Microsoft.Xna.Framework;
 using SpawnHouses.Helpers;
-using SpawnHouses.Structures.StructureParts;
+using SpawnHouses.Types;
 using Terraria.ID;
 
 namespace SpawnHouses.Structures.Structures;
 
 public sealed class BridgeTest : CustomStructure {
     // constants
-    public static readonly string _filePath = "Structures/StructureFiles/bridgeTest";
+    public static readonly string _filePath = "Assets/StructureFiles/bridgeTest";
     public static readonly ushort _structureXSize = 8;
     public static readonly ushort _structureYSize = 9;
 

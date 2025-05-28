@@ -1,12 +1,9 @@
 using System;
 using SpawnHouses.Enums;
-using SpawnHouses.Helpers;
-using SpawnHouses.Structures.StructureParts;
 using Terraria;
 using Terraria.ID;
-using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
-namespace SpawnHouses.Structures;
+namespace SpawnHouses.Types;
 
 public class Bridge {
     public readonly sbyte DeltaXMultiple;

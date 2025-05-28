@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using SpawnHouses.Helpers;
-using SpawnHouses.Structures.StructureParts;
+using SpawnHouses.Structures;
 
-namespace SpawnHouses.Structures;
+namespace SpawnHouses.Types;
 
 public class CustomChainStructure : CustomStructure {
     public List<byte> BridgeDirectionHistory = [];

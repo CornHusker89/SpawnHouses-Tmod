@@ -3,7 +3,7 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 
-namespace SpawnHouses.Structures.StructureParts;
+namespace SpawnHouses.Types;
 
 public class BoundingBox {
     public BoundingBox(Point16 point1, Point16 point2) {

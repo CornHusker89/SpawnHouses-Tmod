@@ -3,13 +3,12 @@ using Microsoft.Xna.Framework;
 using SpawnHouses.Enums;
 using SpawnHouses.Helpers;
 using SpawnHouses.StructureHelper;
-using SpawnHouses.Structures.StructureParts;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
 
-namespace SpawnHouses.Structures;
+namespace SpawnHouses.Types;
 
 public abstract class CustomStructure {
     public ConnectPoint[][] ConnectPoints;

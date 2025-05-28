@@ -8,7 +8,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
-using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
+using BoundingBox = SpawnHouses.Types.BoundingBox;
 
 namespace SpawnHouses.WorldGen;
 
