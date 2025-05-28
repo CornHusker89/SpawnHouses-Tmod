@@ -1,4 +1,5 @@
 using System;
+using SpawnHouses.Enums;
 using SpawnHouses.Helpers;
 using SpawnHouses.Structures.StructureParts;
 using Terraria;
@@ -18,14 +19,12 @@ public class Bridge {
     public readonly short MinDeltaY;
 
     public BoundingBox[] BoundingBoxes;
-    public ushort ID;
+    public BridgeType Id;
     public ConnectPoint Point1;
     public ConnectPoint Point2;
 
 
-    public Bridge(byte[] inputDirections,
-        short minDeltaX, short maxDeltaX, short minDeltaY, short maxDeltaY, sbyte deltaXMultiple = 1,
-        sbyte deltaYMultiple = 1,
+    public Bridge(byte[] inputDirections, short minDeltaX, short maxDeltaX, short minDeltaY, short maxDeltaY, sbyte deltaXMultiple = 1, sbyte deltaYMultiple = 1,
         ConnectPoint point1 = null, ConnectPoint point2 = null, BoundingBox[] boundingBoxes = null) {
         InputDirections = inputDirections;
         MinDeltaX = minDeltaX;
@@ -38,10 +37,12 @@ public class Bridge {
         Point2 = point2;
         BoundingBoxes = boundingBoxes;
 
-        if (Enum.TryParse(GetType().Name, out BridgeID result))
-            ID = (ushort)result;
-        else
+        if (Enum.TryParse(GetType().Name, out BridgeType result)) {
+            Id = result;
+        }
+        else {
             throw new Exception($"BridgeID of {ToString()} not found");
+        }
     }
 
     public virtual void Generate() {

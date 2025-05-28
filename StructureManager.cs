@@ -62,7 +62,7 @@ internal class StructureManager : ModSystem {
 internal static class ChainProcessor {
     internal static Dictionary<string, object> SerializeChain(CustomChainStructure processingStructure) {
         var dict = new Dictionary<string, object> {
-            ["ID"] = processingStructure.ID,
+            ["ID"] = processingStructure.Id,
             ["X"] = processingStructure.X,
             ["Y"] = processingStructure.Y,
             ["Status"] = processingStructure.Status
@@ -73,7 +73,7 @@ internal static class ChainProcessor {
             if (connectPoint.ChildStructure is not null) {
                 dict[$"Substructure{i}"] = SerializeChain(connectPoint.ChildStructure);
                 dict[$"Substructure{i}Bridge"] = new Dictionary<string, object> {
-                    ["ID"] = connectPoint.ChildBridge.ID,
+                    ["ID"] = connectPoint.ChildBridge.Id,
                     ["X1"] = connectPoint.ChildBridge.Point1.X,
                     ["Y1"] = connectPoint.ChildBridge.Point1.Y,
                     ["X2"] = connectPoint.ChildBridge.Point2.X,
@@ -88,7 +88,7 @@ internal static class ChainProcessor {
     }
 
     internal static CustomChainStructure DeserializeChain(StructureChain structureChain, TagCompound structureDict) {
-        CustomChainStructure? structure = (CustomChainStructure)StructureIDUtils.CreateStructure(
+        CustomChainStructure? structure = (CustomChainStructure)StructureIdHelper.CreateStructure(
             (ushort)(short)structureDict["ID"],
             (ushort)(short)structureDict["X"],
             (ushort)(short)structureDict["Y"],
@@ -102,7 +102,7 @@ internal static class ChainProcessor {
                 point.ChildStructure = DeserializeChain(structureChain, (TagCompound)structureDict[$"Substructure{i}"]);
                 if (structureDict.ContainsKey($"Substructure{i}Bridge")) {
                     TagCompound? bridgeDict = (TagCompound)structureDict[$"Substructure{i}Bridge"];
-                    Bridge? bridge = BridgeIDUtils.CreateBridge((ushort)(short)bridgeDict["ID"]);
+                    Bridge? bridge = BridgeIdHelper.CreateBridge((ushort)(short)bridgeDict["ID"]);
 
                     // get the child connect point
                     ushort goalX = (ushort)(short)bridgeDict["X2"];

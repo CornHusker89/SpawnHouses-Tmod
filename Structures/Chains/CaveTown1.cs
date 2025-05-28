@@ -42,10 +42,7 @@ public class CaveTown1 : StructureChain {
 
     protected override Bridge GetBridgeOfDirection(Bridge[] bridges, byte direction, CustomChainStructure structure) {
         Bridge[] newBridgeList;
-        if (structure.ID == (ushort)StructureType.CaveTown1_Test1)
-            newBridgeList = _bridgeListSmall;
-        else
-            newBridgeList = _bridgeListLarge;
+        newBridgeList = structure.Id is StructureType.CaveTown1Test1 ? _bridgeListSmall : _bridgeListLarge;
 
         for (ushort i = 0; i < 5000; i++) {
             int index = Terraria.WorldGen.genRand.Next(0, newBridgeList.Length);

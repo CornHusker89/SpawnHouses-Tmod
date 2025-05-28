@@ -77,7 +77,7 @@ public class MainBasement : StructureChain {
         if (CompatabilityHelper.IsMSEnabled && ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementSizeMultiplier > 0.60) {
             bool found = false;
             ActionOnEachStructure(structure => {
-                if (structure.ID == (ushort)StructureType.MainBasement_Room5) {
+                if (structure.Id is StructureType.MainBasementRoom5) {
                     found = true;
                 }
             });
@@ -90,7 +90,7 @@ public class MainBasement : StructureChain {
     protected override bool IsConnectPointValid(ChainConnectPoint connectPoint, ChainConnectPoint targetConnectPoint,
         CustomChainStructure targetStructure) {
         // clear root point
-        if (connectPoint.ParentStructure.ID is (ushort)StructureType.MainBasement_Entry1 or (ushort)StructureType.MainBasement_Entry2 && connectPoint.RootPoint) {
+        if (connectPoint.ParentStructure.Id is StructureType.MainBasementEntry1 or StructureType.MainBasementEntry2 && connectPoint.RootPoint) {
             return false;
         }
 
@@ -157,36 +157,36 @@ public class MainBasement : StructureChain {
             // don't generate a branching hallway right after another one :) but only if the shape isn't too vertical
             if (_shape > 0.31 && parentConnectPoint is not null &&
                 parentConnectPoint.GenerateChance == GenerateChances.Guaranteed &&
-                StructureIDUtils.IsBranchingHallway(structure))
+                StructureIdHelper.IsBranchingHallway(structure))
                 continue;
 
             // don't generate a branching hallway if it means going over the max branch count
-            if (closeToMaxBranchLength && StructureIDUtils.IsBranchingHallway(structure)) continue;
+            if (closeToMaxBranchLength && StructureIdHelper.IsBranchingHallway(structure)) continue;
 
-            if (_shape >= 0.89f && StructureIDUtils.IsBranchingHallway(structure)) continue;
+            if (_shape >= 0.89f && StructureIdHelper.IsBranchingHallway(structure)) continue;
 
             // if vertical shape, make the first left and right a branching hallway
             if (_shape <= 0.11 && parentConnectPoint is not null)
                 if (parentConnectPoint.ParentStructure == RootStructure &&
-                    !StructureIDUtils.IsBranchingHallway(structure))
+                    !StructureIdHelper.IsBranchingHallway(structure))
                     continue;
 
             // get some elevation changes
             if (_shape <= 0.41 && parentConnectPoint is not null) {
                 if (_shape <= 0.21) {
-                    if (!(StructureIDUtils.IsBranchingHallway(structure) ||
-                          StructureIDUtils.IsBranchingHallway(parentConnectPoint.ParentStructure)))
+                    if (!(StructureIdHelper.IsBranchingHallway(structure) ||
+                          StructureIdHelper.IsBranchingHallway(parentConnectPoint.ParentStructure)))
                         continue;
                 }
                 else {
                     if (parentConnectPoint.ParentStructure is not null) {
                         if (parentConnectPoint.ParentStructure.ParentChainConnectPoint is not null &&
-                            !(StructureIDUtils.IsBranchingHallway(structure) ||
-                              StructureIDUtils.IsBranchingHallway(parentConnectPoint.ParentStructure)))
+                            !(StructureIdHelper.IsBranchingHallway(structure) ||
+                              StructureIdHelper.IsBranchingHallway(parentConnectPoint.ParentStructure)))
                             continue;
                         if (parentConnectPoint.ParentStructure.ParentChainConnectPoint is not null
                             && parentConnectPoint.ParentStructure.ParentChainConnectPoint.ParentStructure is not null
-                            && StructureIDUtils.IsBranchingHallway(
+                            && StructureIdHelper.IsBranchingHallway(
                                 parentConnectPoint.ParentStructure.ParentChainConnectPoint!.ParentStructure))
                             continue;
                     }
@@ -200,7 +200,7 @@ public class MainBasement : StructureChain {
     }
 
     protected override void OnStructureGenerate(CustomChainStructure structure) {
-        if (structure.ID != (ushort)StructureType.MainBasement_Room5 || !CompatabilityHelper.IsMSEnabled) {
+        if (structure.Id is not StructureType.MainBasementRoom5 || !CompatabilityHelper.IsMSEnabled) {
             foreach (BoundingBox boundingBox in structure.StructureBoundingBoxes) {
                 StructureGenHelper.GenerateCobwebs(
                     new Point(boundingBox.Point1.X, boundingBox.Point1.Y),

@@ -128,7 +128,7 @@ public abstract class StructureChain {
 
         // prune any dangling branching hallways
         ActionOnEachStructure(structure => {
-            if (StructureIDUtils.IsBranchingHallway(structure)) {
+            if (StructureIdHelper.IsBranchingHallway(structure)) {
                 int count = 0;
                 structure.ActionOnEachConnectPoint(point => {
                     if (point.ChildStructure is not null)
@@ -287,7 +287,7 @@ public abstract class StructureChain {
         _currentCost += newStructure.Cost;
 
         // reduce the weighting of the chosen structure so that we don't get 5 in a row
-        _copiedStructureList.First(curStructure => curStructure.ID == newStructure.ID).Weight /= 2;
+        _copiedStructureList.First(curStructure => curStructure.Id == newStructure.Id).Weight /= 2;
         CalculateWeights();
 
         for (byte direction = 0; direction < 4; direction++)
@@ -409,11 +409,11 @@ public abstract class StructureChain {
 
             // don't generate a branching hallway right after another one :)
             if (parentConnectPoint is not null && parentConnectPoint.GenerateChance == GenerateChances.Guaranteed &&
-                StructureIDUtils.IsBranchingHallway(structure))
+                StructureIdHelper.IsBranchingHallway(structure))
                 continue;
 
             // don't generate a branching hallway if it means going over the max branch count
-            if (closeToMaxBranchLength && StructureIDUtils.IsBranchingHallway(structure)) continue;
+            if (closeToMaxBranchLength && StructureIdHelper.IsBranchingHallway(structure)) continue;
 
             return structure;
         }

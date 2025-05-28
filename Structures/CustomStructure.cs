@@ -14,7 +14,7 @@ namespace SpawnHouses.Structures;
 public abstract class CustomStructure {
     public ConnectPoint[][] ConnectPoints;
     public string FilePath;
-    public ushort ID;
+    public StructureType Id;
     public byte Status;
     public ushort StructureXSize;
     public ushort StructureYSize;
@@ -32,9 +32,9 @@ public abstract class CustomStructure {
         Y = y;
 
         if (Enum.TryParse(GetType().Name, out StructureType result))
-            ID = (ushort)result;
+            Id = result;
         else
-            throw new Exception($"StructureID of {ToString()} not found");
+            throw new Exception($"StructureId of {ToString()} not found");
 
         if (!isChainStructure) {
             ConnectPoints = connectPoints;
