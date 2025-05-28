@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Helpers;
 using SpawnHouses.StructureHelper;
 using SpawnHouses.Structures.StructureParts;
 using Terraria;
@@ -143,7 +144,7 @@ public sealed class MainHouse : CustomStructure {
                     LeftType = _type_small_basement_left;
                     generatedBasement = true;
                 }
-                else if (hasBasement && ModHelper.IsMSEnabled && !RightSmall) {
+                else if (hasBasement && CompatabilityHelper.IsMSEnabled && !RightSmall) {
                     LeftType = _type_small_basement_left;
                     generatedBasement = true;
                 }
@@ -151,10 +152,10 @@ public sealed class MainHouse : CustomStructure {
                     LeftType = _type_small_left;
                 }
             }
-            else if (ModHelper.IsMSEnabled && RightSmall) {
+            else if (CompatabilityHelper.IsMSEnabled && RightSmall) {
                 LeftType = _type_basement_left;
             }
-            else if (ModHelper.IsMSEnabled) {
+            else if (CompatabilityHelper.IsMSEnabled) {
                 LeftType = _type_magicstorage_left;
             }
             else if (hasBasement && (RightSmall || Terraria.WorldGen.genRand.NextBool())) {
@@ -205,7 +206,7 @@ public sealed class MainHouse : CustomStructure {
         }
         else {
             if (RightSmall) {
-                if (ModHelper.IsMSEnabled && LeftType != _type_magicstorage_left)
+                if (CompatabilityHelper.IsMSEnabled && LeftType != _type_magicstorage_left)
                     RightType = _type_small_magicstorage_right;
                 else
                     RightType = _type_small_right;
@@ -215,7 +216,7 @@ public sealed class MainHouse : CustomStructure {
                 RightType = _type_basement_right;
                 generatedBasement = true;
             }
-            else if (ModHelper.IsMSEnabled && LeftSmall) {
+            else if (CompatabilityHelper.IsMSEnabled && LeftSmall) {
                 RightType = _type_magicstorage_right;
             }
             else {
@@ -276,9 +277,9 @@ public sealed class MainHouse : CustomStructure {
             StructureGenHelper.Blend(ConnectPoints[3][0], 20, TileID.Grass, maxHeight: InUnderworld ? (ushort)10 : (ushort)38, blendLeftSide: false);
         }
 
-        Generator.GenerateStructure(LeftFilePath, new Point16(X, Y + 10), ModInstance.Mod);
-        Generator.GenerateStructure(RightFilePath, new Point16(X + LeftSize, Y + 10), ModInstance.Mod);
-        Generator.GenerateStructure(TopFilePath, new Point16(X + LeftSize - 14, Y), ModInstance.Mod);
+        Generator.GenerateStructure(LeftFilePath, new Point16(X, Y + 10), SpawnHousesMod.Instance);
+        Generator.GenerateStructure(RightFilePath, new Point16(X + LeftSize, Y + 10), SpawnHousesMod.Instance);
+        Generator.GenerateStructure(TopFilePath, new Point16(X + LeftSize - 14, Y), SpawnHousesMod.Instance);
 
         string signString = "All good adventures start in a tavern...To bad this isn't a tavern :(";
         Random rnd = new();
@@ -286,7 +287,7 @@ public sealed class MainHouse : CustomStructure {
             string possibleString = _signQuotes[rnd.Next(0, _signQuotes.Count)];
             if (possibleString.Contains('~'))
                 try {
-                    var dict = WebClientInstance.WebClient.GetSpawnCount();
+                    var dict = SpawnHousesMod.WebClient.GetSpawnCount();
                     if (dict is not null) {
                         dict.TryGetValue("main_houses_extrapolated", out int value);
                         if (value is not -1) {
@@ -311,7 +312,7 @@ public sealed class MainHouse : CustomStructure {
 
         Terraria.WorldGen.PlaceTile(X + LeftSize - 1, Y + 24, TileID.WorkBenches, true, true, style: 0);
         Generator.GenerateStructure("Structures/StructureFiles/mainHouse/mainHouse_Rose",
-            new Point16(X + LeftSize - 1, Y + 18), ModInstance.Mod);
+            new Point16(X + LeftSize - 1, Y + 18), SpawnHousesMod.Instance);
 
         // bushes
         if (!InUnderworld && !bare) {

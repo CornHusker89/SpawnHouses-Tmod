@@ -1,7 +1,12 @@
+using System;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Helpers;
+using SpawnHouses.Structures.Chains;
 using SpawnHouses.Structures.StructureParts;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.ID;
+using Terraria.ModLoader;
 using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 
 namespace SpawnHouses.Structures.Structures.ChainStructures;
@@ -351,7 +356,7 @@ public class MainBasement_Room5 : CustomChainStructure {
     public MainBasement_Room5(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
         ushort weight = 10) :
         base(
-            ModHelper.IsMSEnabled
+            CompatabilityHelper.IsMSEnabled
                 ? "Structures/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage"
                 : "Structures/StructureFiles/mainBasement/mainBasement_Room5",
             22,
@@ -377,40 +382,24 @@ public class MainBasement_Room5 : CustomChainStructure {
     }
 
     public override void OnFound() {
-        if (ModHelper.IsMSEnabled &&
-            FilePath == "Structures/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage") {
-            Terraria.WorldGen.PlaceTile(X + 11, Y + 7, ModHelper.RemoteAccessTileID);
-            TileEntity.PlaceEntityNet(X + 10, Y + 6, ModHelper.RemoteAccessTileEntityID);
+        if (CompatabilityHelper.IsMSEnabled && FilePath == "Structures/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage") {
+            CompatabilityHelper.PlaceMSModule(X + 10, Y + 6, CompatabilityHelper.RemoteAccessTileID, CompatabilityHelper.RemoteAccessTileEntityID);
+            if (StructureManager.MainHouse is not null && StructureManager.MainHouse.Status != StructureStatus.NotGenerated) {
+                CompatabilityHelper.LinkRemoteStorage(new Point16(X + 10, Y + 6), StructureManager.MainHouse.StorageHeartPos);
+            }
 
-            if (StructureManager.MainHouse is not null &&
-                StructureManager.MainHouse.Status != StructureStatus.NotGenerated)
-                ModHelper.LinkRemoteStorage(
-                    new Point16(X + 10, Y + 6),
-                    StructureManager.MainHouse.StorageHeartPos
-                );
+            NetHelper.SendUpdateMagicStorage(X + 11, Y + 7);
+            CompatabilityHelper.UpdateStorageNetwork(X + 11, Y + 7);
 
-            Terraria.WorldGen.PlaceTile(X + 9, Y + 4, ModHelper.StorageUnitTileID);
-            TileEntity.PlaceEntityNet(X + 8, Y + 3, ModHelper.StorageUnitTileEntityID);
-
-            Terraria.WorldGen.PlaceTile(X + 13, Y + 4, ModHelper.StorageUnitTileID);
-            TileEntity.PlaceEntityNet(X + 12, Y + 3, ModHelper.StorageUnitTileEntityID);
-
-            Terraria.WorldGen.PlaceTile(X + 15, Y + 4, ModHelper.StorageUnitTileID);
-            TileEntity.PlaceEntityNet(X + 14, Y + 3, ModHelper.StorageUnitTileEntityID);
-
-            Terraria.WorldGen.PlaceTile(X + 7, Y + 7, ModHelper.StorageUnitTileID);
-            TileEntity.PlaceEntityNet(X + 6, Y + 6, ModHelper.StorageUnitTileEntityID);
-
-            Terraria.WorldGen.PlaceTile(X + 9, Y + 7, ModHelper.StorageUnitTileID);
-            TileEntity.PlaceEntityNet(X + 8, Y + 6, ModHelper.StorageUnitTileEntityID);
-
-            Terraria.WorldGen.PlaceTile(X + 13, Y + 7, ModHelper.StorageUnitTileID);
-            TileEntity.PlaceEntityNet(X + 12, Y + 6, ModHelper.StorageUnitTileEntityID);
+            CompatabilityHelper.PlaceMSModule(X + 8, Y + 3, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
+            CompatabilityHelper.PlaceMSModule(X + 12, Y + 3, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
+            CompatabilityHelper.PlaceMSModule(X + 14, Y + 3, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
+            CompatabilityHelper.PlaceMSModule(X + 6, Y + 6, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
+            CompatabilityHelper.PlaceMSModule(X + 8, Y + 6, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
+            CompatabilityHelper.PlaceMSModule(X + 12, Y + 6, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
 
             StructureGenHelper.GenerateCobwebs(new Point(X, Y), StructureXSize, StructureYSize);
             FrameTiles();
-
-            NetMessage.SendTileSquare(-1, X, Y, StructureXSize, StructureYSize);
         }
     }
 }

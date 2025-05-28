@@ -1,5 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Enums;
+using SpawnHouses.Helpers;
 using SpawnHouses.StructureHelper;
 using SpawnHouses.Structures.StructureParts;
 using Terraria;
@@ -29,7 +31,7 @@ public abstract class CustomStructure {
         X = x;
         Y = y;
 
-        if (Enum.TryParse(GetType().Name, out StructureID result))
+        if (Enum.TryParse(GetType().Name, out StructureType result))
             ID = (ushort)result;
         else
             throw new Exception($"StructureID of {ToString()} not found");
@@ -108,7 +110,7 @@ public abstract class CustomStructure {
     /// </summary>
     [NoJIT]
     public void _GenerateStructure() {
-        Generator.GenerateStructure(FilePath, new Point16(X, Y), ModInstance.Mod);
+        Generator.GenerateStructure(FilePath, new Point16(X, Y), SpawnHousesMod.Instance);
         FrameTiles();
     }
 

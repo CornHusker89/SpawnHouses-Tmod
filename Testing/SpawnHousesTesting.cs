@@ -14,35 +14,35 @@ public class SpawnHousesTesting {
         WorldGenTesting.WorldGenTesting? testingMod = ModContent.GetInstance<WorldGenTesting.WorldGenTesting>();
 
         testingMod.AddTest(new Test(
-            ModInstance.Mod, () => {
+            SpawnHousesMod.Instance, () => {
                 TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
                 return ScreenshotMainHouse();
             },
             "mainhouse"
         ));
         testingMod.AddTest(new Test(
-            ModInstance.Mod, () => {
+            SpawnHousesMod.Instance, () => {
                 TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
                 return ScreenshotBeachHouse();
             },
             "beachhouse"
         ));
         testingMod.AddTest(new Test(
-            ModInstance.Mod, () => {
+            SpawnHousesMod.Instance, () => {
                 TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
                 return ScreenshotMainBasement();
             },
             "mainbasement"
         ));
         testingMod.AddTest(new Test(
-            ModInstance.Mod, () => {
+            SpawnHousesMod.Instance, () => {
                 TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
                 return ScreenshotMineshaft();
             },
             "mineshaft"
         ));
         testingMod.AddTest(new Test(
-            ModInstance.Mod, () => {
+            SpawnHousesMod.Instance, () => {
                 TestingHelper.MakeWorld("SpawnHousesAutomatedTesting");
                 string output = string.Empty;
                 string? result = ScreenshotMainHouse();

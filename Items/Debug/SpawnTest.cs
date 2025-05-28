@@ -1,5 +1,7 @@
 using System;
+using SpawnHouses.Helpers;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -13,23 +15,21 @@ public class SpawnTest : ModItem {
         Item.rare = ItemRarityID.Blue;
     }
 
-    public override bool AltFunctionUse(Terraria.Player player) {
+    public override bool AltFunctionUse(Player player) {
         return true;
     }
 
-    public override bool? UseItem(Terraria.Player player) {
+    public override bool? UseItem(Player player) {
         int x = (Main.MouseWorld / 16).ToPoint16().X;
         int y = (Main.MouseWorld / 16).ToPoint16().Y;
 
-        Console.WriteLine(x + ", " + y);
-
-        // var s = StructureGenHelper.GetSurfaceLevel(x - 30, x + 30, y);
-        // Console.WriteLine($"ave: {s.average}, sd: {s.sd}");
-
-        // WorldUtils.Gen(new Point(x, y), new Shapes.HalfCircle(20), Actions.Chain(
-        // 	new Modifiers.Flip(false, true),
-        // 	new Actions.PlaceTile(0)
-        // ));
+        Console.WriteLine($"item netmode is {Main.netMode} and position is - {x}, {y}");
+        if (Main.netMode == NetmodeID.MultiplayerClient) {
+            Console.WriteLine("updating from test item");
+            //CompatabilityHelper.UpdateStorageNetwork(x, y);
+            MagicStorage.NetHelper.SendSearchAndRefresh(x, y);
+            //MagicStorage.Components.TEStorageComponent.SearchAndRefreshNetwork(new Point16(x, y));
+        }
 
         return true;
     }

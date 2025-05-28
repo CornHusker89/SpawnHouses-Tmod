@@ -1,4 +1,5 @@
 using System;
+using SpawnHouses.Helpers;
 using SpawnHouses.Structures.StructureParts;
 using Terraria;
 using Terraria.ID;

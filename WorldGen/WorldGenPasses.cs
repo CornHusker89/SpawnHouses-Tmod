@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Helpers;
 using SpawnHouses.Structures;
 using Terraria;
 using Terraria.ID;
@@ -44,14 +45,14 @@ public class WorldGenPasses : ModSystem {
     }
 
     public override void PreWorldGen() {
-        StructureManager.WorldVersion = new Version(ModInstance.Mod.Version.ToString());
+        StructureManager.WorldModVersion = SpawnHousesMod.Instance.Version;
     }
 
     public override void PostWorldGen() {
         // move guide into the main house (if it's there)
         if (StructureManager.MainHouse is not null)
             foreach (NPC npc in Main.npc)
-                if (npc.type is NPCID.Guide or NPCID.TaxCollector || (ModHelper.IsMSEnabled && npc.type == ModHelper.AutomatonNpcID)) {
+                if (npc.type is NPCID.Guide or NPCID.TaxCollector || (CompatabilityHelper.IsMSEnabled && npc.type == CompatabilityHelper.AutomatonNpcID)) {
                     npc.position.X = (StructureManager.MainHouse.X + StructureManager.MainHouse.LeftSize - 1 + Terraria.WorldGen.genRand.Next(-4, 5)) * 16; // tiles to pixels
                     npc.position.Y = (StructureManager.MainHouse.Y + 13) * 16;
                 }
@@ -65,7 +66,7 @@ public class WorldGenPasses : ModSystem {
         if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement)
             GenerateMainBasement();
 
-        WebClientInstance.WebClient.AddSpawnCount(
+        SpawnHousesMod.WebClient.AddSpawnCount(
             StructureManager.MainHouse is not null,
             StructureManager.MainBasement is not null,
             StructureManager.BeachHouse is not null,

@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Helpers;
 using SpawnHouses.Structures;
 using SpawnHouses.Structures.Chains;
 using SpawnHouses.Structures.Structures;
@@ -46,7 +47,7 @@ public static class WorldGenHelper {
 
             // Move out of the way of the big spawn tree or just offset it
             try {
-                if (ModHelper.IsRemnantsEnabled || ModContent.GetInstance<SpawnHousesConfig>().SpawnPointHouseOffset) {
+                if (CompatabilityHelper.IsRemnantsEnabled || ModContent.GetInstance<SpawnHousesConfig>().SpawnPointHouseOffset) {
                     (double average, double sd) leftSurface = StructureGenHelper.GetSurfaceLevel(initialX - 120 - 30, initialX - 120 + 30,
                         initialY, maxCastDistance: 400);
                     (double average, double sd) rightSurface = StructureGenHelper.GetSurfaceLevel(initialX + 120 - 30, initialX + 120 + 30,
@@ -69,7 +70,7 @@ public static class WorldGenHelper {
                 }
             }
             catch (Exception e) {
-                ModContent.GetInstance<SpawnHouses>().Logger.Error($"Main house failed to generate:\n{e}");
+                ModContent.GetInstance<SpawnHousesMod>().Logger.Error($"Main house failed to generate:\n{e}");
                 return;
             }
 
@@ -88,7 +89,7 @@ public static class WorldGenHelper {
 
         // just in case something above got fucked up
         if (!foundValidSpot) {
-            ModContent.GetInstance<SpawnHouses>().Logger
+            ModContent.GetInstance<SpawnHousesMod>().Logger
                 .Error(
                     "Failed to generate SpawnPointHouse. Please report this world seed and your client.log to the mod's author");
             return;
@@ -124,7 +125,7 @@ public static class WorldGenHelper {
                 ));
         }
         catch (Exception e) {
-            ModContent.GetInstance<SpawnHouses>().Logger.Error($"Main house failed to generate:\n{e}");
+            ModContent.GetInstance<SpawnHousesMod>().Logger.Error($"Main house failed to generate:\n{e}");
         }
     }
 
@@ -165,7 +166,7 @@ public static class WorldGenHelper {
             }
         }
         catch (Exception e) {
-            ModContent.GetInstance<SpawnHouses>().Logger.Error($"Mineshaft failed to generate:\n{e}");
+            ModContent.GetInstance<SpawnHousesMod>().Logger.Error($"Mineshaft failed to generate:\n{e}");
         }
     }
 
@@ -195,7 +196,7 @@ public static class WorldGenHelper {
                 StructureManager.MainBasement = chain;
             }
             catch (Exception e) {
-                ModContent.GetInstance<SpawnHouses>().Logger.Error($"Main basement failed to generate:\n{e}");
+                ModContent.GetInstance<SpawnHousesMod>().Logger.Error($"Main basement failed to generate:\n{e}");
             }
     }
 
@@ -332,7 +333,7 @@ public static class WorldGenHelper {
                     ));
             }
             catch (Exception e) {
-                ModContent.GetInstance<SpawnHouses>().Logger.Error($"Beach house failed to generate:\n{e}");
+                ModContent.GetInstance<SpawnHousesMod>().Logger.Error($"Beach house failed to generate:\n{e}");
             }
     }
 }

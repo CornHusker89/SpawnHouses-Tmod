@@ -1,3 +1,5 @@
+using SpawnHouses.Enums;
+using SpawnHouses.Helpers;
 using SpawnHouses.Structures.Bridges;
 using SpawnHouses.Structures.StructureParts;
 using SpawnHouses.Structures.Structures.ChainStructures;
@@ -40,7 +42,7 @@ public class CaveTown1 : StructureChain {
 
     protected override Bridge GetBridgeOfDirection(Bridge[] bridges, byte direction, CustomChainStructure structure) {
         Bridge[] newBridgeList;
-        if (structure.ID == (ushort)StructureID.CaveTown1_Test1)
+        if (structure.ID == (ushort)StructureType.CaveTown1_Test1)
             newBridgeList = _bridgeListSmall;
         else
             newBridgeList = _bridgeListLarge;

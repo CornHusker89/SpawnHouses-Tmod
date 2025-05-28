@@ -1,107 +1,75 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
+using SpawnHouses.Enums;
+using SpawnHouses.Structures;
 using SpawnHouses.Structures.Bridges;
 using SpawnHouses.Structures.ChainStructures;
 using SpawnHouses.Structures.Structures;
 using SpawnHouses.Structures.Structures.ChainStructures;
-using Terraria.ModLoader;
 
-namespace SpawnHouses.Structures;
+namespace SpawnHouses.Helpers;
 
 // ReSharper disable InconsistentNaming
-public enum StructureID : ushort {
-    // normal structures
-    MainHouse = 1,
-    BeachHouse = 2,
-    Firepit = 3,
-    Mineshaft = 20,
-
-    // main basement
-    MainBasement_Entry1 = 4,
-    MainBasement_Entry2 = 5,
-    MainBasement_Hallway4 = 6,
-    MainBasement_Hallway5 = 7,
-    MainBasement_Hallway9 = 8,
-    MainBasement_Room1 = 9,
-    MainBasement_Room1_WithFloor = 10,
-    MainBasement_Room2 = 11,
-    MainBasement_Room2_WithRoof = 12,
-    MainBasement_Room3 = 13,
-    MainBasement_Room4 = 14,
-    MainBasement_Room5 = 15,
-    MainBasement_Room6 = 16,
-    MainBasement_Room7 = 17,
-
-    // cave town 1
-    CaveTown1_Test1 = 18,
-    CaveTown1_Test2 = 19,
-
-    // testing structures
-    BridgeTest = 10000,
-    TestChainStructure = 10001,
-    TestChainStructure2 = 10002
-}
-
 public static class StructureIDUtils {
     public static readonly ushort[] BranchingHallwayIDs = [
         6, 7, 8
     ];
 
-    public static Type GetStructureType(StructureID type) {
+    public static Type GetStructureType(StructureType type) {
         switch (type) {
             // normal structures
-            case StructureID.MainHouse:
+            case StructureType.MainHouse:
                 return typeof(MainHouse);
-            case StructureID.BeachHouse:
+            case StructureType.BeachHouse:
                 return typeof(BeachHouse);
-            case StructureID.Firepit:
+            case StructureType.Firepit:
                 return typeof(Firepit);
-            case StructureID.Mineshaft:
+            case StructureType.Mineshaft:
                 return typeof(Mineshaft);
 
             // main basement
-            case StructureID.MainBasement_Entry1:
+            case StructureType.MainBasement_Entry1:
                 return typeof(MainBasement_Entry1);
-            case StructureID.MainBasement_Entry2:
+            case StructureType.MainBasement_Entry2:
                 return typeof(MainBasement_Entry2);
-            case StructureID.MainBasement_Hallway4:
+            case StructureType.MainBasement_Hallway4:
                 return typeof(MainBasement_Hallway4);
-            case StructureID.MainBasement_Hallway5:
+            case StructureType.MainBasement_Hallway5:
                 return typeof(MainBasement_Hallway5);
-            case StructureID.MainBasement_Hallway9:
+            case StructureType.MainBasement_Hallway9:
                 return typeof(MainBasement_Hallway9);
-            case StructureID.MainBasement_Room1:
+            case StructureType.MainBasement_Room1:
                 return typeof(MainBasement_Room1);
-            case StructureID.MainBasement_Room1_WithFloor:
+            case StructureType.MainBasement_Room1_WithFloor:
                 return typeof(MainBasement_Room1_WithFloor);
-            case StructureID.MainBasement_Room2:
+            case StructureType.MainBasement_Room2:
                 return typeof(MainBasement_Room2);
-            case StructureID.MainBasement_Room2_WithRoof:
+            case StructureType.MainBasement_Room2_WithRoof:
                 return typeof(MainBasement_Room2_WithRoof);
-            case StructureID.MainBasement_Room3:
+            case StructureType.MainBasement_Room3:
                 return typeof(MainBasement_Room3);
-            case StructureID.MainBasement_Room4:
+            case StructureType.MainBasement_Room4:
                 return typeof(MainBasement_Room4);
-            case StructureID.MainBasement_Room5:
+            case StructureType.MainBasement_Room5:
                 return typeof(MainBasement_Room5);
-            case StructureID.MainBasement_Room6:
+            case StructureType.MainBasement_Room6:
                 return typeof(MainBasement_Room6);
-            case StructureID.MainBasement_Room7:
+            case StructureType.MainBasement_Room7:
                 return typeof(MainBasement_Room7);
 
 
-            case StructureID.CaveTown1_Test1:
+            case StructureType.CaveTown1_Test1:
                 return typeof(CaveTown1_Test1);
-            case StructureID.CaveTown1_Test2:
+            case StructureType.CaveTown1_Test2:
                 return typeof(CaveTown1_Test2);
 
 
-            case StructureID.BridgeTest:
+            case StructureType.BridgeTest:
                 return typeof(BridgeTest);
-            case StructureID.TestChainStructure:
+            case StructureType.TestChainStructure:
                 return typeof(TestChainStructure);
-            case StructureID.TestChainStructure2:
+            case StructureType.TestChainStructure2:
                 return typeof(TestChainStructure2);
 
             default:
@@ -110,7 +78,7 @@ public static class StructureIDUtils {
     }
 
     public static CustomStructure CreateStructure(ushort type, ushort x, ushort y, byte status) {
-        Type structureType = GetStructureType((StructureID)type);
+        Type structureType = GetStructureType((StructureType)type);
         object obj;
         if (structureType.BaseType == null)
             obj = Activator.CreateInstance(structureType, x, y, status);
@@ -266,12 +234,4 @@ public static class GenerateChances {
     public const byte Rejected = 0;
     public const byte Neutral = 1;
     public const byte Guaranteed = 2;
-}
-
-public static class ModInstance {
-    public static readonly Mod Mod = ModContent.GetInstance<SpawnHouses>();
-}
-
-public static class WebClientInstance {
-    public static readonly WebHelper WebClient = new();
 }

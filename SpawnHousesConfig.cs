@@ -36,12 +36,12 @@ public class SpawnHousesConfig : ModConfig {
         get => _spawnPointBasementSize;
         set {
             _spawnPointBasementSize = value;
-            SpawnPointBasementMultiplier = value / 6f;
+            SpawnPointBasementSizeMultiplier = value / 6f;
             SetTotalNpcs();
         }
     }
 
-    [JsonIgnore] public float SpawnPointBasementMultiplier { get; set; } = 1;
+    [JsonIgnore] public float SpawnPointBasementSizeMultiplier { get; set; } = 1;
 
     [DefaultValue(2)]
     [Range(2, 2)]

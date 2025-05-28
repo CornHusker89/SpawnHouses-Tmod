@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using SpawnHouses.Helpers;
 using SpawnHouses.StructureHelper;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
@@ -7,7 +8,7 @@ using Terraria.WorldBuilding;
 namespace SpawnHouses.Structures.StructureParts;
 
 public class ChainConnectPoint : ConnectPoint {
-    private readonly Mod _mod = ModContent.GetInstance<SpawnHouses>();
+    private readonly Mod _mod = ModContent.GetInstance<SpawnHousesMod>();
     public byte BranchLength;
     public Bridge ChildBridge;
     public byte GenerateChance;

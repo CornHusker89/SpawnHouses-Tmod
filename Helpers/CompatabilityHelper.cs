@@ -1,14 +1,16 @@
 using System;
 using MagicStorage.Components;
 using SpawnHouses.Testing;
+using Terraria;
 using Terraria.DataStructures;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 // ReSharper disable InconsistentNaming
 
-namespace SpawnHouses;
+namespace SpawnHouses.Helpers;
 
-public class ModHelper : ModSystem {
+public class CompatabilityHelper : ModSystem {
     public static bool IsMSEnabled;
     public static bool ErrorLoadingMS;
 
@@ -53,20 +55,19 @@ public class ModHelper : ModSystem {
         catch (Exception) {
             IsMSEnabled = false;
             ErrorLoadingMS = true;
-            ModContent.GetInstance<SpawnHouses>().Logger
-                .Error("Failed to retrieve Magic Storage IDs. Contact the mod author about this issue");
+            ModContent.GetInstance<SpawnHousesMod>().Logger.Error("Failed to retrieve Magic Storage IDs. Contact the mod author about this issue");
         }
     }
 
 
     [JITWhenModsEnabled("MagicStorage")]
-    public static bool LinkRemoteStorage(Point16 remotePos, Point16 heartPos) {
-        if (!IsMSEnabled) return false;
+    public static void LinkRemoteStorage(Point16 remotePos, Point16 heartPos) {
+        if (!IsMSEnabled) {
+            return;
+        }
 
         void SendError() {
-            ModContent.GetInstance<SpawnHouses>().Logger
-                .Error(
-                    "Failed to link Magic Storage's remote storage to storage heart. Contact the mod author about this issue");
+            ModContent.GetInstance<SpawnHousesMod>().Logger.Error("Failed to link Magic Storage's remote storage to storage heart. Contact the mod author about this issue");
         }
 
         try {
@@ -74,17 +75,38 @@ public class ModHelper : ModSystem {
             TERemoteAccess remoteTileEntity = (TERemoteAccess)tileEntity;
             if (remoteTileEntity == null) {
                 SendError();
-                return false;
+                return;
             }
 
             bool success = remoteTileEntity.TryLocate(heartPos, out string message);
-            if (!success) SendError();
-            return success;
+            if (!success) {
+                SendError();
+            }
         }
         catch (Exception) {
             SendError();
-            return false;
         }
+    }
+
+    [JITWhenModsEnabled("MagicStorage")]
+    public static void PlaceMSModule(int x, int y, int tileId, int entityId) {
+        Terraria.WorldGen.PlaceTile(x + 1, y + 1, tileId);
+        TileEntity.PlaceEntityNet(x, y, entityId);
+
+        if (Main.netMode == NetmodeID.Server) {
+            NetMessage.SendTileSquare(-1, x, y, 2, 2);
+            NetMessage.SendData(MessageID.TileEntityPlacement, number: x, number2: y, number3: entityId);
+        }
+    }
+
+    /// <summary>
+    /// updates local MS network at target location
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    [JITWhenModsEnabled("MagicStorage")]
+    public static void UpdateStorageNetwork (int x, int y) {
+        MagicStorage.NetHelper.SendSearchAndRefresh(x, y);
     }
 
 

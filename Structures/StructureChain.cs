@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SpawnHouses.Helpers;
 using SpawnHouses.Structures.StructureParts;
 using Terraria;
 using Terraria.ModLoader;
@@ -119,7 +120,7 @@ public abstract class StructureChain {
 
         // if we didn't find what we needed in however many tries, abort
         if (!foundValidStructureChain) {
-            ModContent.GetInstance<SpawnHouses>().Logger.Error(
+            ModContent.GetInstance<SpawnHousesMod>().Logger.Error(
                 $"Failed to generate StructureChain of type {ToString()}. Please report this error, this seed ({Main.ActiveWorldFileData.Seed}), and your client.log to the mod's author");
             SuccessfulGeneration = false;
             return;
@@ -163,17 +164,15 @@ public abstract class StructureChain {
                 (ushort)(_usableStructureList[i - 1].Weight + _copiedStructureList[i - 1].Weight);
     }
 
-    private CustomChainStructure PlaceNewStructure(ChainConnectPoint parentConnectPoint,
-        bool closeToMaxBranchLength = false,
-        int x = 500, int y = 500) {
+    private CustomChainStructure PlaceNewStructure(ChainConnectPoint parentConnectPoint, bool closeToMaxBranchLength = false, int x = 500, int y = 500) {
         CustomChainStructure structure = null;
         for (int i = 0; i < 100; i++) {
-            structure = GetNewStructure(parentConnectPoint, closeToMaxBranchLength, _structureListWeightSum,
-                _usableStructureList);
+            structure = GetNewStructure(parentConnectPoint, closeToMaxBranchLength, _structureListWeightSum, _usableStructureList);
 
             if (structure is not null) {
                 structure.ParentChainConnectPoint = parentConnectPoint;
                 structure.SetPosition(x, y);
+                structure.ParentStructureChain = this;
                 break;
             }
         }
@@ -181,8 +180,7 @@ public abstract class StructureChain {
         return structure;
     }
 
-    private void MoveConnectPointAndStructure(CustomChainStructure structure, ChainConnectPoint connectPoint, int x,
-        int y) {
+    private void MoveConnectPointAndStructure(CustomChainStructure structure, ChainConnectPoint connectPoint, int x, int y) {
         int deltaX = connectPoint.X - x;
         int deltaY = connectPoint.Y - y;
         structure.SetPosition(structure.X - deltaX, structure.Y - deltaY);
@@ -192,8 +190,7 @@ public abstract class StructureChain {
         byte currentBranchLength = connectPoint.BranchLength;
         byte targetDirection = connectPoint.Direction;
 
-        if (currentBranchLength > MaxBranchLength) // extra failsafe
-        {
+        if (currentBranchLength > MaxBranchLength) { // extra failsafe
             _failedConnectPointList.Add(connectPoint);
             return;
         }

@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SpawnHouses.Helpers;
 using SpawnHouses.Structures;
 using SpawnHouses.Structures.Chains;
 using SpawnHouses.Structures.Structures;
+using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
@@ -12,7 +14,7 @@ namespace SpawnHouses;
 #nullable enable
 
 internal class StructureManager : ModSystem {
-    public static Version WorldVersion = new(ModInstance.Mod.Version.ToString());
+    public static Version WorldModVersion = SpawnHousesMod.Instance.Version;
 
     public static MainHouse? MainHouse;
     public static MainBasement? MainBasement;
@@ -20,7 +22,7 @@ internal class StructureManager : ModSystem {
     public static BeachHouse? BeachHouse;
 
     public override void SaveWorldData(TagCompound tag) {
-        tag["WorldVersion"] = WorldVersion;
+        tag["WorldModVersion"] = WorldModVersion;
 
         tag["MainHouse"] = MainHouse;
         tag["MainBasement"] = MainBasement;
@@ -29,11 +31,14 @@ internal class StructureManager : ModSystem {
     }
 
     public override void LoadWorldData(TagCompound tag) {
-        WorldVersion = tag.ContainsKey("WorldVersion")
-            ? new Version(tag.GetString("WorldVersion"))
-            : new Version("0.3.2");
+        // "WorldVersion" is the old name
+        WorldModVersion = tag.ContainsKey("WorldModVersion")
+            ? new Version(tag.GetString("WorldModVersion"))
+            : tag.ContainsKey("WorldVersion")
+                ? new Version(tag.GetString("WorldVersion"))
+                : new Version("0.3.2");
 
-        if (WorldVersion.Major < 1) {
+        if (WorldModVersion.Major < 1) {
             // the rest are unrecoverable. mainhouse might use just 1 structure, basement uses seeds, mineshaft doesn't exist
             BeachHouse = tag.ContainsKey("BeachHouse") ? tag.Get<BeachHouse>("BeachHouse") : null;
         }
@@ -46,7 +51,7 @@ internal class StructureManager : ModSystem {
     }
 
     public override void ClearWorld() {
-        WorldVersion = new Version(ModInstance.Mod.Version.ToString());
+        WorldModVersion = SpawnHousesMod.Instance.Version;
         MainHouse = null;
         MainBasement = null;
         Mineshaft = null;
@@ -55,7 +60,7 @@ internal class StructureManager : ModSystem {
 }
 
 internal static class ChainProcessor {
-    internal static Dictionary<string, object> ProcessStructure(CustomChainStructure processingStructure) {
+    internal static Dictionary<string, object> SerializeChain(CustomChainStructure processingStructure) {
         var dict = new Dictionary<string, object> {
             ["ID"] = processingStructure.ID,
             ["X"] = processingStructure.X,
@@ -66,7 +71,7 @@ internal static class ChainProcessor {
         int i = 0;
         processingStructure.ActionOnEachConnectPoint(connectPoint => {
             if (connectPoint.ChildStructure is not null) {
-                dict[$"Substructure{i}"] = ProcessStructure(connectPoint.ChildStructure);
+                dict[$"Substructure{i}"] = SerializeChain(connectPoint.ChildStructure);
                 dict[$"Substructure{i}Bridge"] = new Dictionary<string, object> {
                     ["ID"] = connectPoint.ChildBridge.ID,
                     ["X1"] = connectPoint.ChildBridge.Point1.X,
@@ -82,25 +87,26 @@ internal static class ChainProcessor {
         return dict;
     }
 
-    internal static CustomChainStructure ProcessSubstructure(TagCompound structureObj) {
+    internal static CustomChainStructure DeserializeChain(StructureChain structureChain, TagCompound structureDict) {
         CustomChainStructure? structure = (CustomChainStructure)StructureIDUtils.CreateStructure(
-            (ushort)(short)structureObj["ID"],
-            (ushort)(short)structureObj["X"],
-            (ushort)(short)structureObj["Y"],
-            (byte)structureObj["Status"]
+            (ushort)(short)structureDict["ID"],
+            (ushort)(short)structureDict["X"],
+            (ushort)(short)structureDict["Y"],
+            (byte)structureDict["Status"]
         );
 
         int i = 0;
+        structure.ParentStructureChain = structureChain;
         structure.ActionOnEachConnectPoint(point => {
-            if (structureObj.ContainsKey($"Substructure{i}")) {
-                point.ChildStructure = ProcessSubstructure((TagCompound)structureObj[$"Substructure{i}"]);
-                if (structureObj.ContainsKey($"Substructure{i}Bridge")) {
-                    TagCompound? bridgeObj = (TagCompound)structureObj[$"Substructure{i}Bridge"];
-                    Bridge? bridge = BridgeIDUtils.CreateBridge((ushort)(short)bridgeObj["ID"]);
+            if (structureDict.ContainsKey($"Substructure{i}")) {
+                point.ChildStructure = DeserializeChain(structureChain, (TagCompound)structureDict[$"Substructure{i}"]);
+                if (structureDict.ContainsKey($"Substructure{i}Bridge")) {
+                    TagCompound? bridgeDict = (TagCompound)structureDict[$"Substructure{i}Bridge"];
+                    Bridge? bridge = BridgeIDUtils.CreateBridge((ushort)(short)bridgeDict["ID"]);
 
                     // get the child connect point
-                    ushort goalX = (ushort)(short)bridgeObj["X2"];
-                    ushort goalY = (ushort)(short)bridgeObj["Y2"];
+                    ushort goalX = (ushort)(short)bridgeDict["X2"];
+                    ushort goalY = (ushort)(short)bridgeDict["Y2"];
                     bool found = false;
                     point.ChildStructure.ActionOnEachConnectPoint(nextPoint => {
                         if (nextPoint.X == goalX && nextPoint.Y == goalY) {
@@ -109,8 +115,9 @@ internal static class ChainProcessor {
                             bridge.SetPoints(point, nextPoint);
                         }
                     });
-                    if (!found)
+                    if (!found) {
                         throw new Exception("Bridge loading failed");
+                    }
 
                     point.ChildBridge = bridge;
                 }
@@ -158,7 +165,7 @@ internal class MainHouseSerializer : TagSerializer<MainHouse, TagCompound> {
             tag.GetBool("InUnderworld"),
             tag.GetByte("LeftType") != 0
                 ? tag.GetByte("LeftType")
-                : (byte)1, // if its 0 (which only happens if it's a <= v0.2.7 world) set to default (large) 
+                : (byte)1, // if its 0 (which only happens if it's a <= v0.2.7 world) set to default (large)
             tag.GetByte("RightType") != 0 ? tag.GetByte("RightType") : (byte)1
         );
     }
@@ -170,7 +177,7 @@ internal class MainBasementSerializer : TagSerializer<MainBasement, TagCompound>
             ["X"] = chain.EntryPosX,
             ["Y"] = chain.EntryPosY,
             ["Status"] = chain.Status,
-            ["RootStructure"] = ChainProcessor.ProcessStructure(chain.RootStructure)
+            ["RootStructure"] = ChainProcessor.SerializeChain(chain.RootStructure)
         };
     }
 
@@ -180,7 +187,7 @@ internal class MainBasementSerializer : TagSerializer<MainBasement, TagCompound>
             (ushort)tag.Get<short>("Y"),
             tag.GetByte("Status")
         );
-        basement.RootStructure = ChainProcessor.ProcessSubstructure((TagCompound)tag["RootStructure"]);
+        basement.RootStructure = ChainProcessor.DeserializeChain(basement, (TagCompound)tag["RootStructure"]);
         return basement;
     }
 }

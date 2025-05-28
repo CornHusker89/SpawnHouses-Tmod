@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Helpers;
 using SpawnHouses.StructureHelper;
 using SpawnHouses.Structures.StructureParts;
 using Terraria.DataStructures;
@@ -11,7 +12,7 @@ using BoundingBox = SpawnHouses.Structures.StructureParts.BoundingBox;
 namespace SpawnHouses.Structures.Bridges;
 
 public class ParabolaBridge : Bridge {
-    private readonly Mod _mod = ModContent.GetInstance<SpawnHouses>();
+    private readonly Mod _mod = ModContent.GetInstance<SpawnHousesMod>();
     private readonly double AttemptSlope;
     private readonly byte BoundingBoxYMargin;
 
