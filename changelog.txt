@@ -1,3 +1,4 @@
 Version 1.1.0
-Major Changes
-- Added an item to create more Spawn Point Houses, craftable with 500 stone, 350 wood, and 10 iron bars.
+Minor Changes
+- Fixed basement magic storage not connecting to the spawn point house's setup in multiplayer
+- Changes to save/loading system, if you encounter any saving/loading errors please let me know!

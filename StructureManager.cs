@@ -63,7 +63,7 @@ internal class StructureManager : ModSystem {
 internal static class ChainProcessor {
     internal static Dictionary<string, object> SerializeChain(CustomChainStructure processingStructure) {
         var dict = new Dictionary<string, object> {
-            ["ID"] = processingStructure.Id,
+            ["ID"] = (ushort)processingStructure.Id,
             ["X"] = processingStructure.X,
             ["Y"] = processingStructure.Y,
             ["Status"] = processingStructure.Status
@@ -74,7 +74,7 @@ internal static class ChainProcessor {
             if (connectPoint.ChildStructure is not null) {
                 dict[$"Substructure{i}"] = SerializeChain(connectPoint.ChildStructure);
                 dict[$"Substructure{i}Bridge"] = new Dictionary<string, object> {
-                    ["ID"] = connectPoint.ChildBridge.Id,
+                    ["ID"] = (ushort)connectPoint.ChildBridge.Id,
                     ["X1"] = connectPoint.ChildBridge.Point1.X,
                     ["Y1"] = connectPoint.ChildBridge.Point1.Y,
                     ["X2"] = connectPoint.ChildBridge.Point2.X,

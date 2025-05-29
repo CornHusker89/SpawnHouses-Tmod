@@ -26,18 +26,18 @@ public class MainBasement : StructureChain {
             (byte)Math.Round(4 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementSizeMultiplier),
             x, y,
             [
-                new MainBasement_Room1(cost: 12, weight: 40),
-                new MainBasement_Room1_WithFloor(cost: 14, weight: 130),
-                new MainBasement_Room2(cost: 13, weight: 40),
-                new MainBasement_Room2_WithRoof(cost: 15, weight: 90),
-                new MainBasement_Room3(cost: 8, weight: 115),
-                new MainBasement_Room4(cost: 11, weight: 5),
-                new MainBasement_Room5(cost: 13, weight: 145),
-                new MainBasement_Room6(cost: 14, weight: 115),
-                new MainBasement_Room7(cost: 14, weight: 80),
-                new MainBasement_Hallway4(cost: 5, weight: 100),
-                new MainBasement_Hallway5(cost: 5, weight: 100),
-                new MainBasement_Hallway9(cost: 4, weight: 100)
+                new MainBasementRoom1(cost: 12, weight: 40),
+                new MainBasementRoom1WithFloor(cost: 14, weight: 130),
+                new MainBasementRoom2(cost: 13, weight: 40),
+                new MainBasementRoom2WithRoof(cost: 15, weight: 90),
+                new MainBasementRoom3(cost: 8, weight: 115),
+                new MainBasementRoom4(cost: 11, weight: 5),
+                new MainBasementRoom5(cost: 13, weight: 145),
+                new MainBasementRoom6(cost: 14, weight: 115),
+                new MainBasementRoom7(cost: 14, weight: 80),
+                new MainBasementHallway4(cost: 5, weight: 100),
+                new MainBasementHallway5(cost: 5, weight: 100),
+                new MainBasementHallway9(cost: 4, weight: 100)
             ],
             [
                 new SingleStructureBridge.MainBasementHallway1(),
@@ -65,8 +65,8 @@ public class MainBasement : StructureChain {
                 new SingleStructureBridge.MainBasementHallway8AltGen()
             ],
             [
-                new MainBasement_Entry2(cost: 10, weight: 100),
-                new MainBasement_Entry1(cost: 10, weight: 100)
+                new MainBasementEntry2(cost: 10, weight: 100),
+                new MainBasementEntry1(cost: 10, weight: 100)
             ],
             startingBoundingBoxes, status) {
         _shape = ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementShape;

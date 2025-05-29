@@ -17,60 +17,60 @@ public static class StructureIdHelper {
         StructureType.MainBasementHallway9
     ];
 
-    public static Type GetStructureType(StructureType type) {
-        switch (type) {
+    public static Type GetStructureType(ushort id) {
+        switch (id) {
             // normal structures
-            case StructureType.MainHouse:
+            case (ushort)StructureType.MainHouse:
                 return typeof(MainHouse);
-            case StructureType.BeachHouse:
+            case (ushort)StructureType.BeachHouse:
                 return typeof(BeachHouse);
-            case StructureType.Firepit:
+            case (ushort)StructureType.Firepit:
                 return typeof(Firepit);
-            case StructureType.Mineshaft:
+            case (ushort)StructureType.Mineshaft:
                 return typeof(Mineshaft);
 
             // main basement
-            case StructureType.MainBasementEntry1:
-                return typeof(MainBasement_Entry1);
-            case StructureType.MainBasementEntry2:
-                return typeof(MainBasement_Entry2);
-            case StructureType.MainBasementHallway4:
-                return typeof(MainBasement_Hallway4);
-            case StructureType.MainBasementHallway5:
-                return typeof(MainBasement_Hallway5);
-            case StructureType.MainBasementHallway9:
-                return typeof(MainBasement_Hallway9);
-            case StructureType.MainBasementRoom1:
-                return typeof(MainBasement_Room1);
-            case StructureType.MainBasementRoom1WithFloor:
-                return typeof(MainBasement_Room1_WithFloor);
-            case StructureType.MainBasementRoom2:
-                return typeof(MainBasement_Room2);
-            case StructureType.MainBasementRoom2WithRoof:
-                return typeof(MainBasement_Room2_WithRoof);
-            case StructureType.MainBasementRoom3:
-                return typeof(MainBasement_Room3);
-            case StructureType.MainBasementRoom4:
-                return typeof(MainBasement_Room4);
-            case StructureType.MainBasementRoom5:
-                return typeof(MainBasement_Room5);
-            case StructureType.MainBasementRoom6:
-                return typeof(MainBasement_Room6);
-            case StructureType.MainBasementRoom7:
-                return typeof(MainBasement_Room7);
+            case (ushort)StructureType.MainBasementEntry1:
+                return typeof(MainBasementEntry1);
+            case (ushort)StructureType.MainBasementEntry2:
+                return typeof(MainBasementEntry2);
+            case (ushort)StructureType.MainBasementHallway4:
+                return typeof(MainBasementHallway4);
+            case (ushort)StructureType.MainBasementHallway5:
+                return typeof(MainBasementHallway5);
+            case (ushort)StructureType.MainBasementHallway9:
+                return typeof(MainBasementHallway9);
+            case (ushort)StructureType.MainBasementRoom1:
+                return typeof(MainBasementRoom1);
+            case (ushort)StructureType.MainBasementRoom1WithFloor:
+                return typeof(MainBasementRoom1WithFloor);
+            case (ushort)StructureType.MainBasementRoom2:
+                return typeof(MainBasementRoom2);
+            case (ushort)StructureType.MainBasementRoom2WithRoof:
+                return typeof(MainBasementRoom2WithRoof);
+            case (ushort)StructureType.MainBasementRoom3:
+                return typeof(MainBasementRoom3);
+            case (ushort)StructureType.MainBasementRoom4:
+                return typeof(MainBasementRoom4);
+            case (ushort)StructureType.MainBasementRoom5:
+                return typeof(MainBasementRoom5);
+            case (ushort)StructureType.MainBasementRoom6:
+                return typeof(MainBasementRoom6);
+            case (ushort)StructureType.MainBasementRoom7:
+                return typeof(MainBasementRoom7);
 
 
-            case StructureType.CaveTown1Test1:
+            case (ushort)StructureType.CaveTown1Test1:
                 return typeof(CaveTown1_Test1);
-            case StructureType.CaveTown1Test2:
+            case (ushort)StructureType.CaveTown1Test2:
                 return typeof(CaveTown1_Test2);
 
 
-            case StructureType.BridgeTest:
+            case (ushort)StructureType.BridgeTest:
                 return typeof(BridgeTest);
-            case StructureType.TestChainStructure:
+            case (ushort)StructureType.TestChainStructure:
                 return typeof(TestChainStructure);
-            case StructureType.TestChainStructure2:
+            case (ushort)StructureType.TestChainStructure2:
                 return typeof(TestChainStructure2);
 
             default:
@@ -78,8 +78,8 @@ public static class StructureIdHelper {
         }
     }
 
-    public static CustomStructure CreateStructure(ushort type, ushort x, ushort y, byte status) {
-        Type structureType = GetStructureType((StructureType)type);
+    public static CustomStructure CreateStructure(ushort id, ushort x, ushort y, byte status) {
+        Type structureType = GetStructureType(id);
         object obj;
         if (structureType.BaseType == null)
             obj = Activator.CreateInstance(structureType, x, y, status);
