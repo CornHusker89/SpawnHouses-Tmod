@@ -9,7 +9,7 @@ using Terraria.IO;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
-using static SpawnHouses.WorldGen.WorldGenHelper;
+using static SpawnHouses.Helpers.WorldGenHelper;
 
 
 namespace SpawnHouses.WorldGen;

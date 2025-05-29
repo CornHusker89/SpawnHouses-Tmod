@@ -1,7 +1,5 @@
 using System;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Helpers;
-using SpawnHouses.Structures;
 using SpawnHouses.Structures.Chains;
 using SpawnHouses.Structures.Structures;
 using Terraria;
@@ -10,7 +8,7 @@ using Terraria.ModLoader;
 using Terraria.WorldBuilding;
 using BoundingBox = SpawnHouses.Types.BoundingBox;
 
-namespace SpawnHouses.WorldGen;
+namespace SpawnHouses.Helpers;
 
 public static class WorldGenHelper {
     private static byte _mainHouseOffsetDirection = Directions.None;
