@@ -24,12 +24,6 @@ public class SpawnTest : ModItem {
         int y = (Main.MouseWorld / 16).ToPoint16().Y;
 
         Console.WriteLine($"item netmode is {Main.netMode} and position is - {x}, {y}");
-        if (Main.netMode == NetmodeID.MultiplayerClient) {
-            Console.WriteLine("updating from test item");
-            //CompatabilityHelper.UpdateStorageNetwork(x, y);
-            MagicStorage.NetHelper.SendSearchAndRefresh(x, y);
-            //MagicStorage.Components.TEStorageComponent.SearchAndRefreshNetwork(new Point16(x, y));
-        }
 
         return true;
     }
