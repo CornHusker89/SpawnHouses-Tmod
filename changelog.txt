@@ -1,4 +1,3 @@
-Version 1.1.0
+Version 1.1.2
 Minor Changes
-- Fixed basement magic storage not connecting to the spawn point house's setup in multiplayer
-- Changes to save/loading system, if you encounter any saving/loading errors please let me know!
+- Fixed loading error when Magic Storage is disabled
