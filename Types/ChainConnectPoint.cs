@@ -1,7 +1,6 @@
 using Microsoft.Xna.Framework;
 using SpawnHouses.Helpers;
-using SpawnHouses.StructureHelper;
-using SpawnHouses.Structures;
+using StructureHelper.API;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;

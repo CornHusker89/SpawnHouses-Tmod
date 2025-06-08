@@ -2,7 +2,7 @@ using System;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Enums;
 using SpawnHouses.Helpers;
-using SpawnHouses.StructureHelper;
+using StructureHelper.API;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;

@@ -41,7 +41,6 @@ public static class NetHelper {
     /// </summary>
     public static void ReceiveUpdateMagicStorage(BinaryReader reader, int sender)
     {
-        Console.WriteLine("received update");
         CompatabilityHelper.UpdateStorageNetwork(reader.ReadInt32(), reader.ReadInt32());
     }
 }

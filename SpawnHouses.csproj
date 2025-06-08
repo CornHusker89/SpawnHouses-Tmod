@@ -10,13 +10,14 @@
         <Optimize>false</Optimize>
     </PropertyGroup>
     <ItemGroup>
-        <Reference Include="MagicStorage">
-            <HintPath>..\..\ModReader\MagicStorage\MagicStorage.dll</HintPath>
+        <Reference Include="StructureHelper">
+          <HintPath>..\..\ModReader\StructureHelper\StructureHelper.dll</HintPath>
         </Reference>
-    </ItemGroup>
-    <ItemGroup>
         <Reference Include="WorldGenTesting">
             <HintPath>..\..\ModSources\WorldGenTesting\bin\Debug\net8.0\WorldGenTesting.dll</HintPath>
+        </Reference>
+        <Reference Include="MagicStorage">
+            <HintPath>..\..\ModReader\MagicStorage\MagicStorage.dll</HintPath>
         </Reference>
     </ItemGroup>
     <ItemGroup>
