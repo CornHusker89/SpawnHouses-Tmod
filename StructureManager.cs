@@ -2,11 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.Helpers;
-using SpawnHouses.Structures;
 using SpawnHouses.Structures.Chains;
 using SpawnHouses.Structures.Structures;
 using SpawnHouses.Types;
-using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
@@ -116,9 +114,7 @@ internal static class ChainProcessor {
                             bridge.SetPoints(point, nextPoint);
                         }
                     });
-                    if (!found) {
-                        throw new Exception("Bridge loading failed");
-                    }
+                    if (!found) throw new Exception("Bridge loading failed");
 
                     point.ChildBridge = bridge;
                 }
@@ -133,7 +129,7 @@ internal static class ChainProcessor {
 
 internal class DictionarySerializer : TagSerializer<Dictionary<string, object>, TagCompound> {
     public override TagCompound Serialize(Dictionary<string, object> data) {
-        TagCompound tag = new TagCompound();
+        TagCompound tag = new();
         foreach (var kvp in data)
             tag[kvp.Key] = kvp.Value;
         return tag;
@@ -183,7 +179,7 @@ internal class MainBasementSerializer : TagSerializer<MainBasement, TagCompound>
     }
 
     public override MainBasement Deserialize(TagCompound tag) {
-        MainBasement basement = new MainBasement(
+        MainBasement basement = new(
             (ushort)tag.Get<short>("X"),
             (ushort)tag.Get<short>("Y"),
             tag.GetByte("Status")

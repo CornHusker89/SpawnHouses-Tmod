@@ -1,11 +1,7 @@
-using System;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Helpers;
-using SpawnHouses.Structures;
 using SpawnHouses.Structures.Structures;
 using Terraria;
-using Terraria.DataStructures;
-using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace SpawnHouses;
@@ -14,9 +10,7 @@ public class SpawnHousesPlayer : ModPlayer {
     private int _frameCounter;
 
     public override void OnEnterWorld() {
-        if (CompatabilityHelper.ErrorLoadingMS) {
-            Main.NewText("Generated Houses had an issue loading Magic Storage content, so Magic Storage features in Generated Houses are disabled. Please contact the author about this issue!", Color.Red);
-        }
+        if (CompatabilityHelper.ErrorLoadingMS) Main.NewText("Generated Houses had an issue loading Magic Storage content, so Magic Storage features in Generated Houses are disabled. Please contact the author about this issue!", Color.Red);
     }
 
     public override void PostUpdate() {
@@ -26,16 +20,14 @@ public class SpawnHousesPlayer : ModPlayer {
             int x = (int)Player.Center.X / 16;
             int y = (int)Player.Center.Y / 16;
 
-            if (StructureManager.MainBasement is not null && StructureManager.MainBasement.Status == StructureStatus.GeneratedButNotFound) {
+            if (StructureManager.MainBasement is not null && StructureManager.MainBasement.Status == StructureStatus.GeneratedButNotFound)
                 if (
                     x > StructureManager.MainBasement.EntryPosX - 7
                     && x < StructureManager.MainBasement.EntryPosX + 7
                     && y > StructureManager.MainBasement.EntryPosY + 6
                     && y < StructureManager.MainBasement.EntryPosY + 20
-                ) {
+                )
                     StructureManager.MainBasement.OnFound();
-                }
-            }
 
             if (StructureManager.BeachHouse is not null && StructureManager.BeachHouse.Status == StructureStatus.GeneratedButNotFound) {
                 int houseCenterX = StructureManager.BeachHouse.X + BeachHouse._structureXSize / 2;
@@ -46,9 +38,8 @@ public class SpawnHousesPlayer : ModPlayer {
                     && x < houseCenterX + 70
                     && y > houseCenterY - 44
                     && y < houseCenterY + 44
-                ) {
+                )
                     StructureManager.BeachHouse.OnFound();
-                }
             }
         }
     }

@@ -19,11 +19,11 @@ public class SpawnIceCave : ModItem {
     public override void AddRecipes() {
     }
 
-    public override bool AltFunctionUse(Terraria.Player player) {
+    public override bool AltFunctionUse(Player player) {
         return true;
     }
 
-    public override bool? UseItem(Terraria.Player player) {
+    public override bool? UseItem(Player player) {
         Point16 point = (Main.MouseWorld / 16).ToPoint16();
         int x = point.X;
         int y = point.Y;

@@ -1,6 +1,5 @@
 #nullable enable
 using Microsoft.Xna.Framework;
-using SpawnHouses.Structures;
 using Terraria;
 using Terraria.ModLoader;
 using WorldGenTesting.Helpers;

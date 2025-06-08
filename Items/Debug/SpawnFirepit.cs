@@ -16,12 +16,12 @@ public class SpawnFirepit : ModItem {
     public override void AddRecipes() {
     }
 
-    public override bool AltFunctionUse(Terraria.Player player) {
+    public override bool AltFunctionUse(Player player) {
         return true;
     }
 
 
-    public override bool? UseItem(Terraria.Player player) {
+    public override bool? UseItem(Player player) {
         bool foundLocation = false;
         ushort x = 0;
         ushort y = 0;
@@ -40,7 +40,7 @@ public class SpawnFirepit : ModItem {
         y = (ushort)(y - 2);
         x = (ushort)(x - 3);
 
-        Firepit structure = new Firepit(x, y);
+        Firepit structure = new(x, y);
         structure.Generate();
 
         return true;

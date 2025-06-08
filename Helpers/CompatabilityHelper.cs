@@ -62,9 +62,7 @@ public class CompatabilityHelper : ModSystem {
 
     [JITWhenModsEnabled("MagicStorage")]
     public static void LinkRemoteStorage(Point16 remotePos, Point16 heartPos) {
-        if (!IsMSEnabled) {
-            return;
-        }
+        if (!IsMSEnabled) return;
 
         void SendError() {
             ModContent.GetInstance<SpawnHousesMod>().Logger.Error("Failed to link Magic Storage's remote storage to storage heart. Contact the mod author about this issue");
@@ -79,9 +77,7 @@ public class CompatabilityHelper : ModSystem {
             }
 
             bool success = remoteTileEntity.TryLocate(heartPos, out string message);
-            if (!success) {
-                SendError();
-            }
+            if (!success) SendError();
         }
         catch (Exception) {
             SendError();
@@ -100,12 +96,12 @@ public class CompatabilityHelper : ModSystem {
     }
 
     /// <summary>
-    /// updates local MS network at target location
+    ///     updates local MS network at target location
     /// </summary>
     /// <param name="x"></param>
     /// <param name="y"></param>
     [JITWhenModsEnabled("MagicStorage")]
-    public static void UpdateStorageNetwork (int x, int y) {
+    public static void UpdateStorageNetwork(int x, int y) {
         MagicStorage.NetHelper.SendSearchAndRefresh(x, y);
     }
 

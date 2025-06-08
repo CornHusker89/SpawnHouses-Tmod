@@ -34,12 +34,10 @@ public class Bridge {
         Point2 = point2;
         BoundingBoxes = boundingBoxes;
 
-        if (Enum.TryParse(GetType().Name, out BridgeType result)) {
+        if (Enum.TryParse(GetType().Name, out BridgeType result))
             Id = result;
-        }
-        else {
+        else
             throw new Exception($"BridgeID of {ToString()} not found");
-        }
     }
 
     public virtual void Generate() {

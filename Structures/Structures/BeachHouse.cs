@@ -75,7 +75,7 @@ public sealed class BeachHouse : CustomStructure {
     }
 
     public override void Generate(bool bare = false) {
-        Tile beamTile = new Tile {
+        Tile beamTile = new() {
             HasTile = true,
             TileType = TileID.RichMahoganyBeam,
             TileColor = PaintID.BrownPaint

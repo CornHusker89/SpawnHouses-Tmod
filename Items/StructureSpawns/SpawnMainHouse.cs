@@ -39,11 +39,11 @@ public class SpawnMainHouse : ModItem {
         recipe.Register();
     }
 
-    public override bool AltFunctionUse(Terraria.Player player) {
+    public override bool AltFunctionUse(Player player) {
         return true;
     }
 
-    public override bool? UseItem(Terraria.Player player) {
+    public override bool? UseItem(Player player) {
         if (player.whoAmI == Main.myPlayer) {
             Point16 mousePos = (Main.MouseWorld / 16).ToPoint16();
             int mouseX = mousePos.X;
@@ -72,7 +72,7 @@ public class SpawnMainHouse : ModItem {
             _evaluatedHouseSize = true;
         }
 
-        Point16 pos = new(Terraria.Player.tileTargetX, Terraria.Player.tileTargetY);
+        Point16 pos = new(Player.tileTargetX, Player.tileTargetY);
         Vector2 pos2 = pos.ToVector2() * 16 - Main.screenPosition;
         int x = (int)pos2.X;
         int y = (int)pos2.Y;

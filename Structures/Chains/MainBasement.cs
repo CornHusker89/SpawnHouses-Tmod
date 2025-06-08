@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Enums;
@@ -8,7 +7,6 @@ using SpawnHouses.Structures.Bridges;
 using SpawnHouses.Structures.Structures.ChainStructures;
 using SpawnHouses.Types;
 using Terraria;
-using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
@@ -77,9 +75,7 @@ public class MainBasement : StructureChain {
         if (CompatabilityHelper.IsMSEnabled && ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementSizeMultiplier > 0.60) {
             bool found = false;
             ActionOnEachStructure(structure => {
-                if (structure.Id is StructureType.MainBasementRoom5) {
-                    found = true;
-                }
+                if (structure.Id is StructureType.MainBasementRoom5) found = true;
             });
             return found;
         }
@@ -90,29 +86,22 @@ public class MainBasement : StructureChain {
     protected override bool IsConnectPointValid(ChainConnectPoint connectPoint, ChainConnectPoint targetConnectPoint,
         CustomChainStructure targetStructure) {
         // clear root point
-        if (connectPoint.ParentStructure.Id is StructureType.MainBasementEntry1 or StructureType.MainBasementEntry2 && connectPoint.RootPoint) {
-            return false;
-        }
+        if (connectPoint.ParentStructure.Id is StructureType.MainBasementEntry1 or StructureType.MainBasementEntry2 && connectPoint.RootPoint) return false;
 
         // ensure it's at/under the rootstructure
         bool valid = true;
         targetStructure.ActionOnEachConnectPoint(point => {
-            if (point.Y < RootStructure.Y + 10) {
-                valid = false;
-            }
+            if (point.Y < RootStructure.Y + 10) valid = false;
         });
-        if (!valid) {
-            return false;
-        }
+        if (!valid) return false;
 
         // change base direction chances based on desired shape
-        if (connectPoint.ParentStructure != RootStructure) {
+        if (connectPoint.ParentStructure != RootStructure)
             if (_shape <= 0.21f) {
                 int rootY = RootStructure.ConnectPoints[Directions.Left][0].Y;
                 if (connectPoint.Y == rootY || targetConnectPoint.Y == rootY)
                     return false;
             }
-        }
 
         int maxDistance = 999;
         if (_shape <= 0.41f) {
@@ -123,23 +112,17 @@ public class MainBasement : StructureChain {
                     maxDistance = 50;
                     if (_shape <= 0.11f && ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementSize <= 14) {
                         maxDistance = 35;
-                        if (_shape <= 0.01f) {
-                            maxDistance = 29;
-                        }
+                        if (_shape <= 0.01f) maxDistance = 29;
                     }
                 }
             }
         }
 
         byte direction = connectPoint.Direction;
-        if (direction == Directions.Down) {
-            direction = Directions.Left;
-        }
+        if (direction == Directions.Down) direction = Directions.Left;
 
         int startX = RootStructure.ConnectPoints[direction][0].X;
-        if (Math.Abs(targetConnectPoint.X - startX) > maxDistance) {
-            return false;
-        }
+        if (Math.Abs(targetConnectPoint.X - startX) > maxDistance) return false;
 
         return valid;
     }
@@ -200,15 +183,13 @@ public class MainBasement : StructureChain {
     }
 
     protected override void OnStructureGenerate(CustomChainStructure structure) {
-        if (structure.Id is not StructureType.MainBasementRoom5 || !CompatabilityHelper.IsMSEnabled) {
-            foreach (BoundingBox boundingBox in structure.StructureBoundingBoxes) {
+        if (structure.Id is not StructureType.MainBasementRoom5 || !CompatabilityHelper.IsMSEnabled)
+            foreach (BoundingBox boundingBox in structure.StructureBoundingBoxes)
                 StructureGenHelper.GenerateCobwebs(
                     new Point(boundingBox.Point1.X, boundingBox.Point1.Y),
                     (ushort)(boundingBox.Point2.X - boundingBox.Point1.X + 1),
                     (ushort)(boundingBox.Point2.Y - boundingBox.Point1.Y + 1)
                 );
-            }
-        }
 
         int centerX = structure.X + structure.StructureXSize / 2;
         int centerY = structure.Y + structure.StructureYSize / 2;
@@ -227,9 +208,7 @@ public class MainBasement : StructureChain {
                         tile.Slope = SlopeType.Solid;
                         tile.IsHalfBlock = false;
 
-                        if (!tile.HasTile || tile.TileType is TileID.SmallPiles or TileID.Vines or TileID.Grass) {
-                            tile.TileType = TileID.Dirt;
-                        }
+                        if (!tile.HasTile || tile.TileType is TileID.SmallPiles or TileID.Vines or TileID.Grass) tile.TileType = TileID.Dirt;
                     }
 
                     return true;
@@ -246,16 +225,12 @@ public class MainBasement : StructureChain {
     }
 
     public override bool Generate() {
-        if (!base.Generate()) {
-            return false;
-        }
+        if (!base.Generate()) return false;
 
         // clear the extra walls on top, if the basement generates directly on the surface
-        if (StructureManager.MainHouse is null) {
-            for (int i = -6; i <= 6; i++) {
+        if (StructureManager.MainHouse is null)
+            for (int i = -6; i <= 6; i++)
                 WorldUtils.ClearWall(EntryPosX + i, EntryPosY);
-            }
-        }
 
         return true;
     }

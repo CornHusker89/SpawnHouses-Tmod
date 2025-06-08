@@ -16,12 +16,12 @@ public class SpawnBeachHouse : ModItem {
     public override void AddRecipes() {
     }
 
-    public override bool AltFunctionUse(Terraria.Player player) {
+    public override bool AltFunctionUse(Player player) {
         return true;
     }
 
 
-    public override bool? UseItem(Terraria.Player player) {
+    public override bool? UseItem(Player player) {
         bool foundLocation = false;
         ushort x = 0;
         ushort y = 0;
@@ -42,7 +42,7 @@ public class SpawnBeachHouse : ModItem {
 
         bool reverse = x > Main.LocalPlayer.position.X / 16;
 
-        BeachHouse structure = new BeachHouse(x, y, 0, reverse);
+        BeachHouse structure = new(x, y, 0, reverse);
         structure.Generate();
         //structure._GenerateStructure();
 

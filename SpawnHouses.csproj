@@ -11,7 +11,7 @@
     </PropertyGroup>
     <ItemGroup>
         <Reference Include="StructureHelper">
-          <HintPath>..\..\ModReader\StructureHelper\StructureHelper.dll</HintPath>
+            <HintPath>..\..\ModReader\StructureHelper\StructureHelper.dll</HintPath>
         </Reference>
         <Reference Include="WorldGenTesting">
             <HintPath>..\..\ModSources\WorldGenTesting\bin\Debug\net8.0\WorldGenTesting.dll</HintPath>
@@ -21,7 +21,7 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
-      <Folder Include="Assets\" />
+        <Folder Include="Assets\"/>
     </ItemGroup>
     <!--  <ItemGroup>-->
     <!--    <PackageReference Include="tModLoader.CodeAssist" Version="0.1.*" />-->

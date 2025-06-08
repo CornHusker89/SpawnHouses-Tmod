@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using SpawnHouses.Helpers;
-using SpawnHouses.Structures;
 
 namespace SpawnHouses.Types;
 
@@ -10,8 +9,8 @@ public class CustomChainStructure : CustomStructure {
     public new ChainConnectPoint[][] ConnectPoints;
     public sbyte Cost;
     public ChainConnectPoint ParentChainConnectPoint;
-    public BoundingBox[] StructureBoundingBoxes;
     public StructureChain ParentStructureChain;
+    public BoundingBox[] StructureBoundingBoxes;
     public ushort Weight;
 
     protected CustomChainStructure(string filePath, ushort structureXSize, ushort structureYSize,
@@ -89,10 +88,8 @@ public class CustomChainStructure : CustomStructure {
     }
 
     public void ActionOnEachConnectPoint(Action<ChainConnectPoint> function) {
-        for (byte direction = 0; direction < 4; direction++) {
-            foreach (ChainConnectPoint connectPoint in ConnectPoints[direction]) {
+        for (byte direction = 0; direction < 4; direction++)
+            foreach (ChainConnectPoint connectPoint in ConnectPoints[direction])
                 function(connectPoint);
-            }
-        }
     }
 }

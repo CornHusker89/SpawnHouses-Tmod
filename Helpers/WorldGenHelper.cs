@@ -158,7 +158,7 @@ public static class WorldGenHelper {
                 startLeftSide = _mainHouseOffsetDirection == Directions.Left;
 
             if (FindValidLocation(startLeftSide) || FindValidLocation(!startLeftSide)) {
-                Mineshaft mineshaft = new Mineshaft((ushort)(x - 13), (ushort)(y - 13));
+                Mineshaft mineshaft = new((ushort)(x - 13), (ushort)(y - 13));
                 mineshaft.Generate();
                 StructureManager.Mineshaft = mineshaft;
             }
@@ -173,7 +173,7 @@ public static class WorldGenHelper {
         BoundingBox[] mineshaftBoundingBox = [];
         if (StructureManager.Mineshaft is not null) {
             Mineshaft structure = StructureManager.Mineshaft;
-            BoundingBox structureBox = new BoundingBox(structure.X - 8, structure.Y,
+            BoundingBox structureBox = new(structure.X - 8, structure.Y,
                 structure.X + structure.StructureXSize + 8, structure.Y + 200);
             mineshaftBoundingBox = [structureBox];
         }
@@ -312,7 +312,7 @@ public static class WorldGenHelper {
                     y = (ushort)(y - 2);
                     x = (ushort)(x - 3);
 
-                    Firepit structure = new Firepit(x, y);
+                    Firepit structure = new(x, y);
                     structure.Generate();
                 }
 

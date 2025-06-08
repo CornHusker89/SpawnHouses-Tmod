@@ -46,7 +46,7 @@ public class WebClient {
                 ["beach_house"] = beachHouse ? 1 : 0,
                 ["mineshaft"] = mineshaft ? 1 : 0
             };
-            StringContent content = new StringContent(JsonSerializer.Serialize(dict), Encoding.UTF8, "application/json");
+            StringContent content = new(JsonSerializer.Serialize(dict), Encoding.UTF8, "application/json");
             HttpResponseMessage response = _client.PostAsync("https://spawnhousescounter.xyz/api/add", content).Result;
             response.EnsureSuccessStatusCode();
         }

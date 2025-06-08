@@ -17,12 +17,12 @@ public class SpawnBridgeTest : ModItem {
     public override void AddRecipes() {
     }
 
-    public override bool AltFunctionUse(Terraria.Player player) {
+    public override bool AltFunctionUse(Player player) {
         return true;
     }
 
 
-    public override bool? UseItem(Terraria.Player player) {
+    public override bool? UseItem(Player player) {
         bool foundLocation = false;
         ushort x = 0;
         ushort y = 0;
@@ -41,7 +41,7 @@ public class SpawnBridgeTest : ModItem {
         y = (ushort)(y - 9); //the structure spawning has an offset + we want it to be a little off the ground
         x = (ushort)(x - 4); //center the struct
 
-        BridgeTest structure1 = new BridgeTest(x, y);
+        BridgeTest structure1 = new(x, y);
         structure1._GenerateStructure();
 
 
@@ -66,7 +66,7 @@ public class SpawnBridgeTest : ModItem {
         y = (ushort)(y - 9); //the structure spawning has an offset + we want it to be a little off the ground
         x = (ushort)(x - 4); //center the struct
 
-        BridgeTest structure2 = new BridgeTest(x, y);
+        BridgeTest structure2 = new(x, y);
         structure2._GenerateStructure();
 
 

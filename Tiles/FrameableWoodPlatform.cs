@@ -38,7 +38,7 @@ public class FrameableWoodPlatform : ModTile {
         tile.TileFrameX = 0;
 
         if (Main.netMode == NetmodeID.MultiplayerClient)
-            NetMessage.SendTileSquare(-1, Terraria.Player.tileTargetX, Terraria.Player.tileTargetY, 1);
+            NetMessage.SendTileSquare(-1, Player.tileTargetX, Player.tileTargetY, 1);
     }
 
     public override IEnumerable<Item> GetItemDrops(int i, int j) {
@@ -60,7 +60,7 @@ public class FrameableWoodPlatform : ModTile {
             tile.Slope = SlopeType.Solid;
 
         if (Main.netMode == NetmodeID.MultiplayerClient)
-            NetMessage.SendTileSquare(-1, Terraria.Player.tileTargetX, Terraria.Player.tileTargetY, 1);
+            NetMessage.SendTileSquare(-1, Player.tileTargetX, Player.tileTargetY, 1);
 
         SoundEngine.PlaySound(SoundID.MenuTick);
         return false;

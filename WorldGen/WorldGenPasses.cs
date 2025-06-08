@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Helpers;
-using SpawnHouses.Structures;
 using Terraria;
 using Terraria.ID;
 using Terraria.IO;

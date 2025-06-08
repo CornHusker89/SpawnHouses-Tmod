@@ -1,7 +1,5 @@
 using System;
-using SpawnHouses.Helpers;
 using Terraria;
-using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 
