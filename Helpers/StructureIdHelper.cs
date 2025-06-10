@@ -2,7 +2,6 @@ using System;
 using System.ComponentModel;
 using System.Linq;
 using SpawnHouses.Enums;
-using SpawnHouses.Structures.ChainStructures;
 using SpawnHouses.Structures.Structures;
 using SpawnHouses.Structures.Structures.ChainStructures;
 using SpawnHouses.Types;

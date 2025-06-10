@@ -7,7 +7,7 @@ namespace SpawnHouses.Structures.Structures;
 
 public sealed class BridgeTest : CustomStructure {
     // constants
-    public static readonly string _filePath = "Assets/StructureFiles/bridgeTest";
+    public static readonly string _filePath = "Assets/StructureFiles/bridgeTest.shstruct";
     public static readonly ushort _structureXSize = 8;
     public static readonly ushort _structureYSize = 9;
 

@@ -1,12 +1,12 @@
 using SpawnHouses.Helpers;
 using SpawnHouses.Types;
 
-namespace SpawnHouses.Structures.ChainStructures;
+namespace SpawnHouses.Structures.Structures.ChainStructures;
 
 public sealed class TestChainStructure2 : CustomChainStructure {
     public TestChainStructure2(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
         ushort weight = 10) :
-        base("Assets/StructureFiles/chainTest2",
+        base("Assets/StructureFiles/chainTest2.shstruct",
             15,
             8,
             [

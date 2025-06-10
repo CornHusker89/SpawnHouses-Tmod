@@ -8,8 +8,8 @@ namespace SpawnHouses.Structures.Structures;
 
 public sealed class BeachHouse : CustomStructure {
     // constants
-    public static readonly string _filePath = "Assets/StructureFiles/beachHouse/beachHouse_v2";
-    public static readonly string _filePath_r = "Assets/StructureFiles/beachHouse/beachHouse_v2_r";
+    public static readonly string _filePath = "Assets/StructureFiles/beachHouse/beachHouse_v2.shstruct";
+    public static readonly string _filePath_r = "Assets/StructureFiles/beachHouse/beachHouse_v2_r.shstruct";
     public static readonly ushort _structureXSize = 35;
     public static readonly ushort _structureYSize = 26;
 
@@ -75,20 +75,22 @@ public sealed class BeachHouse : CustomStructure {
     }
 
     public override void Generate(bool bare = false) {
-        Tile beamTile = new() {
-            HasTile = true,
-            TileType = TileID.RichMahoganyBeam,
-            TileColor = PaintID.BrownPaint
-        };
-        if (!Reverse) {
-            StructureGenHelper.Blend(ConnectPoints[3][0], 8, TileID.Sand, blendLeftSide: false);
-            StructureGenHelper.GenerateBeams(new Point(X + 1, Y + 30), beamTile, 4, 3);
-            StructureGenHelper.GenerateFoundation(new Point(X + 22, Y + 34), TileID.Sand, 11);
-        }
-        else {
-            StructureGenHelper.Blend(ConnectPoints[2][0], 8, TileID.Sand);
-            StructureGenHelper.GenerateBeams(new Point(X + 25, Y + 30), beamTile, 4, 3);
-            StructureGenHelper.GenerateFoundation(new Point(X + 12, Y + 34), TileID.Sand, 11);
+        if (!bare) {
+            Tile beamTile = new Tile {
+                HasTile = true,
+                TileType = TileID.RichMahoganyBeam,
+                TileColor = PaintID.BrownPaint
+            };
+            if (!Reverse) {
+                StructureGenHelper.Blend(ConnectPoints[3][0], 8, TileID.Sand, blendLeftSide: false);
+                StructureGenHelper.GenerateBeams(new Point(X + 1, Y + 30), beamTile, 4, 3);
+                StructureGenHelper.GenerateFoundation(new Point(X + 22, Y + 34), TileID.Sand, 11);
+            }
+            else {
+                StructureGenHelper.Blend(ConnectPoints[2][0], 8, TileID.Sand);
+                StructureGenHelper.GenerateBeams(new Point(X + 25, Y + 30), beamTile, 4, 3);
+                StructureGenHelper.GenerateFoundation(new Point(X + 12, Y + 34), TileID.Sand, 11);
+            }
         }
 
         _GenerateStructure();

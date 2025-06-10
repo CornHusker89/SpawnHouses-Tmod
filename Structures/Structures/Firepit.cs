@@ -9,7 +9,7 @@ namespace SpawnHouses.Structures.Structures;
 
 public sealed class Firepit : CustomStructure {
     // constants
-    public static readonly string _filePath = "Assets/StructureFiles/firepit";
+    public static readonly string _filePath = "Assets/StructureFiles/firepit.shstruct";
     public static readonly ushort _structureXSize = 7;
     public static readonly ushort _structureYSize = 3;
 
