@@ -27,10 +27,9 @@ public class SpawnBeachHouse : ModItem {
     }
 
     public override void AddRecipes() {
-        Recipe recipe = Recipe.Create(ModContent.ItemType<SpawnMainHouse>());
-        recipe.AddIngredient(ItemID.IronBar, 10);
-        recipe.AddIngredient(ItemID.Wood, 350);
-        recipe.AddIngredient(ItemID.StoneBlock, 500);
+        Recipe recipe = Recipe.Create(ModContent.ItemType<SpawnBeachHouse>());
+        recipe.AddIngredient(ItemID.IronBar, 6);
+        recipe.AddIngredient(ItemID.Wood, 300);
         recipe.AddTile(TileID.WorkBenches);
         recipe.Register();
     }
