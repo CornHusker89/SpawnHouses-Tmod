@@ -13,6 +13,11 @@ public sealed class BeachHouse : CustomStructure {
     public static readonly ushort _structureXSize = 35;
     public static readonly ushort _structureYSize = 26;
 
+    public static readonly string _filePathNoDeck = "Assets/StructureFiles/beachHouse/beachHouse_v2_NoDeck.shstruct";
+    public static readonly ushort _structureXSizeNoDeck = 24;
+    public static readonly ushort _structureYSizeNoDeck = 34;
+
+
     public static readonly ConnectPoint[][] _connectPoints = [
         // top
         [],
@@ -47,30 +52,34 @@ public sealed class BeachHouse : CustomStructure {
 
 
     public readonly bool Reverse;
+    public bool HasDeck;
 
-    public BeachHouse(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, bool reverse = false) :
-        base(!reverse ? _filePath : _filePath_r, _structureXSize, _structureYSize,
+    public BeachHouse(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, bool reverse = false, bool hasDeck = true) :
+        base(hasDeck? !reverse ? _filePath : _filePath_r : _filePathNoDeck, _structureXSize, _structureYSize,
             CopyConnectPoints(!reverse ? _connectPoints : _connectPoints_r), status, x, y) {
         Reverse = reverse;
+        HasDeck = hasDeck;
         Status = status;
     }
 
     public override void OnFound() {
         Status = StructureStatus.GeneratedAndFound;
 
-        if (!Reverse) {
-            Terraria.WorldGen.PlaceTile(X + 16, Y + 20, TileID.Beds, true, true, style: 22);
-            NetMessage.SendTileSquare(-1, X + 15, Y + 19, 4, 2);
+        if (HasDeck) {
+            if (!Reverse) {
+                Terraria.WorldGen.PlaceTile(X + 16, Y + 20, TileID.Beds, true, true, style: 22);
+                NetMessage.SendTileSquare(-1, X + 15, Y + 19, 4, 2);
 
-            Terraria.WorldGen.PlaceTile(X + 14, Y + 28, TileID.Chairs, true, true, style: 0);
-            NetMessage.SendTileSquare(-1, X + 14, Y + 27, 1, 2);
-        }
-        else {
-            Terraria.WorldGen.PlaceTile(X + 17, Y + 20, TileID.Beds, true, true, style: 22);
-            NetMessage.SendTileSquare(-1, X + 16, Y + 19, 4, 2);
+                Terraria.WorldGen.PlaceTile(X + 14, Y + 28, TileID.Chairs, true, true, style: 0);
+                NetMessage.SendTileSquare(-1, X + 14, Y + 27, 1, 2);
+            }
+            else {
+                Terraria.WorldGen.PlaceTile(X + 17, Y + 20, TileID.Beds, true, true, style: 22);
+                NetMessage.SendTileSquare(-1, X + 16, Y + 19, 4, 2);
 
-            Terraria.WorldGen.PlaceTile(X + 20, Y + 28, TileID.Chairs, true, true, style: 0);
-            NetMessage.SendTileSquare(-1, X + 20, Y + 27, 1, 2);
+                Terraria.WorldGen.PlaceTile(X + 20, Y + 28, TileID.Chairs, true, true, style: 0);
+                NetMessage.SendTileSquare(-1, X + 20, Y + 27, 1, 2);
+            }
         }
     }
 

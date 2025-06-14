@@ -50,6 +50,7 @@ public class SpawnMainHouse : ModItem {
 
             MainHouse house = new((ushort)(mouseX - Math.Floor(_xSize / 2.0)), (ushort)(mouseY - Math.Floor(_ySize / 2.0)));
             house.Generate(true);
+            house.OnFound();
 
             NetMessage.SendTileSquare(-1, house.X, house.Y, house.StructureXSize, house.StructureYSize);
         }

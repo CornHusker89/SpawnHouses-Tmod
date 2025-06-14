@@ -160,9 +160,7 @@ internal class MainHouseSerializer : TagSerializer<MainHouse, TagCompound> {
             tag.GetByte("Status"),
             tag.GetBool("HasBasement"),
             tag.GetBool("InUnderworld"),
-            tag.GetByte("LeftType") != 0
-                ? tag.GetByte("LeftType")
-                : (byte)1, // if its 0 (which only happens if it's a <= v0.2.7 world) set to default (large)
+            tag.GetByte("LeftType") != 0 ? tag.GetByte("LeftType") : (byte)1, // if its 0 (which only happens if it's a <= v0.2.7 world) set to default (large)
             tag.GetByte("RightType") != 0 ? tag.GetByte("RightType") : (byte)1
         );
     }
@@ -213,7 +211,8 @@ internal class BeachHouseSerializer : TagSerializer<BeachHouse, TagCompound> {
             ["X"] = structure.X,
             ["Y"] = structure.Y,
             ["Status"] = structure.Status,
-            ["Reverse"] = structure.Reverse
+            ["Reverse"] = structure.Reverse,
+            ["HasDeck"] = structure.HasDeck
         };
     }
 
@@ -222,7 +221,8 @@ internal class BeachHouseSerializer : TagSerializer<BeachHouse, TagCompound> {
             tag.Get<ushort>("X"),
             tag.Get<ushort>("Y"),
             tag.GetByte("Status"),
-            tag.GetBool("Reverse")
+            tag.GetBool("Reverse"),
+            tag.ContainsKey("HasDeck") && tag.GetBool("HasDeck")
         );
     }
 }

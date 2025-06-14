@@ -24,7 +24,11 @@ Mods: {
 
 			SpawnBeachHouse: {
 				DisplayName: Spawn Beach House
-				Tooltip: --Testing item, no guarantees it won't crash the game--
+				Tooltip:
+					'''
+					Creates Generated Housing's Beach House at the cursor.
+					When held, the yellow region represents the aboveground section, and blue is the floor
+					'''
 			}
 
 			SpawnBridgeTest: {

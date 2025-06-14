@@ -29,7 +29,7 @@ public class SpawnBeachHouse : ModItem {
     public override void AddRecipes() {
         Recipe recipe = Recipe.Create(ModContent.ItemType<SpawnBeachHouse>());
         recipe.AddIngredient(ItemID.IronBar, 6);
-        recipe.AddIngredient(ItemID.Wood, 300);
+        recipe.AddIngredient(ItemID.Wood, 275);
         recipe.AddTile(TileID.WorkBenches);
         recipe.Register();
     }
@@ -44,9 +44,9 @@ public class SpawnBeachHouse : ModItem {
             int mouseX = mousePos.X;
             int mouseY = mousePos.Y;
 
-            BeachHouse house = new((ushort)(mouseX - Math.Floor(24 / 2.0)), (ushort)(mouseY - Math.Floor(34 / 2.0)));
-            house.FilePath = "Assets/StructureFiles/beachHouse/beachHouse_v2_altfoundation.shstruct";
+            BeachHouse house = new((ushort)(mouseX - Math.Floor(24 / 2.0)), (ushort)(mouseY - Math.Floor(34 / 2.0)), hasDeck: false);
             house.Generate(true);
+            house.OnFound();
 
             NetMessage.SendTileSquare(-1, house.X, house.Y, house.StructureXSize, house.StructureYSize);
         }
