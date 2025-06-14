@@ -10,7 +10,7 @@ public static class DrawHelper {
     private static readonly Asset<Texture2D> PixelTexture = ModContent.Request<Texture2D>("SpawnHouses/Items/StructureSpawns/Pixel");
 
     /// <summary>
-    /// Draws rectangles relative to the player camera. Main.spriteBatch must be ended before this is called
+    ///     Draws rectangles relative to the player camera. Main.spriteBatch must be ended before this is called
     /// </summary>
     /// <param name="rectangles">Expected to be world coordinates (tile coords * 16)</param>
     /// <param name="colors">Must have a color for every rectangle</param>
@@ -18,8 +18,7 @@ public static class DrawHelper {
     public static void DrawRectangles(Rectangle[] rectangles, Color[] colors, int width) {
         Main.spriteBatch.Begin(default, default, default, default, default, default, Main.GameViewMatrix.TransformationMatrix);
 
-        for (int index = 0; index < rectangles.Length; index++)
-        {
+        for (int index = 0; index < rectangles.Length; index++) {
             Rectangle rect = rectangles[index];
             Color color = colors[index];
             Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(rect.Left, rect.Top, rect.Width, width), color);

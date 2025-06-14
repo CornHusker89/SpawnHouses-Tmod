@@ -1,19 +1,15 @@
 using System;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Content;
 using SpawnHouses.Helpers;
 using SpawnHouses.Structures.Structures;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.WorldBuilding;
 
 namespace SpawnHouses.Items.StructureSpawns;
 
 public class SpawnBeachHouse : ModItem {
-
     public override void SetDefaults() {
         Item.useStyle = ItemUseStyleID.Swing;
         Item.useTime = 20;
@@ -50,6 +46,7 @@ public class SpawnBeachHouse : ModItem {
 
             NetMessage.SendTileSquare(-1, house.X, house.Y, house.StructureXSize, house.StructureYSize);
         }
+
         return true;
     }
 
@@ -64,8 +61,8 @@ public class SpawnBeachHouse : ModItem {
         int y = (int)pos2.Y;
 
         Rectangle[] rectangles = [
-            new Rectangle(x + -16 * 12, y + 16 * -17, 16 * 24, 16 * 31),
-            new Rectangle(x + -16 * 12, y + 16 * 14, 16 * 24, 16 * 3)
+            new(x + -16 * 12, y + 16 * -17, 16 * 24, 16 * 31),
+            new(x + -16 * 12, y + 16 * 14, 16 * 24, 16 * 3)
         ];
         Color[] colors = [
             Color.Yellow,

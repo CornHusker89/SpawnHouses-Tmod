@@ -55,7 +55,7 @@ public sealed class BeachHouse : CustomStructure {
     public bool HasDeck;
 
     public BeachHouse(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, bool reverse = false, bool hasDeck = true) :
-        base(hasDeck? !reverse ? _filePath : _filePath_r : _filePathNoDeck, _structureXSize, _structureYSize,
+        base(hasDeck ? !reverse ? _filePath : _filePath_r : _filePathNoDeck, _structureXSize, _structureYSize,
             CopyConnectPoints(!reverse ? _connectPoints : _connectPoints_r), status, x, y) {
         Reverse = reverse;
         HasDeck = hasDeck;
@@ -85,7 +85,7 @@ public sealed class BeachHouse : CustomStructure {
 
     public override void Generate(bool bare = false) {
         if (!bare) {
-            Tile beamTile = new Tile {
+            Tile beamTile = new() {
                 HasTile = true,
                 TileType = TileID.RichMahoganyBeam,
                 TileColor = PaintID.BrownPaint

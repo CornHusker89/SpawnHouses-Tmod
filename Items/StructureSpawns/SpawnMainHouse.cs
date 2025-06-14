@@ -1,7 +1,5 @@
 using System;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Content;
 using SpawnHouses.Helpers;
 using SpawnHouses.Structures.Structures;
 using Terraria;
@@ -54,6 +52,7 @@ public class SpawnMainHouse : ModItem {
 
             NetMessage.SendTileSquare(-1, house.X, house.Y, house.StructureXSize, house.StructureYSize);
         }
+
         return true;
     }
 
@@ -79,8 +78,8 @@ public class SpawnMainHouse : ModItem {
         int leftOffset = -16 * (int)Math.Floor(_xSize / 2.0);
 
         Rectangle[] rectangles = [
-            new Rectangle(x + leftOffset, y + topOffset, _xSizePixels, 16 * (_ySize - 10)),
-            new Rectangle(x + leftOffset, y + topOffset + 26 * 16, _xSizePixels, 16 * (_ySize - 26))
+            new(x + leftOffset, y + topOffset, _xSizePixels, 16 * (_ySize - 10)),
+            new(x + leftOffset, y + topOffset + 26 * 16, _xSizePixels, 16 * (_ySize - 26))
         ];
         Color[] colors = [
             Color.Yellow,
