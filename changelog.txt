@@ -1,4 +1,6 @@
 Version 1.2.0
+Major Changes
+- Added an item to create more Beach Houses, craftable with 275 wood and 6 iron bars.
+
 Minor Changes
 - Added Structure Helper as a dependency
-- Added an item to create more Beach Houses, craftable with 275 wood and 6 iron bars.
