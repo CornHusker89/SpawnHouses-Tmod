@@ -1,3 +1,3 @@
-Version 1.2.1
+Version 1.2.2
 Minor Changes
-- Fixed Magic Storage tiles in the Spawn Point House and Basement
+- Fixed placed tile entities not working properly
