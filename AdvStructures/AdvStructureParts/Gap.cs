@@ -2,12 +2,16 @@
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
 public class Gap {
+
+    /// <summary>If one room is the parent of the other, this is the parent room</summary>
+    public Room? ParentRoom;
+
     /// <summary>This will be null if the gap leads to an exterior</summary>
     public Room? HigherRoom;
 
     public bool IsExterior;
 
-    /// <summary>If the gap rooms on it's left/right</summary>
+    /// <summary>If the gap has rooms on it's left/right</summary>
     public bool IsHorizontal;
 
     /// <summary>If the gap is vertical and is horizontally aligned with a gap, this is the next gap with a lower y in the chain</summary>
@@ -44,6 +48,13 @@ public class Gap {
                 LowerRoom = room1;
                 HigherRoom = room2;
             }
+        }
+
+        if (room1.ParentRoom != null) {
+            ParentRoom = room1.ParentRoom;
+        }
+        else if (room2?.ParentRoom != null) {
+            ParentRoom = room2.ParentRoom;
         }
     }
 

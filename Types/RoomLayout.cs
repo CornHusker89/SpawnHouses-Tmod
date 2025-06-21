@@ -39,56 +39,38 @@ public class RoomLayoutVolumes(
 
 public class RoomLayout(
     List<Floor> floors,
-    List<Gap> floorGaps,
     List<Wall> walls,
-    List<Gap> wallGaps,
+    List<Gap> gaps,
     List<Room> rooms
 ) {
-    public readonly List<Gap> FloorGaps = floorGaps;
     public readonly List<Floor> Floors = floors;
-    public readonly List<Gap> WallGaps = wallGaps;
     public readonly List<Wall> Walls = walls;
+    public readonly List<Gap> Gaps = gaps;
     public readonly List<Room> Rooms = rooms;
 
-    /// <summary>
-    ///     gets closest room to the point
-    /// </summary>
-    /// <param name="roomLayout"></param>
-    /// <param name="point"></param>
-    /// <returns></returns>
-    public Room GetClosestRoom(Point16 point) {
-        if (Rooms.Count == 0)
-            throw new Exception("BackgroundVolumes in given room layout was empty");
+    public static RoomLayout Union(params RoomLayout[] roomLayouts) {
+        List<Floor> floors = [];
+        List<Wall> walls = [];
+        List<Gap> gaps = [];
+        List<Room> rooms = [];
 
-        int closestIndex = -1;
-        double closestDistance = double.MaxValue;
-
-        for (int i = 0; i < Rooms.Count; i++) {
-            double closestDistanceInShape = double.MaxValue;
-            Rooms[i].Volume.ExecuteOnPerimeter((x, y, _) => {
-                double distance = Math.Sqrt(Math.Pow(point.X - x, 2) + Math.Pow(point.Y - y, 2));
-                if (distance < closestDistanceInShape)
-                    closestDistanceInShape = distance;
-            });
-
-            if (closestDistanceInShape < closestDistance) {
-                closestDistance = closestDistanceInShape;
-                closestIndex = i;
-            }
+        foreach (RoomLayout roomLayout in roomLayouts) {
+            floors.AddRange(roomLayout.Floors);
+            walls.AddRange(roomLayout.Walls);
+            gaps.AddRange(roomLayout.Gaps);
+            rooms.AddRange(roomLayout.Rooms);
         }
 
-        return Rooms[closestIndex];
+        return new RoomLayout(floors, walls, gaps, rooms);
     }
 }
 
 public class ExternalLayout(
     List<Floor> floors,
-    List<Gap> floorGaps,
     List<Wall> walls,
-    List<Gap> wallGaps
+    List<Gap> gaps
 ) {
-    public readonly List<Gap> FloorGaps = floorGaps;
     public readonly List<Floor> Floors = floors;
-    public readonly List<Gap> WallGaps = wallGaps;
+    public readonly List<Gap> Gaps = gaps;
     public readonly List<Wall> Walls = walls;
 }

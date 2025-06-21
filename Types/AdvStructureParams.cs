@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using SpawnHouses.AdvStructures;
 using SpawnHouses.AdvStructures.AdvStructureParts;
+using SpawnHouses.Structures;
 using Terraria.DataStructures;
 using Range = SpawnHouses.Structures.Range;
 
@@ -10,14 +11,19 @@ namespace SpawnHouses.Types;
 public class StructureParams {
     public StructureTag[] TagBlacklist;
     public StructureTag[] TagsRequired;
-    public Point16 Start;
-    public Point16 End;
     public EntryPoint[] EntryPoints;
     public TilePalette Palette;
     public Range VolumeRange;
     public Range HousingRange;
+    public bool CanAddEntryPoints;
 
     public int Length;
+
+    public int StartEntryPointX;
+    public int EndEntryPointX;
+
+    /// <summary>calculated using the entry points</summary>
+    public readonly Point16 Center;
 
     public int Housing;
     public int Height;
@@ -26,24 +32,27 @@ public class StructureParams {
     public StructureParams(
         StructureTag[] tagsRequired,
         StructureTag[] tagBlacklist,
-        Point16 start,
-        Point16 end,
         EntryPoint[] entryPoints,
         TilePalette tilePalette,
         Range volumeRange,
-        Range housingRange) {
+        Range housingRange,
+        bool canAddEntryPoints) {
         TagsRequired = tagsRequired;
         TagBlacklist = tagBlacklist;
-        Start = start;
-        End = end;
-        if (Start.X > End.X) {
-            (Start, End) = (End, Start);
-        }
-        Length = End.X - Start.X;
         EntryPoints = entryPoints;
+        StartEntryPointX = EntryPoints.Select(entryPoint => entryPoint.Start.X).Min();
+        EndEntryPointX = EntryPoints.Select(entryPoint => entryPoint.Direction is Directions.Left or Directions.Right ? entryPoint.Start.X : entryPoint.Start.X + entryPoint.Size).Max();
+        Length = EndEntryPointX - StartEntryPointX;
         Palette = tilePalette;
         VolumeRange = volumeRange;
         HousingRange = housingRange;
+        CanAddEntryPoints = canAddEntryPoints;
+
+        int centerXMin = EntryPoints.Min(entryPoint => entryPoint.Start.X);
+        int centerXMax = EntryPoints.Max(entryPoint => entryPoint.End.X);
+        int centerYMin = EntryPoints.Min(entryPoint => entryPoint.Start.Y);
+        int centerYMax = EntryPoints.Max(entryPoint => entryPoint.End.Y);
+        Center = new Point16(centerXMin + (centerXMin + centerXMax) / 2, centerXMin + (centerYMin + centerYMax) / 2);
 
         if (VolumeRange.Min / HousingRange.Min < 60)
             throw new ArgumentException($"Volume minimum of {VolumeRange.Min} is too small given the housing minimum of {HousingRange.Min}");
@@ -56,23 +65,27 @@ public class StructureParams {
     public void ReRollRanges() {
         double scale = Terraria.WorldGen.genRand.NextDouble();
         Volume = (int)(VolumeRange.Min + (VolumeRange.Max - VolumeRange.Min) * scale);
-        Height = Volume / (End.X - Start.X);
+        Height = Volume / Length;
         if (Height <= 4) {
-            throw new ArgumentException($"Volume ({Volume}) is too small compared to the length ({Length}) of the structure, resulting in a height of {Height}");
+            throw new ArgumentException($"Volume ({Volume}) is too small compared to the length ({Length}) of the structure, resulting in an unacceptable total height of {Height}");
         }
 
         if (HousingRange.Min < 0) {
             throw new ArgumentException("Min housing cannot be less than 0");
         }
+
         if (HousingRange.Max < 0) {
             throw new ArgumentException("Max housing cannot be less than 0");
         }
+
         if (HousingRange.Max < HousingRange.Min) {
             throw new ArgumentException("Max Housing is less than min housing");
         }
+
         if (HousingRange.Max == 0 && TagBlacklist.Contains(StructureTag.HasHousing)) {
             throw new ArgumentException("Adv structure cannot have a max housing of 0 while blacklisting components with housing");
         }
+
         Housing = (int)(HousingRange.Min + (HousingRange.Max - HousingRange.Min) * scale);
     }
 }

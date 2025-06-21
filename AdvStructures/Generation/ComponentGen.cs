@@ -651,15 +651,19 @@ public static class ComponentGen {
             PaintedType.PlaceTile(x, y, PaintedType.PickRandom(
                 elevated ? componentParams.TilePalette.WallAltElevated : componentParams.TilePalette.WallAlt));
 
-            if (lowX[y - yStart] == 0)
+            if (lowX[y - yStart] == 0) {
                 lowX[y - yStart] = x;
-            if (highX[y - yStart] == 0)
+            }
+            if (highX[y - yStart] == 0) {
                 highX[y - yStart] = x;
+            }
 
-            if (x < lowX[y - yStart])
+            if (x < lowX[y - yStart]) {
                 lowX[y - yStart] = x;
-            if (x > highX[y - yStart])
+            }
+            if (x > highX[y - yStart]) {
                 highX[y - yStart] = x;
+            }
         });
 
         for (int index = 0; index < lowX.Length; index++) {

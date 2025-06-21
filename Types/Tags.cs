@@ -58,6 +58,7 @@ public enum RoomLayoutTag {
 public enum ComponentTag {
     // ===== all =====
     Elevated,
+    External,
 
     // ===== floor =====
     IsFloor,

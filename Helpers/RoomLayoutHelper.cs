@@ -8,13 +8,14 @@ using SpawnHouses.Types;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
+using Gap = SpawnHouses.AdvStructures.AdvStructureParts.Gap;
 using Range = SpawnHouses.Structures.Range;
 
 namespace SpawnHouses.Helpers;
 
 public static class RoomLayoutHelper {
     /// <summary>
-    ///     based on the size, so if room is not uniform square results might not be accurate
+    ///     based on the outer bounding box, so if room is not uniform square results might not be accurate
     /// </summary>
     /// <param name="volume"></param>
     /// <returns></returns>
@@ -41,6 +42,35 @@ public static class RoomLayoutHelper {
         }
 
         return (cornersX, cornersY);
+    }
+
+    /// <summary>
+    ///     gets closest room to the point using the perimeter of each room
+    /// </summary>
+    /// <param name="rooms"></param>
+    /// <param name="point"></param>
+    /// <returns></returns>
+    public static Room GetClosestRoom(List<Room> rooms, Point16 point) {
+        if (rooms.Count == 0)
+            throw new Exception("BackgroundVolumes in given room layout was empty");
+
+        int closestIndex = -1;
+        double closestDistance = double.MaxValue;
+
+        for (int i = 0; i < rooms.Count; i++) {
+            double closestDistanceInShape = double.MaxValue;
+            rooms[i].Volume.ExecuteOnPerimeter((x, y, _) => {
+                double distance = Math.Sqrt(Math.Pow(point.X - x, 2) + Math.Pow(point.Y - y, 2));
+                if (distance < closestDistanceInShape)
+                    closestDistanceInShape = distance;
+            });
+
+            if (closestDistanceInShape < closestDistance) {
+                closestDistance = closestDistanceInShape;
+                closestIndex = i;
+            }
+        }
+        return rooms[closestIndex];
     }
 
     /// <summary>
@@ -173,6 +203,7 @@ public static class RoomLayoutHelper {
         finishedRoomVolumes.AddRange(roomQueue);
         return new RoomLayoutVolumes(floorVolumes, wallVolumes, finishedRoomVolumes);
     }
+
 
     /// <summary>
     ///     creates actual floor and wall objects from volumes
@@ -319,14 +350,11 @@ public static class RoomLayoutHelper {
     }
 
     /// <summary>
-    /// Removes impractically small gaps, moves and resizes large gaps, puts into 2 lists
+    /// Removes impractically small gaps, moves and resizes large gaps
     /// </summary>
     /// <param name="gaps"></param>
     /// <returns></returns>
-    public static (List<Gap> floorGaps, List<Gap> wallGaps) ResizeAndSortGaps(List<Gap> gaps) {
-        // prune gap sizes
-        List<Gap> floorGaps = [];
-        List<Gap> wallGaps = [];
+    public static void ResizeAndMoveGaps(List<Gap> gaps) {
         int maxFloorGapSize = gaps.Where(gap => !gap.IsHorizontal).Select(gap => gap.Volume.Size.X).Max();
 
         // filter out gaps which are too small and resize gaps
@@ -339,10 +367,10 @@ public static class RoomLayoutHelper {
                 }
 
                 var points = gap.Volume.Points;
-                for (int i = 0; i < gap.Volume.Points.Length; i++) {
+                for (int pointIndex = 0; pointIndex < gap.Volume.Points.Length; pointIndex++) {
                     // ensure doors aren't too tall
-                    if (points[i].Y < gap.Volume.BoundingBox.bottomRight.Y - 2) {
-                        points[i] = new Point16(points[i].X, gap.Volume.BoundingBox.bottomRight.Y - 2);
+                    if (points[pointIndex].Y < gap.Volume.BoundingBox.bottomRight.Y - 2) {
+                        points[pointIndex] = new Point16(points[pointIndex].X, gap.Volume.BoundingBox.bottomRight.Y - 2);
                     }
                 }
 
@@ -379,43 +407,63 @@ public static class RoomLayoutHelper {
         }
 
         // attempt to chain vertical gaps
-        foreach (Gap gap in gaps) {
-            if (gap.IsHorizontal) {
-                wallGaps.Add(gap);
-            }
-            else {
-                // randomly move the gap, but if possible align it with the gap below
-                Gap? potentialChainGap = gaps.Find(potentialGap =>
-                    !potentialGap.IsHorizontal &&
-                    potentialGap.HigherRoom == gap.LowerRoom &&
-                    gap.Volume.BoundingBox.topLeft.X <= potentialGap.Volume.BoundingBox.topLeft.X &&
-                    gap.Volume.BoundingBox.bottomRight.X >= potentialGap.Volume.BoundingBox.bottomRight.X
-                );
+        for (int gapIndex = gaps.Count - 1; gapIndex >= 0; gapIndex--) {
+            Gap gap = gaps[gapIndex];
+            if (gap.IsHorizontal) continue;
 
-                // 60% chance to go for chain gaps
-                if (potentialChainGap != null && Terraria.WorldGen.genRand.NextDouble() < 0.6) {
-                    gap.IsChain = true;
-                    gap.VerticalChainLower = potentialChainGap;
-                    potentialChainGap.VerticalChainHigher = gap;
-                    var points = gap.Volume.Points;
-                    for (int i = 0; i < gap.Volume.Points.Length; i++) {
-                        if (points[i].X < potentialChainGap.Volume.BoundingBox.topLeft.X) {
-                            points[i] = new Point16(potentialChainGap.Volume.BoundingBox.topLeft.X, points[i].Y);
-                        }
+            // randomly move the gap, but if possible align it with the gap below
+            Gap? potentialChainGap = gaps.Find(potentialGap =>
+                !potentialGap.IsHorizontal &&
+                potentialGap.HigherRoom == gap.LowerRoom &&
+                gap.Volume.BoundingBox.topLeft.X <= potentialGap.Volume.BoundingBox.topLeft.X &&
+                gap.Volume.BoundingBox.bottomRight.X >= potentialGap.Volume.BoundingBox.bottomRight.X
+            );
 
-                        if (points[i].X > potentialChainGap.Volume.BoundingBox.bottomRight.X) {
-                            points[i] = new Point16(potentialChainGap.Volume.BoundingBox.bottomRight.X, points[i].Y);
-                        }
+            // 60% chance to go for chain gaps
+            if (potentialChainGap != null && Terraria.WorldGen.genRand.NextDouble() < 0.6) {
+                gap.IsChain = true;
+                gap.VerticalChainLower = potentialChainGap;
+                potentialChainGap.VerticalChainHigher = gap;
+                var points = gap.Volume.Points;
+                for (int pointIndex = 0; pointIndex < gap.Volume.Points.Length; pointIndex++) {
+                    if (points[pointIndex].X < potentialChainGap.Volume.BoundingBox.topLeft.X) {
+                        points[pointIndex] = new Point16(potentialChainGap.Volume.BoundingBox.topLeft.X, points[pointIndex].Y);
                     }
 
-                    gap.Volume = new Shape(points);
+                    if (points[pointIndex].X > potentialChainGap.Volume.BoundingBox.bottomRight.X) {
+                        points[pointIndex] = new Point16(potentialChainGap.Volume.BoundingBox.bottomRight.X, points[pointIndex].Y);
+                    }
                 }
 
-                floorGaps.Add(gap);
+                gap.Volume = new Shape(points);
+            }
+            else {
+                gaps.RemoveAt(gapIndex);
             }
         }
+    }
 
-        return (floorGaps, wallGaps);
+    public static void PruneGaps(List<Gap> gaps, List<Room> rooms, EntryPoint[] entryPoints) {
+        HashSet<Gap> requiredGaps = [];
+        var visitedRooms = rooms.ToHashSet();
+        var visitQueue = new Queue<(Room room, Room? parentRoom)>();
+
+        foreach (EntryPoint entryPoint in entryPoints) {
+            Room potentialRoom = GetClosestRoom(rooms, entryPoint.Middle);
+            visitQueue.Enqueue((potentialRoom, null));
+        }
+
+        while (visitQueue.Count > 0) {
+            (Room room, Room? parentRoom) = visitQueue.Dequeue();
+            if (!visitedRooms.Add(room)) {
+                continue;
+            }
+
+            room.SetParent(parentRoom);
+            foreach (Room connection in room.GetConnections()) {
+                visitQueue.Enqueue((connection, room));
+            }
+        }
     }
 
     /// <summary>
@@ -424,28 +472,19 @@ public static class RoomLayoutHelper {
     /// <param name="roomLayoutVolumes"></param>
     /// <param name="roomLayoutParams"></param>
     /// <returns></returns>
-    public static (List<Gap> floorGaps, List<Gap> wallGaps, List<Room> rooms) CreateGapsAndRooms(RoomLayoutVolumes roomLayoutVolumes, RoomLayoutParams roomLayoutParams) {
+    public static (List<Gap> gaps, List<Room> rooms) CreateGapsAndRooms(RoomLayoutVolumes roomLayoutVolumes, RoomLayoutParams roomLayoutParams) {
         var (allGaps, rooms) = RaycastGaps(roomLayoutVolumes);
         RemoveDuplicateGaps(allGaps);
-        var (floorGaps, wallGaps) = ResizeAndSortGaps(allGaps);
+        ResizeAndMoveGaps(allGaps);
+        PruneGaps(allGaps, rooms, roomLayoutParams.EntryPoints);
 
-        allGaps = [];
-        allGaps.AddRange(floorGaps);
-        allGaps.AddRange(wallGaps);
-
-        // randomize so future iteration won't favor horizontal/vertical
-        allGaps = allGaps.OrderBy(_ => Terraria.WorldGen.genRand.NextDouble()).ToList();
-
-        // create tree for rooms
-
-
-        return (floorGaps, wallGaps, rooms);
+        return (allGaps, rooms);
     }
 
     public static RoomLayout CreateRoomLayout(RoomLayoutVolumes roomLayoutVolumes, RoomLayoutParams roomLayoutParams) {
         var (floors, walls) = CreateFloorsAndWalls(roomLayoutVolumes);
-        var (floorGaps, wallGaps, rooms) = CreateGapsAndRooms(roomLayoutVolumes, roomLayoutParams);
+        var (gaps, rooms) = CreateGapsAndRooms(roomLayoutVolumes, roomLayoutParams);
 
-        return new RoomLayout(floors, floorGaps, walls, wallGaps, rooms);
+        return new RoomLayout(floors, walls, gaps, rooms);
     }
 }

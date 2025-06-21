@@ -1,9 +1,8 @@
 #nullable enable
 
-using SpawnHouses.Types;
 using Terraria.ID;
 
-namespace SpawnHouses.AdvStructures;
+namespace SpawnHouses.Types;
 
 /// <summary>
 ///     Everything inside the struct will be initialized and valid, no matter the params to the constructor
