@@ -23,6 +23,7 @@ public enum StructureType : ushort {
     MainBasementRoom5 = 15,
     MainBasementRoom6 = 16,
     MainBasementRoom7 = 17,
+    MainBasementRoom8 = 21,
 
     // cave town 1
     CaveTown1Test1 = 18,

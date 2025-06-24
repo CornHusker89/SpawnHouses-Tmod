@@ -4,7 +4,7 @@ This mod has Magic Storage integration! A starting setup will spawn with the mai
 
 Use Mod Configs to enable/disable generation of any house.
 
-- Current Compatibilities -
+Current Compatibilities:
 - Calamity
 - Spirit / Spirit Reforged
 - Remnants

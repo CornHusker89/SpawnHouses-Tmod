@@ -1,7 +1,9 @@
 using Microsoft.Xna.Framework;
 using SpawnHouses.Helpers;
 using SpawnHouses.Types;
+using Terraria;
 using Terraria.DataStructures;
+using Terraria.ID;
 using BoundingBox = SpawnHouses.Types.BoundingBox;
 
 namespace SpawnHouses.Structures.Structures.ChainStructures;
@@ -369,6 +371,7 @@ public class MainBasementRoom5 : CustomChainStructure {
             CompatabilityHelper.PlaceMSModule(X + 12, Y + 6, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
 
             StructureGenHelper.GenerateCobwebs(new Point(X, Y), StructureXSize, StructureYSize);
+            NetMessage.SendTileSquare(-1, X, Y, StructureXSize, StructureYSize);
             FrameTiles();
         }
     }
@@ -434,5 +437,37 @@ public class MainBasementRoom7 : CustomChainStructure {
                 ]
             ],
             x, y, status, cost, weight) {
+    }
+}
+
+public class MainBasementRoom8 : CustomChainStructure {
+    public MainBasementRoom8(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
+        base("Assets/StructureFiles/mainBasement/mainBasement_Room8.shstruct",
+            23,
+            9,
+            [
+                // top
+                [],
+
+                // bottom
+                [],
+
+                // left
+                [
+                    new ChainConnectPoint(0, 8, Directions.Left, new Seal.MainBasement_SealWall(), true)
+                ],
+
+                // right
+                [
+                    new ChainConnectPoint(22, 8, Directions.Right, new Seal.MainBasement_SealWall())
+                ]
+            ],
+            x, y, status, cost, weight) {
+    }
+
+    public override void OnFound() {
+        Terraria.WorldGen.PlaceTile(X + 4, Y + 7, TileID.Furnaces, true, true);
+        StructureGenHelper.GenerateCobwebs(new Point(X, Y), StructureXSize, StructureYSize);
+        NetMessage.SendTileSquare(-1, X, Y, StructureXSize, StructureYSize);
     }
 }

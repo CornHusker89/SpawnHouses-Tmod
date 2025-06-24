@@ -1,3 +1,7 @@
-Version 1.2.2
+Version 1.2.3
+Major Changes
+- Added a new room to the basement
+
 Minor Changes
-- Fixed placed tile entities not working properly
+- Fixed some containers not being openable
+- Fixed terrain blending trying to find the lowest surface possible, instead of the surface that makes the most sense

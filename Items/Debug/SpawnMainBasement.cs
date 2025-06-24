@@ -27,6 +27,7 @@ public class SpawnMainBasement : ModItem {
         MainBasement chain = new((ushort)point.X, (ushort)point.Y);
         chain.CalculateChain();
         chain.Generate();
+        chain.OnFound();
         return true;
     }
 }

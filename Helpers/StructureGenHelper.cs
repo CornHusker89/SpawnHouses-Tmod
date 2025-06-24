@@ -291,7 +291,7 @@ public static class StructureGenHelper {
     /// <param name="maxCastDistance"></param>
     /// <returns></returns>
     public static (double average, double sd) GetSurfaceLevel(
-        int x1, int x2, int y, byte step = 1, ushort maxCastDistance = 50) {
+        int x1, int x2, int y, byte step = 1, ushort maxCastDistance = 75) {
         List<double> surfaceLevels = [];
         for (int i = x1; i <= x2; i += step)
         for (int j = 0; j < maxCastDistance; j++)
@@ -376,7 +376,7 @@ public static class StructureGenHelper {
             startY = SurfaceRaycast(startX, endY - maxHeight).yCoord;
 
             (bool found, int distance, int yCoord) possibleDeeperCast = SurfaceRaycastFromInsideTile(startX, startY, 20);
-            if (possibleDeeperCast is { found: true, distance: < 20 })
+            if (possibleDeeperCast is { found: true, distance: < 20 } && possibleDeeperCast.yCoord - 4 < startY) // so we don't dig down to find caves
                 startY = possibleDeeperCast.yCoord;
         }
         else {
@@ -387,7 +387,7 @@ public static class StructureGenHelper {
             endY = SurfaceRaycast(endX, startY - maxHeight).yCoord;
 
             (bool found, int distance, int yCoord) possibleDeeperCast = SurfaceRaycastFromInsideTile(endX, endY, 20);
-            if (possibleDeeperCast is { found: true, distance: < 20 })
+            if (possibleDeeperCast is { found: true, distance: < 20 } && possibleDeeperCast.yCoord - 4 < startY)
                 endY = possibleDeeperCast.yCoord;
         }
 

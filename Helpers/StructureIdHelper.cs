@@ -56,6 +56,8 @@ public static class StructureIdHelper {
                 return typeof(MainBasementRoom6);
             case (ushort)StructureType.MainBasementRoom7:
                 return typeof(MainBasementRoom7);
+            case (ushort)StructureType.MainBasementRoom8:
+                return typeof(MainBasementRoom8);
 
 
             case (ushort)StructureType.CaveTown1Test1:

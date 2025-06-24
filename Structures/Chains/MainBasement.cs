@@ -33,9 +33,10 @@ public class MainBasement : StructureChain {
                 new MainBasementRoom5(cost: 13, weight: 145),
                 new MainBasementRoom6(cost: 14, weight: 115),
                 new MainBasementRoom7(cost: 14, weight: 80),
-                new MainBasementHallway4(cost: 5, weight: 100),
-                new MainBasementHallway5(cost: 5, weight: 100),
-                new MainBasementHallway9(cost: 4, weight: 100)
+                new MainBasementRoom8(cost: 13, weight: 150),
+                new MainBasementHallway4(cost: 5, weight: 110),
+                new MainBasementHallway5(cost: 5, weight: 110),
+                new MainBasementHallway9(cost: 4, weight: 110)
             ],
             [
                 new SingleStructureBridge.MainBasementHallway1(),
@@ -183,7 +184,7 @@ public class MainBasement : StructureChain {
     }
 
     protected override void OnStructureGenerate(CustomChainStructure structure) {
-        if (structure.Id is not StructureType.MainBasementRoom5 || !CompatabilityHelper.IsMSEnabled)
+        if ((structure.Id is not StructureType.MainBasementRoom5 || !CompatabilityHelper.IsMSEnabled) && structure.Id is not StructureType.MainBasementRoom8)
             foreach (BoundingBox boundingBox in structure.StructureBoundingBoxes)
                 StructureGenHelper.GenerateCobwebs(
                     new Point(boundingBox.Point1.X, boundingBox.Point1.Y),
