@@ -33,7 +33,7 @@ public enum StructureTag {
     Jungle,
 
     /// structure is categorized as having an overall cavern/underground theme
-    Cavern,
+    Cavern
 }
 
 public enum RoomLayoutTag {
@@ -52,7 +52,7 @@ public enum RoomLayoutTag {
     FirstFloorStorage,
 
     /// the first floor has horizontal gaps wherever possible
-    FirstFloorConnected,
+    FirstFloorConnected
 }
 
 public enum ComponentTag {

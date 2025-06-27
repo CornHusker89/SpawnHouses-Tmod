@@ -6,7 +6,6 @@ using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Helpers;
 using SpawnHouses.Structures;
 using SpawnHouses.Types;
-using Terraria;
 using Terraria.DataStructures;
 using Range = SpawnHouses.Structures.Range;
 
@@ -29,21 +28,13 @@ public static class AdvStructureLayoutsGen {
             Range? housingRange, Func<AdvStructure, bool> method)> methodTuples = [];
 
         foreach (var tuple in GenMethods) {
-            if (tuple.lengthRange?.InRange(structureParams.Length) is true) {
-                continue;
-            }
+            if (tuple.lengthRange?.InRange(structureParams.Length) is true) continue;
 
-            if (tuple.volumeRange?.InRange(structureParams.Volume) is true) {
-                continue;
-            }
+            if (tuple.volumeRange?.InRange(structureParams.Volume) is true) continue;
 
-            if (tuple.heightRange?.InRange(structureParams.Height) is true) {
-                continue;
-            }
+            if (tuple.heightRange?.InRange(structureParams.Height) is true) continue;
 
-            if (tuple.housingRange?.InRange(structureParams.Housing) is true) {
-                continue;
-            }
+            if (tuple.housingRange?.InRange(structureParams.Housing) is true) continue;
 
             var requiredTags = structureParams.TagsRequired.ToList();
             bool valid = true;
@@ -179,7 +170,7 @@ public static class AdvStructureLayoutsGen {
     /// </summary>
     public static bool StructureLayout2(AdvStructure advStructure) {
         // create room params first
-        RoomLayoutParams roomLayoutParams = new RoomLayoutParams(
+        RoomLayoutParams roomLayoutParams = new(
             [],
             [],
             null,
@@ -192,8 +183,14 @@ public static class AdvStructureLayoutsGen {
             new Range(1, 2),
             0.3f
         );
+        advStructure.Tilemap = new StructureTilemap(
+            (ushort)(advStructure.Params.Length + 10),
+            (ushort)(advStructure.Params.Height + 10),
+            advStructure.Params.TopLeft - new Point16(5, 5)
+        );
 
         // then create external layout
+        Point16 localTilemapOffset = advStructure.Tilemap.WorldTileOffset;
         int externalWallThickness = roomLayoutParams.WallWidth.Max;
         int externalFloorThickness = roomLayoutParams.FloorWidth.Max;
         List<Floor> exteriorFloors = [];
@@ -213,8 +210,8 @@ public static class AdvStructureLayoutsGen {
             // create and add corresponding external gap
             Gap gap = new(
                 new Shape(
-                    thisEntryPoint.Start,
-                    thisEntryPoint.End + thisGapWidth
+                    thisEntryPoint.Start - localTilemapOffset,
+                    thisEntryPoint.End + thisGapWidth - localTilemapOffset
                 ),
                 null!,
                 null,
@@ -232,8 +229,8 @@ public static class AdvStructureLayoutsGen {
             // add in a wall (before the floor) because the entry points are too far away vertically otherwise
             if (Math.Abs(verticalDistanceRequired) > externalFloorThickness) {
                 Wall wall = new(new Shape(
-                    thisEndPoint + new Point16(0, verticalDirection),
-                    new Point16(thisEndPoint.X + (externalFloorThickness - 1) * verticalDirection, nextStartPoint.Y + verticalDirection) // exclude floor, if theres overlap
+                    thisEndPoint + new Point16(0, verticalDirection) - localTilemapOffset,
+                    new Point16(thisEndPoint.X + (externalFloorThickness - 1) * verticalDirection, nextStartPoint.Y + verticalDirection) - localTilemapOffset // exclude floor, if theres overlap
                 ), true);
                 exteriorWalls.Add(wall);
             }
@@ -241,8 +238,8 @@ public static class AdvStructureLayoutsGen {
             // add in the floor
             if (thisEndPoint.X != nextStartPoint.X) {
                 Floor floor = new(new Shape(
-                    new Point16(thisEndPoint.X, nextStartPoint.Y),
-                    nextStartPoint + new Point16(0, externalFloorThickness - 1)
+                    new Point16(thisEndPoint.X, nextStartPoint.Y) - localTilemapOffset,
+                    nextStartPoint + new Point16(0, externalFloorThickness - 1) - localTilemapOffset
                 ), true);
                 exteriorFloors.Add(floor);
             }
@@ -250,13 +247,17 @@ public static class AdvStructureLayoutsGen {
 
         advStructure.ExternalLayout = new ExternalLayout(exteriorFloors, exteriorWalls, exteriorGaps);
 
-        // finally finish the room layout
-        advStructure.Layout = RoomLayoutGen.GetRandomMethod(roomLayoutParams)(roomLayoutParams);
 
-        // assign rooms to the external gaps
-        foreach (Gap gap in advStructure.ExternalLayout.Gaps) {
-            gap.LowerRoom = RoomLayoutHelper.GetClosestRoom(advStructure.Layout.Rooms, gap.Volume.Center);
-        }
+        // advStructure.EvaluateTilemapData();
+        // roomLayoutParams.MainVolume = Shape.FromStructureInterior(advStructure.Tilemap);
+        //
+        // // finally finish the room layout
+        // advStructure.Layout = RoomLayoutGen.GetRandomMethod(roomLayoutParams)(roomLayoutParams);
+        //
+        // // assign rooms to the external gaps
+        // foreach (Gap gap in advStructure.ExternalLayout.Gaps) {
+        //     gap.LowerRoom = RoomLayoutHelper.GetClosestRoom(advStructure.Layout.Rooms, gap.Volume.Center);
+        // }
 
         return true;
     }

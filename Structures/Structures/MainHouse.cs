@@ -286,7 +286,7 @@ public sealed class MainHouse : CustomStructure {
         Generator.GenerateStructure(TopFilePath, new Point16(X + LeftSize - 14, Y - 10), ModInstance.Mod);
 
         string signString = "All good adventures start in a tavern...To bad this isn't a tavern :(";
-        Random rnd = new Random();
+        Random rnd = new();
         for (int i = 0; i < 25; i++) {
             string possibleString = _signQuotes[rnd.Next(0, _signQuotes.Count)];
             if (possibleString.Contains('~'))

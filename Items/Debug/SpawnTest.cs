@@ -40,7 +40,7 @@ public class SpawnTest : ModItem {
 
         Console.WriteLine(x + ", " + y);
 
-        StructureParams structureLayoutParams = new StructureParams(
+        StructureParams structureLayoutParams = new(
             [StructureTag.HasHousing],
             [],
             [
@@ -61,7 +61,7 @@ public class SpawnTest : ModItem {
             true
         );
 
-        AdvStructure structure = new AdvStructure(structureLayoutParams);
+        AdvStructure structure = new(structureLayoutParams);
         structure.ApplyLayoutMethod();
         structure.FillComponents();
 

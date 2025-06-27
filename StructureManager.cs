@@ -125,7 +125,7 @@ internal static class ChainProcessor {
 
 internal class DictionarySerializer : TagSerializer<Dictionary<string, object>, TagCompound> {
     public override TagCompound Serialize(Dictionary<string, object> data) {
-        TagCompound tag = new TagCompound();
+        TagCompound tag = new();
         foreach (var kvp in data)
             tag[kvp.Key] = kvp.Value;
         return tag;
@@ -175,7 +175,7 @@ internal class MainBasementSerializer : TagSerializer<MainBasement, TagCompound>
     }
 
     public override MainBasement Deserialize(TagCompound tag) {
-        MainBasement basement = new MainBasement(
+        MainBasement basement = new(
             (ushort)tag.Get<short>("X"),
             (ushort)tag.Get<short>("Y"),
             tag.GetByte("Status")

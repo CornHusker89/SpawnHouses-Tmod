@@ -7,7 +7,7 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 
-namespace SpawnHouses.AdvStructures;
+namespace SpawnHouses.AdvStructures.Generation;
 
 public static class ComponentGen {
     public static readonly (ComponentTag[] possibleTags, Func<ComponentParams, object> method)[] GenMethods = [
@@ -239,13 +239,13 @@ public static class ComponentGen {
         int bottomY = componentParams.Volume.BoundingBox.bottomRight.Y;
         componentParams.Volume.ExecuteInArea((x, y) => {
             if (y == bottomY)
-                PaintedType.PlaceWall(x, y, PaintedType.PickRandom(componentParams.TilePalette.BackgroundRoomAlt));
+                PaintedType.PlaceWall(x, y, PaintedType.PickRandom(componentParams.TilePalette.BackgroundRoomAlt), componentParams.Tilemap);
             else if (y == bottomY - 1)
-                PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundRoomAccent);
+                PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundRoomAccent, componentParams.Tilemap);
             else
-                PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundRoomMain);
+                PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundRoomMain, componentParams.Tilemap);
 
-            Tile tile = Main.tile[x, y];
+            StructureTile tile = componentParams.Tilemap[x, y];
             tile.HasTile = false;
         });
 
@@ -263,7 +263,7 @@ public static class ComponentGen {
     public static object Roof2(ComponentParams componentParams) {
         TilePalette palette = componentParams.TilePalette;
 
-        Point16 roofStart = new Point16(componentParams.Volume.BoundingBox.topLeft.X,
+        Point16 roofStart = new(componentParams.Volume.BoundingBox.topLeft.X,
             componentParams.Volume.BoundingBox.bottomRight.Y);
         int roofLength = componentParams.Volume.BoundingBox.bottomRight.X - roofStart.X;
         var roofBottom = RaycastHelper.GetTopTilesPos(roofStart, roofLength);
@@ -280,7 +280,7 @@ public static class ComponentGen {
         for (int x = roofStart.X; x < roofStart.X + roofLength; x++) {
             index++;
             if (index != 0 && index != roofLength - 1)
-                PaintedType.PlaceWall(x, roofBottom.pos[index] - 1, palette.BackgroundRoofMain);
+                PaintedType.PlaceWall(x, roofBottom.pos[index] - 1, palette.BackgroundRoofMain, componentParams.Tilemap);
 
             // check if we're on a slope
             if (Math.Abs(roofBottom.slope[index] + 1) < 0.05 &&
@@ -288,27 +288,27 @@ public static class ComponentGen {
                  roofBottom.pos[index] !=
                  roofBottom.pos[index - 1])) // if slope is -1 (up), and if we're actually on a slope
             {
-                PaintedType.PlaceTile(x, roofBottom.pos[index] - 2, palette.RoofMain, BlockType.SlopeDownRight);
+                PaintedType.PlaceTile(x, roofBottom.pos[index] - 2, palette.RoofMain, componentParams.Tilemap, BlockType.SlopeDownRight);
                 if (index != 0)
-                    PaintedType.PlaceTile(x, roofBottom.pos[index] - 1, palette.RoofMain, BlockType.SlopeUpLeft);
+                    PaintedType.PlaceTile(x, roofBottom.pos[index] - 1, palette.RoofMain, componentParams.Tilemap, BlockType.SlopeUpLeft);
             }
             else if (Math.Abs(roofBottom.slope[index] - 1) < 0.05) // if slope is 1 (down)
             {
-                PaintedType.PlaceTile(x, roofBottom.pos[index] - 2, palette.RoofMain, BlockType.SlopeDownLeft);
+                PaintedType.PlaceTile(x, roofBottom.pos[index] - 2, palette.RoofMain, componentParams.Tilemap, BlockType.SlopeDownLeft);
                 if (index != roofLength - 1)
-                    PaintedType.PlaceTile(x, roofBottom.pos[index] - 1, palette.RoofMain, BlockType.SlopeUpRight);
+                    PaintedType.PlaceTile(x, roofBottom.pos[index] - 1, palette.RoofMain, componentParams.Tilemap, BlockType.SlopeUpRight);
             }
             else if
                 (index != 0 &&
                  roofBottom.slope[index - 1] <
                  -0.05) // if the tile behind had a - (up) slope, don't place a solid block
             {
-                PaintedType.PlaceTile(x, roofBottom.pos[index] - 2, palette.RoofMain, BlockType.SlopeDownRight);
+                PaintedType.PlaceTile(x, roofBottom.pos[index] - 2, palette.RoofMain, componentParams.Tilemap, BlockType.SlopeDownRight);
                 if (index != roofLength - 1)
-                    PaintedType.PlaceTile(x, roofBottom.pos[index] - 1, palette.RoofMain, BlockType.SlopeUpLeft);
+                    PaintedType.PlaceTile(x, roofBottom.pos[index] - 1, palette.RoofMain, componentParams.Tilemap, BlockType.SlopeUpLeft);
             }
             else {
-                PaintedType.PlaceTile(x, roofBottom.pos[index] - 2, palette.RoofMain);
+                PaintedType.PlaceTile(x, roofBottom.pos[index] - 2, palette.RoofMain, componentParams.Tilemap);
             }
         }
 
@@ -318,10 +318,10 @@ public static class ComponentGen {
         index = 0;
         for (int x = roofStart.X + 1; x < roofStart.X + roofLength - 1; x++) {
             index++;
-            if (Main.tile[x, roofTop.pos[index]].BlockType == BlockType.SlopeDownLeft &&
-                Main.tile[x - 1, roofTop.pos[index] + 1].BlockType == BlockType.SlopeDownRight) {
-                PaintedType.PlaceTile(x, roofTop.pos[index] + 1, palette.RoofMain);
-                Main.tile[x, roofTop.pos[index]].ClearTile();
+            if (componentParams.Tilemap[x, roofTop.pos[index]].BlockType == BlockType.SlopeDownLeft &&
+                componentParams.Tilemap[x - 1, roofTop.pos[index] + 1].BlockType == BlockType.SlopeDownRight) {
+                PaintedType.PlaceTile(x, roofTop.pos[index] + 1, palette.RoofMain, componentParams.Tilemap);
+                componentParams.Tilemap[x, roofTop.pos[index]].ClearTile();
             }
         }
 
@@ -330,17 +330,17 @@ public static class ComponentGen {
         index = -1;
         for (int x = roofStart.X; x < roofStart.X + roofLength; x++) {
             index++;
-            Tile tile = Main.tile[x, roofTop.pos[index]];
+            StructureTile tile = componentParams.Tilemap[x, roofTop.pos[index]];
             switch (tile.BlockType) {
                 case BlockType.SlopeDownRight: // up
-                    PaintedType.PlaceTile(x, roofTop.pos[index], palette.RoofMain);
+                    PaintedType.PlaceTile(x, roofTop.pos[index], palette.RoofMain, componentParams.Tilemap);
                     if (index != 0 && index != roofLength - 1)
-                        PaintedType.PlaceTile(x - 1, roofTop.pos[index], palette.RoofMain, BlockType.SlopeDownRight);
+                        PaintedType.PlaceTile(x - 1, roofTop.pos[index], palette.RoofMain, componentParams.Tilemap, BlockType.SlopeDownRight);
                     break;
                 case BlockType.SlopeDownLeft: // down
-                    PaintedType.PlaceTile(x, roofTop.pos[index], palette.RoofMain);
+                    PaintedType.PlaceTile(x, roofTop.pos[index], palette.RoofMain, componentParams.Tilemap);
                     if (index != 0 && index != +roofLength - 1)
-                        PaintedType.PlaceTile(x + 1, roofTop.pos[index], palette.RoofMain, BlockType.SlopeDownLeft);
+                        PaintedType.PlaceTile(x + 1, roofTop.pos[index], palette.RoofMain, componentParams.Tilemap, BlockType.SlopeDownLeft);
                     break;
             }
         }
@@ -351,24 +351,22 @@ public static class ComponentGen {
         var roofTopFlats = RaycastHelper.GetFlatTiles(roofTop);
 
         // if there's a flat of length 1 at the start, add transition and manually add half slopes
-        if (Main.tile[roofStart.X, roofTop.pos[0]].BlockType == BlockType.Solid)
-            if (Main.tile[roofStart.X + 1, roofTop.pos[0] - 1].BlockType == BlockType.SlopeDownRight) {
-                PaintedType.PlaceTile(roofStart.X + 1, roofTop.pos[0] - 1, palette.RoofMain);
-                PaintedType.PlaceTile(roofStart.X, roofTop.pos[0] - 1, palette.RoofMain,
-                    BlockType.HalfBlock);
+        if (componentParams.Tilemap[roofStart.X, roofTop.pos[0]].BlockType == BlockType.Solid)
+            if (componentParams.Tilemap[roofStart.X + 1, roofTop.pos[0] - 1].BlockType == BlockType.SlopeDownRight) {
+                PaintedType.PlaceTile(roofStart.X + 1, roofTop.pos[0] - 1, palette.RoofMain, componentParams.Tilemap);
+                PaintedType.PlaceTile(roofStart.X, roofTop.pos[0] - 1, palette.RoofMain, componentParams.Tilemap, BlockType.HalfBlock);
                 tranitions.Add((roofStart.X + 1, roofTop.pos[0] - 1));
             }
-            else if (Main.tile[roofStart.X + 1, roofTop.pos[0]].BlockType == BlockType.SlopeDownLeft) {
-                PaintedType.PlaceTile(roofStart.X + 1, roofTop.pos[0], palette.RoofMain);
-                PaintedType.PlaceTile(roofStart.X, roofTop.pos[0] - 1, palette.RoofMain,
-                    BlockType.HalfBlock);
+            else if (componentParams.Tilemap[roofStart.X + 1, roofTop.pos[0]].BlockType == BlockType.SlopeDownLeft) {
+                PaintedType.PlaceTile(roofStart.X + 1, roofTop.pos[0], palette.RoofMain, componentParams.Tilemap);
+                PaintedType.PlaceTile(roofStart.X, roofTop.pos[0] - 1, palette.RoofMain, componentParams.Tilemap, BlockType.HalfBlock);
                 tranitions.Add((roofStart.X + 1, roofTop.pos[0]));
             }
 
         for (int flatIndex = 0; flatIndex < roofTopFlats.flatStartIndexes.Count; flatIndex++) {
             // if the correct slope to left or right of flat, create transition
             int furthestLeftIndex = roofTopFlats.flatStartIndexes[flatIndex];
-            Tile leftTile = Main.tile[roofStart.X + furthestLeftIndex - 1,
+            StructureTile leftTile = componentParams.Tilemap[roofStart.X + furthestLeftIndex - 1,
                 roofTop.pos[furthestLeftIndex] - 1];
             if (leftTile is { HasTile: true, BlockType: BlockType.SlopeDownLeft }) {
                 leftTile.BlockType = BlockType.Solid;
@@ -376,7 +374,7 @@ public static class ComponentGen {
             }
 
             int furthestRightIndex = roofTopFlats.flatStartIndexes[flatIndex] + roofTopFlats.flatLengths[flatIndex] - 1;
-            Tile rightTile = Main.tile[roofStart.X + furthestRightIndex + 1,
+            StructureTile rightTile = componentParams.Tilemap[roofStart.X + furthestRightIndex + 1,
                 roofTop.pos[furthestRightIndex] - 1];
             if (rightTile is { HasTile: true, BlockType: BlockType.SlopeDownRight }) {
                 rightTile.BlockType = BlockType.Solid;
@@ -390,76 +388,63 @@ public static class ComponentGen {
              xIndex < roofTopFlats.flatStartIndexes[flatIndex] + roofTopFlats.flatLengths[flatIndex];
              xIndex++)
             // ensure the tile underneath is solid (and not a transition tile)
-            if (Main.tile[roofStart.X + xIndex, roofTop.pos[xIndex]].BlockType == BlockType.Solid &&
+            if (componentParams.Tilemap[roofStart.X + xIndex, roofTop.pos[xIndex]].BlockType == BlockType.Solid &&
                 !tranitions.Contains((roofStart.X + xIndex, roofTop.pos[xIndex])))
-                PaintedType.PlaceTile(roofStart.X + xIndex, roofTop.pos[xIndex] - 1, palette.RoofMain,
-                    BlockType.HalfBlock);
+                PaintedType.PlaceTile(roofStart.X + xIndex, roofTop.pos[xIndex] - 1, palette.RoofMain, componentParams.Tilemap, BlockType.HalfBlock);
 
         // 6th pass: create endcaps
         bool anySideEndsWithSlope = Math.Abs(roofBottom.slope[0]) > 0.05 || Math.Abs(roofBottom.slope[^1]) > 0.05;
         bool hasTallEndCaps = anySideEndsWithSlope || Terraria.WorldGen.genRand.NextBool();
         if (hasEndCaps) {
             // left cap
-            Tile leftTestTile = Main.tile[roofStart.X - 1, roofStart.Y - 2];
+            StructureTile leftTestTile = componentParams.Tilemap[roofStart.X - 1, roofStart.Y - 2];
             if (!leftTestTile.HasTile || leftTestTile.BlockType != BlockType.Solid) {
                 if (hasTallEndCaps) {
-                    PaintedType.PlaceTile(roofStart.X - 1, roofStart.Y - 2, palette.RoofMain,
-                        BlockType.SlopeUpRight);
-                    PaintedType.PlaceTile(roofStart.X - 1, roofStart.Y - 3, palette.RoofMain,
-                        BlockType.HalfBlock);
-                    if (Main.tile[roofStart.X, roofTop.pos[0]].BlockType is
+                    PaintedType.PlaceTile(roofStart.X - 1, roofStart.Y - 2, palette.RoofMain, componentParams.Tilemap, BlockType.SlopeUpRight);
+                    PaintedType.PlaceTile(roofStart.X - 1, roofStart.Y - 3, palette.RoofMain, componentParams.Tilemap, BlockType.HalfBlock);
+                    if (componentParams.Tilemap[roofStart.X, roofTop.pos[0]].BlockType is
                         BlockType.SlopeDownRight or BlockType.SlopeDownLeft) {
-                        PaintedType.PlaceTile(roofStart.X, roofTop.pos[0], palette.RoofMain);
-                        PaintedType.PlaceWall(roofStart.X + 1, roofStart.Y - 1,
-                            palette.BackgroundRoofMain);
+                        PaintedType.PlaceTile(roofStart.X, roofTop.pos[0], palette.RoofMain, componentParams.Tilemap);
+                        PaintedType.PlaceWall(roofStart.X + 1, roofStart.Y - 1, palette.BackgroundRoofMain, componentParams.Tilemap);
                     }
                 }
                 else {
-                    PaintedType.PlaceTile(roofStart.X + 1, roofStart.Y - 1, palette.RoofMain,
-                        BlockType.SlopeUpLeft);
-                    PaintedType.PlaceTile(roofStart.X, roofStart.Y - 1, palette.RoofMain);
-                    PaintedType.PlaceTile(roofStart.X - 1, roofStart.Y - 1, palette.RoofMain);
-                    PaintedType.PlaceTile(roofStart.X - 2, roofStart.Y - 1, palette.RoofMain,
-                        BlockType.SlopeUpRight);
-                    PaintedType.PlaceTile(roofStart.X, roofStart.Y - 2, palette.RoofMain);
-                    PaintedType.PlaceTile(roofStart.X - 1, roofStart.Y - 2, palette.RoofMain,
-                        BlockType.HalfBlock);
-                    PaintedType.PlaceTile(roofStart.X - 2, roofStart.Y - 2, palette.RoofMain,
-                        BlockType.HalfBlock);
-                    if (Main.tile[roofStart.X, roofStart.Y - 3].BlockType ==
+                    PaintedType.PlaceTile(roofStart.X + 1, roofStart.Y - 1, palette.RoofMain, componentParams.Tilemap, BlockType.SlopeUpLeft);
+                    PaintedType.PlaceTile(roofStart.X, roofStart.Y - 1, palette.RoofMain, componentParams.Tilemap);
+                    PaintedType.PlaceTile(roofStart.X - 1, roofStart.Y - 1, palette.RoofMain, componentParams.Tilemap);
+                    PaintedType.PlaceTile(roofStart.X - 2, roofStart.Y - 1, palette.RoofMain, componentParams.Tilemap, BlockType.SlopeUpRight);
+                    PaintedType.PlaceTile(roofStart.X, roofStart.Y - 2, palette.RoofMain, componentParams.Tilemap);
+                    PaintedType.PlaceTile(roofStart.X - 1, roofStart.Y - 2, palette.RoofMain, componentParams.Tilemap, BlockType.HalfBlock);
+                    PaintedType.PlaceTile(roofStart.X - 2, roofStart.Y - 2, palette.RoofMain, componentParams.Tilemap, BlockType.HalfBlock);
+                    if (componentParams.Tilemap[roofStart.X, roofStart.Y - 3].BlockType ==
                         BlockType.HalfBlock)
-                        Main.tile[roofStart.X, roofStart.Y - 3].ClearTile();
+                        componentParams.Tilemap[roofStart.X, roofStart.Y - 3].ClearTile();
                 }
             }
 
             // right cap
             int rightPosX = roofStart.X + roofLength - 1;
-            Tile rightTestTile = Main.tile[rightPosX + 1, roofBottom.pos[^1] - 2];
+            StructureTile rightTestTile = componentParams.Tilemap[rightPosX + 1, roofBottom.pos[^1] - 2];
             if (!rightTestTile.HasTile || rightTestTile.BlockType != BlockType.Solid) {
                 if (hasTallEndCaps) {
-                    PaintedType.PlaceTile(rightPosX + 1, roofBottom.pos[^1] - 2, palette.RoofMain,
-                        BlockType.SlopeUpLeft);
-                    PaintedType.PlaceTile(rightPosX + 1, roofBottom.pos[^1] - 3, palette.RoofMain, BlockType.HalfBlock);
-                    if (Main.tile[roofStart.X + roofLength - 1, roofTop.pos[^1]].BlockType is
+                    PaintedType.PlaceTile(rightPosX + 1, roofBottom.pos[^1] - 2, palette.RoofMain, componentParams.Tilemap, BlockType.SlopeUpLeft);
+                    PaintedType.PlaceTile(rightPosX + 1, roofBottom.pos[^1] - 3, palette.RoofMain, componentParams.Tilemap, BlockType.HalfBlock);
+                    if (componentParams.Tilemap[roofStart.X + roofLength - 1, roofTop.pos[^1]].BlockType is
                         BlockType.SlopeDownRight or BlockType.SlopeDownLeft) {
-                        PaintedType.PlaceTile(roofStart.X + roofLength - 1, roofTop.pos[^1],
-                            palette.RoofMain);
-                        PaintedType.PlaceWall(roofStart.X + roofLength - 2, roofTop.pos[^1] + 2,
-                            palette.BackgroundRoofMain);
+                        PaintedType.PlaceTile(roofStart.X + roofLength - 1, roofTop.pos[^1], palette.RoofMain, componentParams.Tilemap);
+                        PaintedType.PlaceWall(roofStart.X + roofLength - 2, roofTop.pos[^1] + 2, palette.BackgroundRoofMain, componentParams.Tilemap);
                     }
                 }
                 else {
-                    PaintedType.PlaceTile(rightPosX - 1, roofBottom.pos[^1] - 1, palette.RoofMain,
-                        BlockType.SlopeUpRight);
-                    PaintedType.PlaceTile(rightPosX, roofBottom.pos[^1] - 1, palette.RoofMain);
-                    PaintedType.PlaceTile(rightPosX + 1, roofBottom.pos[^1] - 1, palette.RoofMain);
-                    PaintedType.PlaceTile(rightPosX + 2, roofBottom.pos[^1] - 1, palette.RoofMain,
-                        BlockType.SlopeUpLeft);
-                    PaintedType.PlaceTile(rightPosX, roofBottom.pos[^1] - 2, palette.RoofMain);
-                    PaintedType.PlaceTile(rightPosX + 1, roofBottom.pos[^1] - 2, palette.RoofMain, BlockType.HalfBlock);
-                    PaintedType.PlaceTile(rightPosX + 2, roofBottom.pos[^1] - 2, palette.RoofMain, BlockType.HalfBlock);
-                    if (Main.tile[rightPosX, roofBottom.pos[^1] - 3].BlockType == BlockType.HalfBlock)
-                        Main.tile[rightPosX, roofBottom.pos[^1] - 3].ClearTile();
+                    PaintedType.PlaceTile(rightPosX - 1, roofBottom.pos[^1] - 1, palette.RoofMain, componentParams.Tilemap, BlockType.SlopeUpRight);
+                    PaintedType.PlaceTile(rightPosX, roofBottom.pos[^1] - 1, palette.RoofMain, componentParams.Tilemap);
+                    PaintedType.PlaceTile(rightPosX + 1, roofBottom.pos[^1] - 1, palette.RoofMain, componentParams.Tilemap);
+                    PaintedType.PlaceTile(rightPosX + 2, roofBottom.pos[^1] - 1, palette.RoofMain, componentParams.Tilemap, BlockType.SlopeUpLeft);
+                    PaintedType.PlaceTile(rightPosX, roofBottom.pos[^1] - 2, palette.RoofMain, componentParams.Tilemap);
+                    PaintedType.PlaceTile(rightPosX + 1, roofBottom.pos[^1] - 2, palette.RoofMain, componentParams.Tilemap, BlockType.HalfBlock);
+                    PaintedType.PlaceTile(rightPosX + 2, roofBottom.pos[^1] - 2, palette.RoofMain, componentParams.Tilemap, BlockType.HalfBlock);
+                    if (componentParams.Tilemap[rightPosX, roofBottom.pos[^1] - 3].BlockType == BlockType.HalfBlock)
+                        componentParams.Tilemap[rightPosX, roofBottom.pos[^1] - 3].ClearTile();
                 }
             }
         }
@@ -476,9 +461,7 @@ public static class ComponentGen {
     ///     Fills a volume with the same floor blocks
     /// </summary>
     public static object Floor1(ComponentParams componentParams) {
-        componentParams.Volume.ExecuteInArea((x, y) => {
-            PaintedType.PlaceTile(x, y, componentParams.TilePalette.FloorMain);
-        });
+        componentParams.Volume.ExecuteInArea((x, y) => { PaintedType.PlaceTile(x, y, componentParams.TilePalette.FloorMain, componentParams.Tilemap); });
 
         return false;
     }
@@ -487,9 +470,7 @@ public static class ComponentGen {
     ///     Fills a volume with random floor blocks
     /// </summary>
     public static object Floor2(ComponentParams componentParams) {
-        componentParams.Volume.ExecuteInArea((x, y) => {
-            PaintedType.PlaceTile(x, y, PaintedType.PickRandom(componentParams.TilePalette.FloorAlt));
-        });
+        componentParams.Volume.ExecuteInArea((x, y) => { PaintedType.PlaceTile(x, y, PaintedType.PickRandom(componentParams.TilePalette.FloorAlt), componentParams.Tilemap); });
 
         return false;
     }
@@ -506,7 +487,8 @@ public static class ComponentGen {
             PaintedType.PlaceTile(x, y,
                 PaintedType.PickRandom(elevated
                     ? componentParams.TilePalette.FloorAlt
-                    : componentParams.TilePalette.FloorAltElevated));
+                    : componentParams.TilePalette.FloorAltElevated),
+                componentParams.Tilemap);
 
             if (topY[x - xStart] == 0)
                 topY[x - xStart] = y;
@@ -517,7 +499,8 @@ public static class ComponentGen {
 
         for (int index = 0; index < topY.Length; index++)
             PaintedType.PlaceTile(xStart + index, topY[index],
-                elevated ? componentParams.TilePalette.FloorMainElevated : componentParams.TilePalette.FloorMain);
+                elevated ? componentParams.TilePalette.FloorMainElevated : componentParams.TilePalette.FloorMain,
+                componentParams.Tilemap);
 
         return false;
     }
@@ -536,11 +519,12 @@ public static class ComponentGen {
             if ((x - xStart - 2) % supportInterval == 0 || x == xStart ||
                 x == componentParams.Volume.BoundingBox.bottomRight.X) {
                 PaintedType.PlaceTile(x, y,
-                    elevated ? componentParams.TilePalette.FloorMainElevated : componentParams.TilePalette.FloorMain);
+                    elevated ? componentParams.TilePalette.FloorMainElevated : componentParams.TilePalette.FloorMain,
+                    componentParams.Tilemap);
             }
             else {
-                PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundFloorMain);
-                Tile tile = Main.tile[x, y];
+                PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundFloorMain, componentParams.Tilemap);
+                StructureTile tile = componentParams.Tilemap[x, y];
                 if (Terraria.WorldGen.genRand.Next(0, 3) == 0) {
                     tile.HasTile = true;
                     tile.TileType = TileID.Cobweb;
@@ -563,9 +547,11 @@ public static class ComponentGen {
 
         for (int index = 0; index < topY.Length; index++) {
             PaintedType.PlaceTile(xStart + index, topY[index],
-                elevated ? componentParams.TilePalette.FloorMainElevated : componentParams.TilePalette.FloorMain);
+                elevated ? componentParams.TilePalette.FloorMainElevated : componentParams.TilePalette.FloorMain,
+                componentParams.Tilemap);
             PaintedType.PlaceTile(xStart + index, bottomY[index],
-                elevated ? componentParams.TilePalette.FloorMainElevated : componentParams.TilePalette.FloorMain);
+                elevated ? componentParams.TilePalette.FloorMainElevated : componentParams.TilePalette.FloorMain,
+                componentParams.Tilemap);
         }
 
         return false;
@@ -580,8 +566,8 @@ public static class ComponentGen {
         int[] bottomY = new int[componentParams.Volume.Size.X];
 
         componentParams.Volume.ExecuteInArea((x, y) => {
-            PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundFloorMain);
-            Tile tile = Main.tile[x, y];
+            PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundFloorMain, componentParams.Tilemap);
+            StructureTile tile = componentParams.Tilemap[x, y];
             tile.HasTile = false;
 
             if (topY[x - xStart] == 0)
@@ -596,8 +582,8 @@ public static class ComponentGen {
         });
 
         for (int index = 0; index < topY.Length; index++) {
-            PaintedType.PlaceTile(xStart + index, topY[index], componentParams.TilePalette.Platform);
-            PaintedType.PlaceTile(xStart + index, bottomY[index], componentParams.TilePalette.Platform);
+            PaintedType.PlaceTile(xStart + index, topY[index], componentParams.TilePalette.Platform, componentParams.Tilemap);
+            PaintedType.PlaceTile(xStart + index, bottomY[index], componentParams.TilePalette.Platform, componentParams.Tilemap);
         }
 
         return false;
@@ -618,7 +604,8 @@ public static class ComponentGen {
         int[] highX = new int[componentParams.Volume.Size.Y];
         componentParams.Volume.ExecuteInArea((x, y) => {
             PaintedType.PlaceTile(x, y,
-                elevated ? componentParams.TilePalette.WallMainElevated : componentParams.TilePalette.WallMain);
+                elevated ? componentParams.TilePalette.WallMainElevated : componentParams.TilePalette.WallMain,
+                componentParams.Tilemap);
 
             if (lowX[y - yStart] == 0)
                 lowX[y - yStart] = x;
@@ -632,8 +619,8 @@ public static class ComponentGen {
         });
 
         for (int index = 0; index < lowX.Length; index++) {
-            PaintedType.PlaceTile(yStart + index, lowX[index], componentParams.TilePalette.WallSpecial);
-            PaintedType.PlaceTile(yStart + index, highX[index], componentParams.TilePalette.WallSpecial);
+            PaintedType.PlaceTile(yStart + index, lowX[index], componentParams.TilePalette.WallSpecial, componentParams.Tilemap);
+            PaintedType.PlaceTile(yStart + index, highX[index], componentParams.TilePalette.WallSpecial, componentParams.Tilemap);
         }
 
         return false;
@@ -649,26 +636,19 @@ public static class ComponentGen {
         int[] highX = new int[componentParams.Volume.Size.Y];
         componentParams.Volume.ExecuteInArea((x, y) => {
             PaintedType.PlaceTile(x, y, PaintedType.PickRandom(
-                elevated ? componentParams.TilePalette.WallAltElevated : componentParams.TilePalette.WallAlt));
+                    elevated ? componentParams.TilePalette.WallAltElevated : componentParams.TilePalette.WallAlt),
+                componentParams.Tilemap);
 
-            if (lowX[y - yStart] == 0) {
-                lowX[y - yStart] = x;
-            }
-            if (highX[y - yStart] == 0) {
-                highX[y - yStart] = x;
-            }
+            if (lowX[y - yStart] == 0) lowX[y - yStart] = x;
+            if (highX[y - yStart] == 0) highX[y - yStart] = x;
 
-            if (x < lowX[y - yStart]) {
-                lowX[y - yStart] = x;
-            }
-            if (x > highX[y - yStart]) {
-                highX[y - yStart] = x;
-            }
+            if (x < lowX[y - yStart]) lowX[y - yStart] = x;
+            if (x > highX[y - yStart]) highX[y - yStart] = x;
         });
 
         for (int index = 0; index < lowX.Length; index++) {
-            PaintedType.PlaceTile(yStart + index, lowX[index], componentParams.TilePalette.WallSpecial);
-            PaintedType.PlaceTile(yStart + index, highX[index], componentParams.TilePalette.WallSpecial);
+            PaintedType.PlaceTile(yStart + index, lowX[index], componentParams.TilePalette.WallSpecial, componentParams.Tilemap);
+            PaintedType.PlaceTile(yStart + index, highX[index], componentParams.TilePalette.WallSpecial, componentParams.Tilemap);
         }
 
         return false;
@@ -684,7 +664,8 @@ public static class ComponentGen {
 
         componentParams.Volume.ExecuteInArea((x, y) => {
             PaintedType.PlaceTile(x, y, PaintedType.PickRandom(
-                elevated ? componentParams.TilePalette.WallAltElevated : componentParams.TilePalette.WallAlt));
+                    elevated ? componentParams.TilePalette.WallAltElevated : componentParams.TilePalette.WallAlt),
+                componentParams.Tilemap);
 
             if (bottomY[x - xStart] == 0)
                 bottomY[x - xStart] = y;
@@ -695,7 +676,8 @@ public static class ComponentGen {
 
         for (int index = 0; index < bottomY.Length; index++)
             PaintedType.PlaceTile(xStart + index, bottomY[index],
-                elevated ? componentParams.TilePalette.WallAccentElevated : componentParams.TilePalette.WallAccent);
+                elevated ? componentParams.TilePalette.WallAccentElevated : componentParams.TilePalette.WallAccent,
+                componentParams.Tilemap);
 
         return false;
     }
@@ -704,9 +686,7 @@ public static class ComponentGen {
     ///     Fills a volume with random background walls
     /// </summary>
     public static object WallGap1(ComponentParams componentParams) {
-        componentParams.Volume.ExecuteInArea((x, y) => {
-            PaintedType.PlaceWall(x, y, PaintedType.PickRandom(componentParams.TilePalette.BackgroundWallAlt));
-        });
+        componentParams.Volume.ExecuteInArea((x, y) => { PaintedType.PlaceWall(x, y, PaintedType.PickRandom(componentParams.TilePalette.BackgroundWallAlt), componentParams.Tilemap); });
 
         return false;
     }
@@ -727,11 +707,11 @@ public static class ComponentGen {
     public static object Background1(ComponentParams componentParams) {
         componentParams.Volume.ExecuteInArea((x, y) => {
             if (y == componentParams.Volume.BoundingBox.bottomRight.Y)
-                PaintedType.PlaceWall(x, y, PaintedType.PickRandom(componentParams.TilePalette.BackgroundRoomAlt));
+                PaintedType.PlaceWall(x, y, PaintedType.PickRandom(componentParams.TilePalette.BackgroundRoomAlt), componentParams.Tilemap);
             else if (y == componentParams.Volume.BoundingBox.bottomRight.Y - 1)
-                PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundRoomAccent);
+                PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundRoomAccent, componentParams.Tilemap);
             else
-                PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundRoomMain);
+                PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundRoomMain, componentParams.Tilemap);
         });
 
         return false;
@@ -744,9 +724,9 @@ public static class ComponentGen {
         int bottomY = componentParams.Volume.BoundingBox.bottomRight.Y;
         componentParams.Volume.ExecuteInArea((x, y) => {
             if (y == bottomY || y == bottomY - 1 || y == bottomY - 2)
-                PaintedType.PlaceWall(x, y, PaintedType.PickRandom(componentParams.TilePalette.BackgroundRoomAlt));
+                PaintedType.PlaceWall(x, y, PaintedType.PickRandom(componentParams.TilePalette.BackgroundRoomAlt), componentParams.Tilemap);
             else
-                PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundRoomMain);
+                PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundRoomMain, componentParams.Tilemap);
         });
 
         return false;
@@ -762,7 +742,7 @@ public static class ComponentGen {
     /// </summary>
     public static object DebugBlocks1(ComponentParams componentParams) {
         componentParams.Volume.ExecuteInArea((x, y) => {
-            Tile tile = Main.tile[x, y];
+            StructureTile tile = componentParams.Tilemap[x, y];
             tile.HasTile = true;
             tile.BlockType = BlockType.Solid;
             tile.TileType = TileID.EmeraldGemspark;
@@ -776,7 +756,7 @@ public static class ComponentGen {
     /// </summary>
     public static object DebugBlocks2(ComponentParams componentParams) {
         componentParams.Volume.ExecuteInArea((x, y) => {
-            Tile tile = Main.tile[x, y];
+            StructureTile tile = componentParams.Tilemap[x, y];
             tile.HasTile = true;
             tile.BlockType = BlockType.Solid;
             tile.TileType = TileID.SapphireGemspark;
@@ -790,7 +770,7 @@ public static class ComponentGen {
     /// </summary>
     public static object DebugBlocks3(ComponentParams componentParams) {
         componentParams.Volume.ExecuteInArea((x, y) => {
-            Tile tile = Main.tile[x, y];
+            StructureTile tile = componentParams.Tilemap[x, y];
             tile.HasTile = true;
             tile.BlockType = BlockType.Solid;
             tile.TileType = TileID.RubyGemspark;
@@ -804,7 +784,7 @@ public static class ComponentGen {
     /// </summary>
     public static object DebugWalls1(ComponentParams componentParams) {
         componentParams.Volume.ExecuteInArea((x, y) => {
-            Tile tile = Main.tile[x, y];
+            StructureTile tile = componentParams.Tilemap[x, y];
             tile.WallType = WallID.EmeraldGemspark;
             tile.WallColor = PaintID.None;
         });
@@ -816,7 +796,7 @@ public static class ComponentGen {
     /// </summary>
     public static object DebugWalls2(ComponentParams componentParams) {
         componentParams.Volume.ExecuteInArea((x, y) => {
-            Tile tile = Main.tile[x, y];
+            StructureTile tile = componentParams.Tilemap[x, y];
             tile.WallType = WallID.SapphireGemspark;
             tile.WallColor = PaintID.None;
         });
@@ -828,7 +808,7 @@ public static class ComponentGen {
     /// </summary>
     public static object DebugWalls3(ComponentParams componentParams) {
         componentParams.Volume.ExecuteInArea((x, y) => {
-            Tile tile = Main.tile[x, y];
+            StructureTile tile = componentParams.Tilemap[x, y];
             tile.WallType = WallID.RubyGemspark;
             tile.WallColor = PaintID.None;
         });

@@ -14,7 +14,7 @@ internal class ChestRule {
     public virtual string Tooltip => "Probably a bug! Report me!";
 
     public Loot AddItem(Item item) {
-        Loot loot = new Loot(item.Clone(), 1);
+        Loot loot = new(item.Clone(), 1);
         pool.Add(loot);
 
         return loot;
@@ -46,7 +46,7 @@ internal class ChestRule {
     }
 
     public TagCompound SerializePool() {
-        TagCompound tag = new TagCompound {
+        TagCompound tag = new() {
             { "Count", pool.Count }
         };
 
@@ -65,7 +65,7 @@ internal class ChestRule {
     }
 
     public virtual ChestRule Clone() {
-        ChestRule clone = new ChestRule();
+        ChestRule clone = new();
 
         for (int k = 0; k < pool.Count; k++) clone.pool.Add(pool[k].Clone());
 
@@ -96,7 +96,7 @@ internal class Loot {
     }
 
     public TagCompound Serialize() {
-        TagCompound tag = new TagCompound {
+        TagCompound tag = new() {
             { "Item", givenItem },
             { "Min", min },
             { "Max", max },

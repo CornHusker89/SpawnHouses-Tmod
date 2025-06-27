@@ -28,7 +28,7 @@ internal class ChestEntity : ModTileEntity {
     }
 
     public TagCompound SaveChestRules() {
-        TagCompound tag = new TagCompound {
+        TagCompound tag = new() {
             { "Count", rules.Count }
         };
 

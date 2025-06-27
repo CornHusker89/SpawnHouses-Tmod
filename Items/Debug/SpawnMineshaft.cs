@@ -39,7 +39,7 @@ public class SpawnMineshaft : ModItem {
         x = (ushort)(x - 13);
         y = (ushort)(y - 13);
 
-        Mineshaft structure = new Mineshaft(x, y);
+        Mineshaft structure = new(x, y);
         structure.Generate();
 
         return true;

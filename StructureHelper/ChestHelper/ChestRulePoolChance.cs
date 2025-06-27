@@ -58,7 +58,7 @@ internal class ChestRulePoolChance : ChestRule {
     }
 
     public override TagCompound Serizlize() {
-        TagCompound tag = new TagCompound {
+        TagCompound tag = new() {
             { "Type", "PoolChance" },
             { "Chance", chance },
             { "ToGenerate", itemsToGenerate },
@@ -69,7 +69,7 @@ internal class ChestRulePoolChance : ChestRule {
     }
 
     public new static ChestRule Deserialize(TagCompound tag) {
-        ChestRulePoolChance rule = new ChestRulePoolChance {
+        ChestRulePoolChance rule = new() {
             itemsToGenerate = tag.GetInt("ToGenerate"),
             chance = tag.GetFloat("Chance"),
             pool = DeserializePool(tag.GetCompound("Pool"))
@@ -79,7 +79,7 @@ internal class ChestRulePoolChance : ChestRule {
     }
 
     public override ChestRule Clone() {
-        ChestRulePoolChance clone = new ChestRulePoolChance();
+        ChestRulePoolChance clone = new();
 
         for (int k = 0; k < pool.Count; k++)
             clone.pool.Add(pool[k].Clone());

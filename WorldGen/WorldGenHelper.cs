@@ -99,7 +99,7 @@ public static class WorldGenHelper {
         }
 
         try {
-            MainHouse house = new MainHouse((ushort)(initialX - 31), (ushort)(initialY - 16),
+            MainHouse house = new((ushort)(initialX - 31), (ushort)(initialY - 16),
                 hasBasement: ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement,
                 inUnderworld: spawnUnderworld);
             house.Generate();
@@ -166,7 +166,7 @@ public static class WorldGenHelper {
                 startLeftSide = _mainHouseOffsetDirection == Directions.Left;
 
             if (FindValidLocation(startLeftSide) || FindValidLocation(!startLeftSide)) {
-                Mineshaft mineshaft = new Mineshaft((ushort)(x - 13), (ushort)(y - 13));
+                Mineshaft mineshaft = new((ushort)(x - 13), (ushort)(y - 13));
                 mineshaft.Generate();
                 StructureManager.Mineshaft = mineshaft;
             }
@@ -181,7 +181,7 @@ public static class WorldGenHelper {
         Box[] mineshaftBoundingBox = [];
         if (StructureManager.Mineshaft is not null) {
             Mineshaft structure = StructureManager.Mineshaft;
-            Box structureBox = new Box(structure.X - 8, structure.Y,
+            Box structureBox = new(structure.X - 8, structure.Y,
                 structure.X + structure.StructureXSize + 8, structure.Y + 200);
             mineshaftBoundingBox = [structureBox];
         }
@@ -320,7 +320,7 @@ public static class WorldGenHelper {
                     y = (ushort)(y - 2);
                     x = (ushort)(x - 3);
 
-                    Firepit structure = new Firepit(x, y);
+                    Firepit structure = new(x, y);
                     structure.Generate();
                 }
 

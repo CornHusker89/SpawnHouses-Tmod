@@ -355,7 +355,7 @@ public static class Generator {
                 }
             }
 
-            TileWallWireStateData wallwire = new TileWallWireStateData();
+            TileWallWireStateData wallwire = new();
             wallwire.SetAllBitsClearFrame(d.wallWireData);
 
             if (isNullTile) {

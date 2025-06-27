@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
@@ -44,9 +43,9 @@ public class RoomLayout(
     List<Room> rooms
 ) {
     public readonly List<Floor> Floors = floors;
-    public readonly List<Wall> Walls = walls;
     public readonly List<Gap> Gaps = gaps;
     public readonly List<Room> Rooms = rooms;
+    public readonly List<Wall> Walls = walls;
 
     public static RoomLayout Union(params RoomLayout[] roomLayouts) {
         List<Floor> floors = [];

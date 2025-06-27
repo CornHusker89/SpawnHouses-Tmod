@@ -24,7 +24,7 @@ public class SpawnCaveTown1 : ModItem {
     public override bool? UseItem(Terraria.Player player) {
         Point16 point = (Main.MouseWorld / 16).ToPoint16();
 
-        CaveTown1 chain = new CaveTown1((ushort)point.X, (ushort)point.Y);
+        CaveTown1 chain = new((ushort)point.X, (ushort)point.Y);
         chain.CalculateChain();
         chain.Generate();
         return true;

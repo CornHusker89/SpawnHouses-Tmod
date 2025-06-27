@@ -40,7 +40,7 @@ public class SpawnFirepit : ModItem {
         y = (ushort)(y - 2);
         x = (ushort)(x - 3);
 
-        Firepit structure = new Firepit(x, y);
+        Firepit structure = new(x, y);
         structure.Generate();
 
         return true;

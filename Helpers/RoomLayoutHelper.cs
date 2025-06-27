@@ -5,7 +5,6 @@ using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Structures;
 using SpawnHouses.Types;
-using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Gap = SpawnHouses.AdvStructures.AdvStructureParts.Gap;
@@ -24,7 +23,8 @@ public static class RoomLayoutHelper {
     }
 
     /// <summary>
-    ///     find all corners of a shape based on their x and y positions, useful for ensuring beams and such make sense visually
+    ///     find all corners of a shape based on their x and y positions, useful for ensuring beams and such make sense
+    ///     visually
     /// </summary>
     /// <param name="shape"></param>
     /// <returns></returns>
@@ -70,6 +70,7 @@ public static class RoomLayoutHelper {
                 closestIndex = i;
             }
         }
+
         return rooms[closestIndex];
     }
 
@@ -148,15 +149,14 @@ public static class RoomLayoutHelper {
                 yCutCount++;
 
             int outerBoundaryWidth = splitAlongX ? roomLayoutParams.RoomHeight.Min : roomLayoutParams.RoomWidth.Min;
-            Range validCutRange = new Range((splitAlongX ? roomVolume.BoundingBox.topLeft.Y : roomVolume.BoundingBox.topLeft.X) + outerBoundaryWidth,
+            Range validCutRange = new((splitAlongX ? roomVolume.BoundingBox.topLeft.Y : roomVolume.BoundingBox.topLeft.X) + outerBoundaryWidth,
                 (splitAlongX ? roomVolume.BoundingBox.bottomRight.Y : roomVolume.BoundingBox.bottomRight.X) - outerBoundaryWidth - (splitAlongX ? iterationFloorWidth : iterationWallWidth)
             );
 
             List<int> predeterminedSplits = [];
             foreach (int predeterminedSplit in splitAlongX ? priorityXSplits : priorityYSplits)
-                if (validCutRange.InRange(predeterminedSplit)) {
+                if (validCutRange.InRange(predeterminedSplit))
                     predeterminedSplits.Add(predeterminedSplit);
-                }
 
             int splitStart = predeterminedSplits.Count == 0
                 ? Terraria.WorldGen.genRand.Next(validCutRange.Min, validCutRange.Max + 1)
@@ -191,12 +191,10 @@ public static class RoomLayoutHelper {
             }
 
             if (roomSubsections.middle is not null) {
-                if (splitAlongX) {
+                if (splitAlongX)
                     floorVolumes.Add(roomSubsections.middle);
-                }
-                else {
+                else
                     wallVolumes.Add(roomSubsections.middle);
-                }
             }
         }
 
@@ -213,22 +211,18 @@ public static class RoomLayoutHelper {
         List<Wall> walls = [];
         foreach (Shape shape in roomLayoutVolumes.FloorVolumes) {
             bool exterior = true;
-            Point16 lowerPoint = new Point16(shape.BoundingBox.topLeft.X + shape.Size.X / 2, shape.BoundingBox.topLeft.Y - 1);
-            Point16 higherPoint = new Point16(shape.BoundingBox.topLeft.X + shape.Size.X / 2, shape.BoundingBox.bottomRight.Y + 1);
-            if (roomLayoutVolumes.InStructure(lowerPoint) && roomLayoutVolumes.InStructure(higherPoint)) {
-                exterior = false;
-            }
+            Point16 lowerPoint = new(shape.BoundingBox.topLeft.X + shape.Size.X / 2, shape.BoundingBox.topLeft.Y - 1);
+            Point16 higherPoint = new(shape.BoundingBox.topLeft.X + shape.Size.X / 2, shape.BoundingBox.bottomRight.Y + 1);
+            if (roomLayoutVolumes.InStructure(lowerPoint) && roomLayoutVolumes.InStructure(higherPoint)) exterior = false;
 
             floors.Add(new Floor(shape, exterior));
         }
 
         foreach (Shape shape in roomLayoutVolumes.WallVolumes) {
             bool exterior = true;
-            Point16 lowerPoint = new Point16(shape.BoundingBox.topLeft.X - 1, shape.BoundingBox.topLeft.Y + shape.Size.Y / 2);
-            Point16 higherPoint = new Point16(shape.BoundingBox.bottomRight.X + 1, shape.BoundingBox.topLeft.Y + shape.Size.Y / 2);
-            if (roomLayoutVolumes.InStructure(lowerPoint) && roomLayoutVolumes.InStructure(higherPoint)) {
-                exterior = false;
-            }
+            Point16 lowerPoint = new(shape.BoundingBox.topLeft.X - 1, shape.BoundingBox.topLeft.Y + shape.Size.Y / 2);
+            Point16 higherPoint = new(shape.BoundingBox.bottomRight.X + 1, shape.BoundingBox.topLeft.Y + shape.Size.Y / 2);
+            if (roomLayoutVolumes.InStructure(lowerPoint) && roomLayoutVolumes.InStructure(higherPoint)) exterior = false;
 
             walls.Add(new Wall(shape, exterior));
         }
@@ -246,7 +240,7 @@ public static class RoomLayoutHelper {
     }
 
     /// <summary>
-    /// Uses perimeter raycasting to find all possible gaps of any size
+    ///     Uses perimeter raycasting to find all possible gaps of any size
     /// </summary>
     /// <param name="roomLayoutVolumes"></param>
     /// <returns></returns>
@@ -264,9 +258,7 @@ public static class RoomLayoutHelper {
             room.Volume.ExecuteOnPerimeter((x, y, direction) => {
                 Point16 pos = new(x, y);
                 Point16 step = new(0, 0);
-                if (lastDirection == Directions.None) {
-                    lastDirection = direction;
-                }
+                if (lastDirection == Directions.None) lastDirection = direction;
 
                 switch (direction) {
                     case Directions.Up:
@@ -284,14 +276,10 @@ public static class RoomLayoutHelper {
                 }
 
                 pos += step;
-                while (direction is Directions.Up or Directions.Down ? roomLayoutVolumes.InFloor(pos) : roomLayoutVolumes.InWall(pos)) {
-                    pos += step;
-                }
+                while (direction is Directions.Up or Directions.Down ? roomLayoutVolumes.InFloor(pos) : roomLayoutVolumes.InWall(pos)) pos += step;
 
                 Room? foundRoom = GetRoomFromPos(rooms, pos);
-                if (foundRoom == room) {
-                    foundRoom = null; // invalidate casts that find its own room
-                }
+                if (foundRoom == room) foundRoom = null; // invalidate casts that find its own room
 
                 if (direction != lastDirection && curGapVolumes.Count != 0) {
                     roomGaps.Add(new Gap(Shape.Union(curGapVolumes), room, lastRoom, isHorizontal));
@@ -325,32 +313,27 @@ public static class RoomLayoutHelper {
     }
 
     /// <summary>
-    /// Removes duplicate gaps in-place
+    ///     Removes duplicate gaps in-place
     /// </summary>
     /// <param name="gaps"></param>
     public static void RemoveDuplicateGaps(List<Gap> gaps) {
-        for (int testingIndex = gaps.Count - 1; testingIndex >= 0; testingIndex--) {
-            for (int removingIndex = testingIndex - 1; removingIndex >= 0; removingIndex--) {
-                Gap gap = gaps[testingIndex];
-                Gap removingGap = gaps[removingIndex];
+        for (int testingIndex = gaps.Count - 1; testingIndex >= 0; testingIndex--)
+        for (int removingIndex = testingIndex - 1; removingIndex >= 0; removingIndex--) {
+            Gap gap = gaps[testingIndex];
+            Gap removingGap = gaps[removingIndex];
 
-                if (gap.RepresentsSimilarGap(removingGap)) {
-                    if (removingGap.LowerRoom.Gaps.Remove(removingGap)) {
-                        removingGap.LowerRoom.Gaps.Add(gap);
-                    }
+            if (gap.RepresentsSimilarGap(removingGap)) {
+                if (removingGap.LowerRoom.Gaps.Remove(removingGap)) removingGap.LowerRoom.Gaps.Add(gap);
 
-                    if (removingGap.HigherRoom!.Gaps.Remove(removingGap)) {
-                        removingGap.HigherRoom!.Gaps.Add(gap);
-                    }
+                if (removingGap.HigherRoom!.Gaps.Remove(removingGap)) removingGap.HigherRoom!.Gaps.Add(gap);
 
-                    gaps.RemoveAt(removingIndex);
-                }
+                gaps.RemoveAt(removingIndex);
             }
         }
     }
 
     /// <summary>
-    /// Removes impractically small gaps, moves and resizes large gaps
+    ///     Removes impractically small gaps, moves and resizes large gaps
     /// </summary>
     /// <param name="gaps"></param>
     /// <returns></returns>
@@ -367,12 +350,10 @@ public static class RoomLayoutHelper {
                 }
 
                 var points = gap.Volume.Points;
-                for (int pointIndex = 0; pointIndex < gap.Volume.Points.Length; pointIndex++) {
+                for (int pointIndex = 0; pointIndex < gap.Volume.Points.Length; pointIndex++)
                     // ensure doors aren't too tall
-                    if (points[pointIndex].Y < gap.Volume.BoundingBox.bottomRight.Y - 2) {
+                    if (points[pointIndex].Y < gap.Volume.BoundingBox.bottomRight.Y - 2)
                         points[pointIndex] = new Point16(points[pointIndex].X, gap.Volume.BoundingBox.bottomRight.Y - 2);
-                    }
-                }
 
                 gap.Volume = new Shape(points);
             }
@@ -392,13 +373,9 @@ public static class RoomLayoutHelper {
                     int rightX = gapCenter + (int)Math.Ceiling((double)suggestedSize / 2) + outOfBoundsDistance;
                     var points = gap.Volume.Points;
                     for (int pointIndex = 0; pointIndex < gap.Volume.Points.Length; pointIndex++) {
-                        if (points[pointIndex].X < leftX) {
-                            points[pointIndex] = new Point16(leftX, points[pointIndex].Y);
-                        }
+                        if (points[pointIndex].X < leftX) points[pointIndex] = new Point16(leftX, points[pointIndex].Y);
 
-                        if (points[pointIndex].X > rightX) {
-                            points[pointIndex] = new Point16(rightX, points[pointIndex].Y);
-                        }
+                        if (points[pointIndex].X > rightX) points[pointIndex] = new Point16(rightX, points[pointIndex].Y);
                     }
 
                     gap.Volume = new Shape(points);
@@ -426,13 +403,9 @@ public static class RoomLayoutHelper {
                 potentialChainGap.VerticalChainHigher = gap;
                 var points = gap.Volume.Points;
                 for (int pointIndex = 0; pointIndex < gap.Volume.Points.Length; pointIndex++) {
-                    if (points[pointIndex].X < potentialChainGap.Volume.BoundingBox.topLeft.X) {
-                        points[pointIndex] = new Point16(potentialChainGap.Volume.BoundingBox.topLeft.X, points[pointIndex].Y);
-                    }
+                    if (points[pointIndex].X < potentialChainGap.Volume.BoundingBox.topLeft.X) points[pointIndex] = new Point16(potentialChainGap.Volume.BoundingBox.topLeft.X, points[pointIndex].Y);
 
-                    if (points[pointIndex].X > potentialChainGap.Volume.BoundingBox.bottomRight.X) {
-                        points[pointIndex] = new Point16(potentialChainGap.Volume.BoundingBox.bottomRight.X, points[pointIndex].Y);
-                    }
+                    if (points[pointIndex].X > potentialChainGap.Volume.BoundingBox.bottomRight.X) points[pointIndex] = new Point16(potentialChainGap.Volume.BoundingBox.bottomRight.X, points[pointIndex].Y);
                 }
 
                 gap.Volume = new Shape(points);
@@ -455,19 +428,16 @@ public static class RoomLayoutHelper {
 
         while (visitQueue.Count > 0) {
             (Room room, Room? parentRoom) = visitQueue.Dequeue();
-            if (!visitedRooms.Add(room)) {
-                continue;
-            }
+            if (!visitedRooms.Add(room)) continue;
 
             room.SetParent(parentRoom);
-            foreach (Room connection in room.GetConnections()) {
-                visitQueue.Enqueue((connection, room));
-            }
+            foreach (Room connection in room.GetConnections()) visitQueue.Enqueue((connection, room));
         }
     }
 
     /// <summary>
-    ///     adds gaps between rooms, then optimizes and processes the gaps. essentially completes the whole gap making process from start to end
+    ///     adds gaps between rooms, then optimizes and processes the gaps. essentially completes the whole gap making process
+    ///     from start to end
     /// </summary>
     /// <param name="roomLayoutVolumes"></param>
     /// <param name="roomLayoutParams"></param>
@@ -486,5 +456,24 @@ public static class RoomLayoutHelper {
         var (gaps, rooms) = CreateGapsAndRooms(roomLayoutVolumes, roomLayoutParams);
 
         return new RoomLayout(floors, walls, gaps, rooms);
+    }
+
+    public static Shape[] VolumesFromEntryPoints(EntryPoint[] entryPoints, int floorWidth, int wallWidth) {
+        var volumes = new Shape[entryPoints.Length];
+        for (int i = 0; i < volumes.Length; i++) {
+            EntryPoint entryPoint = entryPoints[i];
+            if (entryPoint.IsHorizontal)
+                volumes[i] = new Shape(
+                    entryPoint.Start,
+                    entryPoint.End + new Point16(0, entryPoint.Direction is Directions.Down ? floorWidth - 1 : -floorWidth + 1)
+                );
+            else
+                volumes[i] = new Shape(
+                    entryPoint.Start,
+                    entryPoint.End + new Point16(entryPoint.Direction is Directions.Right ? wallWidth - 1 : -wallWidth + 1, 0)
+                );
+        }
+
+        return volumes;
     }
 }

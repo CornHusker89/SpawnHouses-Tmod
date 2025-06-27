@@ -24,7 +24,7 @@ public class SpawnMainBasement : ModItem {
     public override bool? UseItem(Terraria.Player player) {
         Point16 point = (Main.MouseWorld / 16).ToPoint16();
 
-        MainBasement chain = new MainBasement((ushort)point.X, (ushort)point.Y);
+        MainBasement chain = new((ushort)point.X, (ushort)point.Y);
         chain.CalculateChain();
         chain.Generate();
         return true;

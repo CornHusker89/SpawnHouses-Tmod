@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using SpawnHouses.AdvStructures;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Structures;
 using Terraria.DataStructures;
@@ -9,25 +8,22 @@ using Range = SpawnHouses.Structures.Range;
 namespace SpawnHouses.Types;
 
 public class StructureParams {
-    public StructureTag[] TagBlacklist;
-    public StructureTag[] TagsRequired;
-    public EntryPoint[] EntryPoints;
-    public TilePalette Palette;
-    public Range VolumeRange;
-    public Range HousingRange;
     public bool CanAddEntryPoints;
-
-    public int Length;
-
-    public int StartEntryPointX;
     public int EndEntryPointX;
-
-    /// <summary>calculated using the entry points</summary>
-    public readonly Point16 Center;
+    public EntryPoint[] EntryPoints;
+    public int Height;
 
     public int Housing;
-    public int Height;
+    public Range HousingRange;
+
+    public int Length;
+    public TilePalette Palette;
+
+    public int StartEntryPointX;
+    public StructureTag[] TagBlacklist;
+    public StructureTag[] TagsRequired;
     public int Volume;
+    public Range VolumeRange;
 
     public StructureParams(
         StructureTag[] tagsRequired,
@@ -62,29 +58,24 @@ public class StructureParams {
         ReRollRanges();
     }
 
+    /// <summary>calculated using the entry points</summary>
+    public Point16 Center { get; private set; }
+
+    public Point16 TopLeft => new(StartEntryPointX, EntryPoints.Select(entryPoint => entryPoint.End.Y).Max() - Height);
+
     public void ReRollRanges() {
         double scale = Terraria.WorldGen.genRand.NextDouble();
         Volume = (int)(VolumeRange.Min + (VolumeRange.Max - VolumeRange.Min) * scale);
         Height = Volume / Length;
-        if (Height <= 4) {
-            throw new ArgumentException($"Volume ({Volume}) is too small compared to the length ({Length}) of the structure, resulting in an unacceptable total height of {Height}");
-        }
+        if (Height <= 4) throw new ArgumentException($"Volume ({Volume}) is too small compared to the length ({Length}) of the structure, resulting in an unacceptable total height of {Height}");
 
-        if (HousingRange.Min < 0) {
-            throw new ArgumentException("Min housing cannot be less than 0");
-        }
+        if (HousingRange.Min < 0) throw new ArgumentException("Min housing cannot be less than 0");
 
-        if (HousingRange.Max < 0) {
-            throw new ArgumentException("Max housing cannot be less than 0");
-        }
+        if (HousingRange.Max < 0) throw new ArgumentException("Max housing cannot be less than 0");
 
-        if (HousingRange.Max < HousingRange.Min) {
-            throw new ArgumentException("Max Housing is less than min housing");
-        }
+        if (HousingRange.Max < HousingRange.Min) throw new ArgumentException("Max Housing is less than min housing");
 
-        if (HousingRange.Max == 0 && TagBlacklist.Contains(StructureTag.HasHousing)) {
-            throw new ArgumentException("Adv structure cannot have a max housing of 0 while blacklisting components with housing");
-        }
+        if (HousingRange.Max == 0 && TagBlacklist.Contains(StructureTag.HasHousing)) throw new ArgumentException("Adv structure cannot have a max housing of 0 while blacklisting components with housing");
 
         Housing = (int)(HousingRange.Min + (HousingRange.Max - HousingRange.Min) * scale);
     }
@@ -104,18 +95,18 @@ public class RoomLayoutParams(
     float largeRoomChance = 0.2f,
     int attempts = 5
 ) {
-    public RoomLayoutTag[] TagsBlacklist = tagsBlacklist;
-    public RoomLayoutTag[] TagsRequired = tagsRequired;
-    public Shape MainVolume = mainVolume;
+    public int Attempts = attempts;
     public EntryPoint[] EntryPoints = entryPoints;
-    public TilePalette TilePalette = tilePalette;
-    public int Housing = housing;
     public Range FloorWidth = floorWidth;
+    public int Housing = housing;
+    public float LargeRoomChance = largeRoomChance;
+    public Shape MainVolume = mainVolume;
     public Range RoomHeight = roomHeight;
     public Range RoomWidth = roomWidth;
+    public RoomLayoutTag[] TagsBlacklist = tagsBlacklist;
+    public RoomLayoutTag[] TagsRequired = tagsRequired;
+    public TilePalette TilePalette = tilePalette;
     public Range WallWidth = wallWidth;
-    public float LargeRoomChance = largeRoomChance;
-    public int Attempts = attempts;
 
     /// <summary>
     ///     true if volume's dimensions are not smaller than min sizes
@@ -141,9 +132,11 @@ public class ComponentParams(
     ComponentTag[] tagsRequired,
     ComponentTag[] tagsBlacklist,
     Shape volume,
-    TilePalette tilePalette) {
+    TilePalette tilePalette,
+    StructureTilemap tilemap) {
     public readonly ComponentTag[] TagsBlacklist = tagsBlacklist;
     public readonly ComponentTag[] TagsRequired = tagsRequired;
+    public readonly StructureTilemap Tilemap = tilemap;
     public readonly TilePalette TilePalette = tilePalette;
     public Shape Volume = volume;
 }

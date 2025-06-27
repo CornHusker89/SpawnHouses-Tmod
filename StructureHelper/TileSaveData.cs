@@ -79,7 +79,7 @@ public struct TileSaveData : TagSerializable {
     /// <param name="tag">The tag to interpret</param>
     /// <returns>The unpacked TileSaveData</returns>
     public static TileSaveData DeserializeData(TagCompound tag) {
-        TileSaveData output = new TileSaveData(
+        TileSaveData output = new(
             tag.GetString("Tile"),
             tag.GetString("Wall"),
             tag.GetShort("FrameX"),
@@ -102,7 +102,7 @@ public struct TileSaveData : TagSerializable {
     /// </summary>
     /// <returns>The packed TagCompound</returns>
     public TagCompound SerializeData() {
-        TagCompound tag = new TagCompound {
+        TagCompound tag = new() {
             ["Tile"] = tile,
             ["Wall"] = wall,
             ["FrameX"] = frameX,

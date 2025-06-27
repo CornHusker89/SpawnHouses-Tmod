@@ -19,12 +19,11 @@ public static class RaycastHelper {
     public static (double average, double sd) GetSurfaceLevel(int x1, int x2, int y, byte step = 1, ushort maxCastDistance = 50) {
         List<double> surfaceLevels = [];
         for (int i = x1; i <= x2; i += step)
-        for (int j = 0; j < maxCastDistance; j++) {
+        for (int j = 0; j < maxCastDistance; j++)
             if (Terraria.WorldGen.SolidTile(i, y + j)) {
                 surfaceLevels.Add(y + j);
                 break;
             }
-        }
 
         double average = surfaceLevels.Average();
         double sumOfSquaresOfDifferences = surfaceLevels.Select(val => (val - average) * (val - average)).Sum();
@@ -42,11 +41,9 @@ public static class RaycastHelper {
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
     public static (int distance, int yCoord) SurfaceRaycast(int x, int y, int maxCastDistance = 100) {
-        for (int i = 0; i < maxCastDistance; i++) {
-            if (Terraria.WorldGen.SolidTile(x, y + i)) {
+        for (int i = 0; i < maxCastDistance; i++)
+            if (Terraria.WorldGen.SolidTile(x, y + i))
                 return (i, y + i);
-            }
-        }
         throw new Exception("surface not found within " + maxCastDistance + " tiles");
     }
 
@@ -63,16 +60,13 @@ public static class RaycastHelper {
     public static (bool found, int distance, int yCoord) SurfaceRaycastFromInsideTile(int x, int y,
         int maxCastDistance = 40) {
         bool inSolid = true;
-        for (int i = 0; i < maxCastDistance; i++) {
+        for (int i = 0; i < maxCastDistance; i++)
             if (Terraria.WorldGen.SolidTile(x, y + i)) {
-                if (!inSolid) {
-                    return (true, i, y + i);
-                }
+                if (!inSolid) return (true, i, y + i);
             }
             else if (inSolid) {
                 inSolid = false;
             }
-        }
 
         return (false, -1, -1);
     }
@@ -116,9 +110,8 @@ public static class RaycastHelper {
                 jumpDist++;
             }
             else {
-                if (IsValidTile(Main.tile[start.X + i, lastY - 1])) {
+                if (IsValidTile(Main.tile[start.X + i, lastY - 1]))
                     jumpDist--;
-                }
                 else
                     do {
                         jumpDist++;
@@ -132,7 +125,7 @@ public static class RaycastHelper {
         // get the slope
         double[] slope = new double[length];
         int lastChangeIndex = 0;
-        for (int i = 0; i < length - 1; i++) {
+        for (int i = 0; i < length - 1; i++)
             if (pos[i] == pos[i + 1]) {
                 slope[i] = 0;
             }
@@ -149,7 +142,6 @@ public static class RaycastHelper {
 
                 lastChangeIndex = i;
             }
-        }
 
         slope[length - 1] = slope[length - 2];
 
@@ -199,18 +191,14 @@ public static class RaycastHelper {
         int highestStart = 0;
         int highestLength = 1;
         for (int i = 1; i < tiles.pos.Length; i++) {
-            if (Math.Abs(tiles.pos[i] - tiles.pos[i - 1]) >= 4) {
-                jumpIndexes.Add(i);
-            }
+            if (Math.Abs(tiles.pos[i] - tiles.pos[i - 1]) >= 4) jumpIndexes.Add(i);
             if (tiles.pos[i] < lowestPos) {
                 lowestPos = tiles.pos[i];
                 highestLength = 0;
                 highestStart = i;
             }
 
-            if (tiles.pos[i] == lowestPos) {
-                highestLength += 1;
-            }
+            if (tiles.pos[i] == lowestPos) highestLength += 1;
         }
 
         return (jumpIndexes, highestStart, highestLength);

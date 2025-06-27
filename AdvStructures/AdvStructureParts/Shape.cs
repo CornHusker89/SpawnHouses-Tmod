@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Structures;
+using SpawnHouses.Types;
 using Terraria;
 using Terraria.DataStructures;
 
@@ -28,11 +29,11 @@ public class Shape {
     private Point16 _center = new(-1, -1);
 
     public (Point16 topLeft, Point16 bottomRight) BoundingBox;
-
-
-    public bool IsBox; // because many of the shapes will be boxes, introduce optimizations for boxes
     public Point16[] Points;
     public Point16 Size;
+
+
+    public bool IsBox { get; private set; } // because many of the shapes will be boxes, introduce optimizations for boxes
 
     public int Area {
         get {
@@ -91,9 +92,7 @@ public class Shape {
                 Points = points;
 
                 // ensure triangles don't get counted as boxes
-                if (Points.Length <= 3) {
-                    break;
-                }
+                if (Points.Length <= 3) break;
 
                 // test if there is only 2 unique x and y's, indicating it's a box
                 IsBox = true;
@@ -269,7 +268,7 @@ public class Shape {
             Point16 p2 = shape.Points[(i + 1) % shape.Points.Length]; // Next vertex (looping)
 
             Point16 edge = p2 - p1;
-            Point16 normal = new Point16(-edge.Y, edge.X); // Perpendicular normal
+            Point16 normal = new(-edge.Y, edge.X); // Perpendicular normal
 
             double length = Math.Sqrt(normal.X * normal.X + normal.Y * normal.Y);
             Point16 normalized = length == 0
@@ -560,6 +559,73 @@ public class Shape {
             int newY = (int)Math.Round(p1.Y + t * dy);
             return new Point16(cutCoord, newY);
         }
+    }
+
+
+    public static Shape FromStructureInterior(StructureTilemap tilemap) {
+        List<Point16> outline = [];
+
+        // Step 1: Find the starting point (top-left of the first border)
+        (int x, int y)? start = null;
+        for (int y = 0; y < tilemap.Height - 1 && start == null; y++)
+        for (int x = 0; x < tilemap.Width - 1; x++)
+            if (GetSquareValue(tilemap, x, y) != 0) {
+                start = (x, y);
+                break;
+            }
+
+        if (start == null)
+            throw new Exception("valid shape not found from tilemap");
+
+        (int x, int y) pos = start.Value;
+        (int dx, int dy) dir = (0, -1); // initial direction: up
+        var visited = new HashSet<(int, int)>();
+        int steps = 0;
+        int maxSteps = tilemap.Width * tilemap.Height * 4;
+
+        do {
+            // Use the current square's value to determine direction
+            int value = GetSquareValue(tilemap, pos.x, pos.y);
+
+            // Based on lookup table of marching squares
+            (int dx, int dy) nextDir = value switch {
+                1 => (0, -1), // up
+                2 => (1, 0), // right
+                3 => (1, 0),
+                4 => (-1, 0), // left
+                5 => (0, -1),
+                6 => dir.dy == -1 ? (1, 0) : (-1, 0),
+                7 => (1, 0),
+                8 => (0, 1), // down
+                9 => dir.dx == 1 ? (0, -1) : (0, 1),
+                10 => (0, 1),
+                11 => (0, 1),
+                12 => (-1, 0),
+                13 => (-1, 0),
+                14 => (0, -1),
+                _ => (0, 0) // 0 or 15: no edge
+            };
+
+            // Move and store edge vertex
+            outline.Add(new Point16(pos.x, pos.y));
+            pos = (pos.x + nextDir.dx, pos.y + nextDir.dy);
+            visited.Add(pos);
+            dir = nextDir;
+            steps++;
+        } while (pos != start.Value && !visited.Contains(pos) && steps < maxSteps);
+
+        return new Shape(outline);
+    }
+
+    // Converts 2x2 grid cell into a marching square index
+    private static int GetSquareValue(StructureTilemap tilemap, int x, int y) {
+        int value = 0;
+        if (tilemap.IsValidTile(x, y)) value |= 1; // bottom-left
+        if (tilemap.IsValidTile(x + 1, y)) value |= 2; // bottom-right
+        if (tilemap.IsValidTile(x + 1, y + 1)) value |= 4; // top-right
+        if (tilemap.IsValidTile(x, y + 1)) value |= 8; // top-left
+
+        return value;
     }
 
     #endregion

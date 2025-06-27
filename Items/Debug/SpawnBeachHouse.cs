@@ -42,7 +42,7 @@ public class SpawnBeachHouse : ModItem {
 
         bool reverse = x > Main.LocalPlayer.position.X / 16;
 
-        BeachHouse structure = new BeachHouse(x, y, 0, reverse);
+        BeachHouse structure = new(x, y, 0, reverse);
         structure.Generate();
         //structure._GenerateStructure();
 

@@ -40,7 +40,7 @@ public class SpawnMainHouse : ModItem {
         y = (ushort)(y - 16); //the structure spawning has an offset + we want it to be a little off the ground
         x = (ushort)(x - 31); //center the struct
 
-        MainHouse structure = new MainHouse(x, y);
+        MainHouse structure = new(x, y);
         structure.Generate();
 
         return true;
