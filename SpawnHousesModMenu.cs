@@ -11,19 +11,18 @@ using Terraria.ID;
 
 namespace SpawnHouses;
 
-public class SpawnHousesModMenu : ModMenu
-{
+public class SpawnHousesModMenu : ModMenu {
     public override bool IsAvailable => true;
-
     public override string DisplayName => "Generated Housing";
-    //public override int Music => MusicLoader.GetMusicSlot(Mod, "Sounds/Music/YourMenuTheme"); // Optional custom music
-
     public override ModSurfaceBackgroundStyle MenuBackgroundStyle => ModContent.GetInstance<CustomMenuBackgroundStyle>();
+
+    public override bool PreDrawLogo(SpriteBatch spriteBatch, ref Vector2 logoDrawCenter, ref float logoRotation, ref float logoScale, ref Color drawColor) {
+        logoScale = 0.85f;
+        return true;
+    }
 }
 
-
-public class CustomMenuBackgroundStyle : ModSurfaceBackgroundStyle
-{
+public class CustomMenuBackgroundStyle : ModSurfaceBackgroundStyle {
     private Stopwatch _stopwatch;
 
     private Asset<Texture2D> _skyBackTexture;
@@ -31,25 +30,24 @@ public class CustomMenuBackgroundStyle : ModSurfaceBackgroundStyle
     private Asset<Texture2D> _backTexture;
     private Asset<Texture2D>[] _frontTextures;
 
-    private readonly double _frontFrameInterval = 1000.0 / 9;
     private readonly double _skyDetailFrameInterval = 1000.0 / 5;
+    private readonly double _fogFrameInterval = 1000.0 / 6;
+    private readonly double _frontFrameInterval = 1000.0 / 9;
 
-    public override void Load()
-    {
+    public override void Load() {
         _stopwatch = Stopwatch.StartNew();
 
         _skyBackTexture = ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/sky_back0050");
-        for (int i = 0; i < _skyDetailTextures.Length; i++)
-        {
+        for (int i = 0; i < _skyDetailTextures.Length; i++) {
             string name = i + "";
-            if (name.Length == 1)
+            if (name.Length == 1) {
                 name = "0" + name;
+            }
             _skyDetailTextures[i] = ModContent.Request<Texture2D>($"SpawnHouses/Assets/Menu/sky_detail00{name}");
         }
 
         _backTexture = ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/back0050");
-        _frontTextures =
-        [
+        _frontTextures = [
             ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/front0050"),
             ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/front0051"),
             ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/front0052"),
@@ -59,23 +57,21 @@ public class CustomMenuBackgroundStyle : ModSurfaceBackgroundStyle
         ];
     }
 
-    public override void Unload()
-    {
+    public override void Unload() {
         // force this to main thread because sometimes unloading is done on separate thread
-        Main.RunOnMainThread(() =>
-        {
+        Main.RunOnMainThread(() => {
             _skyBackTexture?.Dispose();
-            foreach (var texture in _skyDetailTextures)
+            foreach (var texture in _skyDetailTextures) {
                 texture?.Dispose();
+            }
             _backTexture?.Dispose();
-            foreach (var texture in _frontTextures)
+            foreach (var texture in _frontTextures) {
                 texture?.Dispose();
+            }
         });
     }
 
-    public override bool PreDrawCloseBackground(SpriteBatch spriteBatch)
-    {
-
+    public override bool PreDrawCloseBackground(SpriteBatch spriteBatch) {
         spriteBatch.Draw(
             _skyBackTexture.Value,
             new Rectangle(0, 0, Main.screenWidth, Main.screenHeight),
@@ -103,17 +99,16 @@ public class CustomMenuBackgroundStyle : ModSurfaceBackgroundStyle
         return false;
     }
 
-    public override void ModifyFarFades(float[] fades, float transitionSpeed)
-    {
+    public override void ModifyFarFades(float[] fades, float transitionSpeed) {
         for (int i = 0; i < fades.Length; i++) {
             if (i == Slot) {
-                fades[i] += transitionSpeed;
+                fades[i] += transitionSpeed * 2;
                 if (fades[i] > 1f) {
                     fades[i] = 1f;
                 }
             }
             else {
-                fades[i] -= transitionSpeed;
+                fades[i] -= transitionSpeed * 2;
                 if (fades[i] < 0f) {
                     fades[i] = 0f;
                 }
