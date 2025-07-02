@@ -49,6 +49,7 @@ public enum RoomLayoutTag {
     /// room layout has entry points that go up/down (ex. is a platform)
     HasVerticalEntryPoints,
 
+    /// will reliably generate a large, convenient room intended for storage
     FirstFloorStorage,
 
     /// the first floor has horizontal gaps wherever possible

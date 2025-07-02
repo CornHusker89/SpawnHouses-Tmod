@@ -319,6 +319,7 @@ public static class RoomLayoutHelper {
     public static void RemoveDuplicateGaps(List<Gap> gaps) {
         for (int testingIndex = gaps.Count - 1; testingIndex >= 0; testingIndex--)
         for (int removingIndex = testingIndex - 1; removingIndex >= 0; removingIndex--) {
+            if (testingIndex >= gaps.Count) break;
             Gap gap = gaps[testingIndex];
             Gap removingGap = gaps[removingIndex];
 
@@ -422,7 +423,7 @@ public static class RoomLayoutHelper {
         var visitQueue = new Queue<(Room room, Room? parentRoom)>();
 
         foreach (EntryPoint entryPoint in entryPoints) {
-            Room potentialRoom = GetClosestRoom(rooms, entryPoint.Middle);
+            Room potentialRoom = GetClosestRoom(rooms, entryPoint.Center);
             visitQueue.Enqueue((potentialRoom, null));
         }
 

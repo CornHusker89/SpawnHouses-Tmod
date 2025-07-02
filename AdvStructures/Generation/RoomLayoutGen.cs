@@ -5,7 +5,7 @@ using System.Linq;
 using SpawnHouses.Helpers;
 using SpawnHouses.Types;
 
-namespace SpawnHouses.AdvStructures;
+namespace SpawnHouses.AdvStructures.Generation;
 
 public class RoomLayoutGen {
     public static readonly (RoomLayoutTag[] possibleTags, Func<RoomLayoutParams, RoomLayout> method)[] GenMethods = [

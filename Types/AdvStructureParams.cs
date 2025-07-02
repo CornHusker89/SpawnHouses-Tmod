@@ -50,10 +50,8 @@ public class StructureParams {
         int centerYMax = EntryPoints.Max(entryPoint => entryPoint.End.Y);
         Center = new Point16(centerXMin + (centerXMin + centerXMax) / 2, centerXMin + (centerYMin + centerYMax) / 2);
 
-        if (VolumeRange.Min / HousingRange.Min < 60)
-            throw new ArgumentException($"Volume minimum of {VolumeRange.Min} is too small given the housing minimum of {HousingRange.Min}");
-        if (VolumeRange.Max / HousingRange.Max < 60)
-            throw new ArgumentException($"Volume maximum of {VolumeRange.Max} is too small given the housing maximum of {HousingRange.Max}");
+        if (EntryPoints.Select(entryPoint => entryPoint.Start.Y).Max() - EntryPoints.Select(entryPoint => entryPoint.Start.Y).Min() + 4 > VolumeRange.Min / Length)
+            throw new ArgumentException($"Entry points are too far away vertically for a minimum height of {VolumeRange.Min / Length}");
 
         ReRollRanges();
     }
@@ -61,23 +59,29 @@ public class StructureParams {
     /// <summary>calculated using the entry points</summary>
     public Point16 Center { get; private set; }
 
+    /// <summary>calculated using entry points, taking <see cref="Height"/> into account</summary>
     public Point16 TopLeft => new(StartEntryPointX, EntryPoints.Select(entryPoint => entryPoint.End.Y).Max() - Height);
 
     public void ReRollRanges() {
         double scale = Terraria.WorldGen.genRand.NextDouble();
         Volume = (int)(VolumeRange.Min + (VolumeRange.Max - VolumeRange.Min) * scale);
         Height = Volume / Length;
-        if (Height <= 4) throw new ArgumentException($"Volume ({Volume}) is too small compared to the length ({Length}) of the structure, resulting in an unacceptable total height of {Height}");
-
-        if (HousingRange.Min < 0) throw new ArgumentException("Min housing cannot be less than 0");
-
-        if (HousingRange.Max < 0) throw new ArgumentException("Max housing cannot be less than 0");
-
-        if (HousingRange.Max < HousingRange.Min) throw new ArgumentException("Max Housing is less than min housing");
-
-        if (HousingRange.Max == 0 && TagBlacklist.Contains(StructureTag.HasHousing)) throw new ArgumentException("Adv structure cannot have a max housing of 0 while blacklisting components with housing");
-
         Housing = (int)(HousingRange.Min + (HousingRange.Max - HousingRange.Min) * scale);
+
+        if (VolumeRange.Min / HousingRange.Min < 60)
+            throw new ArgumentException($"Volume minimum of {VolumeRange.Min} is too small given the housing minimum of {HousingRange.Min}");
+        if (VolumeRange.Max / HousingRange.Max < 60)
+            throw new ArgumentException($"Volume maximum of {VolumeRange.Max} is too small given the housing maximum of {HousingRange.Max}");
+        if (Height <= 4)
+            throw new ArgumentException($"Volume ({Volume}) is too small compared to the length ({Length}) of the structure, resulting in an unacceptable total height of {Height}");
+        if (HousingRange.Min < 0)
+            throw new ArgumentException("Min housing cannot be less than 0");
+        if (HousingRange.Max < 0)
+            throw new ArgumentException("Max housing cannot be less than 0");
+        if (HousingRange.Max < HousingRange.Min)
+            throw new ArgumentException("Max Housing is less than min housing");
+        if (HousingRange.Max > 0 && TagBlacklist.Contains(StructureTag.HasHousing))
+            throw new ArgumentException("Structure cannot have a max housing > 0 while blacklisting components with housing");
     }
 }
 

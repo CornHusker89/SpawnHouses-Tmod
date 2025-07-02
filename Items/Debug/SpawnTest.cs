@@ -23,9 +23,6 @@ public class SpawnTest : ModItem {
         return true;
     }
 
-    // var roomLayoutParams = new RoomLayoutParams([], [], new Shape(new Point16(x, y), new Point16(x + length, y - length)),
-    // 	palette, 11, new Range(4, 18), new Range(7, 24), new Range(1, 2), new Range(1, 2), 0.3f, 1);
-
     // WorldUtils.Gen(new Point(x + length / 2, y - length), new Shapes.Circle((length + 50) / 2), Actions.Chain(
     //     new Actions.SetFrames(),
     //     new Actions.Custom((i, j, args) => {
@@ -45,13 +42,13 @@ public class SpawnTest : ModItem {
             [],
             [
                 new EntryPoint(
-                    new Point16(x, y),
-                    2,
+                    new Point16(x, y - 2),
+                    3,
                     Directions.Right
                 ),
                 new EntryPoint(
-                    new Point16(x + 25, y),
-                    2,
+                    new Point16(x + 25, y - 2),
+                    3,
                     Directions.Left
                 )
             ],
@@ -64,6 +61,7 @@ public class SpawnTest : ModItem {
         AdvStructure structure = new(structureLayoutParams);
         structure.ApplyLayoutMethod();
         structure.FillComponents();
+        structure.PlaceTilemap();
 
         return true;
     }

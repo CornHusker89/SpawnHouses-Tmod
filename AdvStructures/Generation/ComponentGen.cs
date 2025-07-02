@@ -619,8 +619,8 @@ public static class ComponentGen {
         });
 
         for (int index = 0; index < lowX.Length; index++) {
-            PaintedType.PlaceTile(yStart + index, lowX[index], componentParams.TilePalette.WallSpecial, componentParams.Tilemap);
-            PaintedType.PlaceTile(yStart + index, highX[index], componentParams.TilePalette.WallSpecial, componentParams.Tilemap);
+            PaintedType.PlaceTile(lowX[index], yStart + index, componentParams.TilePalette.WallSpecial, componentParams.Tilemap);
+            PaintedType.PlaceTile(highX[index], yStart + index, componentParams.TilePalette.WallSpecial, componentParams.Tilemap);
         }
 
         return false;
@@ -647,8 +647,8 @@ public static class ComponentGen {
         });
 
         for (int index = 0; index < lowX.Length; index++) {
-            PaintedType.PlaceTile(yStart + index, lowX[index], componentParams.TilePalette.WallSpecial, componentParams.Tilemap);
-            PaintedType.PlaceTile(yStart + index, highX[index], componentParams.TilePalette.WallSpecial, componentParams.Tilemap);
+            PaintedType.PlaceTile(lowX[index], yStart + index, componentParams.TilePalette.WallSpecial, componentParams.Tilemap);
+            PaintedType.PlaceTile(highX[index], yStart + index, componentParams.TilePalette.WallSpecial, componentParams.Tilemap);
         }
 
         return false;

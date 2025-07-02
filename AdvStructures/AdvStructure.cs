@@ -36,10 +36,10 @@ public class AdvStructure {
     /// <summary>
     ///     calculates a structure's layout, and does not alter tiles
     /// </summary>
-    /// <param name="method">method to be used. leave null for a random method</param>
-    public bool ApplyLayoutMethod(Func<AdvStructure, bool> method = null) {
-        method ??= AdvStructureLayoutsGen.GetRandomMethod(Params);
-        bool result = method(this);
+    /// <param name="generator">layout generator to be used. leave null for a random method</param>
+    public bool ApplyLayoutMethod(IStructureLayoutGenerator generator = null) {
+        generator ??= StructureLayoutGen.GetRandomLayoutGenerator(Params);
+        bool result = generator.Generate(this);
         if (result) HasLayout = true;
 
         // set the bounding box
@@ -121,6 +121,12 @@ public class AdvStructure {
     }
 
     /// <summary>
+    /// assigns room objects to the gaps in the external layout
+    /// </summary>
+    public void CompleteExternalGaps() {
+    }
+
+    /// <summary>
     ///     Fills current layout with tiles
     /// </summary>
     /// <exception cref="Exception">Throws when no layout has been set</exception>
@@ -133,25 +139,20 @@ public class AdvStructure {
         FillComponentSet(ExternalLayout.Gaps.FindAll(gap => !gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsFloorGap], []);
         FillComponentSet(ExternalLayout.Gaps.FindAll(gap => gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsWallGap], []);
 
-        // FillComponentSet(ExternalLayout.Gaps.FindAll(gap => !gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsFloorGap], [],
-        //     Params.Palette);
-        // FillComponentSet(ExternalLayout.Gaps.FindAll(gap => gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsWallGap], [],
-        //     Params.Palette);
+        FillComponentSet(ExternalLayout.Gaps.FindAll(gap => !gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsFloorGap], []);
+        FillComponentSet(ExternalLayout.Gaps.FindAll(gap => gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsWallGap], []);
 
-        // FillComponentSet(Layout.Floors.Select(floor => floor.Volume).ToList(), [ComponentTag.IsFloor], [], Params.Palette);
-        // FillComponentSet(Layout.Walls.Select(wall => wall.Volume).ToList(), [ComponentTag.IsWall], [], Params.Palette);
-        // FillComponentSet(Layout.Gaps.FindAll(gap => !gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsDebugBlocks], [],
-        //     Params.Palette);
-        // FillComponentSet(Layout.Gaps.FindAll(gap => gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsDebugBlocks], [],
-        //     Params.Palette);
-        //
-        // List<Shape> roomVolumes = [];
-        // foreach (Room room in Layout.Rooms) {
-        //     roomVolumes.Add(room.Volume);
-        // }
-        //
-        // FillComponentSet(roomVolumes, [ComponentTag.IsBackground], [],
-        //     Params.Palette);
+        FillComponentSet(Layout.Floors.Select(floor => floor.Volume).ToList(), [ComponentTag.IsFloor], []);
+        FillComponentSet(Layout.Walls.Select(wall => wall.Volume).ToList(), [ComponentTag.IsWall], []);
+        FillComponentSet(Layout.Gaps.FindAll(gap => !gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsDebugBlocks], []);
+        FillComponentSet(Layout.Gaps.FindAll(gap => gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsDebugBlocks], []);
+
+        List<Shape> roomVolumes = [];
+        foreach (Room room in Layout.Rooms) {
+            roomVolumes.Add(room.Volume);
+        }
+
+        FillComponentSet(roomVolumes, [ComponentTag.IsBackground], []);
 
         BoundingBox.ExecuteInArea((x, y) => {
             WorldUtils.TileFrame(x, y);
@@ -159,12 +160,21 @@ public class AdvStructure {
         });
     }
 
-    public void PlaceTilemap() {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="force">if a tile has no actual tile, if this is true the tile will still overwrite it's Main.tile</param>
+    public void PlaceTilemap(bool force = false) {
         int xOffset = Tilemap.WorldTileOffset.X;
         int yOffset = Tilemap.WorldTileOffset.Y;
-        for (int x = 0; x < Tilemap.Width; x++)
-        for (int y = 0; y < Tilemap.Height; y++)
-            Tilemap[x, y].CopyTile(x + xOffset, y + yOffset);
+        for (int x = 0; x < Tilemap.Width; x++) {
+            for (int y = 0; y < Tilemap.Height; y++) {
+                StructureTile tile = Tilemap[x, y];
+                if (force || tile.HasTile) {
+                    Tilemap[x, y].CopyTile(x + xOffset, y + yOffset);
+                }
+            }
+        }
     }
 
     public void FinishHousing() {

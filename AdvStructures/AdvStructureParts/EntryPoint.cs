@@ -27,7 +27,7 @@ public class EntryPoint {
     public bool IsHorizontal => Direction is Directions.Right or Directions.Left;
 
     /// <summary>the bottom/right point</summary>
-    public Point16 End => Start + (IsHorizontal ? new Point16(0, Size) : new Point16(Size, 0));
+    public Point16 End => Start + (IsHorizontal ? new Point16(0, Size - 1) : new Point16(Size - 1, 0));
 
-    public Point16 Middle => (Start + End) / new Point16(2, 2);
+    public Point16 Center => (Start + End) / new Point16(2, 2);
 }
