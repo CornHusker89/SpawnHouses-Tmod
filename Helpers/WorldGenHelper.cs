@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Structures.Chains;
 using SpawnHouses.Structures.Structures;
@@ -43,26 +45,29 @@ public static class WorldGenHelper {
                 return true;
             }
 
-            // Move out of the way of the big spawn tree or just offset it
             try {
                 if (CompatabilityHelper.IsRemnantsEnabled || ModContent.GetInstance<SpawnHousesConfig>().SpawnPointHouseOffset) {
-                    (double average, double sd) leftSurface = StructureGenHelper.GetSurfaceLevel(initialX - 120 - 30, initialX - 120 + 30,
-                        initialY, maxCastDistance: 400);
-                    (double average, double sd) rightSurface = StructureGenHelper.GetSurfaceLevel(initialX + 120 - 30, initialX + 120 + 30,
-                        initialY, maxCastDistance: 400);
-                    if (leftSurface.sd < rightSurface.sd) {
-                        initialX -= 120;
-                        initialY = (int)leftSurface.average;
-                        _mainHouseOffsetDirection = Directions.Left;
+                    List<((double average, double sd) raycast, int offset)> positions = [
+                        ((0, 0), -200),
+                        ((0, 0), -150),
+                        ((0, 0), -100),
+                        ((0, 0), 100),
+                        ((0, 0), 150),
+                        ((0, 0), 200)
+                    ];
+
+                    for (int i = 0; i < positions.Count; i++) {
+                        int offset = positions[i].offset;
+                        positions[i] = (StructureGenHelper.GetSurfaceLevel(initialX + offset - 42, initialX + offset + 42, initialY, maxCastDistance: 400), offset);
                     }
-                    else {
-                        initialX += 120;
-                        initialY = (int)rightSurface.average;
-                        _mainHouseOffsetDirection = Directions.Right;
-                    }
+                    ((double average, double sd) raycast, int offset) selectedPosition = positions.MinBy(tuple => tuple.raycast.sd);
+
+                    initialX += selectedPosition.offset;
+                    initialY = (int)selectedPosition.raycast.average;
+                    _mainHouseOffsetDirection = selectedPosition.offset > 0 ? Directions.Right : Directions.Left;
                 }
                 else {
-                    (double average, double sd) surface = StructureGenHelper.GetSurfaceLevel(initialX - 30, initialX + 30, initialY,
+                    (double average, double sd) surface = StructureGenHelper.GetSurfaceLevel(initialX - 42, initialX + 42, initialY,
                         maxCastDistance: 400);
                     initialY = (int)surface.average;
                 }

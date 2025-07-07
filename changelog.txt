@@ -1,7 +1,4 @@
-Version 1.2.3
-Major Changes
-- Added a new room to the basement
-
+Version 1.2.4
 Minor Changes
-- Fixed some containers not being openable
-- Fixed terrain blending trying to find the lowest surface possible, instead of the surface that makes the most sense
+- Improved compatibility  with Remnants
+- Fixed issue with spawn point basement lights not turning on upon entry

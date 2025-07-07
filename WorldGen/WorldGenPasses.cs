@@ -55,11 +55,12 @@ public class WorldGenPasses : ModSystem {
                     npc.position.Y = (StructureManager.MainHouse.Y + 13) * 16;
                 }
 
+        //so that it won't go out of bounds
         if (Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "").Replace("'", "") == "dontdigup" ||
-            Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "") == "getfixedboi")
-            //so that it won't go out of bounds
-            ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementShape =
-                float.Max(ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementShape, 0.4f);
+            Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "") == "getfixedboi" ||
+            CompatabilityHelper.IsRemnantsEnabled) {
+            ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementShape = float.Max(ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementShape, 0.4f);
+        }
 
         if (ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement)
             GenerateMainBasement();

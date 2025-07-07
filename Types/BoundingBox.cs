@@ -20,6 +20,17 @@ public class BoundingBox {
     public Point16 Point1 { get; set; }
     public Point16 Point2 { get; set; }
 
+    public override string ToString() {
+        return $"point1: {Point1}, point2: {Point2}";
+    }
+
+    public static bool IsPointInside(BoundingBox boundingBox, Point16 point) {
+        return !(boundingBox.Point1.X > point.X ||
+            boundingBox.Point2.X < point.X ||
+            boundingBox.Point1.Y > point.Y ||
+            boundingBox.Point2.Y < point.Y);
+    }
+
     public static bool IsBoundingBoxColliding(BoundingBox structureBoundingBox, BoundingBox other) {
         // see if they aren't colliding
         if (structureBoundingBox.Point1.X > other.Point2.X || structureBoundingBox.Point2.X < other.Point1.X ||

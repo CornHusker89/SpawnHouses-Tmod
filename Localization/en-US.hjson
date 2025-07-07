@@ -120,7 +120,7 @@ Mods: {
 					Label: Spawn Point House Offset
 					Tooltip:
 						'''
-						If ON, the Spawn Point House will generate ~120 tiles away from the spawn point.
+						If ON, the Spawn Point House will generate away from the spawn point.
 						This can be useful for compatability with other mods that place tiles at the world spawn
 						'''
 				}

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SpawnHouses.Enums;
 using SpawnHouses.Helpers;
 using SpawnHouses.Structures.Chains;
 using SpawnHouses.Structures.Structures;
@@ -19,6 +20,8 @@ internal class StructureManager : ModSystem {
     public static MainBasement? MainBasement;
     public static Mineshaft? Mineshaft;
     public static BeachHouse? BeachHouse;
+
+    public static List<BoundingBox> MainBasementBoundingBoxes = [];
 
     public override void SaveWorldData(TagCompound tag) {
         tag["WorldModVersion"] = WorldModVersion;
@@ -46,6 +49,10 @@ internal class StructureManager : ModSystem {
             MainBasement = tag.ContainsKey("MainBasement") ? tag.Get<MainBasement>("MainBasement") : null;
             Mineshaft = tag.ContainsKey("Mineshaft") ? tag.Get<Mineshaft>("Mineshaft") : null;
             BeachHouse = tag.ContainsKey("BeachHouse") ? tag.Get<BeachHouse>("BeachHouse") : null;
+
+            MainBasement?.ActionOnEachStructure(structure => {
+                MainBasementBoundingBoxes.AddRange(structure.StructureBoundingBoxes);
+            });
         }
     }
 
