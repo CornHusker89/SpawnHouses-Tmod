@@ -149,7 +149,8 @@ public static class RaycastHelper {
     }
 
     /// <summary>
-    ///     Gives the lengths and starts of all flat spots, using tile y-coords. Made to take the input from GetTopTilesPos()
+    ///     Gives the lengths and starts of all flat spots, using tile y-coords. Made to take the input from
+    ///     <see cref="GetTopTilesPos" />
     /// </summary>
     /// <param name="tiles"></param>
     /// <returns></returns>
@@ -179,8 +180,7 @@ public static class RaycastHelper {
 
     /// <summary>
     ///     Gives the starts of all jumps AT or OVER a certain threshold, along with info from the highest tiles, using tile
-    ///     y-coords.
-    ///     Made to take the input from GetTopTilesPos()
+    ///     y-coords. Made to take the input from <see cref="GetTopTilesPos" />
     /// </summary>
     /// <param name="tiles"></param>
     /// <param name="threshold"></param>

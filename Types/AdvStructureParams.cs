@@ -59,7 +59,7 @@ public class StructureParams {
     /// <summary>calculated using the entry points</summary>
     public Point16 Center { get; private set; }
 
-    /// <summary>calculated using entry points, taking <see cref="Height"/> into account</summary>
+    /// <summary>calculated using entry points, taking <see cref="Height" /> into account</summary>
     public Point16 TopLeft => new(StartEntryPointX, EntryPoints.Select(entryPoint => entryPoint.End.Y).Max() - Height);
 
     public void ReRollRanges() {
@@ -86,8 +86,6 @@ public class StructureParams {
 }
 
 public class RoomLayoutParams(
-    RoomLayoutTag[] tagsRequired,
-    RoomLayoutTag[] tagsBlacklist,
     Shape mainVolume,
     EntryPoint[] entryPoints,
     TilePalette tilePalette,
@@ -107,8 +105,6 @@ public class RoomLayoutParams(
     public Shape MainVolume = mainVolume;
     public Range RoomHeight = roomHeight;
     public Range RoomWidth = roomWidth;
-    public RoomLayoutTag[] TagsBlacklist = tagsBlacklist;
-    public RoomLayoutTag[] TagsRequired = tagsRequired;
     public TilePalette TilePalette = tilePalette;
     public Range WallWidth = wallWidth;
 

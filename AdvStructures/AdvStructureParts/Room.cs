@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
-public class Room {
+public class Room : IComponent {
     public List<Gap> Gaps;
 
     /// <summary>If the room has important things inside, alters generation such as gaps</summary>
@@ -12,7 +12,6 @@ public class Room {
 
     public bool IsEntryRoom;
     public Room? ParentRoom;
-    public Shape Volume;
 
     public Room(Shape volume, List<Gap>? gaps = null) {
         Volume = volume;
@@ -21,6 +20,9 @@ public class Room {
         IsEntryRoom = true;
         ParentRoom = null;
     }
+
+    public ushort Id { get; set; }
+    public Shape Volume { get; set; }
 
     public void SetParent(Room parent) {
         IsEntryRoom = false;

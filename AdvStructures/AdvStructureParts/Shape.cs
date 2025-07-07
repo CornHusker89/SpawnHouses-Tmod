@@ -183,6 +183,16 @@ public class Shape {
         return BoundingBox.topLeft + Size / new Point16(2, 2);
     }
 
+    /// <summary>
+    ///     offsets entire shape by given point
+    /// </summary>
+    /// <param name="offset"></param>
+    public void Offset(Point16 offset) {
+        for (int i = 0; i < Points.Length; i++) Points[i] -= offset;
+
+        Init(Points);
+    }
+
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
     /// <param name="points">If only 2 points are passed, will assume a box</param>

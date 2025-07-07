@@ -36,26 +36,6 @@ public enum StructureTag {
     Cavern
 }
 
-public enum RoomLayoutTag {
-    // these are specific to each roomLayout, and not necessarily the whole structure
-    HasHousing,
-    HasFlatFloors,
-    NoFlatFloors,
-    SomeFlatFloors,
-
-    /// room layout has entry points that go left/right (ex. is a door)
-    HorizontalEntryPoints,
-
-    /// room layout has entry points that go up/down (ex. is a platform)
-    HasVerticalEntryPoints,
-
-    /// will reliably generate a large, convenient room intended for storage
-    FirstFloorStorage,
-
-    /// the first floor has horizontal gaps wherever possible
-    FirstFloorConnected
-}
-
 public enum ComponentTag {
     // ===== all =====
     Elevated,
@@ -68,12 +48,6 @@ public enum ComponentTag {
     FloorHollow,
     FloorGroundLevel,
 
-    /// floor is either 1 or 2 tiles thick
-    FloorThin,
-
-    /// floor is larger than 2 tiles thick
-    FloorThick,
-
 
     // ===== wall =====
     IsWall,
@@ -81,30 +55,23 @@ public enum ComponentTag {
     WallGroundLevel,
 
 
-    // ===== decor =====
-    HasDecor,
-    DecorIsUnderGround,
-    DecorGroundLevel,
-    DecorElevated,
-
-
-    // ===== stairway =====
-    IsStairway,
-
-    /// stairway is 3 or fewer tiles wide
-    StairwayNarrow,
-
-    /// stairway is 4 or 5 tiles wide
-    StairwayMedium,
-
-    /// stairway is 6 or greater tiles wide
-    StairwayWide,
-
-
     // ===== background =====
     IsBackground,
     BackgroundHasWindow,
     BackgroundGroundLevel,
+
+
+    // ===== stairway =====
+    IsStairway,
+    StairwayRequiresJumping,
+    StairwayNotRequiresJumping,
+
+
+    // ===== decor =====
+    IsDecor,
+    DecorIsUnderGround,
+    DecorGroundLevel,
+    DecorElevated,
 
 
     // ===== roof =====
@@ -116,6 +83,9 @@ public enum ComponentTag {
     RoofSlopeLessThan1,
     RoofSlopeGreaterThan1,
     RoofSlopeNone,
+
+
+    // ===== gap =====
 
 
     // ===== debug =====

@@ -1,7 +1,7 @@
 #nullable enable
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
-public class Gap {
+public class Gap : IComponent {
     /// <summary>This will be null if the gap leads to an exterior</summary>
     public Room? HigherRoom;
 
@@ -28,8 +28,6 @@ public class Gap {
     ///     chain
     /// </summary>
     public Gap? VerticalChainLower;
-
-    public Shape Volume;
 
     /// <summary>
     ///     higher/lower room is determined by the sum of the center coordinates for both room
@@ -61,6 +59,10 @@ public class Gap {
             ParentRoom = room1.ParentRoom;
         else if (room2?.ParentRoom != null) ParentRoom = room2.ParentRoom;
     }
+
+    public ushort Id { get; set; }
+
+    public Shape Volume { get; set; }
 
     /// <summary>
     ///     tests if the rooms and direction are the same, and the volumes collide

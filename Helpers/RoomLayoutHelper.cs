@@ -81,7 +81,7 @@ public static class RoomLayoutHelper {
     /// <param name="priorityXSplits"></param>
     /// <param name="priorityYSplits"></param>
     /// <returns></returns>
-    public static RoomLayoutVolumes SplitBsp(RoomLayoutParams roomLayoutParams, List<int> priorityXSplits, List<int> priorityYSplits) {
+    private static RoomLayoutVolumes SplitBsp(RoomLayoutParams roomLayoutParams, List<int> priorityXSplits, List<int> priorityYSplits) {
         if (roomLayoutParams.RoomHeight.Max < roomLayoutParams.FloorWidth.Max + 2 * roomLayoutParams.RoomHeight.Min)
             ModContent.GetInstance<SpawnHouses>().Logger.Warn(
                 $"a max room height of {roomLayoutParams.RoomHeight.Max} was given, but at least {roomLayoutParams.FloorWidth.Max + 2 * roomLayoutParams.RoomHeight.Min} is required");
@@ -459,22 +459,67 @@ public static class RoomLayoutHelper {
         return new RoomLayout(floors, walls, gaps, rooms);
     }
 
-    public static Shape[] VolumesFromEntryPoints(EntryPoint[] entryPoints, int floorWidth, int wallWidth) {
-        var volumes = new Shape[entryPoints.Length];
-        for (int i = 0; i < volumes.Length; i++) {
+    /// <summary>
+    /// </summary>
+    /// <param name="entryPoints"></param>
+    /// <param name="floorWidth"></param>
+    /// <param name="wallWidth"></param>
+    /// <remarks>returned gaps have both rooms set to null</remarks>
+    /// <returns></returns>
+    public static Gap[] GapsFromEntryPoints(EntryPoint[] entryPoints, int floorWidth, int wallWidth) {
+        var gaps = new Gap[entryPoints.Length];
+        for (int i = 0; i < gaps.Length; i++) {
             EntryPoint entryPoint = entryPoints[i];
             if (entryPoint.IsHorizontal)
-                volumes[i] = new Shape(
-                    entryPoint.Start,
-                    entryPoint.End + new Point16(0, entryPoint.Direction is Directions.Down ? floorWidth - 1 : -floorWidth + 1)
+                gaps[i] = new Gap(
+                    new Shape(
+                        entryPoint.Start,
+                        entryPoint.End + new Point16(entryPoint.Direction is Directions.Right ? wallWidth - 1 : -wallWidth + 1, 0)
+                    ),
+                    null, null, entryPoint.Direction is Directions.Left or Directions.Right
                 );
             else
-                volumes[i] = new Shape(
-                    entryPoint.Start,
-                    entryPoint.End + new Point16(entryPoint.Direction is Directions.Right ? wallWidth - 1 : -wallWidth + 1, 0)
+                gaps[i] = new Gap(
+                    new Shape(
+                        entryPoint.Start,
+                        entryPoint.End + new Point16(0, entryPoint.Direction is Directions.Down ? floorWidth - 1 : -floorWidth + 1)
+                    ),
+                    null, null, entryPoint.Direction is Directions.Left or Directions.Right
                 );
         }
 
-        return volumes;
+        return gaps;
+    }
+
+    /// <summary>
+    ///     procedural BSP algorithm to split rooms
+    /// </summary>
+    public static RoomLayout CreateRoomLayout(RoomLayoutParams roomLayoutParams) {
+        var corners = GetCorners(roomLayoutParams.MainVolume);
+        RoomLayoutVolumes? pickedLayout = null;
+
+        var possibleLayouts = new RoomLayoutVolumes[roomLayoutParams.Attempts];
+        for (int attempt = 0; attempt < roomLayoutParams.Attempts; attempt++) {
+            RoomLayoutVolumes volumes = SplitBsp(roomLayoutParams, corners.xCoords, corners.yCoords);
+            if (volumes.RoomVolumes.Count == roomLayoutParams.Housing) {
+                pickedLayout = volumes;
+                break;
+            }
+
+            possibleLayouts[attempt] = volumes;
+        }
+
+        // find the layout with the closest housing to the requested amount
+        if (pickedLayout is null) {
+            int closetHousingCount = Math.Abs(possibleLayouts[0].RoomVolumes.Count - roomLayoutParams.Housing);
+            pickedLayout = possibleLayouts[0]; // default to the first
+            for (int i = 1; i < possibleLayouts.Length; i++)
+                if (Math.Abs(possibleLayouts[i].RoomVolumes.Count - roomLayoutParams.Housing) < closetHousingCount) {
+                    closetHousingCount = Math.Abs(possibleLayouts[i].RoomVolumes.Count - roomLayoutParams.Housing);
+                    pickedLayout = possibleLayouts[i];
+                }
+        }
+
+        return CreateRoomLayout(pickedLayout, roomLayoutParams);
     }
 }

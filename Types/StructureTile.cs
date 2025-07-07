@@ -1,5 +1,6 @@
 using Terraria;
 using Terraria.ID;
+using Terraria.WorldBuilding;
 
 namespace SpawnHouses.Types;
 
@@ -44,6 +45,8 @@ public class StructureTile {
     /// </remarks>
     public bool IsActuated;
 
+    // Custom fields
+
     public bool IsExteriorComponent;
 
     public bool IsFloor;
@@ -52,7 +55,15 @@ public class StructureTile {
 
     public bool IsInside;
 
-    // Custom fields
+    /// <summary>
+    ///     If true, when the tilemap is pasted, the original tile here will remain
+    /// </summary>
+    public bool IsNullTile;
+
+    /// <summary>
+    ///     If true, when the tilemap is pasted, the original wall here will remain
+    /// </summary>
+    public bool IsNullWall;
 
     public bool IsOutside;
 
@@ -151,13 +162,21 @@ public class StructureTile {
     /// <param name="y"></param>
     public void CopyTile(int x, int y) {
         Tile tile = Main.tile[x, y];
-        tile.TileType = TileType;
-        tile.WallType = WallType;
-        tile.HasTile = HasTile;
-        tile.IsActuated = IsActuated;
-        tile.HasActuator = HasActuator;
-        tile.TileColor = TileColor;
-        tile.WallColor = WallColor;
-        tile.BlockType = BlockType;
+        if (!IsNullTile) {
+            tile.TileType = TileType;
+            tile.HasTile = HasTile;
+            tile.IsActuated = IsActuated;
+            tile.HasActuator = HasActuator;
+            tile.TileColor = TileColor;
+            tile.BlockType = BlockType;
+        }
+
+        if (!IsNullWall) {
+            tile.WallType = WallType;
+            tile.WallColor = WallColor;
+        }
+
+        WorldUtils.TileFrame(x, y);
+        Framing.WallFrame(x, y);
     }
 }

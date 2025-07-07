@@ -1,4 +1,5 @@
 using System;
+using SpawnHouses.AdvStructures.AdvStructureParts;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Types;
@@ -62,13 +63,12 @@ public class StructureTilemap {
     }
 
     /// <summary>
-    ///     adds rows and columns to the tilemap
+    ///     offsets given <see cref="ExternalLayout" /> by this tilemap's tile offset
     /// </summary>
-    /// <param name="tileOffset">
-    ///     the amount to shift each tile. the way to think about this is shifting the top left tile this
-    ///     much, and filling in the resulting gap to expand the tilemap
-    /// </param>
-    public void Expand(Point16 tileOffset) {
-        throw new NotImplementedException();
+    /// <param name="externalLayout"></param>
+    public void OffsetExternalLayout(ExternalLayout externalLayout) {
+        foreach (Floor floor in externalLayout.Floors) floor.Volume.Offset(WorldTileOffset);
+        foreach (Wall wall in externalLayout.Walls) wall.Volume.Offset(WorldTileOffset);
+        foreach (Gap gap in externalLayout.Gaps) gap.Volume.Offset(WorldTileOffset);
     }
 }

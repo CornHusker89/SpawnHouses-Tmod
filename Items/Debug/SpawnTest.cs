@@ -37,31 +37,28 @@ public class SpawnTest : ModItem {
 
         Console.WriteLine(x + ", " + y);
 
-        StructureParams structureLayoutParams = new(
-            [StructureTag.HasHousing],
-            [],
-            [
-                new EntryPoint(
-                    new Point16(x, y - 2),
-                    3,
-                    Directions.Right
-                ),
-                new EntryPoint(
-                    new Point16(x + 25, y - 2),
-                    3,
-                    Directions.Left
-                )
-            ],
-            TilePalette.Palette1,
-            new Range(600, 1000),
-            new Range(9, 15),
-            true
+        AdvStructure structure = new(
+            new StructureParams(
+                [StructureTag.HasHousing],
+                [],
+                [
+                    new EntryPoint(
+                        new Point16(x, y - 2),
+                        3,
+                        Directions.Right
+                    ),
+                    new EntryPoint(
+                        new Point16(x + 25, y - 2),
+                        3,
+                        Directions.Left
+                    )
+                ],
+                TilePalette.Palette1,
+                new Range(600, 1000),
+                new Range(9, 15),
+                true
+            )
         );
-
-        AdvStructure structure = new(structureLayoutParams);
-        structure.ApplyLayoutMethod();
-        structure.FillComponents();
-        structure.PlaceTilemap();
 
         return true;
     }
