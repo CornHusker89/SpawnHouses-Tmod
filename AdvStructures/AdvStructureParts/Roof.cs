@@ -1,13 +1,10 @@
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
-public class Floor : IComponent {
+public class Roof : IComponent {
     public ushort Id { get; set; }
     public Shape Volume { get; set; }
 
-    public bool IsExterior;
-
-    public Floor(Shape volume, bool isExterior = false) {
+    public Roof(Shape volume) {
         Volume = volume;
-        IsExterior = isExterior;
     }
 }

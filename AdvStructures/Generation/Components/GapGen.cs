@@ -1,3 +1,4 @@
+using System.Linq;
 using SpawnHouses.Types;
 
 namespace SpawnHouses.AdvStructures.Generation.Components;
@@ -10,8 +11,10 @@ public class GapGen {
         public ComponentTag[] GetPossibleTags() {
             return [
                 ComponentTag.IsFloorGap,
-                ComponentTag.FloorGroundLevel,
-                ComponentTag.Elevated
+                ComponentTag.Elevated,
+                ComponentTag.GroundLevel,
+                ComponentTag.UnderGround,
+                ComponentTag.External
             ];
         }
 
@@ -19,9 +22,11 @@ public class GapGen {
             int xStart = componentParams.Volume.BoundingBox.topLeft.X;
             int[] topY = new int[componentParams.Volume.Size.X];
             int[] bottomY = new int[componentParams.Volume.Size.X];
+            bool placeWalls = !componentParams.TagsRequired.Contains(ComponentTag.External);
 
             componentParams.Volume.ExecuteInArea((x, y) => {
-                PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundFloorMain, componentParams.Tilemap);
+                if (placeWalls)
+                    PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundFloorMain, componentParams.Tilemap);
                 StructureTile tile = componentParams.Tilemap[x, y];
                 tile.HasTile = false;
 
@@ -52,13 +57,16 @@ public class GapGen {
         public ComponentTag[] GetPossibleTags() {
             return [
                 ComponentTag.IsWallGap,
-                ComponentTag.WallGroundLevel,
-                ComponentTag.Elevated
+                ComponentTag.Elevated,
+                ComponentTag.GroundLevel,
+                ComponentTag.UnderGround,
+                ComponentTag.External
             ];
         }
 
         public bool Generate(ComponentParams componentParams) {
-            componentParams.Volume.ExecuteInArea((x, y) => { PaintedType.PlaceWall(x, y, PaintedType.PickRandom(componentParams.TilePalette.BackgroundWallAlt), componentParams.Tilemap); });
+            if (!componentParams.TagsRequired.Contains(ComponentTag.External))
+                componentParams.Volume.ExecuteInArea((x, y) => { PaintedType.PlaceWall(x, y, PaintedType.PickRandom(componentParams.TilePalette.BackgroundWallAlt), componentParams.Tilemap); });
             return true;
         }
     }

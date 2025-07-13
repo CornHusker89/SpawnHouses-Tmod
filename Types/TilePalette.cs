@@ -148,7 +148,7 @@ public class TilePalette {
         ],
         new PaintedType(TileID.RichMahogany, PaintID.BrownPaint),
         new PaintedType(TileID.GrayBrick),
-        new PaintedType(TileID.RedDynastyShingles, PaintID.YellowPaint),
+        new PaintedType(TileID.RedDynastyShingles),
         new PaintedType(WallID.Wood),
         new PaintedType(WallID.GrayBrick),
         new PaintedType(WallID.BlueDungeonSlab, PaintID.GrayPaint),

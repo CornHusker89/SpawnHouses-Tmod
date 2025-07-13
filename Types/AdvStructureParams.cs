@@ -20,21 +20,21 @@ public class StructureParams {
     public TilePalette Palette;
 
     public int StartEntryPointX;
-    public StructureTag[] TagBlacklist;
+    public StructureTag[] TagsBlacklist;
     public StructureTag[] TagsRequired;
     public int Volume;
     public Range VolumeRange;
 
     public StructureParams(
         StructureTag[] tagsRequired,
-        StructureTag[] tagBlacklist,
+        StructureTag[] tagsBlacklist,
         EntryPoint[] entryPoints,
         TilePalette tilePalette,
         Range volumeRange,
         Range housingRange,
         bool canAddEntryPoints) {
         TagsRequired = tagsRequired;
-        TagBlacklist = tagBlacklist;
+        TagsBlacklist = tagsBlacklist;
         EntryPoints = entryPoints;
         StartEntryPointX = EntryPoints.Select(entryPoint => entryPoint.Start.X).Min();
         EndEntryPointX = EntryPoints.Select(entryPoint => entryPoint.Direction is Directions.Left or Directions.Right ? entryPoint.Start.X : entryPoint.Start.X + entryPoint.Size).Max();
@@ -52,6 +52,10 @@ public class StructureParams {
 
         if (EntryPoints.Select(entryPoint => entryPoint.Start.Y).Max() - EntryPoints.Select(entryPoint => entryPoint.Start.Y).Min() + 4 > VolumeRange.Min / Length)
             throw new ArgumentException($"Entry points are too far away vertically for a minimum height of {VolumeRange.Min / Length}");
+        if (tagsRequired.Contains(StructureTag.HasFlatFloors) && tagsRequired.Contains(StructureTag.HasNoFlatFloors))
+            throw new ArgumentException("Cannot require mutually exclusive tags \"HasFlatFloors\" and \"HasNoFlatFloors\"");
+        if (tagsRequired.Contains(StructureTag.AboveGround) && tagsRequired.Contains(StructureTag.UnderGround))
+            throw new ArgumentException("Cannot require mutually exclusive tags \"AboveGround\" and \"UnderGround\"");
 
         ReRollRanges();
     }
@@ -73,14 +77,14 @@ public class StructureParams {
         if (VolumeRange.Max / HousingRange.Max < 60)
             throw new ArgumentException($"Volume maximum of {VolumeRange.Max} is too small given the housing maximum of {HousingRange.Max}");
         if (Height <= 4)
-            throw new ArgumentException($"Volume ({Volume}) is too small compared to the length ({Length}) of the structure, resulting in an unacceptable total height of {Height}");
+            throw new ArgumentException($"Volume ({Volume}) is too small compared to the length ({Length}) of the structure, resulting in a too-low total height of {Height}");
         if (HousingRange.Min < 0)
             throw new ArgumentException("Min housing cannot be less than 0");
         if (HousingRange.Max < 0)
             throw new ArgumentException("Max housing cannot be less than 0");
         if (HousingRange.Max < HousingRange.Min)
             throw new ArgumentException("Max Housing is less than min housing");
-        if (HousingRange.Max > 0 && TagBlacklist.Contains(StructureTag.HasHousing))
+        if (HousingRange.Max > 0 && TagsBlacklist.Contains(StructureTag.HasHousing))
             throw new ArgumentException("Structure cannot have a max housing > 0 while blacklisting components with housing");
     }
 }
@@ -107,6 +111,25 @@ public class RoomLayoutParams(
     public Range RoomWidth = roomWidth;
     public TilePalette TilePalette = tilePalette;
     public Range WallWidth = wallWidth;
+
+    /// <summary>
+    ///     returns a shallow copy of these params
+    /// </summary>
+    /// <returns></returns>
+    public RoomLayoutParams Clone() {
+        return new RoomLayoutParams(
+            MainVolume,
+            EntryPoints,
+            TilePalette,
+            Housing,
+            RoomHeight,
+            RoomWidth,
+            FloorWidth,
+            WallWidth,
+            LargeRoomChance,
+            Attempts
+        );
+    }
 
     /// <summary>
     ///     true if volume's dimensions are not smaller than min sizes

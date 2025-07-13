@@ -6,6 +6,7 @@ using SpawnHouses.AdvStructures.Generation;
 using SpawnHouses.AdvStructures.Generation.Components;
 using SpawnHouses.Helpers;
 using SpawnHouses.StructureHelper;
+using SpawnHouses.Structures;
 using SpawnHouses.Types;
 using Terraria;
 using Terraria.DataStructures;
@@ -15,19 +16,14 @@ namespace SpawnHouses.AdvStructures;
 
 public class AdvStructure {
     public ExternalLayout ExternalLayout;
-    public bool FilledComponents;
-    public bool HasLayout;
     public RoomLayout Layout;
-
     public StructureParams Params;
-
-    // public Tilemap TileMap;
-    /// <summary>Position of the top-left of the outer bounding box</summary>
-    public Point16 Position;
-
     public StructureTilemap Tilemap;
-
     public int XSize, YSize, HousingCount;
+    public bool HasFilledComponents;
+
+    public bool HasLayout => Layout != null;
+
 
     /// <summary>
     /// </summary>
@@ -59,7 +55,7 @@ public class AdvStructure {
                 var requiredTags = Params.TagsRequired.ToList();
                 bool valid = true;
                 foreach (StructureTag possibleTag in possibleGenerator.GetPossibleTags()) {
-                    if (Params.TagBlacklist.Contains(possibleTag)) {
+                    if (Params.TagsBlacklist.Contains(possibleTag)) {
                         valid = false;
                         break;
                     }
@@ -71,20 +67,17 @@ public class AdvStructure {
                     validGenerators.Add(possibleGenerator);
             }
 
-            if (validGenerators.Count == 0)
-                throw new Exception("No structure layout generators found were compatible with the given parameters");
+            if (validGenerators.Count == 0) {
+                throw new Exception($"No structure layout generators found were compatible with the given parameters. required tags: {EnumHelper.ToString(Params.TagsRequired)}, blacklisted tags: {EnumHelper.ToString(Params.TagsBlacklist)}");
+            }
             generator = validGenerators[Terraria.WorldGen.genRand.Next(0, validGenerators.Count)];
         }
 
         bool result = generator.Generate(this);
-        if (result) HasLayout = true;
+        if (!result)
+            throw new Exception("error in structure layout generator");
 
-        // set the bounding box
-        var edgeVolumes = ExternalLayout.Floors.Select(floor => floor.Volume).ToList();
-        edgeVolumes.AddRange(ExternalLayout.Walls.Select(wall => wall.Volume).ToList());
-        edgeVolumes.AddRange(ExternalLayout.Gaps.Select(gap => gap.Volume).ToList());
-
-        return result;
+        return true;
     }
 
     /// <summary>
@@ -155,7 +148,7 @@ public class AdvStructure {
         }
 
         if (validGenerators.Count == 0)
-            throw new Exception("No components found were compatible with given tags");
+            throw new Exception($"No components found were compatible with given parameters. required tags: {EnumHelper.ToString(componentParams.TagsRequired)}, blacklisted tags: {EnumHelper.ToString(componentParams.TagsBlacklist)}");
 
         return validGenerators[Terraria.WorldGen.genRand.Next(0, validGenerators.Count)];
     }
@@ -222,35 +215,38 @@ public class AdvStructure {
         if (!HasLayout)
             throw new Exception("No layout has been set");
 
-        FillComponentSet(ExternalLayout.Floors.Select(floor => floor.Volume).ToList(), [ComponentTag.IsFloor], []);
-        FillComponentSet(ExternalLayout.Walls.Select(wall => wall.Volume).ToList(), [ComponentTag.IsWall], []);
-        FillComponentSet(ExternalLayout.Gaps.FindAll(gap => !gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsFloorGap], []);
-        FillComponentSet(ExternalLayout.Gaps.FindAll(gap => gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsWallGap], []);
+        FillComponentSet(ExternalLayout.Floors.Select(floor => floor.Volume).ToList(), [ComponentTag.IsFloor, ComponentTag.External], []);
+        FillComponentSet(ExternalLayout.Walls.Select(wall => wall.Volume).ToList(), [ComponentTag.IsWall, ComponentTag.External], []);
+        FillComponentSet(ExternalLayout.Gaps.FindAll(gap => !gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsFloorGap, ComponentTag.External], []);
+        FillComponentSet(ExternalLayout.Gaps.FindAll(gap => gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsWallGap, ComponentTag.External], []);
+        FillComponentSet(ExternalLayout.Roofs.Select(roof => roof.Volume).ToList(), [ComponentTag.IsRoof, ComponentTag.External], []);
 
-        FillComponentSet(ExternalLayout.Gaps.FindAll(gap => !gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsFloorGap], []);
-        FillComponentSet(ExternalLayout.Gaps.FindAll(gap => gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsWallGap], []);
+        // FillComponentSet(Layout.Floors.Select(floor => floor.Volume).ToList(), [ComponentTag.IsFloor], []);
+        // FillComponentSet(Layout.Walls.Select(wall => wall.Volume).ToList(), [ComponentTag.IsWall], []);
+        // FillComponentSet(Layout.Gaps.FindAll(gap => !gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsDebugBlocks], []);
+        // FillComponentSet(Layout.Gaps.FindAll(gap => gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsDebugBlocks], []);
+        //
+        // FillComponentSet(Layout.Rooms.Select(room => room.Volume).ToList(), [ComponentTag.IsBackground], []);
 
-        FillComponentSet(Layout.Floors.Select(floor => floor.Volume).ToList(), [ComponentTag.IsFloor], []);
-        FillComponentSet(Layout.Walls.Select(wall => wall.Volume).ToList(), [ComponentTag.IsWall], []);
-        FillComponentSet(Layout.Gaps.FindAll(gap => !gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsDebugBlocks], []);
-        FillComponentSet(Layout.Gaps.FindAll(gap => gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsDebugBlocks], []);
-
-        List<Shape> roomVolumes = [];
-        foreach (Room room in Layout.Rooms) roomVolumes.Add(room.Volume);
-
-        FillComponentSet(roomVolumes, [ComponentTag.IsBackground], []);
+        HasFilledComponents = true;
     }
 
     /// <summary>
     /// </summary>
-    /// <param name="force">if a tile has no actual tile, if this is true the tile will still overwrite it's Main.tile</param>
-    public void PlaceTilemap(bool force = false) {
+    public void PlaceTilemap() {
+        if (!HasFilledComponents)
+            throw new Exception("No filled components have been set");
+
         int xOffset = Tilemap.WorldTileOffset.X;
         int yOffset = Tilemap.WorldTileOffset.Y;
         for (int x = 0; x < Tilemap.Width; x++)
         for (int y = 0; y < Tilemap.Height; y++) {
-            StructureTile tile = Tilemap[x, y];
-            if (force || tile.HasTile) Tilemap[x, y].CopyTile(x + xOffset, y + yOffset);
+            Tilemap[x, y].CopyTile(x + xOffset, y + yOffset);
+        }
+
+        for (int x = 0; x < Tilemap.Width; x++)
+        for (int y = 0; y < Tilemap.Height; y++) {
+            Tilemap[x, y].SetFrames(x + xOffset, y + yOffset);
         }
     }
 

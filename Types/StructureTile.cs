@@ -1,3 +1,4 @@
+using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.WorldBuilding;
@@ -175,7 +176,10 @@ public class StructureTile {
             tile.WallType = WallType;
             tile.WallColor = WallColor;
         }
+    }
 
+    public void SetFrames(int x, int y)
+    {
         WorldUtils.TileFrame(x, y);
         Framing.WallFrame(x, y);
     }

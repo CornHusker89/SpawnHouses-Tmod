@@ -11,8 +11,10 @@ public static class WallGen {
         public ComponentTag[] GetPossibleTags() {
             return [
                 ComponentTag.IsWall,
-                ComponentTag.WallGroundLevel,
-                ComponentTag.Elevated
+                ComponentTag.External,
+                ComponentTag.Elevated,
+                ComponentTag.GroundLevel,
+                ComponentTag.UnderGround
             ];
         }
 
@@ -53,8 +55,10 @@ public static class WallGen {
         public ComponentTag[] GetPossibleTags() {
             return [
                 ComponentTag.IsWall,
-                ComponentTag.WallGroundLevel,
-                ComponentTag.Elevated
+                ComponentTag.External,
+                ComponentTag.Elevated,
+                ComponentTag.GroundLevel,
+                ComponentTag.UnderGround
             ];
         }
 
@@ -91,8 +95,9 @@ public static class WallGen {
         public ComponentTag[] GetPossibleTags() {
             return [
                 ComponentTag.IsWall,
-                ComponentTag.WallGroundLevel,
-                ComponentTag.Elevated
+                ComponentTag.Elevated,
+                ComponentTag.GroundLevel,
+                ComponentTag.UnderGround
             ];
         }
 

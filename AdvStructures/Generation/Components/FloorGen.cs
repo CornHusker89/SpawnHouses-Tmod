@@ -12,8 +12,9 @@ public static class FloorGen {
         public ComponentTag[] GetPossibleTags() {
             return [
                 ComponentTag.IsFloor,
-                ComponentTag.FloorSolid,
-                ComponentTag.FloorGroundLevel
+                ComponentTag.External,
+                ComponentTag.GroundLevel,
+                ComponentTag.UnderGround
             ];
         }
 
@@ -31,8 +32,10 @@ public static class FloorGen {
             return [
                 ComponentTag.IsFloor,
                 ComponentTag.FloorSolid,
-                ComponentTag.FloorGroundLevel,
-                ComponentTag.Elevated
+                ComponentTag.External,
+                ComponentTag.Elevated,
+                ComponentTag.GroundLevel,
+                ComponentTag.UnderGround
             ];
         }
 
@@ -50,8 +53,10 @@ public static class FloorGen {
             return [
                 ComponentTag.IsFloor,
                 ComponentTag.FloorSolid,
-                ComponentTag.FloorGroundLevel,
-                ComponentTag.Elevated
+                ComponentTag.External,
+                ComponentTag.Elevated,
+                ComponentTag.GroundLevel,
+                ComponentTag.UnderGround
             ];
         }
 

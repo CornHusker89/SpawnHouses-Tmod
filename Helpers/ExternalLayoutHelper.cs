@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using Terraria.DataStructures;
@@ -35,7 +36,7 @@ public class ExternalLayoutHelper {
     /// <param name="width"></param>
     /// <param name="isExternal"></param>
     /// <returns></returns>
-    public static Floor CreateFloor(int y, int xStart, int xEnd, bool extendHigher, int width, bool isExternal) {
+    public static Floor CreateFloor(int y, int xStart, int xEnd, bool extendHigher, int width, bool isExternal = true) {
         return new Floor(
             new Shape(
                 new Point16(xStart, y),
@@ -57,7 +58,7 @@ public class ExternalLayoutHelper {
     /// <param name="width"></param>
     /// <param name="isExternal"></param>
     /// <returns></returns>
-    public static Wall CreateWall(int x, int yStart, int yEnd, bool extendHigher, int width, bool isExternal) {
+    public static Wall CreateWall(int x, int yStart, int yEnd, bool extendHigher, int width, bool isExternal = true) {
         return new Wall(
             new Shape(
                 new Point16(x, yStart),
@@ -65,5 +66,91 @@ public class ExternalLayoutHelper {
             ),
             isExternal
         );
+    }
+
+    /// <summary>
+    ///     creates floor and walls as needed to fulfill the given path. intended to be used to top-off structures
+    /// </summary>
+    /// <param name="path"></param>
+    /// <param name="floorWidth"></param>
+    /// <param name="extendWallsHigher"></param>
+    /// <param name="wallWidth"></param>
+    /// <param name="isExternal"></param>
+    /// <remarks>assumes that floors get priority over walls</remarks>
+    /// <returns></returns>
+    public static (List<Floor> floors, List<Wall> walls, List<Roof> roofs) CreateTopFloorsAndWalls(List<Point16> path, int floorWidth, bool extendWallsHigher, int wallWidth, bool isExternal = true) {
+        List<Floor> floors = [];
+        List<Wall> walls = [];
+        List<Roof> roofs = [];
+
+        List<Point16> roofPoints = [];
+        bool lastComponentWasFloor = false;
+        for (int pathIndex = 0; pathIndex < path.Count - 1; pathIndex++) {
+            Point16 thisPoint = path[pathIndex];
+            Point16 nextPoint = path[pathIndex + 1];
+
+            if (thisPoint == nextPoint) {
+                continue;
+            }
+
+            bool isFloor = thisPoint.X != nextPoint.X;
+            bool nextComponentIsFloor = pathIndex == path.Count - 2 || nextPoint.X != path[pathIndex + 2].X;
+
+            if (isFloor) {
+                roofPoints.Add(thisPoint);
+
+                if (thisPoint.Y == nextPoint.Y)
+                {
+                    floors.Add(CreateFloor(thisPoint.Y, thisPoint.X - (lastComponentWasFloor ? wallWidth + 1 : 0),
+                        nextPoint.X + (!nextComponentIsFloor && extendWallsHigher ? wallWidth - 1 : 0), true, floorWidth, isExternal));
+                }
+                else {
+                    floors.Add(new Floor(new Shape(
+                        new Point16()
+                    )));
+                }
+
+
+            }
+            else {
+                // create a roof out of the last non-wall segments
+                if (roofPoints.Count != 0) {
+                    roofPoints.Add(thisPoint);
+                    for (int i = roofPoints.Count - 1; i >= 0; i--) {
+                        roofPoints.Add(new Point16(
+                            roofPoints[i].X,
+                            roofPoints[i].Y - 3
+                        ));
+                    }
+                    roofs.Add(new Roof(new Shape(roofPoints)));
+                    roofPoints.Clear();
+                }
+
+                if (lastComponentWasFloor) {
+                    walls.Add(CreateWall(thisPoint.X, nextPoint.Y > thisPoint.Y ? thisPoint.Y + 1 : thisPoint.Y - floorWidth,
+                        nextPoint.Y > thisPoint.Y ? nextPoint.Y - floorWidth : nextPoint.Y + 1, extendWallsHigher, wallWidth, isExternal));
+                }
+                else {
+                    walls.Add(CreateWall(thisPoint.X, thisPoint.Y,
+                        nextPoint.Y > thisPoint.Y ? nextPoint.Y - floorWidth : nextPoint.Y + 1, extendWallsHigher, wallWidth, isExternal));
+                }
+            }
+
+            lastComponentWasFloor = isFloor;
+        }
+
+        if (roofPoints.Count != 0) {
+            roofPoints.Add(path[^1]);
+            for (int i = roofPoints.Count - 1; i >= 0; i--) {
+                roofPoints.Add(new Point16(
+                    roofPoints[i].X,
+                    roofPoints[i].Y - 3
+                ));
+            }
+
+            roofs.Add(new Roof(new Shape(roofPoints)));
+        }
+
+        return (floors, walls, roofs);
     }
 }

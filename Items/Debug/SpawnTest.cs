@@ -48,14 +48,14 @@ public class SpawnTest : ModItem {
                         Directions.Right
                     ),
                     new EntryPoint(
-                        new Point16(x + 25, y - 2),
+                        new Point16(x + 20, y - 2),
                         3,
                         Directions.Left
                     )
                 ],
                 TilePalette.Palette1,
-                new Range(600, 1000),
-                new Range(9, 15),
+                new Range(200, 300),
+                new Range(3, 5),
                 true
             )
         );

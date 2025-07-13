@@ -14,6 +14,7 @@ public static class RoofGen {
         public ComponentTag[] GetPossibleTags() {
             return [
                 ComponentTag.IsRoof,
+                ComponentTag.External,
                 ComponentTag.RoofShort,
                 ComponentTag.RoofTall,
                 ComponentTag.RoofSlope1To1,
@@ -24,16 +25,16 @@ public static class RoofGen {
 
         public bool Generate(ComponentParams componentParams) {
             TilePalette p = componentParams.TilePalette;
-            Point16 roofStart = new(componentParams.Volume.BoundingBox.topLeft.X,
-                componentParams.Volume.BoundingBox.bottomRight.Y);
-            int roofLength = componentParams.Volume.BoundingBox.bottomRight.X - roofStart.X;
-            var roofBottom = RaycastHelper.GetTopTilesPos(roofStart, roofLength);
+            Point16 roofStart = new Point16(componentParams.Volume.BoundingBox.topLeft.X, componentParams.Volume.BoundingBox.bottomRight.Y);
+            int roofLength = componentParams.Volume.BoundingBox.bottomRight.X - roofStart.X + 1;
+            var roofBottom = RaycastHelper.GetTopTilesPos(roofStart, roofLength, tilemap: componentParams.Tilemap);
+
             roofStart = new Point16(roofStart.X, roofBottom.pos[0]);
 
             var roofBottomFlats = RaycastHelper.GetFlatTiles(roofBottom);
             bool isTallRoof = roofBottomFlats.flatLengths.Sum() > roofLength / 2 &&
-                              roofLength > 30 &&
-                              Terraria.WorldGen.genRand.Next(0, 4) == 0;
+                roofLength >= 22 &&
+                Terraria.WorldGen.genRand.Next(0, 4) == 0;
             bool hasEndCaps = Terraria.WorldGen.genRand.Next(0, 5) != 0;
 
             // pass 1: make roof shape
@@ -45,9 +46,7 @@ public static class RoofGen {
 
                 // check if we're on a slope
                 if (Math.Abs(roofBottom.slope[index] + 1) < 0.05 &&
-                    (index == 0 ||
-                     roofBottom.pos[index] !=
-                     roofBottom.pos[index - 1])) // if slope is -1 (up), and if we're actually on a slope
+                    (index == 0 || roofBottom.pos[index] != roofBottom.pos[index - 1])) // if slope is -1 (up), and if we're actually on a slope
                 {
                     PaintedType.PlaceTile(x, roofBottom.pos[index] - 2, p.RoofMain, componentParams.Tilemap, BlockType.SlopeDownRight);
                     if (index != 0)
@@ -75,7 +74,7 @@ public static class RoofGen {
 
             // 2nd pass: validate slopes
             var roofTop =
-                RaycastHelper.GetTopTilesPos(roofStart + new Point16(0, -2), roofLength);
+                RaycastHelper.GetTopTilesPos(roofStart + new Point16(0, -2), roofLength, tilemap: componentParams.Tilemap);
             index = 0;
             for (int x = roofStart.X + 1; x < roofStart.X + roofLength - 1; x++) {
                 index++;
@@ -87,7 +86,7 @@ public static class RoofGen {
             }
 
             // 3rd pass: make slopes double width
-            roofTop = RaycastHelper.GetTopTilesPos(roofStart + new Point16(0, -2), roofLength);
+            roofTop = RaycastHelper.GetTopTilesPos(roofStart + new Point16(0, -2), roofLength, tilemap: componentParams.Tilemap);
             index = -1;
             for (int x = roofStart.X; x < roofStart.X + roofLength; x++) {
                 index++;
@@ -107,7 +106,7 @@ public static class RoofGen {
             }
 
             // 4th pass: prep slope transitions to half blocks
-            roofTop = RaycastHelper.GetTopTilesPos(roofStart + new Point16(0, -2), roofLength);
+            roofTop = RaycastHelper.GetTopTilesPos(roofStart + new Point16(0, -2), roofLength, tilemap: componentParams.Tilemap);
             List<(int, int)> tranitions = [];
             var roofTopFlats = RaycastHelper.GetFlatTiles(roofTop);
 

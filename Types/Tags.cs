@@ -4,15 +4,18 @@ public enum StructureTag {
     // ===== structureLayout =====
     IsSymmetric,
     HasHousing,
-    HasLargeRoom,
-    HasNoLargeRoom,
     HasFlatFloors,
     HasNoFlatFloors,
     HasSomeFlatFloors,
-    FirstFloorStorage,
 
-    /// the first floor has horizontal gaps wherever possible
-    FirstFloorConnected,
+    /// there is a convenient large room intended for general use
+    HasLargeRoom,
+
+    /// there is a convenient large room intended for storage
+    HasStorage,
+
+    /// the main floor has horizontal gaps wherever possible
+    MainFloorConnected,
 
     /// structure is categorized as being above ground (typically has a roof)
     AboveGround,
@@ -39,26 +42,26 @@ public enum StructureTag {
 public enum ComponentTag {
     // ===== all =====
     Elevated,
+    GroundLevel,
+    UnderGround,
     External,
+
 
     // ===== floor =====
     IsFloor,
     IsFloorGap,
     FloorSolid,
     FloorHollow,
-    FloorGroundLevel,
 
 
     // ===== wall =====
     IsWall,
     IsWallGap,
-    WallGroundLevel,
 
 
     // ===== background =====
     IsBackground,
     BackgroundHasWindow,
-    BackgroundGroundLevel,
 
 
     // ===== stairway =====
@@ -69,9 +72,6 @@ public enum ComponentTag {
 
     // ===== decor =====
     IsDecor,
-    DecorIsUnderGround,
-    DecorGroundLevel,
-    DecorElevated,
 
 
     // ===== roof =====

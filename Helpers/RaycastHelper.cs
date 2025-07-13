@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SpawnHouses.Types;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.ID;
 
 namespace SpawnHouses.Helpers;
 
@@ -82,12 +84,8 @@ public static class RaycastHelper {
     ///     WorldGen.SolidTile(tile)
     /// </param>
     /// <returns>y-position and slope of every tile along length. Remember that a positive slope results in going down, not up</returns>
-    public static (int[] pos, double[] slope) GetTopTilesPos(Point16 start, int length, bool requiresSolidTiles = false) {
-        bool IsValidTile(Tile tile) {
-            return tile.HasTile && (!requiresSolidTiles || Terraria.WorldGen.SolidTile(tile));
-        }
-
-        // get the pos
+    public static (int[] pos, double[] slope) GetTopTilesPos(Point16 start, int length, bool requiresSolidTiles = false, StructureTilemap tilemap = null) {
+        bool customTilemap = tilemap != null;
         int[] pos = new int[length];
         int lastY = start.Y;
         for (int i = 0; i < length; i++) {
@@ -102,20 +100,20 @@ public static class RaycastHelper {
 
             int jumpDist = 0;
 
-            if (IsValidTile(Main.tile[start.X + i, lastY])) {
+            if (IsValidTile(start.X + i, lastY)) {
                 do {
                     jumpDist--;
-                } while (IsValidTile(Main.tile[start.X + i, lastY + jumpDist]));
+                } while (IsValidTile(start.X + i, lastY + jumpDist));
 
                 jumpDist++;
             }
             else {
-                if (IsValidTile(Main.tile[start.X + i, lastY - 1]))
+                if (IsValidTile(start.X + i, lastY - 1))
                     jumpDist--;
                 else
                     do {
                         jumpDist++;
-                    } while (!IsValidTile(Main.tile[start.X + i, lastY + jumpDist]));
+                    } while (!IsValidTile(start.X + i, lastY + jumpDist));
             }
 
             lastY += jumpDist;
@@ -146,6 +144,15 @@ public static class RaycastHelper {
         slope[length - 1] = slope[length - 2];
 
         return (pos, slope);
+
+        bool IsValidTile(int x, int y) {
+            if (customTilemap) {
+                return tilemap![x, y].HasTile && (!requiresSolidTiles || tilemap![x, y].BlockType == BlockType.Solid);
+            }
+
+            Tile tile = Main.tile[x, y];
+            return tile.HasTile && (!requiresSolidTiles || Terraria.WorldGen.SolidTile(tile));
+        }
     }
 
     /// <summary>
