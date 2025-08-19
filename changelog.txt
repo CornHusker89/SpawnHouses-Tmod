@@ -1,4 +1,3 @@
-Version 1.2.4
+Version 1.2.5
 Minor Changes
-- Improved compatibility  with Remnants
-- Fixed issue with spawn point basement lights not turning on upon entry
+- Forces the beach house to spawn on the non-dungeon side
