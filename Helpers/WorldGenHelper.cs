@@ -209,15 +209,15 @@ public static class WorldGenHelper {
         short yModifier = 0;
         ushort fillTileType = TileID.Sand;
 
-        bool FindLeft(bool reverse = false, bool force = false) {
+        void FindShoreline(bool rightSide = false) {
             ushort x, y;
-            if (!reverse)
+            if (!rightSide)
                 x = 70;
             else
                 x = (ushort)(Main.maxTilesX - 70);
 
             while (true) {
-                if (!reverse)
+                if (!rightSide)
                     x++;
                 else
                     x--;
@@ -234,22 +234,16 @@ public static class WorldGenHelper {
                         if (!Terraria.WorldGen.SolidTile(x, y + 20) ||
                             !Terraria.WorldGen.SolidTile(x, y + 28)) // if we're on an "island" keep going
                             break;
+                        
+                        tileX = x;
+                        tileY = y;
 
-                        ushort type = Main.tile[x, y].TileType;
-                        if (type is TileID.Sand or TileID.ShellPile or TileID.Crimsand or TileID.Ebonsand
-                                or TileID.Pearlsand || force) {
-                            tileX = x;
-                            tileY = y;
+                        //sample a deeper tile
+                        fillTileType = Main.tile[x, y + 10].TileType;
+                        if (fillTileType == TileID.ShellPile)
+                            fillTileType = TileID.Sand;
 
-                            //sample a deeper tile
-                            fillTileType = Main.tile[x, y + 10].TileType;
-                            if (fillTileType == TileID.ShellPile)
-                                fillTileType = TileID.Sand;
-
-                            return true;
-                        }
-
-                        return false;
+                        return;
                     }
 
                     if (Main.tile[x, y].LiquidAmount != 0)
@@ -258,85 +252,65 @@ public static class WorldGenHelper {
             }
         }
 
-        bool FindRight(bool force = false) {
-            return FindLeft(true, force);
-        }
-
         bool dungeonIsLeftSide = Main.dungeonX < Main.maxTilesX / 2;
+        bool rightSide = dungeonIsLeftSide;
+        
+        FindShoreline(rightSide);
 
-        bool spawnDungeonSide = Terraria.WorldGen.genRand.Next(0, 4) == 0; // 1 out of 4
+        if (tileX == 0 || tileY == 0) return;
+        
+        try {
+            BeachHouse beachHouse = !rightSide
+                ? new BeachHouse((ushort)(tileX - 9), (ushort)(tileY - 32))
+                : new BeachHouse((ushort)(tileX - 23), (ushort)(tileY - 32), reverse: true);
+            beachHouse.Generate();
+            StructureManager.BeachHouse = beachHouse;
 
-        // initally set it to the same side, then swap it if we aren't spawning on the DungeonSide
-        bool leftSide = dungeonIsLeftSide;
-        if (!spawnDungeonSide)
-            leftSide = !leftSide;
+            // firepit generation
+            if (Terraria.WorldGen.genRand.Next(0, 2) == 0) // 1/2 chance
+            {
+                bool foundLocation = false;
+                ushort x;
 
-        if (leftSide) {
-            if (!FindLeft()) {
-                leftSide = false;
-                FindRight(true);
-            }
-        }
-        else {
-            if (!FindRight()) {
-                leftSide = true;
-                FindLeft(force: true);
-            }
-        }
+                if (rightSide)
+                    x = (ushort)(tileX - 9 + 35 + Terraria.WorldGen.genRand.Next(8, 12));
+                else
+                    x = (ushort)(tileX - 23 - Terraria.WorldGen.genRand.Next(8, 12));
 
-        if (tileX != 0 && tileY != 0)
-            try {
-                BeachHouse beachHouse = leftSide
-                    ? new BeachHouse((ushort)(tileX - 9), (ushort)(tileY - 32))
-                    : new BeachHouse((ushort)(tileX - 23), (ushort)(tileY - 32), reverse: true);
-                beachHouse.Generate();
-                StructureManager.BeachHouse = beachHouse;
-
-                // firepit generation
-                if (Terraria.WorldGen.genRand.Next(0, 2) == 0) // 1/2 chance
-                {
-                    bool foundLocation = false;
-                    ushort x;
-
-                    if (leftSide)
-                        x = (ushort)(tileX - 9 + 35 + Terraria.WorldGen.genRand.Next(8, 12));
-                    else
-                        x = (ushort)(tileX - 23 - Terraria.WorldGen.genRand.Next(8, 12));
-
-                    ushort y = 10;
-                    while (!foundLocation) {
-                        y = tileY;
-                        while (y < Main.worldSurface) {
-                            if (Terraria.WorldGen.SolidTile(x, y)) break;
-                            y++;
-                        }
-
-                        foundLocation = true;
+                ushort y = 10;
+                while (!foundLocation) {
+                    y = tileY;
+                    while (y < Main.worldSurface) {
+                        if (Terraria.WorldGen.SolidTile(x, y)) break;
+                        y++;
                     }
 
-                    y = (ushort)(y - 2);
-                    x = (ushort)(x - 3);
-
-                    Firepit structure = new(x, y);
-                    structure.Generate();
+                    foundLocation = true;
                 }
 
-                // replace all sand with filltype sand (for when the beaches are corrupt blocks)
-                if (fillTileType is not TileID.Sand)
-                    WorldUtils.Gen(new Point(tileX, tileY), new Shapes.Circle(60, 50), Actions.Chain(
-                        new Actions.Custom((i, j, args) => {
-                            if (Terraria.WorldGen.InWorld(i, j) && Main.tile[i, j].HasTile &&
-                                Main.tile[i, j].TileType == TileID.Sand) {
-                                Tile tile = Main.tile[i, j];
-                                tile.TileType = fillTileType;
-                            }
+                y = (ushort)(y - 2);
+                x = (ushort)(x - 3);
 
-                            return true;
-                        })
-                    ));
+                Firepit structure = new(x, y);
+                structure.Generate();
             }
-            catch (Exception e) {
-                ModContent.GetInstance<SpawnHousesMod>().Logger.Error($"Beach house failed to generate:\n{e}");
-            }
+
+            // replace all sand with filltype sand (for when the beaches are corrupt blocks)
+            if (fillTileType is not TileID.Sand)
+                WorldUtils.Gen(new Point(tileX, tileY), new Shapes.Circle(60, 50), Actions.Chain(
+                    new Actions.Custom((i, j, args) => {
+                        if (Terraria.WorldGen.InWorld(i, j) && Main.tile[i, j].HasTile &&
+                            Main.tile[i, j].TileType == TileID.Sand) {
+                            Tile tile = Main.tile[i, j];
+                            tile.TileType = fillTileType;
+                        }
+
+                        return true;
+                    })
+                ));
+        }
+        catch (Exception e) {
+            ModContent.GetInstance<SpawnHousesMod>().Logger.Error($"Beach house failed to generate:\n{e}");
+        }
     }
 }
