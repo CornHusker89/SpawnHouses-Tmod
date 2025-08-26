@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SpawnHouses.AdvStructures;
 using SpawnHouses.Structures;
 using SpawnHouses.Structures.Chains;
 using SpawnHouses.Structures.Structures;
@@ -18,6 +19,10 @@ internal class StructureManager : ModSystem {
     public static MainBasement? MainBasement;
     public static Mineshaft? Mineshaft;
     public static BeachHouse? BeachHouse;
+
+    public override void Load() {
+        AdvStructure.PopulateGenerators();
+    }
 
     public override void SaveWorldData(TagCompound tag) {
         tag["WorldVersion"] = WorldVersion;
@@ -158,7 +163,7 @@ internal class MainHouseSerializer : TagSerializer<MainHouse, TagCompound> {
             tag.GetBool("InUnderworld"),
             tag.GetByte("LeftType") != 0
                 ? tag.GetByte("LeftType")
-                : (byte)1, // if its 0 (which only happens if it's a <= v0.2.7 world) set to default (large) 
+                : (byte)1, // if its 0 (which only happens if it's a <= v0.2.7 world) set to default (large)
             tag.GetByte("RightType") != 0 ? tag.GetByte("RightType") : (byte)1
         );
     }

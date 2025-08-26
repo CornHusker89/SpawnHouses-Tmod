@@ -5,7 +5,7 @@ namespace SpawnHouses.AdvStructures.Generation.Components;
 
 public static class WallGen {
     /// <summary>
-    ///     Fills a volume with the same wall blocks, with special blocks at regular intervals
+    ///     Fills a volume with the same wall blocks, with special blocks at the first and last x position of each row
     /// </summary>
     public class WallGenerator1 : IComponentGenerator {
         public ComponentTag[] GetPossibleTags() {
@@ -16,6 +16,64 @@ public static class WallGen {
                 ComponentTag.GroundLevel,
                 ComponentTag.UnderGround
             ];
+        }
+
+        public bool Generate(ComponentParams componentParams) {
+            bool elevated = componentParams.TagsRequired.Contains(ComponentTag.Elevated);
+
+            componentParams.Volume.ExecuteInArea((x, y) => {
+                PaintedType.PlaceTile(x, y,
+                    elevated ? componentParams.TilePalette.WallMainElevated : componentParams.TilePalette.WallMain,
+                    componentParams.Tilemap
+                );
+            });
+            return true;
+        }
+    }
+
+    /// <summary>
+    ///     Fills a volume with random blocks
+    /// </summary>
+    public class WallGenerator2 : IComponentGenerator {
+        public ComponentTag[] GetPossibleTags() {
+            return [
+                ComponentTag.IsWall,
+                ComponentTag.External,
+                ComponentTag.Elevated,
+                ComponentTag.GroundLevel,
+                ComponentTag.UnderGround
+            ];
+        }
+
+        public bool Generate(ComponentParams componentParams) {
+            bool elevated = componentParams.TagsRequired.Contains(ComponentTag.Elevated);
+
+            componentParams.Volume.ExecuteInArea((x, y) => {
+                PaintedType.PlaceTile(x, y,
+                    PaintedType.PickRandom(elevated ? componentParams.TilePalette.WallAltElevated : componentParams.TilePalette.WallAlt),
+                    componentParams.Tilemap
+                );
+            });
+            return true;
+        }
+    }
+
+    /// <summary>
+    ///     Fills a volume with the same wall blocks, with special blocks at the first and last x position of each row
+    /// </summary>
+    public class WallGenerator3 : IComponentGenerator {
+        public ComponentTag[] GetPossibleTags() {
+            return [
+                ComponentTag.IsWall,
+                ComponentTag.External,
+                ComponentTag.Elevated,
+                ComponentTag.GroundLevel,
+                ComponentTag.UnderGround
+            ];
+        }
+
+        public bool CanGenerate(ComponentParams componentParams) {
+            return componentParams.Volume.Size.X >= 3;
         }
 
         public bool Generate(ComponentParams componentParams) {
@@ -49,9 +107,9 @@ public static class WallGen {
     }
 
     /// <summary>
-    ///     Fills a volume with random wall blocks, with special blocks at regular intervals
+    ///     Fills a volume with random wall blocks, with special blocks at the first and last x position of each row
     /// </summary>
-    public class WallGenerator2 : IComponentGenerator {
+    public class WallGenerator4 : IComponentGenerator {
         public ComponentTag[] GetPossibleTags() {
             return [
                 ComponentTag.IsWall,
@@ -60,6 +118,10 @@ public static class WallGen {
                 ComponentTag.GroundLevel,
                 ComponentTag.UnderGround
             ];
+        }
+
+        public bool CanGenerate(ComponentParams componentParams) {
+            return componentParams.Volume.Size.X >= 3;
         }
 
         public bool Generate(ComponentParams componentParams) {
@@ -91,7 +153,7 @@ public static class WallGen {
     /// <summary>
     ///     Fills a volume with random blocks, but the bottom block consistent
     /// </summary>
-    public class WallGenerator3 : IComponentGenerator {
+    public class WallGenerator5 : IComponentGenerator {
         public ComponentTag[] GetPossibleTags() {
             return [
                 ComponentTag.IsWall,

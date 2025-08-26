@@ -11,11 +11,16 @@ using SpawnHouses.Structures;
 using SpawnHouses.Types;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.ID;
 
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
 #pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
 
+/// <summary>
+/// generic 2D shape. has support for triangles, rectangles, and n-gons.
+/// </summary>
+/// <remarks>it's assumed that the points are in clockwise order</remarks>
 public class Shape {
     private static readonly Color[] Colors = [
         Color.White,
@@ -25,6 +30,7 @@ public class Shape {
     ];
 
     private int _area = -1;
+    private int _expandedArea = -1;
 
     private Point16 _center = new(-1, -1);
 
@@ -35,6 +41,9 @@ public class Shape {
 
     public bool IsBox { get; private set; } // because many of the shapes will be boxes, introduce optimizations for boxes
 
+    /// <summary>
+    ///     the amount of tiles this shape encloses
+    /// </summary>
     public int Area {
         get {
             if (_area == -1)
@@ -43,13 +52,18 @@ public class Shape {
         }
     }
 
-    public Point16 Center {
+    /// <summary>
+    ///     the number of tiles this shape encloses if it were expanded by 1 tile in every direction
+    /// </summary>
+    public int ExpandedArea {
         get {
-            if (_center == new Point16(-1, -1))
-                _center = GetCenter();
-            return _center;
+            if (_expandedArea == -1)
+                _expandedArea = GetExpandedShape(1).Area;
+            return _expandedArea;
         }
     }
+
+    public Point16 Center => BoundingBox.topLeft + Size / new Point16(2, 2);
 
     private static Color GetColor(int index) {
         return Colors[index % Colors.Length];
@@ -75,7 +89,10 @@ public class Shape {
         });
     }
 
-    private void Init(Point16[] points) {
+    private void Init(Point16[] points, bool optimize) {
+        _center = new Point16(-1, -1);
+        _area = -1;
+        _expandedArea = -1;
         switch (points.Length) {
             case < 2:
                 throw new ArgumentException("Shape must have at least 2 points.");
@@ -89,46 +106,15 @@ public class Shape {
                 IsBox = true;
                 break;
             default:
-                Points = points;
-
-                // ensure triangles don't get counted as boxes
-                if (Points.Length <= 3) break;
-
-                // test if there is only 2 unique x and y's, indicating it's a box
-                IsBox = true;
-                int x1 = Points[0].X, x2 = -1, y1 = Points[0].Y, y2 = -1;
-                foreach (Point16 point in Points) {
-                    if (point.X != x1)
-                        if (x2 == -1) {
-                            x2 = point.X;
-                        }
-                        else if (point.X != x2) {
-                            IsBox = false;
-                            break;
-                        }
-
-                    if (point.Y != y1)
-                        if (y2 == -1) {
-                            y2 = point.Y;
-                        }
-                        else if (point.Y != y2) {
-                            IsBox = false;
-                            break;
-                        }
+                if (points.Length <= 3) {
+                    Points = points;
+                    break;
                 }
 
-                // optimize points if box
-                if (IsBox) {
-                    if (x2 == -1)
-                        x2 = x1;
-                    if (y2 == -1)
-                        y2 = y1;
-                    Points = [
-                        new Point16(x1, y1),
-                        new Point16(x2, y1),
-                        new Point16(x2, y2),
-                        new Point16(x1, y2)
-                    ];
+                Points = optimize ? OptimizePoints(points) : points;
+
+                if (Points.Length == 4) {
+                    IsBox = true;
                 }
 
                 break;
@@ -163,6 +149,75 @@ public class Shape {
         return true;
     }
 
+    /// <summary>
+    /// removes extra points in shape.
+    /// </summary>
+    /// <param name="points"></param>
+    /// <returns></returns>
+    /// <remarks>destructive, returns the input list</remarks>
+    public static Point16[] OptimizePoints(List<Point16> points) {
+
+        // ensure the shape isn't 1 wide/tall, which involves overlapping points by nature
+        // if (points.All(p => p.X == points[0].X) && points.All(p => p.Y == points[0].Y))
+        //     return points.ToArray();
+
+        for (int i = 0; i < points.Count; i++) {
+            Point16 last = points[i - 1 != -1 ? i - 1 : points.Count - 1];
+            Point16 target = points[i];
+            Point16 next = points[i + 1 != points.Count ? i + 1 : 0];
+
+            if (points.Count == 1) {
+                break;
+            }
+
+            if (target == next) {
+                points.RemoveAt(i);
+                i--;
+                continue; // so that we don't interfere with the next condition
+            }
+
+            if ((target.X == last.X && target.X == next.X && ((last.Y < target.Y && target.Y < next.Y) || (last.Y > target.Y && target.Y > next.Y)))
+                || (target.Y == last.Y && target.Y == next.Y && ((last.X < target.X && target.X < next.X) || (last.X > target.X && target.X > next.X)))) {
+                points.RemoveAt(i);
+                i--;
+            }
+        }
+
+        if (points[0] == points[^1] && points.Count > 1) {
+            points.RemoveAt(points.Count - 1);
+        }
+
+        return points.ToArray();
+    }
+
+    public static Point16[] OptimizePoints(Point16[] points) => OptimizePoints(points.ToList());
+
+
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+
+    /// <param name="points">If only 2 points are passed, will assume a box</param>
+    /// <returns></returns>
+    public Shape(params Point16[] points) {
+        Init(points, true);
+    }
+
+    /// <param name="points">If only 2 points are passed, will assume a box</param>
+    /// <returns></returns>
+    public Shape(IEnumerable<Point16> points) {
+        var pointsArray = points.ToArray();
+        Init(pointsArray, true);
+    }
+
+    private Shape(IEnumerable<Point16> points, bool optimize) {
+        var pointsArray = points.ToArray();
+        Init(pointsArray, optimize);
+    }
+
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+
+
+    #region Shape Self-Geometry
+    
     private int GetArea() {
         if (IsBox)
             return (BoundingBox.bottomRight.X - BoundingBox.topLeft.X) *
@@ -179,8 +234,150 @@ public class Shape {
         return (int)Math.Abs(area / 2);
     }
 
-    private Point16 GetCenter() {
-        return BoundingBox.topLeft + Size / new Point16(2, 2);
+    /// <summary>
+    /// normalize vector, intended to be used when getting edge/vertex normals
+    /// </summary>
+    /// <param name="normal"></param>
+    /// <param name="round"></param>
+    /// <returns></returns>
+    private static (double x, double y) Normalize((double x, double y) normal, bool round) {
+        double largestMagnitude = Math.Max(double.Abs(normal.x), double.Abs(normal.y));
+        if (largestMagnitude < 0.00001f) {
+            return (0, 0);
+        }
+
+        double normalX = normal.x / largestMagnitude;
+        double normalY = normal.y / largestMagnitude;
+        return (round ? Math.Round(normalX) : normalX, round ? Math.Round(normalY) : normalY);
+    }
+
+    /// <summary>
+    /// gets outward facing normals for each edge
+    /// </summary>
+    /// <param name="round">if each normal is rounded to 0 or 1</param>
+    /// <returns></returns>
+    /// <remarks>edge index 0 is the edge between verts 0 and 1, with this pattern continuing and wrapping around</remarks>
+    public (double x, double y)[] GetEdgeNormals(bool round) {
+        int count = Points.Length;
+        (double x, double y)[] normals = new (double, double)[count];
+
+        for (int i = 0; i < count; i++) {
+            Point16 p1 = Points[i];
+            Point16 p2 = Points[(i + 1) % count];
+            Point16 edge = p2 - p1;
+
+            // rotate 90° counterclockwise for outward normal
+            Point16 normal = new(edge.Y, -edge.X);
+            normals[i] = Normalize((normal.X, normal.Y), round);
+        }
+
+        return normals;
+    }
+
+    /// <summary>
+    /// gets outward facing normals for each vertex
+    /// </summary>
+    /// <returns></returns>
+    /// <remarks>rounds each normal to 0 or 1</remarks>
+    public Point16[] GetVertexNormals() {
+        int count = Points.Length;
+        var normals = new Point16[count];
+        var edgeNormals = GetEdgeNormals(false);
+
+        for (int i = 0; i < count; i++) {
+            // average the normals of the two adjacent edges
+            (double x, double y) n1 = edgeNormals[(i - 1 + count) % count];
+            (double x, double y) n2 = edgeNormals[i];
+            (double x, double y) normal = Normalize(((n1.x + n2.x) / 2, (n1.y + n2.y) / 2), true);
+            normals[i] = new Point16((int)normal.x, (int)normal.y);
+        }
+
+        return normals;
+    }
+
+    /// <summary>
+    ///     gets ratio of bounding box size to actual shape area. can indicate how box-like the shape is
+    /// </summary>
+    /// <returns></returns>
+    public double GetBoundingBoxEfficiency() => (double)Size.X * Size.Y / Area;
+
+    /// <summary>
+    ///     gets number of tiles that are within the bounding box but not in the shape. can indicate how box-like the shape is
+    /// </summary>
+    /// <returns></returns>
+    public int GetUnusedBoundingBoxArea() => Size.X * Size.Y - Area;
+
+    /// <summary>
+    ///     returns list of points, expanded by their outward facing normals
+    /// </summary>
+    /// <param name="expansion">the number of tiles to expand each point by (only whole numbers)</param>
+    private Point16[] ExpandPoints(int expansion) {
+        var expandedPoints = new Point16[Points.Length];
+        var normals = GetVertexNormals();
+        for (int i = 0; i < Points.Length; i++) {
+            expandedPoints[i] = Points[i] + normals[i];
+        }
+        return expandedPoints;
+    }
+
+    /// <summary>
+    ///     expands shape by <see cref="expansion"/> tiles
+    /// </summary>
+    /// <param name="expansion">the number of tiles to expand each point by (only whole numbers)</param>
+    public void Expand(int expansion) {
+        Points = ExpandPoints(expansion);
+    }
+
+    /// <summary>
+    ///     creates new shape, expanded by <see cref="expansion"/> tiles
+    /// </summary>
+    /// <returns></returns>
+    public Shape GetExpandedShape(int expansion) {
+        return new Shape(ExpandPoints(expansion), false);
+    }
+    
+    /// <summary>
+    ///     find all corners of a shape based on their x and y positions, useful for ensuring beams and such make sense visually
+    /// </summary>
+    /// <returns></returns>
+    public List<Point16> GetCorners() {
+        List<Point16> corners = [];
+        Shape expandedShape = GetExpandedShape(1);
+
+        foreach (Point16 point in expandedShape.Points) {
+            bool xCorner = point.X != expandedShape.BoundingBox.topLeft.X
+                && point.X != expandedShape.BoundingBox.bottomRight.X;
+            bool yCorner = point.Y != expandedShape.BoundingBox.topLeft.Y 
+                && point.Y != expandedShape.BoundingBox.bottomRight.Y;
+            if (xCorner && yCorner) {
+                corners.Add(new Point16(point.X, point.Y));
+            }
+            else if (xCorner && !yCorner) {
+                corners.Add(new Point16(point.X, (short)-1));
+            }
+            else if (!xCorner && yCorner) {
+                corners.Add(new Point16((short)-1, point.Y));
+            }
+        }
+        
+        // sanitize list to remove repeat values
+        for (int i = 0; i < corners.Count; i++) {
+            Point16 target = corners[i];
+            if (target.X == -1 == (target.Y == -1)) { // only check cases where only 1 axis is valid
+                continue;
+            }
+            
+            Point16 last = corners[i - 1 != -1 ? i - 1 : corners.Count - 1];
+            Point16 next = corners[i + 1 != corners.Count ? i + 1 : 0];
+
+            if ((last.X != -1 && last.Y != -1 && (target.X == last.X || target.Y == last.Y))
+                || (next.X != -1 && next.Y != -1 && (target.X == next.X || target.Y == next.Y))) {
+                corners.RemoveAt(i);
+                i--;
+            }
+        }
+
+        return corners;
     }
 
     /// <summary>
@@ -190,28 +387,132 @@ public class Shape {
     public void Offset(Point16 offset) {
         for (int i = 0; i < Points.Length; i++) Points[i] -= offset;
 
-        Init(Points);
+        Init(Points, false);
+    }
+    
+    #endregion
+
+
+    #region Execute-In
+
+    /// <param name="action">(int x, int y, byte direction</param>
+    /// <param name="completeLoop"></param>
+    public void ExecuteOnPerimeter(Action<int, int, byte> action, bool completeLoop = true) {
+        if (IsBox) {
+            // go line-by-line
+            for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
+                action(x, BoundingBox.topLeft.Y, Directions.Up);
+            if (completeLoop)
+                for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
+                    action(x, BoundingBox.bottomRight.Y, Directions.Down);
+            for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
+                action(BoundingBox.topLeft.X, y, Directions.Left);
+            for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
+                action(BoundingBox.bottomRight.X, y, Directions.Right);
+        }
+        else {
+            for (int pointNum = 0; pointNum < Points.Length - 1; pointNum++)
+                // test for a vertical line
+                if (Points[pointNum].X == Points[pointNum + 1].X) {
+                    int lowerY = Math.Min(Points[pointNum].Y, Points[pointNum + 1].Y);
+                    int higherY = Math.Max(Points[pointNum].Y, Points[pointNum + 1].Y);
+                    for (int y = lowerY; y < higherY; y++)
+                        action(Points[pointNum].X, y,
+                            Points[pointNum].X > Center.X ? Directions.Right : Directions.Left);
+                }
+                else {
+                    double slope = (double)(Points[pointNum].Y - Points[pointNum + 1].Y) /
+                                   (Points[pointNum].X - Points[pointNum + 1].X);
+
+                    // determine whether to iterate along x/y-axis
+                    if (Math.Abs(slope) > 1) {
+                        // by y
+                        slope = 1 / slope;
+                        int lowerY = Math.Min(Points[pointNum].Y, Points[pointNum + 1].Y);
+                        int higherY = Math.Max(Points[pointNum].Y, Points[pointNum + 1].Y);
+                        int startingX = Points[pointNum].Y < Points[pointNum + 1].Y
+                            ? Points[pointNum + 1].X
+                            : Points[pointNum].X;
+                        for (int y = lowerY; y < higherY; y++) {
+                            // round towards the middle
+                            double x = startingX + slope * (y - lowerY);
+                            if (x < Center.X)
+                                action((int)Math.Floor(x), y, Directions.Left);
+                            else
+                                action((int)Math.Ceiling(x), y, Directions.Right);
+                        }
+                    }
+                    else {
+                        // by x
+                        int lowerX = Math.Min(Points[pointNum].X, Points[pointNum + 1].X);
+                        int higherX = Math.Max(Points[pointNum].X, Points[pointNum + 1].X);
+                        int startingY = Points[pointNum].X < Points[pointNum + 1].X
+                            ? Points[pointNum + 1].Y
+                            : Points[pointNum].Y;
+                        for (int x = lowerX; x < higherX; x++) {
+                            double y = startingY + slope * (x - lowerX);
+                            if (y < Center.Y)
+                                action(x, (int)Math.Floor(y), Directions.Up);
+                            else
+                                action(x, (int)Math.Ceiling(y), Directions.Down);
+                        }
+                    }
+                }
+        }
     }
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+    public void ExecuteInArea(Action<int, int> action) {
+        if (IsBox)
+            for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
+            for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
+                action(x, y);
+        else {
+            for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++) {
+                var intersections = new List<int>();
 
-    /// <param name="points">If only 2 points are passed, will assume a box</param>
-    /// <returns></returns>
-    public Shape(params Point16[] points) {
-        Init(points);
+                for (int i = 0; i < Points.Length; i++) {
+                    Point16 p1 = Points[i];
+                    Point16 p2 = Points[(i + 1) % Points.Length];
+
+                    // Find intersection of edge with the current scanline
+                    if ((p1.Y <= y && p2.Y > y) || (p2.Y <= y && p1.Y > y)) {
+                        int intersectX = (int)Math.Round(p1.X + (double)(y - p1.Y) * (p2.X - p1.X) / (p2.Y - p1.Y));
+                        intersections.Add(intersectX);
+                    }
+                }
+
+                intersections.Sort();
+
+                for (int i = 0; i < intersections.Count; i += 2) {
+                    if (i + 1 >= intersections.Count) break;
+
+                    int startX = intersections[i];
+                    int endX = intersections[i + 1];
+
+                    for (int x = startX; x <= endX; x++)
+                        action(x, y);
+                }
+            }
+
+            // Handle bottom horizontal edge
+            for (int i = 0; i < Points.Length; i++) {
+                Point16 p1 = Points[i];
+                Point16 p2 = Points[(i + 1) % Points.Length];
+
+                if (p1.Y == p2.Y && p1.Y == BoundingBox.bottomRight.Y) {
+                    int startX = Math.Min(p1.X, p2.X);
+                    int endX = Math.Max(p1.X, p2.X);
+                    for (int x = startX; x <= endX; x++)
+                        action(x, p1.Y);
+                }
+            }
+        }
     }
 
-    /// <param name="points">If only 2 points are passed, will assume a box</param>
-    /// <returns></returns>
-    public Shape(IEnumerable<Point16> points) {
-        var pointsArray = points.ToArray();
-        Init(pointsArray);
-    }
-
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+    #endregion
 
 
-    #region Intersection Methods
+    #region General Shape Intersection
 
     public bool Contains(Point16 point) {
         if (IsBox)
@@ -313,129 +614,6 @@ public class Shape {
         }
     }
 
-    #endregion
-
-
-    #region ExecuteIn Methods
-
-    /// <param name="action">(int x, int y, byte direction</param>
-    /// <param name="completeLoop"></param>
-    public void ExecuteOnPerimeter(Action<int, int, byte> action, bool completeLoop = true) {
-        if (IsBox) {
-            // go line-by-line
-            for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
-                action(x, BoundingBox.topLeft.Y, Directions.Up);
-            if (completeLoop)
-                for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
-                    action(x, BoundingBox.bottomRight.Y, Directions.Down);
-            for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
-                action(BoundingBox.topLeft.X, y, Directions.Left);
-            for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
-                action(BoundingBox.bottomRight.X, y, Directions.Right);
-        }
-        else {
-            for (int pointNum = 0; pointNum < Points.Length - 1; pointNum++)
-                // test for a vertical line
-                if (Points[pointNum].X == Points[pointNum + 1].X) {
-                    int lowerY = Math.Min(Points[pointNum].Y, Points[pointNum + 1].Y);
-                    int higherY = Math.Max(Points[pointNum].Y, Points[pointNum + 1].Y);
-                    for (int y = lowerY; y < higherY; y++)
-                        action(Points[pointNum].X, y,
-                            Points[pointNum].X > Center.X ? Directions.Right : Directions.Left);
-                }
-                else {
-                    double slope = (double)(Points[pointNum].Y - Points[pointNum + 1].Y) /
-                                   (Points[pointNum].X - Points[pointNum + 1].X);
-
-                    // determine whether to iterate along x/y-axis
-                    if (Math.Abs(slope) > 1) {
-                        // by y
-                        slope = 1 / slope;
-                        int lowerY = Math.Min(Points[pointNum].Y, Points[pointNum + 1].Y);
-                        int higherY = Math.Max(Points[pointNum].Y, Points[pointNum + 1].Y);
-                        int startingX = Points[pointNum].Y < Points[pointNum + 1].Y
-                            ? Points[pointNum + 1].X
-                            : Points[pointNum].X;
-                        for (int y = lowerY; y < higherY; y++) {
-                            // round towards the middle
-                            double x = startingX + slope * (y - lowerY);
-                            if (x < Center.X)
-                                action((int)Math.Floor(x), y, Directions.Left);
-                            else
-                                action((int)Math.Ceiling(x), y, Directions.Right);
-                        }
-                    }
-                    else {
-                        // by x
-                        int lowerX = Math.Min(Points[pointNum].X, Points[pointNum + 1].X);
-                        int higherX = Math.Max(Points[pointNum].X, Points[pointNum + 1].X);
-                        int startingY = Points[pointNum].X < Points[pointNum + 1].X
-                            ? Points[pointNum + 1].Y
-                            : Points[pointNum].Y;
-                        for (int x = lowerX; x < higherX; x++) {
-                            double y = startingY + slope * (x - lowerX);
-                            if (y < Center.Y)
-                                action(x, (int)Math.Floor(y), Directions.Up);
-                            else
-                                action(x, (int)Math.Ceiling(y), Directions.Down);
-                        }
-                    }
-                }
-        }
-    }
-
-    public void ExecuteInArea(Action<int, int> action) {
-        if (IsBox)
-            for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
-            for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
-                action(x, y);
-        else
-            for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++) {
-                var intersections = new List<int>();
-
-                for (int i = 0; i < Points.Length; i++) {
-                    Point16 p1 = Points[i];
-                    Point16 p2 = Points[(i + 1) % Points.Length];
-
-                    // **Handle horizontal edges properly**
-                    if (p1.Y == p2.Y) {
-                        if (p1.Y == BoundingBox.bottomRight.Y) // If it's the bottom edge, count it
-                        {
-                            int startX = Math.Min(p1.X, p2.X);
-                            int endX = Math.Max(p1.X, p2.X);
-                            for (int x = startX; x <= endX; x++)
-                                action(x, y);
-                        }
-
-                        continue;
-                    }
-
-                    // **Find intersection of edge with the current scanline**
-                    if ((p1.Y <= y && p2.Y > y) || (p2.Y <= y && p1.Y > y)) {
-                        int intersectX = (int)Math.Round(p1.X + (double)(y - p1.Y) * (p2.X - p1.X) / (p2.Y - p1.Y));
-                        intersections.Add(intersectX);
-                    }
-                }
-
-                intersections.Sort();
-
-                for (int i = 0; i < intersections.Count; i += 2) {
-                    if (i + 1 >= intersections.Count) break;
-
-                    int startX = intersections[i];
-                    int endX = intersections[i + 1];
-
-                    for (int x = startX; x <= endX; x++)
-                        action(x, y);
-                }
-            }
-    }
-
-    #endregion
-
-
-    #region Boolean methods
-
     /// <summary>
     ///     Shapes must not overlap
     /// </summary>
@@ -486,6 +664,11 @@ public class Shape {
     private static int Cross(Point16 o, Point16 a, Point16 b) {
         return (a.X - o.X) * (b.Y - o.Y) - (a.Y - o.Y) * (b.X - o.X);
     }
+
+    #endregion
+
+
+    #region Slicing Shape
 
     public (Shape? lower, Shape? middle, Shape? higher) CutTwice(bool cutXAxis, int cutCoord1, int cutCoord2) {
         if (cutCoord2 < cutCoord1)
@@ -558,82 +741,130 @@ public class Shape {
         int dy = p2.Y - p1.Y;
 
         if (cutXAxis) {
-            if (dy == 0) return new Point16(p1.X, cutCoord); // Horizontal line edge case
+            if (dy == 0) return new Point16(p1.X, cutCoord); // horizontal line edge case
             double t = (cutCoord - p1.Y) / (double)dy;
             int newX = (int)Math.Round(p1.X + t * dx);
             return new Point16(newX, cutCoord);
         }
         else {
-            if (dx == 0) return new Point16(cutCoord, p1.Y); // Vertical line edge case
+            if (dx == 0) return new Point16(cutCoord, p1.Y); // vertical line edge case
             double t = (cutCoord - p1.X) / (double)dx;
             int newY = (int)Math.Round(p1.Y + t * dy);
             return new Point16(cutCoord, newY);
         }
     }
 
+    #endregion
 
-    public static Shape FromStructureInterior(StructureTilemap tilemap) {
+
+    #region Shapes From Tilemap
+
+    /// <summary>
+    /// gets a shape that represents the interior of the structure, and excludes any exterior components
+    /// </summary>
+    /// <param name="tilemap"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
+    /// <remarks>assumes only one interior in the tilemap</remarks>
+    public static Shape GetStructureInterior(StructureTilemap tilemap) {
         List<Point16> outline = [];
 
-        // Step 1: Find the starting point (top-left of the first border)
-        (int x, int y)? start = null;
+        Point16? start = null;
         for (int y = 0; y < tilemap.Height - 1 && start == null; y++)
         for (int x = 0; x < tilemap.Width - 1; x++)
-            if (GetSquareValue(tilemap, x, y) != 0) {
-                start = (x, y);
+            if (GetMarchingSquareIndex(tilemap, x, y) != 0) {
+                start = new Point16(x, y);
                 break;
             }
 
         if (start == null)
             throw new Exception("valid shape not found from tilemap");
 
-        (int x, int y) pos = start.Value;
-        (int dx, int dy) dir = (0, -1); // initial direction: up
-        var visited = new HashSet<(int, int)>();
+        Point16 pos = start.Value;
+        Point16 dir = new (0, 1);
+        var visited = new HashSet<Point16>();
         int steps = 0;
         int maxSteps = tilemap.Width * tilemap.Height * 4;
 
         do {
-            // Use the current square's value to determine direction
-            int value = GetSquareValue(tilemap, pos.x, pos.y);
+            // add previous iteration's position
+            visited.Add(pos);
 
-            // Based on lookup table of marching squares
-            (int dx, int dy) nextDir = value switch {
-                1 => (0, -1), // up
-                2 => (1, 0), // right
-                3 => (1, 0),
-                4 => (-1, 0), // left
-                5 => (0, -1),
-                6 => dir.dy == -1 ? (1, 0) : (-1, 0),
-                7 => (1, 0),
-                8 => (0, 1), // down
-                9 => dir.dx == 1 ? (0, -1) : (0, 1),
-                10 => (0, 1),
-                11 => (0, 1),
-                12 => (-1, 0),
-                13 => (-1, 0),
-                14 => (0, -1),
-                _ => (0, 0) // 0 or 15: no edge
+            int value = GetMarchingSquareIndex(tilemap, pos.X, pos.Y);
+
+            // assumes clockwise direction
+            Point16 nextDir = value switch {
+                1 => new Point16(0, 1), // BL only: down
+                2 => new Point16(1, 0), // BR only: right
+                3 => new Point16(1, 0), // BL + BR: right
+                4 => new Point16(0, -1), // TR only: up
+                5 => dir.X == -1 ? new Point16(0, -1) : new Point16(0, 1), // BL + TR: up if we were going left, otherwise down
+                6 => new Point16(0, -1), // BR + TR: up
+                7 => new Point16(0, -1), // BL + BR + TR: up
+                8 => new Point16(-1, 0), // TL only: left
+                9 => new Point16(0, 1), // BL + TL: down
+                10 => dir.Y == -1 ? new Point16(0, 1) : new Point16(0, -1), // BR + TL: down if we were going left, otherwise up
+                11 => new Point16(1, 0), // BL + BR + TL: right
+                12 => new Point16(-1, 0), // TR + TL: left
+                13 => new Point16(0, 1), // BL + TR + TL: down
+                14 => new Point16(-1, 0), // BR + TR + TL: left
+                _ => new Point16(0, 0), // 0 or 15
             };
 
-            // Move and store edge vertex
-            outline.Add(new Point16(pos.x, pos.y));
-            pos = (pos.x + nextDir.dx, pos.y + nextDir.dy);
-            visited.Add(pos);
+            Point16 outlineOffset = value switch {
+                1 => new Point16(0, 0), // BL only: BL
+                2 => new Point16(1, 0), // BR only: BR
+                3 => new Point16(0, 0), // BL + BR: BL
+                4 => new Point16(1, -1), // TR only: TR
+                5 => dir.X == -1 ? new Point16(1, -1) : new Point16(0, 0), // BL + TR: TR if we were going left, otherwise BL
+                6 => new Point16(1, 0), // BR + TR: BR
+                7 => new Point16(1, 0), // BL + BR + TR: BR
+                8 => new Point16(0, -1), // TL only: TL
+                9 => new Point16(0, -1), // BL + TL: TL
+                10 => dir.Y == -1 ? new Point16(1, 0) : new Point16(0, -1), // BR + TL: BR if we were going left, otherwise TL
+                11 => new Point16(0, 0), // BL + BR + TL: BL
+                12 => new Point16(1, -1), // TR + TL: TR
+                13 => new Point16(0, -1), // BL + TR + TL: TL
+                14 => new Point16(1, -1), // BR + TR + TL: TR
+                _ => new Point16(0, 0), // 0 or 15
+            };
+
+            if (nextDir != dir) {
+                outline.Add(pos + outlineOffset);
+            }
+
+            pos += nextDir;
             dir = nextDir;
             steps++;
         } while (pos != start.Value && !visited.Contains(pos) && steps < maxSteps);
 
-        return new Shape(outline);
+        return new Shape(outline.ToArray());
     }
 
-    // Converts 2x2 grid cell into a marching square index
-    private static int GetSquareValue(StructureTilemap tilemap, int x, int y) {
+    /// <summary>
+    /// converts 2x2 grid cell into a marching square index
+    /// </summary>
+    /// <param name="tilemap"></param>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
+    private static int GetMarchingSquareIndex(StructureTilemap tilemap, int x, int y) {
         int value = 0;
-        if (tilemap.IsValidTile(x, y)) value |= 1; // bottom-left
-        if (tilemap.IsValidTile(x + 1, y)) value |= 2; // bottom-right
-        if (tilemap.IsValidTile(x + 1, y + 1)) value |= 4; // top-right
-        if (tilemap.IsValidTile(x, y + 1)) value |= 8; // top-left
+        // bottom-left
+        if (tilemap.InInterior(x, y))
+            value |= 1;
+
+        // bottom-right
+        if (tilemap.InInterior(x + 1, y))
+            value |= 2;
+
+        // top-right
+        if (tilemap.InInterior(x + 1, y - 1))
+            value |= 4;
+
+        // top-left
+        if (tilemap.InInterior(x, y - 1))
+            value |= 8;
 
         return value;
     }

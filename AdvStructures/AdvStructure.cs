@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.AdvStructures.Generation;
 using SpawnHouses.AdvStructures.Generation.Components;
@@ -70,6 +71,7 @@ public class AdvStructure {
             if (validGenerators.Count == 0) {
                 throw new Exception($"No structure layout generators found were compatible with the given parameters. required tags: {EnumHelper.ToString(Params.TagsRequired)}, blacklisted tags: {EnumHelper.ToString(Params.TagsBlacklist)}");
             }
+
             generator = validGenerators[Terraria.WorldGen.genRand.Next(0, validGenerators.Count)];
         }
 
@@ -115,15 +117,16 @@ public class AdvStructure {
         return;
 
         void SearchOutside(int x, int y) {
+            StructureTile thisTile = Tilemap[x, y];
+            thisTile.IsOutside = true;
+            thisTile.IsNullTile = true;
+            thisTile.IsNullWall = true;
+
             foreach ((int dx, int dy) in ((int, int)[]) [(1, 0), (-1, 0), (0, 1), (0, -1)]) {
-                if (!Tilemap.IsValidTile(x + dx, y + dy)) continue;
+                if (!Tilemap.InBounds(x + dx, y + dy)) continue;
+                StructureTile nextTile = Tilemap[x + dx, y + dy];
+                if (nextTile.IsOutside || nextTile.IsExteriorComponent) continue;
 
-                StructureTile tile = Tilemap[x + dx, y + dy];
-                if (tile.IsOutside || tile.IsExteriorComponent) continue;
-
-                tile.IsOutside = true;
-                tile.IsNullTile = true;
-                tile.IsNullWall = true;
                 SearchOutside(x + dx, y + dy);
             }
         }
@@ -132,6 +135,7 @@ public class AdvStructure {
     private IComponentGenerator GetComponentGenerator(ComponentParams componentParams, IComponentGenerator[] generators) {
         List<IComponentGenerator> validGenerators = [];
         foreach (IComponentGenerator possibleGenerator in generators) {
+            if (!possibleGenerator.CanGenerate(componentParams)) continue;
             var requiredTags = componentParams.TagsRequired.ToList();
             bool valid = true;
             foreach (ComponentTag possibleTag in possibleGenerator.GetPossibleTags()) {
@@ -221,12 +225,14 @@ public class AdvStructure {
         FillComponentSet(ExternalLayout.Gaps.FindAll(gap => gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsWallGap, ComponentTag.External], []);
         FillComponentSet(ExternalLayout.Roofs.Select(roof => roof.Volume).ToList(), [ComponentTag.IsRoof, ComponentTag.External], []);
 
-        // FillComponentSet(Layout.Floors.Select(floor => floor.Volume).ToList(), [ComponentTag.IsFloor], []);
-        // FillComponentSet(Layout.Walls.Select(wall => wall.Volume).ToList(), [ComponentTag.IsWall], []);
-        // FillComponentSet(Layout.Gaps.FindAll(gap => !gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsDebugBlocks], []);
-        // FillComponentSet(Layout.Gaps.FindAll(gap => gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsDebugBlocks], []);
-        //
-        // FillComponentSet(Layout.Rooms.Select(room => room.Volume).ToList(), [ComponentTag.IsBackground], []);
+        FillComponentSet(Layout.Floors.Select(floor => floor.Volume).ToList(), [ComponentTag.IsFloor], []);
+        FillComponentSet(Layout.Walls.Select(wall => wall.Volume).ToList(), [ComponentTag.IsWall], []);
+        FillComponentSet(Layout.Gaps.FindAll(gap => !gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsDebugBlocks], []);
+        FillComponentSet(Layout.Gaps.FindAll(gap => gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsDebugBlocks], []);
+        
+        Console.WriteLine(Layout.Rooms.Count);
+
+        FillComponentSet(Layout.Rooms.Select(room => room.Volume).ToList(), [ComponentTag.IsBackground], []);
 
         HasFilledComponents = true;
     }
@@ -237,16 +243,14 @@ public class AdvStructure {
         if (!HasFilledComponents)
             throw new Exception("No filled components have been set");
 
-        int xOffset = Tilemap.WorldTileOffset.X;
-        int yOffset = Tilemap.WorldTileOffset.Y;
         for (int x = 0; x < Tilemap.Width; x++)
         for (int y = 0; y < Tilemap.Height; y++) {
-            Tilemap[x, y].CopyTile(x + xOffset, y + yOffset);
+            Tilemap[x, y].CopyTile(Tilemap.ConvertToGlobal(x, y));
         }
 
         for (int x = 0; x < Tilemap.Width; x++)
         for (int y = 0; y < Tilemap.Height; y++) {
-            Tilemap[x, y].SetFrames(x + xOffset, y + yOffset);
+            Tilemap[x, y].SetFrames(Tilemap.ConvertToGlobal(x, y));
         }
     }
 
@@ -255,51 +259,38 @@ public class AdvStructure {
 
     #region Generators
 
-    public static readonly IStructureLayoutGenerator[] StructureLayoutGenerators = [
-        new StructureLayoutGen.StructureLayoutGenerator1()
-    ];
+    public static IStructureLayoutGenerator[] StructureLayoutGenerators;
 
-    public static IComponentGenerator[] FloorGenerators = [
-        new FloorGen.FloorGenerator1(),
-        new FloorGen.FloorGenerator2(),
-        new FloorGen.FloorGenerator3(),
-        new FloorGen.FloorGenerator4()
-    ];
+    public static IComponentGenerator[] FloorGenerators;
+    public static IComponentGenerator[] WallGenerators;
+    public static IComponentGenerator[] BackgroundGenerators;
+    public static IComponentGenerator[] StairwayGenerators;
+    public static IComponentGenerator[] DecorGenerators;
+    public static IComponentGenerator[] RoofGenerators;
+    public static IComponentGenerator[] GapGenerators;
+    public static IComponentGenerator[] DebugGenerators;
 
-    public static IComponentGenerator[] WallGenerators = [
-        new WallGen.WallGenerator1(),
-        new WallGen.WallGenerator2(),
-        new WallGen.WallGenerator3()
-    ];
+    public static void PopulateGenerators() {
+        var types = typeof(StructureLayoutGen).GetNestedTypes();
+        StructureLayoutGenerators = types.Select(t => Activator.CreateInstance(t) as IStructureLayoutGenerator).ToArray();
 
-    public static IComponentGenerator[] BackgroundGenerators = [
-        new BackgroundGen.BackgroundGenerator1(),
-        new BackgroundGen.BackgroundGenerator2()
-    ];
-
-    public static IComponentGenerator[] StairwayGenerators = [
-    ];
-
-    public static IComponentGenerator[] DecorGenerators = [
-    ];
-
-    public static IComponentGenerator[] RoofGenerators = [
-        new RoofGen.RoofGenerator1()
-    ];
-
-    public static IComponentGenerator[] GapGenerators = [
-        new GapGen.FloorGapGenerator1(),
-        new GapGen.WallGapGenerator1()
-    ];
-
-    public static IComponentGenerator[] DebugGenerators = [
-        new DebugGen.DebugBlocksGenerator1(),
-        new DebugGen.DebugBlocksGenerator2(),
-        new DebugGen.DebugBlocksGenerator3(),
-        new DebugGen.DebugWallsGenerator1(),
-        new DebugGen.DebugWallsGenerator2(),
-        new DebugGen.DebugWallsGenerator3()
-    ];
+        types = typeof(FloorGen).GetNestedTypes();
+        FloorGenerators = types.Select(t => Activator.CreateInstance(t) as IComponentGenerator).ToArray();
+        types = typeof(WallGen).GetNestedTypes();
+        WallGenerators = types.Select(t => Activator.CreateInstance(t) as IComponentGenerator).ToArray();
+        types = typeof(BackgroundGen).GetNestedTypes();
+        BackgroundGenerators = types.Select(t => Activator.CreateInstance(t) as IComponentGenerator).ToArray();
+        types = typeof(StairwayGen).GetNestedTypes();
+        StairwayGenerators = types.Select(t => Activator.CreateInstance(t) as IComponentGenerator).ToArray();
+        types = typeof(DecorGen).GetNestedTypes();
+        DecorGenerators = types.Select(t => Activator.CreateInstance(t) as IComponentGenerator).ToArray();
+        types = typeof(RoofGen).GetNestedTypes();
+        RoofGenerators = types.Select(t => Activator.CreateInstance(t) as IComponentGenerator).ToArray();
+        types = typeof(GapGen).GetNestedTypes();
+        GapGenerators = types.Select(t => Activator.CreateInstance(t) as IComponentGenerator).ToArray();
+        types = typeof(DebugGen).GetNestedTypes();
+        DebugGenerators = types.Select(t => Activator.CreateInstance(t) as IComponentGenerator).ToArray();
+    }
 
     #endregion
 }

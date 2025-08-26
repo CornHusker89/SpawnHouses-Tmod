@@ -1,5 +1,6 @@
 using System;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.WorldBuilding;
 
@@ -177,10 +178,12 @@ public class StructureTile {
             tile.WallColor = WallColor;
         }
     }
+    public void CopyTile(Point16 point) => CopyTile(point.X, point.Y);
 
     public void SetFrames(int x, int y)
     {
         WorldUtils.TileFrame(x, y);
         Framing.WallFrame(x, y);
     }
+    public void SetFrames(Point16 point) => SetFrames(point.X, point.Y);
 }

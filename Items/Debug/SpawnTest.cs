@@ -12,6 +12,8 @@ using Range = SpawnHouses.Structures.Range;
 namespace SpawnHouses.Items.Debug;
 
 public class SpawnTest : ModItem {
+    public static AdvStructure Structure;
+
     public override void SetDefaults() {
         Item.useStyle = ItemUseStyleID.Swing;
         Item.useTime = 20;
@@ -37,7 +39,7 @@ public class SpawnTest : ModItem {
 
         Console.WriteLine(x + ", " + y);
 
-        AdvStructure structure = new(
+        Structure = new AdvStructure(
             new StructureParams(
                 [StructureTag.HasHousing],
                 [],
@@ -48,13 +50,13 @@ public class SpawnTest : ModItem {
                         Directions.Right
                     ),
                     new EntryPoint(
-                        new Point16(x + 20, y - 2),
+                        new Point16(x + 25, y - 8),
                         3,
                         Directions.Left
                     )
                 ],
                 TilePalette.Palette1,
-                new Range(200, 300),
+                new Range(350, 500),
                 new Range(3, 5),
                 true
             )

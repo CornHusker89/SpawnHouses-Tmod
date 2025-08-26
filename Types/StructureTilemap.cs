@@ -33,6 +33,13 @@ public class StructureTilemap {
             return _tiles[x, y] ?? (_tiles[x, y] = new StructureTile());
         }
     }
+    public StructureTile this[Point16 point] => this[point.X, point.Y];
+
+    public bool InBounds(int x, int y) => x >= 0 && x < Width && y >= 0 && y < Height;
+    public bool InBounds(Point16 point) => InBounds(point.X, point.Y);
+
+    public bool InInterior(int x, int y) => InBounds(x, y) && _tiles[x, y].IsInside;
+    public bool InInterior(Point16 point) => InInterior(point.X, point.Y);
 
     /// <summary>
     ///     tests if the coordinates have a valid, initialized tile that is in bounds
@@ -40,13 +47,10 @@ public class StructureTilemap {
     /// <param name="x"></param>
     /// <param name="y"></param>
     /// <returns></returns>
-    public bool IsValidTile(int x, int y) {
-        if (x < 0 || x >= Width || y < 0 || y >= Height) return false;
-
-        return _tiles[x, y] != null;
-    }
+    public bool IsInitializedTile(int x, int y) => InBounds(x, y) && _tiles[x, y] != null;
 
     /// <summary>
+    ///     gets tile from this tilemap using global world coordinates
     /// </summary>
     /// <param name="x"></param>
     /// <param name="y"></param>
@@ -56,11 +60,15 @@ public class StructureTilemap {
         y -= WorldTileOffset.Y;
         return this[x, y];
     }
+    public StructureTile GetTileByGlobalPos(Point16 pos) => this[pos - WorldTileOffset];
 
-    public StructureTile GetTileByGlobalPos(Point16 pos) {
-        Point16 localPos = pos - WorldTileOffset;
-        return this[localPos.X, localPos.Y];
-    }
+    public int ConvertToRelative (int coordinate, bool isX) => coordinate - (isX ? WorldTileOffset.X : WorldTileOffset.Y);
+    public Point16 ConvertToRelative(int x, int y) => new (x - WorldTileOffset.X, y - WorldTileOffset.Y);
+    public Point16 ConvertToRelative(Point16 point) => ConvertToRelative(point.X, point.Y);
+
+    public int ConvertToGlobal (int coordinate, bool isX) => coordinate + (isX ? WorldTileOffset.X : WorldTileOffset.Y);
+    public Point16 ConvertToGlobal(int x, int y) => new (x + WorldTileOffset.X, y + WorldTileOffset.Y);
+    public Point16 ConvertToGlobal(Point16 point) => ConvertToGlobal(point.X, point.Y);
 
     /// <summary>
     ///     offsets given <see cref="ExternalLayout" /> by this tilemap's tile offset

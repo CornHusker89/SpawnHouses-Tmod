@@ -15,6 +15,9 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
+        <Reference Include="StructureHelper">
+          <HintPath>..\..\ModReader\StructureHelper\StructureHelper.dll</HintPath>
+        </Reference>
         <Reference Include="WorldGenTesting">
             <HintPath>..\..\ModSources\WorldGenTesting\bin\Debug\net8.0\WorldGenTesting.dll</HintPath>
         </Reference>

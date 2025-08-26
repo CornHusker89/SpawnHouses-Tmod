@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
@@ -17,7 +18,7 @@ public static class StructureLayoutGen {
     public class StructureLayoutGenerator1 : IStructureLayoutGenerator {
         public StructureTag[] GetPossibleTags() => [
             StructureTag.HasHousing,
-            StructureTag.HasFlatFloors,
+            StructureTag.HasOnlyRectangleRooms,
             StructureTag.HasLargeRoom,
             StructureTag.HasStorage,
             StructureTag.MainFloorConnected,
@@ -48,11 +49,12 @@ public static class StructureLayoutGen {
                 p.EntryPoints,
                 p.Palette,
                 p.Housing,
-                new Range(4, 18),
+                new Range(4, 13),
                 new Range(7, p.Length),
                 new Range(1, 1),
                 new Range(1, 1),
-                0.3f
+                0.3f,
+                5
             );
 
             // setup external layout
@@ -82,12 +84,12 @@ public static class StructureLayoutGen {
             const int roofMargin = 12;
 
             int entryPointDistance = upper.Start.Y - lower.Start.Y;
-            bool hasBasement = Terraria.WorldGen.genRand.NextDouble() < 0.4 && p.Height - entryPointDistance > 10; //40% if conditions are met
+            bool hasBasement = Terraria.WorldGen.genRand.NextDouble() < 0.4 && p.Height - entryPointDistance > 15; //40% if conditions are met
             int verticalOffset = hasBasement ? 7 : 0;
             int floorTopY = upper.End.Y + 1 + verticalOffset;
 
             // roof setup
-            bool unevenRoof = true;//Terraria.WorldGen.genRand.NextDouble() < 0.6;
+            bool unevenRoof = true;//Terraria.WorldGen.genRand.NextDouble() < 0.7;
             bool leftRoofHigher = Terraria.WorldGen.genRand.NextDouble() < 0.5;
             int unevenRoofStartX = Terraria.WorldGen.genRand.Next(p.StartEntryPointX + (int)(p.Length * 0.4), p.StartEntryPointX + (int)(p.Length * 0.6));
             int roofHeightModifier = p.Height / 5 + 1;
@@ -163,18 +165,19 @@ public static class StructureLayoutGen {
             advStructure.EvaluateTilemapData();
 
             // finally finish the room layout
-            advStructure.Layout = new RoomLayout([], [], [], [
+            advStructure.Layout = new RoomLayout([], [], 
+                advStructure.ExternalLayout.Gaps,
+                [
                 new Room(
-                    new Shape(
-                        new Point16(left.Start.X + 1, upperRoofBottomY + 1) - localTilemapOffset,
-                        new Point16(right.Start.X - 1, floorTopY - 1) - localTilemapOffset
-                    ),
+                    Shape.GetStructureInterior(advStructure.Tilemap),
                     advStructure.ExternalLayout.Gaps
                 )
             ]);
 
+            Console.WriteLine(advStructure.Layout.Rooms[0].Volume);
+
             advStructure.CompleteExternalGaps();
-            RoomLayoutHelper.SubdivideRoom(advStructure.Layout, advStructure.Layout.Rooms[0], roomLayoutParams, prioritySplitYs: [left.End.Y + 1, right.Start.Y + 1]);
+            RoomLayoutHelper.SubdivideRoom(advStructure.Layout, advStructure.Layout.Rooms[0], roomLayoutParams);
 
             return true;
         }

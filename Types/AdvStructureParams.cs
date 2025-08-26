@@ -51,8 +51,8 @@ public class StructureParams {
         Center = new Point16(centerXMin + (centerXMin + centerXMax) / 2, centerXMin + (centerYMin + centerYMax) / 2);
 
         if (EntryPoints.Select(entryPoint => entryPoint.Start.Y).Max() - EntryPoints.Select(entryPoint => entryPoint.Start.Y).Min() + 4 > VolumeRange.Min / Length)
-            throw new ArgumentException($"Entry points are too far away vertically for a minimum height of {VolumeRange.Min / Length}");
-        if (tagsRequired.Contains(StructureTag.HasFlatFloors) && tagsRequired.Contains(StructureTag.HasNoFlatFloors))
+            throw new ArgumentException($"Entry points are too far away vertically for a minimum height of {VolumeRange.Min / Length} (determined by min volume / length)");
+        if (tagsRequired.Contains(StructureTag.HasOnlyRectangleRooms) && tagsRequired.Contains(StructureTag.HasNoRectangleRooms))
             throw new ArgumentException("Cannot require mutually exclusive tags \"HasFlatFloors\" and \"HasNoFlatFloors\"");
         if (tagsRequired.Contains(StructureTag.AboveGround) && tagsRequired.Contains(StructureTag.UnderGround))
             throw new ArgumentException("Cannot require mutually exclusive tags \"AboveGround\" and \"UnderGround\"");

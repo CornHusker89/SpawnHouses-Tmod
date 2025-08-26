@@ -72,6 +72,11 @@ Mods: {
 				DisplayName: Spawn Mineshaft
 				Tooltip: Spawns the mineshaft on the ground underneath the cursor
 			}
+
+			SpawnTest2: {
+				DisplayName: Spawn Test2
+				Tooltip: ""
+			}
 		}
 
 		Configs: {

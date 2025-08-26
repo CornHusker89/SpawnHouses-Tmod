@@ -21,11 +21,15 @@ public struct PaintedType(ushort type, byte paintType = PaintID.None, short styl
             tile.BlockType = blockType;
             tile.TileType = paintedType.Type;
             tile.TileColor = paintedType.PaintType;
+            tile.IsNullTile = false;
         }
         else {
-            Terraria.WorldGen.PlaceTile(x, y, paintedType.Type, true, true, style: paintedType.Style);
-            StructureTile tile = tilemap[x, y];
-            tile.TileColor = paintedType.PaintType;
+            throw new NotImplementedException();
+
+            // can't use this because it needs a custom tilemap
+            // Terraria.WorldGen.PlaceTile(x, y, paintedType.Type, true, true, style: paintedType.Style);
+            // StructureTile tile = tilemap[x, y];
+            // tile.TileColor = paintedType.PaintType;
         }
     }
 
@@ -37,6 +41,7 @@ public struct PaintedType(ushort type, byte paintType = PaintID.None, short styl
         StructureTile tile = tilemap[x, y];
         tile.WallType = paintedType.Type;
         tile.WallColor = paintedType.PaintType;
+        tile.IsNullWall = false;
     }
 
     public static void PlaceWall(Point16 position, PaintedType paintedType, StructureTilemap tilemap) {

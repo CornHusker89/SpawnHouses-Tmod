@@ -4,9 +4,9 @@ public enum StructureTag {
     // ===== structureLayout =====
     IsSymmetric,
     HasHousing,
-    HasFlatFloors,
-    HasNoFlatFloors,
-    HasSomeFlatFloors,
+    HasOnlyRectangleRooms,
+    HasNoRectangleRooms,
+    HasSomeRectangleRooms,
 
     /// there is a convenient large room intended for general use
     HasLargeRoom,
