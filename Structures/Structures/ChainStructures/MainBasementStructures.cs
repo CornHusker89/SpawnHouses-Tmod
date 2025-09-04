@@ -370,7 +370,7 @@ public class MainBasementRoom5 : CustomChainStructure {
             CompatabilityHelper.PlaceMSModule(X + 8, Y + 6, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
             CompatabilityHelper.PlaceMSModule(X + 12, Y + 6, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
 
-            StructureGenHelper.GenerateCobwebs(new Point(X, Y), StructureXSize, StructureYSize);
+            StructureGenHelper.GenerateCobwebs(new Point16(X, Y), StructureXSize, StructureYSize);
             NetMessage.SendTileSquare(-1, X, Y, StructureXSize, StructureYSize);
             FrameTiles();
         }
@@ -467,7 +467,7 @@ public class MainBasementRoom8 : CustomChainStructure {
 
     public override void OnFound() {
         Terraria.WorldGen.PlaceTile(X + 4, Y + 7, TileID.Furnaces, true, true);
-        StructureGenHelper.GenerateCobwebs(new Point(X, Y), StructureXSize, StructureYSize);
+        StructureGenHelper.GenerateCobwebs(new Point16(X, Y), StructureXSize, StructureYSize);
         NetMessage.SendTileSquare(-1, X, Y, StructureXSize, StructureYSize);
     }
 }

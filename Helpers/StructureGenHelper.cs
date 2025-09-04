@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using ReLogic.Utilities;
 using SpawnHouses.Types;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.WorldBuilding;
 
@@ -52,7 +53,7 @@ public static class StructureGenHelper {
     /// <param name="start"></param>
     /// <param name="tileID"></param>
     /// <param name="wallBlacklistIDs"></param>
-    public static void PlaceBush(Point start, ushort tileID = WallID.LivingLeaf, params ushort[] wallBlacklistIDs) {
+    public static void PlaceBush(Point16 start, ushort tileID = WallID.LivingLeaf, params ushort[] wallBlacklistIDs) {
         void PlaceWall(int i, int j) {
             Tile tile = Main.tile[i, j];
             if (!wallBlacklistIDs.Contains(tile.WallType))
@@ -123,8 +124,8 @@ public static class StructureGenHelper {
     /// <param name="length"></param>
     /// <param name="height"></param>
     /// <param name="wallWhitelistIDs"></param>
-    public static void GenerateCobwebs(Point start, ushort length, ushort height, params ushort[] wallWhitelistIDs) {
-        WorldUtils.Gen(start, new Shapes.Rectangle(length, height),
+    public static void GenerateCobwebs(Point16 start, ushort length, ushort height, params ushort[] wallWhitelistIDs) {
+        WorldUtils.Gen(start.ToPoint(), new Shapes.Rectangle(length, height),
             Actions.Chain(
                 new Modifiers.Dither(0.35),
                 new Actions.Custom((i, j, args) => {
@@ -165,7 +166,7 @@ public static class StructureGenHelper {
     /// <param name="beamsCount"></param>
     /// <param name="maxBeamSize"></param>
     /// <param name="stopOnNonSolidTile"></param>
-    public static void GenerateBeams(Point start, Tile beamTile, ushort beamInterval, ushort beamsCount,
+    public static void GenerateBeams(Point16 start, Tile beamTile, ushort beamInterval, ushort beamsCount,
         ushort maxBeamSize = 50, bool stopOnNonSolidTile = false) {
         for (int i = 0; i < beamsCount; i++) {
             bool validBeamLocation = true;
@@ -214,10 +215,10 @@ public static class StructureGenHelper {
     /// <param name="start"></param>
     /// <param name="tileID"></param>
     /// <param name="foundationRadius"></param>
-    public static void GenerateFoundation(Point start, ushort tileID, int foundationRadius,
+    public static void GenerateFoundation(Point16 start, ushort tileID, int foundationRadius,
         bool useHalfCircle = false) {
         if (useHalfCircle)
-            WorldUtils.Gen(start, new Shapes.HalfCircle(foundationRadius), Actions.Chain(
+            WorldUtils.Gen(start.ToPoint(), new Shapes.HalfCircle(foundationRadius), Actions.Chain(
                 new Modifiers.Flip(false, true),
                 new Actions.Custom((i, j, args) => {
                     {
@@ -231,7 +232,7 @@ public static class StructureGenHelper {
                 })
             ));
         else
-            WorldUtils.Gen(start, new Shapes.Circle(foundationRadius),
+            WorldUtils.Gen(start.ToPoint(), new Shapes.Circle(foundationRadius),
                 new Actions.Custom((i, j, args) => {
                     {
                         Tile tile = Main.tile[i, j];
@@ -251,7 +252,7 @@ public static class StructureGenHelper {
     /// <param name="start"></param>
     /// <param name="randomStepOffset"></param>
     /// <param name="steps"></param>
-    public static void DigVerticalTunnel(Point start, int randomStepOffset, int steps) {
+    public static void DigVerticalTunnel(Point16 start, int randomStepOffset, int steps) {
         int initialYOffset = 0;
         for (int i = 0; i < steps; i++) {
             int width = Terraria.WorldGen.genRand.Next(7, 17);
@@ -315,7 +316,7 @@ public static class StructureGenHelper {
     /// <param name="maxCastDistance"></param>
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
-    public static (int distance, int yCoord) SurfaceRaycast(int x, int y, int maxCastDistance = 100) {
+    public static (int distance, int yCoord) SurfaceRaycast(int x, int y, int maxCastDistance = 999) { 
         for (int i = 0; i < maxCastDistance; i++)
             if (Terraria.WorldGen.SolidTile(x, y + i))
                 return (i, y + i);
@@ -359,9 +360,8 @@ public static class StructureGenHelper {
     /// <param name="removeWalls"></param>
     /// <param name="maxHeight"></param>
     /// <param name="blendLeftSide">if true, blending happens on the left side of start. otherwise, the right side</param>
-    public static void Blend(Point start, ushort blendDistance, ushort topTileID, ushort fillTileID = 0,
-        bool canUsePartialTiles = true,
-        bool removeWalls = true, ushort maxHeight = 38, bool blendLeftSide = true) {
+    public static void Blend(Point16 start, ushort blendDistance, ushort topTileID, ushort fillTileID = 0,
+        bool canUsePartialTiles = true, bool removeWalls = true, ushort maxHeight = 38, bool blendLeftSide = true) {
         int startX;
         int startY;
 
@@ -517,7 +517,7 @@ public static class StructureGenHelper {
     public static void Blend(ConnectPoint start, ushort blendDistance, ushort topTileID, ushort fillTileID = 0,
         bool canUsePartialTiles = true,
         bool removeWalls = true, ushort maxHeight = 38, bool blendLeftSide = true) {
-        Blend(new Point(start.X, start.Y), blendDistance, topTileID, fillTileID, canUsePartialTiles, removeWalls,
+        Blend(new Point16(start.X, start.Y), blendDistance, topTileID, fillTileID, canUsePartialTiles, removeWalls,
             maxHeight, blendLeftSide);
     }
 

@@ -7,6 +7,7 @@ using SpawnHouses.Structures.Bridges;
 using SpawnHouses.Structures.Structures.ChainStructures;
 using SpawnHouses.Types;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
@@ -187,7 +188,7 @@ public class MainBasement : StructureChain {
         if ((structure.Id is not StructureType.MainBasementRoom5 || !CompatabilityHelper.IsMSEnabled) && structure.Id is not StructureType.MainBasementRoom8)
             foreach (BoundingBox boundingBox in structure.StructureBoundingBoxes)
                 StructureGenHelper.GenerateCobwebs(
-                    new Point(boundingBox.Point1.X, boundingBox.Point1.Y),
+                    new Point16(boundingBox.Point1.X, boundingBox.Point1.Y),
                     (ushort)(boundingBox.Point2.X - boundingBox.Point1.X + 1),
                     (ushort)(boundingBox.Point2.Y - boundingBox.Point1.Y + 1)
                 );

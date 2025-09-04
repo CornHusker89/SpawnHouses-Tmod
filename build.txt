@@ -1,5 +1,5 @@
 displayName = Generated Housing
 author = CornHusker and Duck
-version = 1.2.5
+version = 1.2.6
 weakReferences = MagicStorage, WorldGenTesting
 modReferences = StructureHelper

@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using SpawnHouses.Helpers;
 using SpawnHouses.Types;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 
 namespace SpawnHouses.Structures.Structures;
@@ -91,14 +92,14 @@ public sealed class BeachHouse : CustomStructure {
                 TileColor = PaintID.BrownPaint
             };
             if (!Reverse) {
-                StructureGenHelper.Blend(ConnectPoints[3][0], 8, TileID.Sand, blendLeftSide: false);
-                StructureGenHelper.GenerateBeams(new Point(X + 1, Y + 30), beamTile, 4, 3);
-                StructureGenHelper.GenerateFoundation(new Point(X + 22, Y + 34), TileID.Sand, 11);
+                StructureGenHelper.Blend(ConnectPoints[3][0], 15, TileID.Sand, blendLeftSide: false);
+                StructureGenHelper.GenerateBeams(new Point16(X + 1, Y + 30), beamTile, 4, 3);
+                StructureGenHelper.GenerateFoundation(new Point16(X + 22, Y + 34), TileID.Sand, 11);
             }
             else {
-                StructureGenHelper.Blend(ConnectPoints[2][0], 8, TileID.Sand);
-                StructureGenHelper.GenerateBeams(new Point(X + 25, Y + 30), beamTile, 4, 3);
-                StructureGenHelper.GenerateFoundation(new Point(X + 12, Y + 34), TileID.Sand, 11);
+                StructureGenHelper.Blend(ConnectPoints[2][0], 15, TileID.Sand);
+                StructureGenHelper.GenerateBeams(new Point16(X + 25, Y + 30), beamTile, 4, 3);
+                StructureGenHelper.GenerateFoundation(new Point16(X + 12, Y + 34), TileID.Sand, 11);
             }
         }
 

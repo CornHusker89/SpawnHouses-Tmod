@@ -271,7 +271,7 @@ public sealed class MainHouse : CustomStructure {
     [NoJIT]
     public override void Generate(bool bare = false) {
         if (!bare) {
-            StructureGenHelper.GenerateFoundation(new Point(X + StructureXSize / 2, Y + 26), TileID.Dirt, StructureXSize / 2 + 7, true);
+            StructureGenHelper.GenerateFoundation(new Point16(X + StructureXSize / 2, Y + 26), TileID.Dirt, StructureXSize / 2 + 7, true);
 
             StructureGenHelper.Blend(ConnectPoints[2][0], 20, TileID.Grass, maxHeight: InUnderworld ? (ushort)10 : (ushort)38);
             StructureGenHelper.Blend(ConnectPoints[3][0], 20, TileID.Grass, maxHeight: InUnderworld ? (ushort)10 : (ushort)38, blendLeftSide: false);
@@ -321,7 +321,7 @@ public sealed class MainHouse : CustomStructure {
             int leftBushCount = Terraria.WorldGen.genRand.Next(2, 5);
             for (int i = 0; i < leftBushCount; i++) {
                 int xOffset = Terraria.WorldGen.genRand.Next(0, 12);
-                StructureGenHelper.PlaceBush(new Point(X + xOffset, Y + 25 + Terraria.WorldGen.genRand.Next(0, 2)),
+                StructureGenHelper.PlaceBush(new Point16(X + xOffset, Y + 25 + Terraria.WorldGen.genRand.Next(0, 2)),
                     wallBlacklistIDs: blacklistWallIDs);
             }
 
@@ -329,7 +329,7 @@ public sealed class MainHouse : CustomStructure {
             for (int i = 0; i < rightBushCount; i++) {
                 int xOffset = Terraria.WorldGen.genRand.Next(0, 12);
                 StructureGenHelper.PlaceBush(
-                    new Point(X + StructureXSize - 1 - xOffset, Y + 25 + Terraria.WorldGen.genRand.Next(0, 2)),
+                    new Point16(X + StructureXSize - 1 - xOffset, Y + 25 + Terraria.WorldGen.genRand.Next(0, 2)),
                     wallBlacklistIDs: blacklistWallIDs);
             }
         }

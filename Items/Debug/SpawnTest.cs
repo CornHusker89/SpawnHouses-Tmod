@@ -20,8 +20,9 @@ public class SpawnTest : ModItem {
     public override bool? UseItem(Player player) {
         int x = (Main.MouseWorld / 16).ToPoint16().X;
         int y = (Main.MouseWorld / 16).ToPoint16().Y;
-
-        Console.WriteLine($"item netmode is {Main.netMode} and position is - {x}, {y}");
+        
+        Console.WriteLine(x + ", " + y);
+        Console.WriteLine($"is {Terraria.WorldBuilding.GenVars.rightBeachStart}");
 
         return true;
     }

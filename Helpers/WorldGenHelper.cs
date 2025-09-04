@@ -205,93 +205,59 @@ public static class WorldGenHelper {
 
 
     public static void GenerateBeachHouse() {
-        ushort tileX = 0, tileY = 0;
-        short yModifier = 0;
-        ushort fillTileType = TileID.Sand;
-
-        void FindShoreline(bool rightSide = false) {
-            ushort x, y;
-            if (!rightSide)
-                x = 70;
-            else
-                x = (ushort)(Main.maxTilesX - 70);
-
-            while (true) {
-                if (!rightSide)
-                    x++;
-                else
-                    x--;
-
-                y = (ushort)(Main.worldSurface * 2 / 5 - yModifier);
-                if (Terraria.WorldGen.SolidTile(x, y))
-                    yModifier -= 70;
-
-                while (true) {
-                    // sample vertical segment
-                    y++;
-
-                    if (Terraria.WorldGen.SolidTile(x, y)) {
-                        if (!Terraria.WorldGen.SolidTile(x, y + 20) ||
-                            !Terraria.WorldGen.SolidTile(x, y + 28)) // if we're on an "island" keep going
-                            break;
-                        
-                        tileX = x;
-                        tileY = y;
-
-                        //sample a deeper tile
-                        fillTileType = Main.tile[x, y + 10].TileType;
-                        if (fillTileType == TileID.ShellPile)
-                            fillTileType = TileID.Sand;
-
-                        return;
-                    }
-
-                    if (Main.tile[x, y].LiquidAmount != 0)
-                        break;
-                }
-            }
+        bool placeRightSide = Main.dungeonX < Main.maxTilesX / 2;
+        int tileX = !placeRightSide ? 120 : (ushort)(Main.maxTilesX - 120), tileY = (int)(Main.worldSurface * 2 / 6);
+        
+        // get the y level where the ocean starts
+        while (Main.tile[tileX, tileY].LiquidAmount == 0) {
+            tileY++;
         }
 
-        bool dungeonIsLeftSide = Main.dungeonX < Main.maxTilesX / 2;
-        bool rightSide = dungeonIsLeftSide;
-        
-        FindShoreline(rightSide);
+        int direction = placeRightSide ? -1 : 1;
+        do {
+            // get the x when liquid ends
+            while (Main.tile[tileX, tileY].LiquidAmount != 0 || Main.tile[tileX + direction * 75, tileY].LiquidAmount != 0) {
+                tileX += direction;
+            }
 
-        if (tileX == 0 || tileY == 0) return;
+            // go up until just before the liquid ends
+            while (Main.tile[tileX, tileY - 1].LiquidAmount != 0) {
+                tileY--;
+            }
+        } while (Main.tile[tileX, tileY].LiquidAmount != 0);
+
+        ushort fillTileType = Main.tile[tileX, tileY + 10].TileType;
+        if (fillTileType == TileID.ShellPile)
+            fillTileType = TileID.Sand;
         
         try {
-            BeachHouse beachHouse = !rightSide
+            BeachHouse beachHouse = !placeRightSide
                 ? new BeachHouse((ushort)(tileX - 9), (ushort)(tileY - 32))
                 : new BeachHouse((ushort)(tileX - 23), (ushort)(tileY - 32), reverse: true);
             beachHouse.Generate();
             StructureManager.BeachHouse = beachHouse;
 
             // firepit generation
-            if (Terraria.WorldGen.genRand.Next(0, 2) == 0) // 1/2 chance
+            if (Terraria.WorldGen.genRand.Next(0, 3) == 0) // 1/3 chance
             {
                 bool foundLocation = false;
-                ushort x;
+                int x;
 
-                if (rightSide)
-                    x = (ushort)(tileX - 9 + 35 + Terraria.WorldGen.genRand.Next(8, 12));
+                if (!placeRightSide)
+                    x = tileX - 9 + 35 + Terraria.WorldGen.genRand.Next(8, 12);
                 else
-                    x = (ushort)(tileX - 23 - Terraria.WorldGen.genRand.Next(8, 12));
+                    x = tileX - 23 - Terraria.WorldGen.genRand.Next(8, 12);
 
-                ushort y = 10;
-                while (!foundLocation) {
-                    y = tileY;
-                    while (y < Main.worldSurface) {
-                        if (Terraria.WorldGen.SolidTile(x, y)) break;
-                        y++;
-                    }
-
-                    foundLocation = true;
+                int y = tileY - 20;
+                while (y < Main.worldSurface) {
+                    if (Terraria.WorldGen.SolidTile(x, y)) break;
+                    y++;
                 }
 
                 y = (ushort)(y - 2);
                 x = (ushort)(x - 3);
 
-                Firepit structure = new(x, y);
+                Firepit structure = new((ushort)x, (ushort)y);
                 structure.Generate();
             }
 

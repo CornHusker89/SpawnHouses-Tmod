@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using SpawnHouses.Helpers;
 using SpawnHouses.Types;
+using Terraria.DataStructures;
 using Terraria.ID;
 
 namespace SpawnHouses.Structures.Structures;
@@ -35,7 +36,7 @@ public sealed class BridgeTest : CustomStructure {
     }
 
     public override void Generate(bool bare = false) {
-        StructureGenHelper.GenerateFoundation(new Point(X, Y + 9), TileID.Dirt, 4);
+        StructureGenHelper.GenerateFoundation(new Point16(X, Y + 9), TileID.Dirt, 4);
 
         base.Generate();
     }
