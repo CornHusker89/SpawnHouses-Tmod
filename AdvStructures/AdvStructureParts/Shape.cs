@@ -113,10 +113,22 @@ public class Shape {
 
                 Points = optimize ? OptimizePoints(points) : points;
 
-                if (Points.Length == 4) {
-                    IsBox = true;
+                switch (Points.Length) {
+                    // this will only happen if the points are the same (shape area of 1)
+                    case 1:
+                        IsBox = true;
+                        break;
+                    // test if the points form a box
+                    case 4: {
+                        HashSet<int> x = [], y = [];
+                        foreach (Point16 point in Points) {
+                            x.Add(point.X);
+                            y.Add(point.Y);
+                        }
+                        IsBox = x.Count <= 2 && y.Count <= 2;
+                        break;
+                    }
                 }
-
                 break;
         }
 
@@ -156,11 +168,6 @@ public class Shape {
     /// <returns></returns>
     /// <remarks>destructive, returns the input list</remarks>
     public static Point16[] OptimizePoints(List<Point16> points) {
-
-        // ensure the shape isn't 1 wide/tall, which involves overlapping points by nature
-        // if (points.All(p => p.X == points[0].X) && points.All(p => p.Y == points[0].Y))
-        //     return points.ToArray();
-
         for (int i = 0; i < points.Count; i++) {
             Point16 last = points[i - 1 != -1 ? i - 1 : points.Count - 1];
             Point16 target = points[i];
@@ -185,6 +192,19 @@ public class Shape {
 
         if (points[0] == points[^1] && points.Count > 1) {
             points.RemoveAt(points.Count - 1);
+        }
+        
+        // ensure the shape isn't 1 wide/tall, which involves overlapping points by nature
+        bool same = true;
+        for (int i = 0; i < points.Count; i++) {
+            Point16 target = points[i];
+            Point16 next = points[i + 1 != points.Count ? i + 1 : 0];
+            if (next != target) {
+                same = false;
+            }
+        }
+        if (same) {
+            return [points[0]];
         }
 
         return points.ToArray();
@@ -278,7 +298,7 @@ public class Shape {
     /// gets outward facing normals for each vertex
     /// </summary>
     /// <returns></returns>
-    /// <remarks>rounds each normal to 0 or 1</remarks>
+    /// <remarks>rounds each vector component to 0 or 1</remarks>
     public Point16[] GetVertexNormals() {
         int count = Points.Length;
         var normals = new Point16[count];
@@ -385,9 +405,57 @@ public class Shape {
     /// </summary>
     /// <param name="offset"></param>
     public void Offset(Point16 offset) {
-        for (int i = 0; i < Points.Length; i++) Points[i] -= offset;
-
+        for (int i = 0; i < Points.Length; i++) {
+            Points[i] += offset;
+        }
         Init(Points, false);
+    }
+
+
+    public (int min, int max, double average) GetTrueSize(bool xAxis) {
+        Dictionary<int, int> minValues = [], maxValues = [];
+        ExecuteInArea((x, y) => {
+            if (!minValues.TryGetValue(xAxis ? y : x, out int oldMinValue)) {
+                minValues[xAxis ? y : x] = x;
+            }
+            else {
+                if (x < oldMinValue) {
+                    minValues[xAxis? y : x] = y;
+                }
+            }
+            if (!maxValues.TryGetValue(xAxis ? y : x, out int oldMaxValue)) {
+                maxValues[xAxis ? y : x] = x;
+            }
+            else {
+                if (x < oldMaxValue) {
+                    maxValues[xAxis? y : x] = y;
+                }
+            }
+        });
+        
+        // get the actual size for each slice using the min/max values for that slice
+        List<int> sizes = [];
+        foreach (int key in minValues.Keys) {
+            sizes.Add(maxValues[key] - minValues[key]);
+        }
+
+        if (sizes.Count == 0) {
+            throw new Exception("shape must have a minimum area of 1");
+        }
+
+        int min = sizes[0], max = sizes[0], average = 0;
+        foreach (int size in sizes) {
+            if (size < min) {
+                min = size;
+            }
+
+            if (size > max) {
+                max = size;
+            }
+            average += size;
+        }
+        average /= sizes.Count;
+        return (min, max, average);
     }
     
     #endregion
@@ -395,7 +463,7 @@ public class Shape {
 
     #region Execute-In
 
-    /// <param name="action">(int x, int y, byte direction</param>
+    /// <param name="action">x, y, direction</param>
     /// <param name="completeLoop"></param>
     public void ExecuteOnPerimeter(Action<int, int, byte> action, bool completeLoop = true) {
         if (IsBox) {
@@ -461,6 +529,10 @@ public class Shape {
         }
     }
 
+    /// <summary>
+    ///     runs action on every tile contained in the shape
+    /// </summary>
+    /// <param name="action"></param>
     public void ExecuteInArea(Action<int, int> action) {
         if (IsBox)
             for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
@@ -468,7 +540,7 @@ public class Shape {
                 action(x, y);
         else {
             for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++) {
-                var intersections = new List<int>();
+                var intersections = new List<double>();
 
                 for (int i = 0; i < Points.Length; i++) {
                     Point16 p1 = Points[i];
@@ -476,7 +548,7 @@ public class Shape {
 
                     // Find intersection of edge with the current scanline
                     if ((p1.Y <= y && p2.Y > y) || (p2.Y <= y && p1.Y > y)) {
-                        int intersectX = (int)Math.Round(p1.X + (double)(y - p1.Y) * (p2.X - p1.X) / (p2.Y - p1.Y));
+                        double intersectX = (int)Math.Round(p1.X + (double)(y - p1.Y) * (p2.X - p1.X) / (p2.Y - p1.Y));
                         intersections.Add(intersectX);
                     }
                 }
@@ -486,11 +558,12 @@ public class Shape {
                 for (int i = 0; i < intersections.Count; i += 2) {
                     if (i + 1 >= intersections.Count) break;
 
-                    int startX = intersections[i];
-                    int endX = intersections[i + 1];
+                    int startX = (int)Math.Round(intersections[i]);
+                    int endX = (int)Math.Round(intersections[i + 1] - 0.05); // very slightly bias inward
 
                     for (int x = startX; x <= endX; x++)
-                        action(x, y);
+                        if (!Points.Contains(new Point16(x, y)))
+                            action(x, y);
                 }
             }
 
@@ -498,13 +571,50 @@ public class Shape {
             for (int i = 0; i < Points.Length; i++) {
                 Point16 p1 = Points[i];
                 Point16 p2 = Points[(i + 1) % Points.Length];
-
-                if (p1.Y == p2.Y && p1.Y == BoundingBox.bottomRight.Y) {
-                    int startX = Math.Min(p1.X, p2.X);
-                    int endX = Math.Max(p1.X, p2.X);
-                    for (int x = startX; x <= endX; x++)
-                        action(x, p1.Y);
+                if (p1.Y == BoundingBox.bottomRight.Y) {
+                    if (p1.Y == p2.Y) {
+                        int startX = Math.Min(p1.X, p2.X);
+                        int endX = Math.Max(p1.X, p2.X);
+                        for (int x = startX + 1; x <= endX - 1; x++)
+                            if (!Points.Contains(new Point16(x, p1.Y)))
+                                action(x, p1.Y);
+                    }
                 }
+            }
+
+            foreach (Point16 point in Points) {
+                action(point.X, point.Y);
+            }
+        }
+    }
+
+    /// <summary>
+    ///     runs action on every tile contained in the shape, passing the predicted tile slope
+    /// </summary>
+    /// <param name="action"></param>
+    /// <param name="slopingAlgorithm">
+    ///     function to determine the <see cref="BlockType"/> passed to the action.
+    ///     if none is passed, this function will only pass <see cref="BlockType.Solid"/>.
+    ///     examples of these functions are found in <see cref="Helpers.SlopeHelper"/>
+    /// </param>
+    public void ExecuteInArea(Action<int, int, BlockType> action, Func<int, int, bool[,], BlockType>? slopingAlgorithm = null) {
+        if (slopingAlgorithm is null) {
+            ExecuteInArea((x, y) => {
+                action(x, y, BlockType.Solid);
+            });
+            return;
+        }
+        
+        bool[,] tilemap = new bool[Size.X, Size.Y];
+        ExecuteInArea((x, y) => tilemap[x - BoundingBox.topLeft.X, y - BoundingBox.topLeft.Y] = true);
+        for (int x = 0; x < Size.X; x++) {
+            int xWorldCoord = x + BoundingBox.topLeft.X;
+            for (int y = 0; y < Size.Y; y++) {
+                int yWorldCoord = y + BoundingBox.topLeft.Y;
+                if (!tilemap[x, y]) {
+                    continue;
+                }
+                action(xWorldCoord, yWorldCoord, slopingAlgorithm(x, y, tilemap));
             }
         }
     }

@@ -136,10 +136,10 @@ public class AdvStructure {
         List<IComponentGenerator> validGenerators = [];
         foreach (IComponentGenerator possibleGenerator in generators) {
             if (!possibleGenerator.CanGenerate(componentParams)) continue;
-            var requiredTags = componentParams.TagsRequired.ToList();
+            var requiredTags = componentParams.Component.TagsRequired.ToList();
             bool valid = true;
             foreach (ComponentTag possibleTag in possibleGenerator.GetPossibleTags()) {
-                if (componentParams.TagsBlacklist.Contains(possibleTag)) {
+                if (componentParams.Component.TagsBlacklist.Contains(possibleTag)) {
                     valid = false;
                     break;
                 }
@@ -152,58 +152,11 @@ public class AdvStructure {
         }
 
         if (validGenerators.Count == 0)
-            throw new Exception($"No components found were compatible with given parameters. required tags: {EnumHelper.ToString(componentParams.TagsRequired)}, blacklisted tags: {EnumHelper.ToString(componentParams.TagsBlacklist)}");
+            throw new Exception($"No components found were compatible with given parameters. required tags: {EnumHelper.ToString(componentParams.Component.TagsRequired)}, blacklisted tags: {EnumHelper.ToString(componentParams.Component.TagsBlacklist)}");
 
         return validGenerators[Terraria.WorldGen.genRand.Next(0, validGenerators.Count)];
     }
-
-    private void FillComponentSet(List<Shape> volumes, ComponentTag[] tagsRequired, ComponentTag[] tagsBlacklist) {
-        if (volumes.Count == 0)
-            return;
-
-        ComponentParams componentParams = new(
-            tagsRequired,
-            tagsBlacklist,
-            volumes[0],
-            Params.Palette,
-            Tilemap
-        );
-
-        IComponentGenerator[] generators;
-        if (tagsRequired.Contains(ComponentTag.IsFloor))
-            generators = FloorGenerators;
-        else if (tagsRequired.Contains(ComponentTag.IsWall))
-            generators = WallGenerators;
-        else if (tagsRequired.Contains(ComponentTag.IsBackground))
-            generators = BackgroundGenerators;
-        else if (tagsRequired.Contains(ComponentTag.IsStairway))
-            generators = StairwayGenerators;
-        else if (tagsRequired.Contains(ComponentTag.IsDecor))
-            generators = DecorGenerators;
-        else if (tagsRequired.Contains(ComponentTag.IsRoof))
-            generators = RoofGenerators;
-        else if (tagsRequired.Contains(ComponentTag.IsFloorGap) || tagsRequired.Contains(ComponentTag.IsWallGap))
-            generators = GapGenerators;
-        else if (tagsRequired.Contains(ComponentTag.IsDebugBlocks) || tagsRequired.Contains(ComponentTag.IsDebugWalls))
-            generators = DebugGenerators;
-        else
-            throw new Exception("component category not found");
-
-        List<IComponentGenerator> generatorQueue = [GetComponentGenerator(componentParams, generators)];
-        foreach (Shape volume in volumes) {
-            componentParams.Volume = volume;
-            int generatorIndex = 0;
-            while (!generatorQueue[generatorIndex].CanGenerate(componentParams)) {
-                generatorIndex++;
-                if (generatorIndex >= generatorQueue.Count) {
-                    generatorQueue.Add(GetComponentGenerator(componentParams, generators));
-                }
-            }
-
-            generatorQueue[generatorIndex].Generate(componentParams);
-        }
-    }
-
+    
     /// <summary>
     ///     assigns room objects to the gaps in the external layout
     /// </summary>
@@ -216,24 +169,72 @@ public class AdvStructure {
     /// </summary>
     /// <exception cref="Exception">Throws when no layout has been set</exception>
     public void FillComponents() {
-        if (!HasLayout)
+        if (false)//(!HasLayout)
             throw new Exception("No layout has been set");
 
-        FillComponentSet(ExternalLayout.Floors.Select(floor => floor.Volume).ToList(), [ComponentTag.IsFloor, ComponentTag.External], []);
-        FillComponentSet(ExternalLayout.Walls.Select(wall => wall.Volume).ToList(), [ComponentTag.IsWall, ComponentTag.External], []);
-        FillComponentSet(ExternalLayout.Gaps.FindAll(gap => !gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsFloorGap, ComponentTag.External], []);
-        FillComponentSet(ExternalLayout.Gaps.FindAll(gap => gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsWallGap, ComponentTag.External], []);
-        FillComponentSet(ExternalLayout.Roofs.Select(roof => roof.Volume).ToList(), [ComponentTag.IsRoof, ComponentTag.External], []);
+        List<IComponent> components = [];
+        components.AddRange(ExternalLayout.Floors);
+        components.AddRange(ExternalLayout.Walls);
+        components.AddRange(ExternalLayout.Gaps);
+        // components.AddRange(ExternalLayout.Roofs);
+        // components.AddRange(Layout.Floors);
+        // components.AddRange(Layout.Walls);
+        // components.AddRange(Layout.Gaps);
+        // components.AddRange(Layout.Rooms);
 
-        FillComponentSet(Layout.Floors.Select(floor => floor.Volume).ToList(), [ComponentTag.IsFloor], []);
-        FillComponentSet(Layout.Walls.Select(wall => wall.Volume).ToList(), [ComponentTag.IsWall], []);
-        FillComponentSet(Layout.Gaps.FindAll(gap => !gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsDebugBlocks], []);
-        FillComponentSet(Layout.Gaps.FindAll(gap => gap.IsHorizontal).Select(gap => gap.Volume).ToList(), [ComponentTag.IsDebugBlocks], []);
+        ComponentParams componentParams = new(
+            null,
+            Params.Palette,
+            Tilemap
+        );
+        Dictionary<Type, List<IComponentGenerator>> generatorQueue = [];
+        foreach (IComponent component in components) {
+            IComponentGenerator[] generators;
+            switch (component) {
+                case Floor:
+                    generators = FloorGenerators;
+                    break;
+                case Wall:
+                    generators = WallGenerators;
+                    break;
+                case Room:
+                    generators = BackgroundGenerators;
+                    // generators = StairwayGenerators;
+                    // generators = DecorGenerators;
+                    break;
+                case Roof:
+                    generators = RoofGenerators;
+                    break;
+                case Gap:
+                    generators = GapGenerators;
+                    break;
+                default: {
+                    if (component.TagsRequired.Contains(ComponentTag.IsDebugBlocks) || component.TagsRequired.Contains(ComponentTag.IsDebugWalls))
+                        generators = DebugGenerators;
+                    else
+                        throw new Exception($"component type {component.GetType()} generators not found");
+                    break;
+                }
+            }
+
+            componentParams.Component = component;
+            int generatorIndex = 0;
+            Type componentType =  component.GetType();
+            if (!generatorQueue.TryGetValue(componentType, out var generatorList)) {
+                generatorList = [GetComponentGenerator(componentParams, generators)];
+                generatorQueue[componentType] = generatorList;
+            }
+            else {
+                while (!generatorList[generatorIndex].CanGenerate(componentParams)) {
+                    generatorIndex++;
+                    if (generatorIndex >= generatorQueue.Count) {
+                        generatorList.Add(GetComponentGenerator(componentParams, generators));
+                    }
+                }
+            }
+            generatorList[generatorIndex].Generate(componentParams);
+        }
         
-        Console.WriteLine(Layout.Rooms.Count);
-
-        FillComponentSet(Layout.Rooms.Select(room => room.Volume).ToList(), [ComponentTag.IsBackground], []);
-
         HasFilledComponents = true;
     }
 
@@ -245,7 +246,7 @@ public class AdvStructure {
 
         for (int x = 0; x < Tilemap.Width; x++)
         for (int y = 0; y < Tilemap.Height; y++) {
-            Tilemap[x, y].CopyTile(Tilemap.ConvertToGlobal(x, y));
+            Tilemap[x, y].PasteTile(Tilemap.ConvertToGlobal(x, y));
         }
 
         for (int x = 0; x < Tilemap.Width; x++)

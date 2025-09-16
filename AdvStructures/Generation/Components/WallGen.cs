@@ -10,7 +10,6 @@ public static class WallGen {
     public class WallGenerator1 : IComponentGenerator {
         public ComponentTag[] GetPossibleTags() {
             return [
-                ComponentTag.IsWall,
                 ComponentTag.External,
                 ComponentTag.Elevated,
                 ComponentTag.GroundLevel,
@@ -19,12 +18,11 @@ public static class WallGen {
         }
 
         public bool Generate(ComponentParams componentParams) {
-            bool elevated = componentParams.TagsRequired.Contains(ComponentTag.Elevated);
+            bool elevated = componentParams.Component.TagsRequired.Contains(ComponentTag.Elevated);
 
-            componentParams.Volume.ExecuteInArea((x, y) => {
-                PaintedType.PlaceTile(x, y,
-                    elevated ? componentParams.TilePalette.WallMainElevated : componentParams.TilePalette.WallMain,
-                    componentParams.Tilemap
+            componentParams.Component.Volume.ExecuteInArea((x, y) => {
+                componentParams.Tilemap.PlaceTile(x, y,
+                    elevated ? componentParams.TilePalette.WallMainElevated : componentParams.TilePalette.WallMain
                 );
             });
             return true;
@@ -37,7 +35,6 @@ public static class WallGen {
     public class WallGenerator2 : IComponentGenerator {
         public ComponentTag[] GetPossibleTags() {
             return [
-                ComponentTag.IsWall,
                 ComponentTag.External,
                 ComponentTag.Elevated,
                 ComponentTag.GroundLevel,
@@ -46,12 +43,11 @@ public static class WallGen {
         }
 
         public bool Generate(ComponentParams componentParams) {
-            bool elevated = componentParams.TagsRequired.Contains(ComponentTag.Elevated);
+            bool elevated = componentParams.Component.TagsRequired.Contains(ComponentTag.Elevated);
 
-            componentParams.Volume.ExecuteInArea((x, y) => {
-                PaintedType.PlaceTile(x, y,
-                    PaintedType.PickRandom(elevated ? componentParams.TilePalette.WallAltElevated : componentParams.TilePalette.WallAlt),
-                    componentParams.Tilemap
+            componentParams.Component.Volume.ExecuteInArea((x, y) => {
+                componentParams.Tilemap.PlaceTile(x, y,
+                    PaintedType.PickRandom(elevated ? componentParams.TilePalette.WallAltElevated : componentParams.TilePalette.WallAlt)
                 );
             });
             return true;
@@ -64,7 +60,6 @@ public static class WallGen {
     public class WallGenerator3 : IComponentGenerator {
         public ComponentTag[] GetPossibleTags() {
             return [
-                ComponentTag.IsWall,
                 ComponentTag.External,
                 ComponentTag.Elevated,
                 ComponentTag.GroundLevel,
@@ -73,18 +68,17 @@ public static class WallGen {
         }
 
         public bool CanGenerate(ComponentParams componentParams) {
-            return componentParams.Volume.Size.X >= 3;
+            return componentParams.Component.Volume.GetTrueSize(true).average >= 4;
         }
 
         public bool Generate(ComponentParams componentParams) {
-            bool elevated = componentParams.TagsRequired.Contains(ComponentTag.Elevated);
-            int yStart = componentParams.Volume.BoundingBox.topLeft.Y;
-            int[] lowX = new int[componentParams.Volume.Size.Y];
-            int[] highX = new int[componentParams.Volume.Size.Y];
-            componentParams.Volume.ExecuteInArea((x, y) => {
-                PaintedType.PlaceTile(x, y,
-                    elevated ? componentParams.TilePalette.WallMainElevated : componentParams.TilePalette.WallMain,
-                    componentParams.Tilemap);
+            bool elevated = componentParams.Component.TagsRequired.Contains(ComponentTag.Elevated);
+            int yStart = componentParams.Component.Volume.BoundingBox.topLeft.Y;
+            int[] lowX = new int[componentParams.Component.Volume.Size.Y];
+            int[] highX = new int[componentParams.Component.Volume.Size.Y];
+            componentParams.Component.Volume.ExecuteInArea((x, y) => {
+                componentParams.Tilemap.PlaceTile(x, y,
+                    elevated ? componentParams.TilePalette.WallMainElevated : componentParams.TilePalette.WallMain);
 
                 if (lowX[y - yStart] == 0)
                     lowX[y - yStart] = x;
@@ -98,8 +92,8 @@ public static class WallGen {
             });
 
             for (int index = 0; index < lowX.Length; index++) {
-                PaintedType.PlaceTile(lowX[index], yStart + index, componentParams.TilePalette.WallSpecial, componentParams.Tilemap);
-                PaintedType.PlaceTile(highX[index], yStart + index, componentParams.TilePalette.WallSpecial, componentParams.Tilemap);
+                componentParams.Tilemap.PlaceTile(lowX[index], yStart + index, componentParams.TilePalette.WallSpecial);
+                componentParams.Tilemap.PlaceTile(highX[index], yStart + index, componentParams.TilePalette.WallSpecial);
             }
 
             return true;
@@ -112,7 +106,6 @@ public static class WallGen {
     public class WallGenerator4 : IComponentGenerator {
         public ComponentTag[] GetPossibleTags() {
             return [
-                ComponentTag.IsWall,
                 ComponentTag.External,
                 ComponentTag.Elevated,
                 ComponentTag.GroundLevel,
@@ -121,18 +114,17 @@ public static class WallGen {
         }
 
         public bool CanGenerate(ComponentParams componentParams) {
-            return componentParams.Volume.Size.X >= 3;
+            return componentParams.Component.Volume.GetTrueSize(true).average >= 4;
         }
 
         public bool Generate(ComponentParams componentParams) {
-            bool elevated = componentParams.TagsRequired.Contains(ComponentTag.Elevated);
-            int yStart = componentParams.Volume.BoundingBox.topLeft.Y;
-            int[] lowX = new int[componentParams.Volume.Size.Y];
-            int[] highX = new int[componentParams.Volume.Size.Y];
-            componentParams.Volume.ExecuteInArea((x, y) => {
-                PaintedType.PlaceTile(x, y, PaintedType.PickRandom(
-                        elevated ? componentParams.TilePalette.WallAltElevated : componentParams.TilePalette.WallAlt),
-                    componentParams.Tilemap);
+            bool elevated = componentParams.Component.TagsRequired.Contains(ComponentTag.Elevated);
+            int yStart = componentParams.Component.Volume.BoundingBox.topLeft.Y;
+            int[] lowX = new int[componentParams.Component.Volume.Size.Y];
+            int[] highX = new int[componentParams.Component.Volume.Size.Y];
+            componentParams.Component.Volume.ExecuteInArea((x, y) => {
+                componentParams.Tilemap.PlaceTile(x, y, PaintedType.PickRandom(
+                    elevated ? componentParams.TilePalette.WallAltElevated : componentParams.TilePalette.WallAlt));
 
                 if (lowX[y - yStart] == 0) lowX[y - yStart] = x;
                 if (highX[y - yStart] == 0) highX[y - yStart] = x;
@@ -142,8 +134,8 @@ public static class WallGen {
             });
 
             for (int index = 0; index < lowX.Length; index++) {
-                PaintedType.PlaceTile(lowX[index], yStart + index, componentParams.TilePalette.WallSpecial, componentParams.Tilemap);
-                PaintedType.PlaceTile(highX[index], yStart + index, componentParams.TilePalette.WallSpecial, componentParams.Tilemap);
+                componentParams.Tilemap.PlaceTile(lowX[index], yStart + index, componentParams.TilePalette.WallSpecial);
+                componentParams.Tilemap.PlaceTile(highX[index], yStart + index, componentParams.TilePalette.WallSpecial);
             }
 
             return true;
@@ -156,7 +148,6 @@ public static class WallGen {
     public class WallGenerator5 : IComponentGenerator {
         public ComponentTag[] GetPossibleTags() {
             return [
-                ComponentTag.IsWall,
                 ComponentTag.Elevated,
                 ComponentTag.GroundLevel,
                 ComponentTag.UnderGround
@@ -164,14 +155,13 @@ public static class WallGen {
         }
 
         public bool Generate(ComponentParams componentParams) {
-            bool elevated = componentParams.TagsRequired.Contains(ComponentTag.Elevated);
-            int xStart = componentParams.Volume.BoundingBox.topLeft.X;
-            int[] bottomY = new int[componentParams.Volume.Size.X];
+            bool elevated = componentParams.Component.TagsRequired.Contains(ComponentTag.Elevated);
+            int xStart = componentParams.Component.Volume.BoundingBox.topLeft.X;
+            int[] bottomY = new int[componentParams.Component.Volume.Size.X];
 
-            componentParams.Volume.ExecuteInArea((x, y) => {
-                PaintedType.PlaceTile(x, y, PaintedType.PickRandom(
-                        elevated ? componentParams.TilePalette.WallAltElevated : componentParams.TilePalette.WallAlt),
-                    componentParams.Tilemap);
+            componentParams.Component.Volume.ExecuteInArea((x, y) => {
+                componentParams.Tilemap.PlaceTile(x, y, PaintedType.PickRandom(
+                    elevated ? componentParams.TilePalette.WallAltElevated : componentParams.TilePalette.WallAlt));
 
                 if (bottomY[x - xStart] == 0)
                     bottomY[x - xStart] = y;
@@ -181,9 +171,8 @@ public static class WallGen {
             });
 
             for (int index = 0; index < bottomY.Length; index++)
-                PaintedType.PlaceTile(xStart + index, bottomY[index],
-                    elevated ? componentParams.TilePalette.WallAccentElevated : componentParams.TilePalette.WallAccent,
-                    componentParams.Tilemap);
+                componentParams.Tilemap.PlaceTile(xStart + index, bottomY[index],
+                    elevated ? componentParams.TilePalette.WallAccentElevated : componentParams.TilePalette.WallAccent);
 
             return true;
         }

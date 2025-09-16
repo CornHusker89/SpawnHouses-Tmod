@@ -6,6 +6,7 @@ using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Helpers;
 using SpawnHouses.Structures;
 using SpawnHouses.Types;
+using Terraria;
 using Terraria.DataStructures;
 using Range = SpawnHouses.Structures.Range;
 
@@ -83,22 +84,20 @@ public static class StructureLayoutGen {
             const int tilemapMargin = 5;
             const int roofMargin = 12;
 
+            // structure parameters
             int entryPointDistance = upper.Start.Y - lower.Start.Y;
             bool hasBasement = Terraria.WorldGen.genRand.NextDouble() < 0.4 && p.Height - entryPointDistance > 15; //40% if conditions are met
             int verticalOffset = hasBasement ? 7 : 0;
             int floorTopY = upper.End.Y + 1 + verticalOffset;
-
-            // roof setup
-            bool unevenRoof = true;//Terraria.WorldGen.genRand.NextDouble() < 0.7;
-            bool leftRoofHigher = Terraria.WorldGen.genRand.NextDouble() < 0.5;
-            int unevenRoofStartX = Terraria.WorldGen.genRand.Next(p.StartEntryPointX + (int)(p.Length * 0.4), p.StartEntryPointX + (int)(p.Length * 0.6));
-            int roofHeightModifier = p.Height / 5 + 1;
+            bool hasHigherSide = true;//Terraria.WorldGen.genRand.NextDouble() < 0.7;
+            bool leftRoofHigher = Terraria.WorldGen.genRand.NextBool();
+            int roofHeightModifier = p.Height / 5 + 1; // if uneven roof, adjust each side by this much
             int upperRoofBottomY = floorTopY - p.Height + 1;
-            if (unevenRoof && upperRoofBottomY + roofHeightModifier >= (leftRoofHigher ? right.Start.Y : left.Start.Y)) { // check that an uneven roof won't cause collision with entry points
-                unevenRoof = false;
+            if (hasHigherSide && upperRoofBottomY + roofHeightModifier >= (leftRoofHigher ? right.Start.Y : left.Start.Y)) { // check that an uneven roof won't cause collision with entry points
+                hasHigherSide = false;
             }
-            int lowerRoofBottomY = upperRoofBottomY + (unevenRoof ? roofHeightModifier : 0);
-            if (unevenRoof) {
+            int lowerRoofBottomY = upperRoofBottomY + (hasHigherSide ? roofHeightModifier : 0);
+            if (hasHigherSide) {
                 upperRoofBottomY -= roofHeightModifier;
             }
 
@@ -108,41 +107,17 @@ public static class StructureLayoutGen {
                 (ushort)(p.Height + 2 * (tilemapMargin + externalFloorThickness) + roofMargin),
                 new Point16(p.StartEntryPointX - externalWallThickness - tilemapMargin, upperRoofBottomY + 1 - externalFloorThickness - roofMargin - tilemapMargin)
             );
-            Point16 localTilemapOffset = advStructure.Tilemap.WorldTileOffset;
-
-            // actually fill the external layout
-            List<Floor> exteriorFloors = [];
-            List<Wall> exteriorWalls = [];
-            List<Roof> roofs = [];
+            
+            var (exteriorFloors, exteriorWalls, roofs) = ExternalLayoutHelper.CreateBasicRoof(
+                new Point16(p.StartEntryPointX + 1 - externalWallThickness, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
+                new Point16(p.EndEntryPointX - 1 + externalWallThickness, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
+                p,
+                externalFloorThickness,
+                externalWallThickness
+            );
+            
             exteriorFloors.Add(ExternalLayoutHelper.CreateFloor(floorTopY, p.StartEntryPointX + 1 - (hasBasement ? 0 : externalWallThickness),
                 p.EndEntryPointX - 1 + (hasBasement ? 0 : externalWallThickness), true, externalFloorThickness));
-
-            if (unevenRoof) {
-                (List<Floor> floors, List<Wall> walls, List<Roof> roofs) topComponents = ExternalLayoutHelper.CreateTopFloorsAndWalls(
-                    [
-                        new Point16(p.StartEntryPointX + 1 - externalWallThickness, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
-                        new Point16(unevenRoofStartX, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
-                        new Point16(unevenRoofStartX, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
-                        new Point16(p.EndEntryPointX - 1 + externalWallThickness, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY)
-                    ],
-                    externalFloorThickness,
-                    true,
-                    externalWallThickness
-                );
-                exteriorFloors.AddRange(topComponents.floors);
-                exteriorWalls.AddRange(topComponents.walls);
-                roofs.AddRange(topComponents.roofs);
-            }
-            else {
-                exteriorFloors.Add(ExternalLayoutHelper.CreateFloor(upperRoofBottomY, p.StartEntryPointX + 1 - externalWallThickness, p.EndEntryPointX - 1 + externalWallThickness, false, externalFloorThickness));
-
-                roofs.Add(
-                    new Roof(new Shape(
-                        new Point16(p.StartEntryPointX + 1 - externalWallThickness, upperRoofBottomY - externalFloorThickness - 3),
-                        new Point16(p.EndEntryPointX - 1 + externalWallThickness, upperRoofBottomY - externalFloorThickness)
-                    ))
-                );
-            }
 
             // if the top of either entry point is NOT flush with the roof
             if (left.Start.Y - 1 != (leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY)) exteriorWalls.Add(ExternalLayoutHelper.CreateWall(left.Start.X, left.Start.Y - 1,
@@ -165,19 +140,19 @@ public static class StructureLayoutGen {
             advStructure.EvaluateTilemapData();
 
             // finally finish the room layout
-            advStructure.Layout = new RoomLayout([], [], 
-                advStructure.ExternalLayout.Gaps,
-                [
-                new Room(
-                    Shape.GetStructureInterior(advStructure.Tilemap),
-                    advStructure.ExternalLayout.Gaps
-                )
-            ]);
+            // advStructure.Layout = new RoomLayout([], [], 
+            //     advStructure.ExternalLayout.Gaps,
+            //     [
+            //     new Room(
+            //         Shape.GetStructureInterior(advStructure.Tilemap),
+            //         advStructure.ExternalLayout.Gaps
+            //     )
+            // ]);
 
-            Console.WriteLine(advStructure.Layout.Rooms[0].Volume);
+            // Console.WriteLine(advStructure.Layout.Rooms[0].Volume);
 
-            advStructure.CompleteExternalGaps();
-            RoomLayoutHelper.SubdivideRoom(advStructure.Layout, advStructure.Layout.Rooms[0], roomLayoutParams);
+            // advStructure.CompleteExternalGaps();
+            // RoomLayoutHelper.SubdivideRoom(advStructure.Layout, advStructure.Layout.Rooms[0], roomLayoutParams);
 
             return true;
         }

@@ -91,7 +91,6 @@ public static class RoomLayoutHelper {
                 roomVolume = roomQueue.Dequeue();
             }
             else {
-                Console.WriteLine("had to end prematurely");
                 break;
             }
 

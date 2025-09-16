@@ -19,14 +19,14 @@ public class GapGen {
         }
 
         public bool Generate(ComponentParams componentParams) {
-            int xStart = componentParams.Volume.BoundingBox.topLeft.X;
-            int[] topY = new int[componentParams.Volume.Size.X];
-            int[] bottomY = new int[componentParams.Volume.Size.X];
-            bool placeWalls = !componentParams.TagsRequired.Contains(ComponentTag.External);
+            int xStart = componentParams.Component.Volume.BoundingBox.topLeft.X;
+            int[] topY = new int[componentParams.Component.Volume.Size.X];
+            int[] bottomY = new int[componentParams.Component.Volume.Size.X];
+            bool placeWalls = !componentParams.Component.TagsRequired.Contains(ComponentTag.External);
 
-            componentParams.Volume.ExecuteInArea((x, y) => {
+            componentParams.Component.Volume.ExecuteInArea((x, y) => {
                 if (placeWalls)
-                    PaintedType.PlaceWall(x, y, componentParams.TilePalette.BackgroundFloorMain, componentParams.Tilemap);
+                    componentParams.Tilemap.PlaceWall(x, y, componentParams.TilePalette.BackgroundFloorMain);
                 StructureTile tile = componentParams.Tilemap[x, y];
                 tile.HasTile = false;
 
@@ -42,8 +42,8 @@ public class GapGen {
             });
 
             for (int index = 0; index < topY.Length; index++) {
-                PaintedType.PlaceTile(xStart + index, topY[index], componentParams.TilePalette.Platform, componentParams.Tilemap);
-                PaintedType.PlaceTile(xStart + index, bottomY[index], componentParams.TilePalette.Platform, componentParams.Tilemap);
+                componentParams.Tilemap.PlaceTile(xStart + index, topY[index], componentParams.TilePalette.Platform);
+                componentParams.Tilemap.PlaceTile(xStart + index, bottomY[index], componentParams.TilePalette.Platform);
             }
 
             return true;
@@ -65,8 +65,10 @@ public class GapGen {
         }
 
         public bool Generate(ComponentParams componentParams) {
-            if (!componentParams.TagsRequired.Contains(ComponentTag.External))
-                componentParams.Volume.ExecuteInArea((x, y) => { PaintedType.PlaceWall(x, y, PaintedType.PickRandom(componentParams.TilePalette.BackgroundWallAlt), componentParams.Tilemap); });
+            if (!componentParams.Component.TagsRequired.Contains(ComponentTag.External))
+                componentParams.Component.Volume.ExecuteInArea((x, y) => {
+                    componentParams.Tilemap.PlaceWall(x, y, PaintedType.PickRandom(componentParams.TilePalette.BackgroundWallAlt));
+                });
             return true;
         }
     }

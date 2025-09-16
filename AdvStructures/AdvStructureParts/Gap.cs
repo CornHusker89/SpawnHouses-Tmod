@@ -1,7 +1,14 @@
 #nullable enable
+using System.Collections.Generic;
+using SpawnHouses.Types;
+
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
 public class Gap : IComponent {
+    public ushort Id { get; set; }
+    public Shape Volume { get; set; }
+    public List<ComponentTag> TagsRequired { get; set; }
+    public List<ComponentTag> TagsBlacklist { get; set; }
     /// <summary>This will be null if the gap leads to an exterior</summary>
     public Room? HigherRoom;
 
@@ -40,6 +47,13 @@ public class Gap : IComponent {
         Volume = volume;
         IsHorizontal = isHorizontal;
         IsExterior = room2 == null;
+        if (IsExterior) {
+            TagsRequired = [isHorizontal ? ComponentTag.IsWallGap : ComponentTag.IsFloorGap, ComponentTag.External];
+        }
+        else {
+            TagsRequired = [isHorizontal ? ComponentTag.IsWallGap : ComponentTag.IsFloorGap];
+        }
+        TagsBlacklist = [];
 
         if (IsExterior) {
             LowerRoom = room1;
@@ -59,10 +73,6 @@ public class Gap : IComponent {
             ParentRoom = room1.ParentRoom;
         else if (room2?.ParentRoom != null) ParentRoom = room2.ParentRoom;
     }
-
-    public ushort Id { get; set; }
-
-    public Shape Volume { get; set; }
 
     /// <summary>
     ///     tests if the rooms and direction are the same, and the volumes collide

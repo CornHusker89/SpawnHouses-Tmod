@@ -13,38 +13,4 @@ public struct PaintedType(ushort type, byte paintType = PaintID.None, short styl
         int index = Terraria.WorldGen.genRand.Next(paintedTypes.Length);
         return paintedTypes[index];
     }
-
-    public static void PlaceTile(int x, int y, PaintedType paintedType, StructureTilemap tilemap, BlockType blockType = BlockType.Solid) {
-        if (paintedType.Style == -1) {
-            StructureTile tile = tilemap[x, y];
-            tile.HasTile = true;
-            tile.BlockType = blockType;
-            tile.TileType = paintedType.Type;
-            tile.TileColor = paintedType.PaintType;
-            tile.IsNullTile = false;
-        }
-        else {
-            throw new NotImplementedException();
-
-            // can't use this because it needs a custom tilemap
-            // Terraria.WorldGen.PlaceTile(x, y, paintedType.Type, true, true, style: paintedType.Style);
-            // StructureTile tile = tilemap[x, y];
-            // tile.TileColor = paintedType.PaintType;
-        }
-    }
-
-    public static void PlaceTile(Point16 position, PaintedType paintedType, StructureTilemap tilemap, BlockType blockType = BlockType.Solid) {
-        PlaceTile(position.X, position.Y, paintedType, tilemap, blockType);
-    }
-
-    public static void PlaceWall(int x, int y, PaintedType paintedType, StructureTilemap tilemap) {
-        StructureTile tile = tilemap[x, y];
-        tile.WallType = paintedType.Type;
-        tile.WallColor = paintedType.PaintType;
-        tile.IsNullWall = false;
-    }
-
-    public static void PlaceWall(Point16 position, PaintedType paintedType, StructureTilemap tilemap) {
-        PlaceWall(position.X, position.Y, paintedType, tilemap);
-    }
 }

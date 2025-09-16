@@ -15,7 +15,7 @@ public class DebugGen {
         }
 
         public bool Generate(ComponentParams componentParams) {
-            componentParams.Volume.ExecuteInArea((x, y) => {
+            componentParams.Component.Volume.ExecuteInArea((x, y) => {
                 StructureTile tile = componentParams.Tilemap[x, y];
                 tile.HasTile = true;
                 tile.BlockType = BlockType.Solid;
@@ -38,7 +38,7 @@ public class DebugGen {
         }
 
         public bool Generate(ComponentParams componentParams) {
-            componentParams.Volume.ExecuteInArea((x, y) => {
+            componentParams.Component.Volume.ExecuteInArea((x, y) => {
                 StructureTile tile = componentParams.Tilemap[x, y];
                 tile.HasTile = true;
                 tile.BlockType = BlockType.Solid;
@@ -61,7 +61,7 @@ public class DebugGen {
         }
 
         public bool Generate(ComponentParams componentParams) {
-            componentParams.Volume.ExecuteInArea((x, y) => {
+            componentParams.Component.Volume.ExecuteInArea((x, y) => {
                 StructureTile tile = componentParams.Tilemap[x, y];
                 tile.HasTile = true;
                 tile.BlockType = BlockType.Solid;
@@ -84,7 +84,7 @@ public class DebugGen {
         }
 
         public bool Generate(ComponentParams componentParams) {
-            componentParams.Volume.ExecuteInArea((x, y) => {
+            componentParams.Component.Volume.ExecuteInArea((x, y) => {
                 StructureTile tile = componentParams.Tilemap[x, y];
                 tile.WallType = WallID.EmeraldGemspark;
                 tile.WallColor = PaintID.None;
@@ -105,7 +105,7 @@ public class DebugGen {
         }
 
         public bool Generate(ComponentParams componentParams) {
-            componentParams.Volume.ExecuteInArea((x, y) => {
+            componentParams.Component.Volume.ExecuteInArea((x, y) => {
                 StructureTile tile = componentParams.Tilemap[x, y];
                 tile.WallType = WallID.SapphireGemspark;
                 tile.WallColor = PaintID.None;
@@ -126,7 +126,7 @@ public class DebugGen {
         }
 
         public bool Generate(ComponentParams componentParams) {
-            componentParams.Volume.ExecuteInArea((x, y) => {
+            componentParams.Component.Volume.ExecuteInArea((x, y) => {
                 StructureTile tile = componentParams.Tilemap[x, y];
                 tile.WallType = WallID.RubyGemspark;
                 tile.WallColor = PaintID.None;

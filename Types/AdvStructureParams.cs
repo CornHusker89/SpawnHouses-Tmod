@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Structures;
@@ -53,9 +54,9 @@ public class StructureParams {
         if (EntryPoints.Select(entryPoint => entryPoint.Start.Y).Max() - EntryPoints.Select(entryPoint => entryPoint.Start.Y).Min() + 4 > VolumeRange.Min / Length)
             throw new ArgumentException($"Entry points are too far away vertically for a minimum height of {VolumeRange.Min / Length} (determined by min volume / length)");
         if (tagsRequired.Contains(StructureTag.HasOnlyRectangleRooms) && tagsRequired.Contains(StructureTag.HasNoRectangleRooms))
-            throw new ArgumentException("Cannot require mutually exclusive tags \"HasFlatFloors\" and \"HasNoFlatFloors\"");
+            throw new ArgumentException("Cannot require mutually exclusive structure tags \"HasOnlyRectangleRooms\" (id 3) and \"HasNoRectangleRooms\" (id 4)");
         if (tagsRequired.Contains(StructureTag.AboveGround) && tagsRequired.Contains(StructureTag.UnderGround))
-            throw new ArgumentException("Cannot require mutually exclusive tags \"AboveGround\" and \"UnderGround\"");
+            throw new ArgumentException("Cannot require mutually exclusive structure tags \"AboveGround\" (id 9) and \"UnderGround\" (id 10)");
 
         ReRollRanges();
     }
@@ -135,7 +136,6 @@ public class RoomLayoutParams(
     ///     true if volume's dimensions are not smaller than min sizes
     /// </summary>
     /// <param name="volume"></param>
-    /// <param name="roomLayoutParams"></param>
     /// <returns></returns>
     public bool IsWithinMinSize(Shape volume) {
         return volume.Size.X >= RoomWidth.Min && volume.Size.Y >= RoomHeight.Min;
@@ -152,14 +152,25 @@ public class RoomLayoutParams(
 }
 
 public class ComponentParams(
-    ComponentTag[] tagsRequired,
-    ComponentTag[] tagsBlacklist,
-    Shape volume,
+    IComponent component,
     TilePalette tilePalette,
     StructureTilemap tilemap) {
-    public readonly ComponentTag[] TagsBlacklist = tagsBlacklist;
-    public readonly ComponentTag[] TagsRequired = tagsRequired;
+    public IComponent Component = component; // not readonly because filling in components uses the same params object for multiple components
     public readonly StructureTilemap Tilemap = tilemap;
     public readonly TilePalette TilePalette = tilePalette;
-    public Shape Volume = volume;
+
+    public static void ValidateRequiredTags(List<ComponentTag> tags) {
+        bool useSimpleSloping = tags.Contains(ComponentTag.UseSimpleSloping);
+        bool useGothicSloping = tags.Contains(ComponentTag.UseSimpleSloping);
+        bool useHalfSloping = tags.Contains(ComponentTag.UseSimpleSloping);
+        if (useSimpleSloping && useGothicSloping) {
+            throw new Exception("cannot have mutually exclusive component tags \"UseSimpleSloping\" (id 25) and \"UseGothicSloping\" (id 26)");
+        }
+        if (useHalfSloping && useGothicSloping) {
+            throw new Exception("cannot have mutually exclusive component tags \"UseHalfSloping\" (id 27) and \"UseGothicSloping\" (id 26)");
+        }
+        if (useSimpleSloping && useHalfSloping) {
+            throw new Exception("cannot have mutually exclusive component tags \"UseSimpleSloping\" (id 25) and \"UseHalfSloping\" (id 27)");
+        }
+    }
 }

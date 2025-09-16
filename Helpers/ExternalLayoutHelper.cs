@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
+using SpawnHouses.Types;
+using Terraria;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Helpers;
@@ -25,6 +27,7 @@ public class ExternalLayoutHelper {
     }
 
     /// <summary>
+    ///     helper function to simplify creating flat floors
     /// </summary>
     /// <param name="y"></param>
     /// <param name="xStart"></param>
@@ -47,12 +50,13 @@ public class ExternalLayoutHelper {
     }
 
     /// <summary>
+    ///     helper function to simplify creating flat walls
     /// </summary>
     /// <param name="x"></param>
     /// <param name="yStart"></param>
     /// <param name="yEnd"></param>
     /// <param name="extendHigher">
-    ///     if true, will expand floor by (<paramref name="width" /> - 1) in the positive direction.
+    ///     if true, will expand wall by (<paramref name="width" /> - 1) in the positive direction.
     ///     otherwise in the negative direction
     /// </param>
     /// <param name="width"></param>
@@ -69,7 +73,7 @@ public class ExternalLayoutHelper {
     }
 
     /// <summary>
-    ///     creates floor and walls as needed to fulfill the given path. intended to be used to top-off structures
+    ///     creates floor and walls as needed to fulfill the given path. intended to create structure roofs
     /// </summary>
     /// <param name="path"></param>
     /// <param name="floorWidth"></param>
@@ -100,9 +104,7 @@ public class ExternalLayoutHelper {
 
             if (isFloor) {
                 roofPoints.Add(
-                    !lastComponentWasFloor && lastPoint != null && lastPoint.Value.Y < thisPoint.Y ?
-                    thisPoint + new Point16(1, 0) :
-                    thisPoint
+                    !lastComponentWasFloor && lastPoint != null && lastPoint.Value.Y < thisPoint.Y ? thisPoint + new Point16(1, 0) : thisPoint
                 );
 
                 if (thisPoint.Y == nextPoint.Y) {
@@ -165,5 +167,86 @@ public class ExternalLayoutHelper {
         }
 
         return (floors, walls, roofs);
+    }
+
+    /// <summary>
+    ///     creates a basic 1 or 2-segment roof, can create roof slopes and can handle different starting and ending Ys
+    /// </summary>
+    /// <param name="left">X must be less than <see cref="right"/>'s X</param>
+    /// <param name="right">X must be greater than <see cref="left"/>'s X</param>
+    /// <param name="p"></param>
+    /// <param name="floorThickness"></param>
+    /// <param name="wallThickness"></param>
+    /// <returns></returns>
+    public static (List<Floor> floors, List<Wall> walls, List<Roof> roofs) CreateBasicRoof(Point16 left, Point16 right, StructureParams p, int floorThickness, int wallThickness) {
+        double[] validRoofSlopes = [0.333, 0.5, 1, 1.5, 2];
+        bool hasHigherSide = left.Y != right.Y;
+        bool leftRoofHigher = left.Y < right.Y;
+        int upperRoofBottomY = int.Min(left.Y, right.Y);
+        int lowerRoofBottomY = int.Max(left.Y, right.Y);
+        int unevenRoofStartX = Terraria.WorldGen.genRand.Next(p.StartEntryPointX + (int)(p.Length * 0.4), p.StartEntryPointX + (int)(p.Length * 0.6))
+            + (int)(p.Length * 0.14) * (leftRoofHigher ? 1 : -1);
+        bool hasSlopedSideRoof = Terraria.WorldGen.genRand.NextDouble() < 0.7;
+        bool hasRoofPeak = Terraria.WorldGen.genRand.NextDouble() < 0.7;
+        double peakRoofSlope = validRoofSlopes[Terraria.WorldGen.genRand.Next(validRoofSlopes.Length)];
+        double sideRoofSlope = double.Min(peakRoofSlope, 0.5);
+
+        List<Point16> path;
+        if (hasHigherSide) {
+            int lowerRoofLength = leftRoofHigher
+                ? p.EndEntryPointX - 1 + wallThickness - unevenRoofStartX
+                : unevenRoofStartX - (p.StartEntryPointX + 1 - wallThickness);
+            if (hasSlopedSideRoof) {
+                int lowerRoofOffset = (int)(sideRoofSlope * lowerRoofLength);
+                path = [
+                    new Point16(p.StartEntryPointX + 1 - wallThickness, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
+                    new Point16(unevenRoofStartX, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY - lowerRoofOffset),
+                    new Point16(unevenRoofStartX, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY - lowerRoofOffset),
+                    new Point16(p.EndEntryPointX - 1 + wallThickness, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY)
+                ];
+            }
+            else {
+                path = [
+                    new Point16(p.StartEntryPointX + 1 - wallThickness, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
+                    new Point16(unevenRoofStartX, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
+                    new Point16(unevenRoofStartX, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
+                    new Point16(p.EndEntryPointX - 1 + wallThickness, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY)
+                ];
+            }
+
+            // add roof peak if required
+            if (hasRoofPeak) {
+                int higherRoofLength = p.Length - lowerRoofLength;
+                int roofPeakX = leftRoofHigher
+                    ? (int)(p.StartEntryPointX + 1 - wallThickness + higherRoofLength * 0.5)
+                    : (int)(unevenRoofStartX + higherRoofLength * 0.5);
+                int roofPeakOffset = (int)(peakRoofSlope * 0.5 * higherRoofLength);
+                path.Insert(leftRoofHigher ? 1 : 3, new Point16(roofPeakX, upperRoofBottomY - roofPeakOffset));
+            }
+        }
+        else {
+            // if there's not a higher side of the roof
+            path = [
+                new Point16(p.StartEntryPointX + 1 - wallThickness, upperRoofBottomY),
+                new Point16(p.EndEntryPointX - 1 + wallThickness, upperRoofBottomY)
+            ];
+        }
+        
+        var result = CreateTopFloorsAndWalls(
+            path,
+            floorThickness,
+            true,
+            wallThickness
+        );
+        foreach (Floor floor in result.floors) {
+            //floor.TagsRequired.Add(ComponentTag.UseSimpleSloping);
+        }
+        if (hasRoofPeak) {
+            foreach (Roof roof in result.roofs) {
+                roof.TagsRequired.Add(ComponentTag.RoofHasLargeOverhang);
+            }
+        }
+
+        return result;
     }
 }

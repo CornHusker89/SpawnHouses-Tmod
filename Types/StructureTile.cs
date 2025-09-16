@@ -162,7 +162,7 @@ public class StructureTile {
     /// </summary>
     /// <param name="x"></param>
     /// <param name="y"></param>
-    public void CopyTile(int x, int y) {
+    public void PasteTile(int x, int y) {
         Tile tile = Main.tile[x, y];
         if (!IsNullTile) {
             tile.TileType = TileType;
@@ -178,7 +178,7 @@ public class StructureTile {
             tile.WallColor = WallColor;
         }
     }
-    public void CopyTile(Point16 point) => CopyTile(point.X, point.Y);
+    public void PasteTile(Point16 point) => PasteTile(point.X, point.Y);
 
     public void SetFrames(int x, int y)
     {
