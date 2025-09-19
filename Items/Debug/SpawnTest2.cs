@@ -1,8 +1,5 @@
 using System;
-using SpawnHouses.AdvStructures;
 using SpawnHouses.AdvStructures.AdvStructureParts;
-using SpawnHouses.Structures;
-using SpawnHouses.Types;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -31,7 +28,7 @@ public class SpawnTest2 : ModItem {
         // if (SpawnTest.Structure.Tilemap.InBounds(point))
         //     Console.WriteLine(SpawnTest.Structure.Tilemap[point].IsInside);
 
-        Shape s = new Shape(
+        Shape s = new(
             new Point16(x, y),
             new Point16(x, y),
             new Point16(x, y + 8),

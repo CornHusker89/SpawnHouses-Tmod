@@ -1,4 +1,3 @@
-using System.Linq;
 using SpawnHouses.Types;
 
 namespace SpawnHouses.AdvStructures.Generation.Components;
@@ -66,9 +65,7 @@ public class GapGen {
 
         public bool Generate(ComponentParams componentParams) {
             if (!componentParams.Component.TagsRequired.Contains(ComponentTag.External))
-                componentParams.Component.Volume.ExecuteInArea((x, y) => {
-                    componentParams.Tilemap.PlaceWall(x, y, PaintedType.PickRandom(componentParams.TilePalette.BackgroundWallAlt));
-                });
+                componentParams.Component.Volume.ExecuteInArea((x, y) => { componentParams.Tilemap.PlaceWall(x, y, PaintedType.PickRandom(componentParams.TilePalette.BackgroundWallAlt)); });
             return true;
         }
     }

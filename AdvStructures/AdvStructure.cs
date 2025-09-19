@@ -1,29 +1,22 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.AdvStructures.Generation;
 using SpawnHouses.AdvStructures.Generation.Components;
 using SpawnHouses.Helpers;
-using SpawnHouses.StructureHelper;
 using SpawnHouses.Structures;
 using SpawnHouses.Types;
-using Terraria;
-using Terraria.DataStructures;
-using Terraria.WorldBuilding;
 
 namespace SpawnHouses.AdvStructures;
 
 public class AdvStructure {
     public ExternalLayout ExternalLayout;
+    public bool HasFilledComponents;
     public RoomLayout Layout;
     public StructureParams Params;
     public StructureTilemap Tilemap;
     public int XSize, YSize, HousingCount;
-    public bool HasFilledComponents;
-
-    public bool HasLayout => Layout != null;
 
 
     /// <summary>
@@ -41,6 +34,8 @@ public class AdvStructure {
             PlaceTilemap();
         }
     }
+
+    public bool HasLayout => Layout != null;
 
     /// <summary>
     ///     calculates a structure's layout, and does not alter tiles
@@ -68,9 +63,7 @@ public class AdvStructure {
                     validGenerators.Add(possibleGenerator);
             }
 
-            if (validGenerators.Count == 0) {
-                throw new Exception($"No structure layout generators found were compatible with the given parameters. required tags: {EnumHelper.ToString(Params.TagsRequired)}, blacklisted tags: {EnumHelper.ToString(Params.TagsBlacklist)}");
-            }
+            if (validGenerators.Count == 0) throw new Exception($"No structure layout generators found were compatible with the given parameters. required tags: {EnumHelper.ToString(Params.TagsRequired)}, blacklisted tags: {EnumHelper.ToString(Params.TagsBlacklist)}");
 
             generator = validGenerators[Terraria.WorldGen.genRand.Next(0, validGenerators.Count)];
         }
@@ -85,7 +78,7 @@ public class AdvStructure {
     /// <summary>
     ///     sets the outside/exterior component/inside tile data within the tilemap, based on the current external layout
     /// </summary>
-    public void EvaluateTilemapData() {
+    public void SetTilesExternalStatus() {
         foreach (Shape shape in ExternalLayout.Floors.Select(floor => floor.Volume))
             shape.ExecuteInArea((x, y) => {
                 StructureTile tile = Tilemap[x, y];
@@ -152,11 +145,11 @@ public class AdvStructure {
         }
 
         if (validGenerators.Count == 0)
-            throw new Exception($"No components found were compatible with given parameters. required tags: {EnumHelper.ToString(componentParams.Component.TagsRequired)}, blacklisted tags: {EnumHelper.ToString(componentParams.Component.TagsBlacklist)}");
+            throw new Exception($"No component generators were found that are compatible with given parameters. type: {componentParams.Component.GetType().FullName}, required tags: {EnumHelper.ToString(componentParams.Component.TagsRequired)}, blacklisted tags: {EnumHelper.ToString(componentParams.Component.TagsBlacklist)}");
 
         return validGenerators[Terraria.WorldGen.genRand.Next(0, validGenerators.Count)];
     }
-    
+
     /// <summary>
     ///     assigns room objects to the gaps in the external layout
     /// </summary>
@@ -169,7 +162,7 @@ public class AdvStructure {
     /// </summary>
     /// <exception cref="Exception">Throws when no layout has been set</exception>
     public void FillComponents() {
-        if (false)//(!HasLayout)
+        if (false) //(!HasLayout)
             throw new Exception("No layout has been set");
 
         List<IComponent> components = [];
@@ -188,7 +181,9 @@ public class AdvStructure {
             Tilemap
         );
         Dictionary<Type, List<IComponentGenerator>> generatorQueue = [];
-        foreach (IComponent component in components) {
+        for (int i = 0; i < components.Count; i++) {
+            IComponent component = components[i];
+            component.Id = (ushort)i;
             IComponentGenerator[] generators;
             switch (component) {
                 case Floor:
@@ -219,7 +214,7 @@ public class AdvStructure {
 
             componentParams.Component = component;
             int generatorIndex = 0;
-            Type componentType =  component.GetType();
+            Type componentType = component.GetType();
             if (!generatorQueue.TryGetValue(componentType, out var generatorList)) {
                 generatorList = [GetComponentGenerator(componentParams, generators)];
                 generatorQueue[componentType] = generatorList;
@@ -227,14 +222,13 @@ public class AdvStructure {
             else {
                 while (!generatorList[generatorIndex].CanGenerate(componentParams)) {
                     generatorIndex++;
-                    if (generatorIndex >= generatorQueue.Count) {
-                        generatorList.Add(GetComponentGenerator(componentParams, generators));
-                    }
+                    if (generatorIndex >= generatorQueue.Count) generatorList.Add(GetComponentGenerator(componentParams, generators));
                 }
             }
+
             generatorList[generatorIndex].Generate(componentParams);
         }
-        
+
         HasFilledComponents = true;
     }
 
@@ -245,14 +239,12 @@ public class AdvStructure {
             throw new Exception("No filled components have been set");
 
         for (int x = 0; x < Tilemap.Width; x++)
-        for (int y = 0; y < Tilemap.Height; y++) {
+        for (int y = 0; y < Tilemap.Height; y++)
             Tilemap[x, y].PasteTile(Tilemap.ConvertToGlobal(x, y));
-        }
 
         for (int x = 0; x < Tilemap.Width; x++)
-        for (int y = 0; y < Tilemap.Height; y++) {
+        for (int y = 0; y < Tilemap.Height; y++)
             Tilemap[x, y].SetFrames(Tilemap.ConvertToGlobal(x, y));
-        }
     }
 
     public void FinishHousing() {
@@ -261,7 +253,6 @@ public class AdvStructure {
     #region Generators
 
     public static IStructureLayoutGenerator[] StructureLayoutGenerators;
-
     public static IComponentGenerator[] FloorGenerators;
     public static IComponentGenerator[] WallGenerators;
     public static IComponentGenerator[] BackgroundGenerators;
@@ -274,7 +265,6 @@ public class AdvStructure {
     public static void PopulateGenerators() {
         var types = typeof(StructureLayoutGen).GetNestedTypes();
         StructureLayoutGenerators = types.Select(t => Activator.CreateInstance(t) as IStructureLayoutGenerator).ToArray();
-
         types = typeof(FloorGen).GetNestedTypes();
         FloorGenerators = types.Select(t => Activator.CreateInstance(t) as IComponentGenerator).ToArray();
         types = typeof(WallGen).GetNestedTypes();

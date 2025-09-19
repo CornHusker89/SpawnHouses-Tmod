@@ -6,7 +6,7 @@ public enum StructureTag {
     HasHousing = 2,
     HasOnlyRectangleRooms = 3,
     HasNoRectangleRooms = 4,
-    
+
     /// has both rectangular and non-uniform rooms
     HasSomeRectangleRooms = 5,
 
@@ -48,18 +48,23 @@ public enum ComponentTag {
     GroundLevel = 2,
     UnderGround = 3,
     External = 4,
-    
-    /// when filling volumes, use <see cref="Helpers.SlopeHelper.SimpleSlopes"/>
+
+    /// when filling volumes, use
+    /// <see cref="Helpers.SlopeHelper.SimpleSlopes" />
     UseSimpleSloping = 25,
-    /// when filling volumes, use <see cref="Helpers.SlopeHelper.GothicSlopes"/>
+
+    /// when filling volumes, use
+    /// <see cref="Helpers.SlopeHelper.GothicSlopes" />
     UseGothicSloping = 26,
-    /// when filling volumes, use <see cref="Helpers.SlopeHelper.HalfSlopes"/>
+
+    /// when filling volumes, use
+    /// <see cref="Helpers.SlopeHelper.HalfSlopes" />
     UseHalfSloping = 27,
 
 
     // ===== floor =====
     IsFloorGap = 6,
-    
+
     /// floor is not hollow
     FloorSolid = 7,
     FloorHollow = 8,
@@ -84,18 +89,18 @@ public enum ComponentTag {
 
 
     // ===== roof =====
-    
+
     /// roof is tall enough that it doesn't follow the contour of the tiles it is placed on
     RoofTall = 15,
-    
+
     RoofShort = 16,
     RoofHasChimney = 17,
     RoofSlope1To1 = 18,
     RoofSlopeLessThan1 = 19,
     RoofSlopeGreaterThan1 = 20,
     RoofSlopeNone = 21,
-    
-    /// roof has an overhand of more than 1 tile
+
+    /// roof has an overhang of more than 1 tile
     RoofHasLargeOverhang = 22,
 
 

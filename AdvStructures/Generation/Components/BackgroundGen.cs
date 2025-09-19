@@ -1,4 +1,3 @@
-using System;
 using SpawnHouses.Types;
 
 namespace SpawnHouses.AdvStructures.Generation.Components;

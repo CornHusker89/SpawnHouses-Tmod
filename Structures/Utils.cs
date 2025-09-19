@@ -289,14 +289,10 @@ public static class WebClientInstance {
 public static class EnumHelper {
     public static string ToString<T>(IEnumerable<T> values) where T : Enum {
         var enumerable = values as T[] ?? values.ToArray();
-        if (enumerable.Length == 0) {
-            return "(empty)";
-        }
+        if (enumerable.Length == 0) return "(empty)";
 
         string s = "";
-        foreach (T value in enumerable) {
-            s += value + ", ";
-        }
+        foreach (T value in enumerable) s += value + ", ";
         return s.Remove(s.Length - 2);
     }
 }

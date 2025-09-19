@@ -1,6 +1,5 @@
 #nullable enable
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Helpers;
@@ -17,15 +16,17 @@ public static class StructureLayoutGen {
     ///     literally just a square. can only have 2 entry points
     /// </summary>
     public class StructureLayoutGenerator1 : IStructureLayoutGenerator {
-        public StructureTag[] GetPossibleTags() => [
-            StructureTag.HasHousing,
-            StructureTag.HasOnlyRectangleRooms,
-            StructureTag.HasLargeRoom,
-            StructureTag.HasStorage,
-            StructureTag.MainFloorConnected,
-            StructureTag.AboveGround,
-            StructureTag.UnderGround
-        ];
+        public StructureTag[] GetPossibleTags() {
+            return [
+                StructureTag.HasHousing,
+                StructureTag.HasOnlyRectangleRooms,
+                StructureTag.HasLargeRoom,
+                StructureTag.HasStorage,
+                StructureTag.MainFloorConnected,
+                StructureTag.AboveGround,
+                StructureTag.UnderGround
+            ];
+        }
 
         public bool CanGenerate(StructureParams structureParams) {
             if (structureParams.EntryPoints.Length != 2) return false;
@@ -54,24 +55,32 @@ public static class StructureLayoutGen {
                 new Range(7, p.Length),
                 new Range(1, 1),
                 new Range(1, 1),
-                0.3f,
-                5
+                0.3f
             );
 
-            // setup external layout
+            const int tilemapMargin = 5;
+            const int roofMargin = 12;
+
+            // structure parameters that aren't dependent on tilemap position
+            int entryPointDistance = Math.Abs(p.EntryPoints[0].End.Y - p.EntryPoints[1].End.Y);
+            bool hasBasement = Terraria.WorldGen.genRand.NextDouble() < 0.4 && p.Height - entryPointDistance > 15; //40% if conditions are met
             int externalWallThickness = roomLayoutParams.WallWidth.Max;
             int externalFloorThickness = roomLayoutParams.FloorWidth.Max;
+            int verticalOffset = hasBasement ? 7 : 0;
+            bool hasHigherSide = Terraria.WorldGen.genRand.NextDouble() < 0.75;
+            bool leftRoofHigher = Terraria.WorldGen.genRand.NextBool();
 
-            EntryPoint upper, lower, left, right;
-            if (p.EntryPoints[0].Center.Y < p.EntryPoints[1].Center.Y) {
-                lower = p.EntryPoints[0];
-                upper = p.EntryPoints[1];
-            }
-            else {
-                lower = p.EntryPoints[1];
-                upper = p.EntryPoints[0];
-            }
+            advStructure.Tilemap = new StructureTilemap(
+                (ushort)(p.Length + 2 * (tilemapMargin + externalWallThickness)),
+                (ushort)(p.Height + 2 * (tilemapMargin + externalFloorThickness) + roofMargin),
+                new Point16(
+                    p.StartEntryPointX - externalWallThickness - tilemapMargin,
+                    int.Max(p.EntryPoints[0].Start.Y, p.EntryPoints[1].Start.Y) + 5 + verticalOffset - p.Height - externalFloorThickness - roofMargin - tilemapMargin
+                )
+            );
 
+            EntryPoint upper = p.EntryPoints[0].Center.Y < p.EntryPoints[1].Center.Y ? p.EntryPoints[1] : p.EntryPoints[0];
+            EntryPoint left, right;
             if (p.EntryPoints[0].Center.X < p.EntryPoints[1].Center.X) {
                 left = p.EntryPoints[0];
                 right = p.EntryPoints[1];
@@ -81,33 +90,19 @@ public static class StructureLayoutGen {
                 right = p.EntryPoints[0];
             }
 
-            const int tilemapMargin = 5;
-            const int roofMargin = 12;
+            left.SetOffset(advStructure.Tilemap.WorldTileOffset * Point16.NegativeOne);
+            right.SetOffset(advStructure.Tilemap.WorldTileOffset * Point16.NegativeOne);
 
-            // structure parameters
-            int entryPointDistance = upper.Start.Y - lower.Start.Y;
-            bool hasBasement = Terraria.WorldGen.genRand.NextDouble() < 0.4 && p.Height - entryPointDistance > 15; //40% if conditions are met
-            int verticalOffset = hasBasement ? 7 : 0;
+            // structure parameters that are dependent on tilemap position
             int floorTopY = upper.End.Y + 1 + verticalOffset;
-            bool hasHigherSide = true;//Terraria.WorldGen.genRand.NextDouble() < 0.7;
-            bool leftRoofHigher = Terraria.WorldGen.genRand.NextBool();
             int roofHeightModifier = p.Height / 5 + 1; // if uneven roof, adjust each side by this much
             int upperRoofBottomY = floorTopY - p.Height + 1;
-            if (hasHigherSide && upperRoofBottomY + roofHeightModifier >= (leftRoofHigher ? right.Start.Y : left.Start.Y)) { // check that an uneven roof won't cause collision with entry points
+            if (hasHigherSide && upperRoofBottomY + roofHeightModifier >= (leftRoofHigher ? right.Start.Y : left.Start.Y)) // check that an uneven roof won't cause collision with entry points
                 hasHigherSide = false;
-            }
-            int lowerRoofBottomY = upperRoofBottomY + (hasHigherSide ? roofHeightModifier : 0);
-            if (hasHigherSide) {
-                upperRoofBottomY -= roofHeightModifier;
-            }
 
-            // create the tilemap around it
-            advStructure.Tilemap = new StructureTilemap(
-                (ushort)(p.Length + 2 * (tilemapMargin + externalWallThickness)),
-                (ushort)(p.Height + 2 * (tilemapMargin + externalFloorThickness) + roofMargin),
-                new Point16(p.StartEntryPointX - externalWallThickness - tilemapMargin, upperRoofBottomY + 1 - externalFloorThickness - roofMargin - tilemapMargin)
-            );
-            
+            int lowerRoofBottomY = upperRoofBottomY + (hasHigherSide ? roofHeightModifier : 0);
+            if (hasHigherSide) upperRoofBottomY -= roofHeightModifier;
+
             var (exteriorFloors, exteriorWalls, roofs) = ExternalLayoutHelper.CreateBasicRoof(
                 new Point16(p.StartEntryPointX + 1 - externalWallThickness, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
                 new Point16(p.EndEntryPointX - 1 + externalWallThickness, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
@@ -115,15 +110,17 @@ public static class StructureLayoutGen {
                 externalFloorThickness,
                 externalWallThickness
             );
-            
+
             exteriorFloors.Add(ExternalLayoutHelper.CreateFloor(floorTopY, p.StartEntryPointX + 1 - (hasBasement ? 0 : externalWallThickness),
                 p.EndEntryPointX - 1 + (hasBasement ? 0 : externalWallThickness), true, externalFloorThickness));
 
             // if the top of either entry point is NOT flush with the roof
-            if (left.Start.Y - 1 != (leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY)) exteriorWalls.Add(ExternalLayoutHelper.CreateWall(left.Start.X, left.Start.Y - 1,
-                (leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY) + 1, false, externalWallThickness));
-            if (right.Start.Y - 1 != (!leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY)) exteriorWalls.Add(ExternalLayoutHelper.CreateWall(right.Start.X, right.Start.Y - 1,
-                (!leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY) + 1, true, externalWallThickness));
+            if (left.Start.Y - 1 != (leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY))
+                exteriorWalls.Add(ExternalLayoutHelper.CreateWall(left.Start.X, left.Start.Y - 1,
+                    (leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY) + 1, false, externalWallThickness));
+            if (right.Start.Y - 1 != (!leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY))
+                exteriorWalls.Add(ExternalLayoutHelper.CreateWall(right.Start.X, right.Start.Y - 1,
+                    (!leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY) + 1, true, externalWallThickness));
 
             // if the bottom of either entry point is NOT flush with the floor
             if (left.End.Y + 1 != floorTopY) exteriorWalls.Add(ExternalLayoutHelper.CreateWall(left.Start.X, left.End.Y + 1, floorTopY - 1 + externalFloorThickness, false, externalWallThickness));
@@ -136,8 +133,7 @@ public static class StructureLayoutGen {
                 roofs
             );
 
-            advStructure.Tilemap.OffsetExternalLayout(advStructure.ExternalLayout);
-            advStructure.EvaluateTilemapData();
+            advStructure.SetTilesExternalStatus();
 
             // finally finish the room layout
             // advStructure.Layout = new RoomLayout([], [], 

@@ -1,6 +1,4 @@
 #nullable enable
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,8 +9,8 @@ namespace SpawnHouses.Types;
 ///     has a blacklist feature to exclude specific items
 /// </summary>
 public class PriorityCollection<T> {
-    private readonly Dictionary<int, HashSet<T>> _sets = new();
     private readonly Dictionary<int, HashSet<T>> _blacklistedItems = new();
+    private readonly Dictionary<int, HashSet<T>> _sets = new();
 
     /// <summary>
     ///     the total number of items within all sets
@@ -25,7 +23,7 @@ public class PriorityCollection<T> {
     /// </summary>
     /// <remarks>excludes sets that are empty due to blacklisted items</remarks>
     public int SetsLength => _sets.Keys.Count(priority => GetHashSet(priority).Count != 0);
-    
+
     /// <summary>
     ///     retrieves the hashset of the given priority
     /// </summary>
@@ -37,9 +35,10 @@ public class PriorityCollection<T> {
             value = [];
             _blacklistedItems[priority] = value;
         }
+
         return _sets[priority].Except(value).ToHashSet();
     }
-    
+
     /// <summary>
     ///     gets an array of valid priorities
     /// </summary>
@@ -55,13 +54,17 @@ public class PriorityCollection<T> {
     /// </summary>
     /// <param name="set"></param>
     /// <param name="priority"></param>
-    public void SetHashSet(HashSet<T> set, int priority) => _sets[priority] = set;
+    public void SetHashSet(HashSet<T> set, int priority) {
+        _sets[priority] = set;
+    }
 
     /// <summary>
     ///     removes the hashset at the given priority
     /// </summary>
     /// <param name="priority"></param>
-    public bool RemoveHashSet(int priority) => _sets.Remove(priority);
+    public bool RemoveHashSet(int priority) {
+        return _sets.Remove(priority);
+    }
 
     /// <summary>
     ///     adds an item to the hashset at the given priority
@@ -86,15 +89,13 @@ public class PriorityCollection<T> {
     public bool RemoveItem(T item) {
         var sortedKeys = _sets.Keys.ToList();
         sortedKeys.Sort();
-        foreach (int key in sortedKeys) {
+        foreach (int key in sortedKeys)
             if (_sets[key].Remove(item)) {
-                if (_sets.Count == 0) { // make sure there's not an empty set
+                if (_sets.Count == 0) // make sure there's not an empty set
                     _sets.Remove(key);
-                }
 
                 return true;
             }
-        }
 
         return false;
     }
@@ -106,14 +107,11 @@ public class PriorityCollection<T> {
     /// <param name="priority"></param>
     /// <returns></returns>
     public bool RemoveItem(T item, int priority) {
-        if (!_sets.TryGetValue(priority, out var set)) {
-            return false;
-        }
+        if (!_sets.TryGetValue(priority, out var set)) return false;
 
         bool result = set.Remove(item);
-        if (set.Count == 0) { // make sure there's not an empty set
+        if (set.Count == 0) // make sure there's not an empty set
             _sets.Remove(priority);
-        }
 
         return result;
     }
@@ -125,12 +123,10 @@ public class PriorityCollection<T> {
     /// <returns>returns false if item is not found in the normal sets</returns>
     public bool AddToBlacklist(T item) {
         foreach (int priority in GetValidPriorities().Where(key => _sets[key].Contains(item))) {
-            if (!_blacklistedItems.TryGetValue(priority, out var set)) {
+            if (!_blacklistedItems.TryGetValue(priority, out var set))
                 _blacklistedItems.Add(priority, [item]);
-            }
-            else {
+            else
                 set.Add(item);
-            }
             return true;
         }
 
@@ -157,9 +153,9 @@ public class PriorityCollection<T> {
     public void ClearBlacklist() {
         _blacklistedItems.Clear();
     }
-    
+
     /// <summary>
-    ///     creates an array of all contained hashsets, in ascending priority order. 
+    ///     creates an array of all contained hashsets, in ascending priority order.
     /// </summary>
     /// <returns></returns>
     public (int priority, HashSet<T> set)[] ToSortedHashSetArray() {
@@ -168,9 +164,7 @@ public class PriorityCollection<T> {
         int count = 0;
         foreach (int key in priorities) {
             var set = GetHashSet(key);
-            if (set.Count == 0) {
-                continue;
-            }
+            if (set.Count == 0) continue;
             result[count] = (key, set);
             count++;
         }
@@ -186,11 +180,10 @@ public class PriorityCollection<T> {
         var result = new T[TotalLength];
         var sets = ToSortedHashSetArray();
         int count = 0;
-        foreach (var tuple in sets) {
-            foreach (T item in tuple.set) {
-                result[count] = item;
-                count++;
-            }
+        foreach (var tuple in sets)
+        foreach (T item in tuple.set) {
+            result[count] = item;
+            count++;
         }
 
         return result;

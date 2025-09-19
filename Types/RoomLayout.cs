@@ -43,9 +43,9 @@ public class RoomLayout(
     List<Room> rooms
 ) {
     public readonly List<Floor> Floors = floors;
-    public readonly List<Wall> Walls = walls;
     public readonly List<Gap> Gaps = gaps;
     public readonly List<Room> Rooms = rooms;
+    public readonly List<Wall> Walls = walls;
 
     public static RoomLayout Union(params RoomLayout[] roomLayouts) {
         List<Floor> floors = [];
@@ -63,8 +63,7 @@ public class RoomLayout(
         return new RoomLayout(floors, walls, gaps, rooms);
     }
 
-    public void Combine(params RoomLayout[] roomLayouts)
-    {
+    public void Combine(params RoomLayout[] roomLayouts) {
         foreach (RoomLayout roomLayout in roomLayouts) {
             Floors.AddRange(roomLayout.Floors);
             Walls.AddRange(roomLayout.Walls);
@@ -82,6 +81,6 @@ public class ExternalLayout(
 ) {
     public readonly List<Floor> Floors = floors;
     public readonly List<Gap> Gaps = gaps;
-    public readonly List<Wall> Walls = walls;
     public readonly List<Roof> Roofs = roofs;
+    public readonly List<Wall> Walls = walls;
 }

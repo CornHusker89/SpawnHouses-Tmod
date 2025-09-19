@@ -18,7 +18,7 @@ namespace SpawnHouses.AdvStructures.AdvStructureParts;
 #pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
 
 /// <summary>
-/// generic 2D shape. has support for triangles, rectangles, and n-gons.
+///     generic 2D shape. has support for triangles, rectangles, and n-gons.
 /// </summary>
 /// <remarks>it's assumed that the points are in clockwise order</remarks>
 public class Shape {
@@ -30,9 +30,9 @@ public class Shape {
     ];
 
     private int _area = -1;
-    private int _expandedArea = -1;
 
     private Point16 _center = new(-1, -1);
+    private int _expandedArea = -1;
 
     public (Point16 topLeft, Point16 bottomRight) BoundingBox;
     public Point16[] Points;
@@ -125,10 +125,12 @@ public class Shape {
                             x.Add(point.X);
                             y.Add(point.Y);
                         }
+
                         IsBox = x.Count <= 2 && y.Count <= 2;
                         break;
                     }
                 }
+
                 break;
         }
 
@@ -162,7 +164,7 @@ public class Shape {
     }
 
     /// <summary>
-    /// removes extra points in shape.
+    ///     removes extra points in shape.
     /// </summary>
     /// <param name="points"></param>
     /// <returns></returns>
@@ -173,9 +175,7 @@ public class Shape {
             Point16 target = points[i];
             Point16 next = points[i + 1 != points.Count ? i + 1 : 0];
 
-            if (points.Count == 1) {
-                break;
-            }
+            if (points.Count == 1) break;
 
             if (target == next) {
                 points.RemoveAt(i);
@@ -190,27 +190,24 @@ public class Shape {
             }
         }
 
-        if (points[0] == points[^1] && points.Count > 1) {
-            points.RemoveAt(points.Count - 1);
-        }
-        
+        if (points[0] == points[^1] && points.Count > 1) points.RemoveAt(points.Count - 1);
+
         // ensure the shape isn't 1 wide/tall, which involves overlapping points by nature
         bool same = true;
         for (int i = 0; i < points.Count; i++) {
             Point16 target = points[i];
             Point16 next = points[i + 1 != points.Count ? i + 1 : 0];
-            if (next != target) {
-                same = false;
-            }
+            if (next != target) same = false;
         }
-        if (same) {
-            return [points[0]];
-        }
+
+        if (same) return [points[0]];
 
         return points.ToArray();
     }
 
-    public static Point16[] OptimizePoints(Point16[] points) => OptimizePoints(points.ToList());
+    public static Point16[] OptimizePoints(Point16[] points) {
+        return OptimizePoints(points.ToList());
+    }
 
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
@@ -237,7 +234,7 @@ public class Shape {
 
 
     #region Shape Self-Geometry
-    
+
     private int GetArea() {
         if (IsBox)
             return (BoundingBox.bottomRight.X - BoundingBox.topLeft.X) *
@@ -255,16 +252,14 @@ public class Shape {
     }
 
     /// <summary>
-    /// normalize vector, intended to be used when getting edge/vertex normals
+    ///     normalize vector, intended to be used when getting edge/vertex normals
     /// </summary>
     /// <param name="normal"></param>
     /// <param name="round"></param>
     /// <returns></returns>
     private static (double x, double y) Normalize((double x, double y) normal, bool round) {
         double largestMagnitude = Math.Max(double.Abs(normal.x), double.Abs(normal.y));
-        if (largestMagnitude < 0.00001f) {
-            return (0, 0);
-        }
+        if (largestMagnitude < 0.00001f) return (0, 0);
 
         double normalX = normal.x / largestMagnitude;
         double normalY = normal.y / largestMagnitude;
@@ -272,7 +267,7 @@ public class Shape {
     }
 
     /// <summary>
-    /// gets outward facing normals for each edge
+    ///     gets outward facing normals for each edge
     /// </summary>
     /// <param name="round">if each normal is rounded to 0 or 1</param>
     /// <returns></returns>
@@ -295,7 +290,7 @@ public class Shape {
     }
 
     /// <summary>
-    /// gets outward facing normals for each vertex
+    ///     gets outward facing normals for each vertex
     /// </summary>
     /// <returns></returns>
     /// <remarks>rounds each vector component to 0 or 1</remarks>
@@ -319,13 +314,17 @@ public class Shape {
     ///     gets ratio of bounding box size to actual shape area. can indicate how box-like the shape is
     /// </summary>
     /// <returns></returns>
-    public double GetBoundingBoxEfficiency() => (double)Size.X * Size.Y / Area;
+    public double GetBoundingBoxEfficiency() {
+        return (double)Size.X * Size.Y / Area;
+    }
 
     /// <summary>
     ///     gets number of tiles that are within the bounding box but not in the shape. can indicate how box-like the shape is
     /// </summary>
     /// <returns></returns>
-    public int GetUnusedBoundingBoxArea() => Size.X * Size.Y - Area;
+    public int GetUnusedBoundingBoxArea() {
+        return Size.X * Size.Y - Area;
+    }
 
     /// <summary>
     ///     returns list of points, expanded by their outward facing normals
@@ -334,14 +333,12 @@ public class Shape {
     private Point16[] ExpandPoints(int expansion) {
         var expandedPoints = new Point16[Points.Length];
         var normals = GetVertexNormals();
-        for (int i = 0; i < Points.Length; i++) {
-            expandedPoints[i] = Points[i] + normals[i];
-        }
+        for (int i = 0; i < Points.Length; i++) expandedPoints[i] = Points[i] + normals[i];
         return expandedPoints;
     }
 
     /// <summary>
-    ///     expands shape by <see cref="expansion"/> tiles
+    ///     expands shape by <see cref="expansion" /> tiles
     /// </summary>
     /// <param name="expansion">the number of tiles to expand each point by (only whole numbers)</param>
     public void Expand(int expansion) {
@@ -349,13 +346,13 @@ public class Shape {
     }
 
     /// <summary>
-    ///     creates new shape, expanded by <see cref="expansion"/> tiles
+    ///     creates new shape, expanded by <see cref="expansion" /> tiles
     /// </summary>
     /// <returns></returns>
     public Shape GetExpandedShape(int expansion) {
         return new Shape(ExpandPoints(expansion), false);
     }
-    
+
     /// <summary>
     ///     find all corners of a shape based on their x and y positions, useful for ensuring beams and such make sense visually
     /// </summary>
@@ -366,27 +363,22 @@ public class Shape {
 
         foreach (Point16 point in expandedShape.Points) {
             bool xCorner = point.X != expandedShape.BoundingBox.topLeft.X
-                && point.X != expandedShape.BoundingBox.bottomRight.X;
-            bool yCorner = point.Y != expandedShape.BoundingBox.topLeft.Y 
-                && point.Y != expandedShape.BoundingBox.bottomRight.Y;
-            if (xCorner && yCorner) {
+                           && point.X != expandedShape.BoundingBox.bottomRight.X;
+            bool yCorner = point.Y != expandedShape.BoundingBox.topLeft.Y
+                           && point.Y != expandedShape.BoundingBox.bottomRight.Y;
+            if (xCorner && yCorner)
                 corners.Add(new Point16(point.X, point.Y));
-            }
-            else if (xCorner && !yCorner) {
+            else if (xCorner && !yCorner)
                 corners.Add(new Point16(point.X, (short)-1));
-            }
-            else if (!xCorner && yCorner) {
-                corners.Add(new Point16((short)-1, point.Y));
-            }
+            else if (!xCorner && yCorner) corners.Add(new Point16((short)-1, point.Y));
         }
-        
+
         // sanitize list to remove repeat values
         for (int i = 0; i < corners.Count; i++) {
             Point16 target = corners[i];
-            if (target.X == -1 == (target.Y == -1)) { // only check cases where only 1 axis is valid
+            if (target.X == -1 == (target.Y == -1)) // only check cases where only 1 axis is valid
                 continue;
-            }
-            
+
             Point16 last = corners[i - 1 != -1 ? i - 1 : corners.Count - 1];
             Point16 next = corners[i + 1 != corners.Count ? i + 1 : 0];
 
@@ -405,9 +397,7 @@ public class Shape {
     /// </summary>
     /// <param name="offset"></param>
     public void Offset(Point16 offset) {
-        for (int i = 0; i < Points.Length; i++) {
-            Points[i] += offset;
-        }
+        for (int i = 0; i < Points.Length; i++) Points[i] += offset;
         Init(Points, false);
     }
 
@@ -419,45 +409,35 @@ public class Shape {
                 minValues[xAxis ? y : x] = x;
             }
             else {
-                if (x < oldMinValue) {
-                    minValues[xAxis? y : x] = y;
-                }
+                if (x < oldMinValue) minValues[xAxis ? y : x] = y;
             }
+
             if (!maxValues.TryGetValue(xAxis ? y : x, out int oldMaxValue)) {
                 maxValues[xAxis ? y : x] = x;
             }
             else {
-                if (x < oldMaxValue) {
-                    maxValues[xAxis? y : x] = y;
-                }
+                if (x < oldMaxValue) maxValues[xAxis ? y : x] = y;
             }
         });
-        
+
         // get the actual size for each slice using the min/max values for that slice
         List<int> sizes = [];
-        foreach (int key in minValues.Keys) {
-            sizes.Add(maxValues[key] - minValues[key]);
-        }
+        foreach (int key in minValues.Keys) sizes.Add(maxValues[key] - minValues[key]);
 
-        if (sizes.Count == 0) {
-            throw new Exception("shape must have a minimum area of 1");
-        }
+        if (sizes.Count == 0) throw new Exception("shape must have a minimum area of 1");
 
         int min = sizes[0], max = sizes[0], average = 0;
         foreach (int size in sizes) {
-            if (size < min) {
-                min = size;
-            }
+            if (size < min) min = size;
 
-            if (size > max) {
-                max = size;
-            }
+            if (size > max) max = size;
             average += size;
         }
+
         average /= sizes.Count;
         return (min, max, average);
     }
-    
+
     #endregion
 
 
@@ -534,10 +514,11 @@ public class Shape {
     /// </summary>
     /// <param name="action"></param>
     public void ExecuteInArea(Action<int, int> action) {
-        if (IsBox)
+        if (IsBox) {
             for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
             for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
                 action(x, y);
+        }
         else {
             for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++) {
                 var intersections = new List<double>();
@@ -571,7 +552,7 @@ public class Shape {
             for (int i = 0; i < Points.Length; i++) {
                 Point16 p1 = Points[i];
                 Point16 p2 = Points[(i + 1) % Points.Length];
-                if (p1.Y == BoundingBox.bottomRight.Y) {
+                if (p1.Y == BoundingBox.bottomRight.Y)
                     if (p1.Y == p2.Y) {
                         int startX = Math.Min(p1.X, p2.X);
                         int endX = Math.Max(p1.X, p2.X);
@@ -579,12 +560,9 @@ public class Shape {
                             if (!Points.Contains(new Point16(x, p1.Y)))
                                 action(x, p1.Y);
                     }
-                }
             }
 
-            foreach (Point16 point in Points) {
-                action(point.X, point.Y);
-            }
+            foreach (Point16 point in Points) action(point.X, point.Y);
         }
     }
 
@@ -593,27 +571,23 @@ public class Shape {
     /// </summary>
     /// <param name="action"></param>
     /// <param name="slopingAlgorithm">
-    ///     function to determine the <see cref="BlockType"/> passed to the action.
-    ///     if none is passed, this function will only pass <see cref="BlockType.Solid"/>.
-    ///     examples of these functions are found in <see cref="Helpers.SlopeHelper"/>
+    ///     function to determine the <see cref="BlockType" /> passed to the action.
+    ///     if none is passed, this function will only pass <see cref="BlockType.Solid" />.
+    ///     examples of these functions are found in <see cref="Helpers.SlopeHelper" />
     /// </param>
     public void ExecuteInArea(Action<int, int, BlockType> action, Func<int, int, bool[,], BlockType>? slopingAlgorithm = null) {
         if (slopingAlgorithm is null) {
-            ExecuteInArea((x, y) => {
-                action(x, y, BlockType.Solid);
-            });
+            ExecuteInArea((x, y) => { action(x, y, BlockType.Solid); });
             return;
         }
-        
+
         bool[,] tilemap = new bool[Size.X, Size.Y];
         ExecuteInArea((x, y) => tilemap[x - BoundingBox.topLeft.X, y - BoundingBox.topLeft.Y] = true);
         for (int x = 0; x < Size.X; x++) {
             int xWorldCoord = x + BoundingBox.topLeft.X;
             for (int y = 0; y < Size.Y; y++) {
                 int yWorldCoord = y + BoundingBox.topLeft.Y;
-                if (!tilemap[x, y]) {
-                    continue;
-                }
+                if (!tilemap[x, y]) continue;
                 action(xWorldCoord, yWorldCoord, slopingAlgorithm(x, y, tilemap));
             }
         }
@@ -870,7 +844,7 @@ public class Shape {
     #region Shapes From Tilemap
 
     /// <summary>
-    /// gets a shape that represents the interior of the structure, and excludes any exterior components
+    ///     gets a shape that represents the interior of the structure, and excludes any exterior components
     /// </summary>
     /// <param name="tilemap"></param>
     /// <returns></returns>
@@ -891,7 +865,7 @@ public class Shape {
             throw new Exception("valid shape not found from tilemap");
 
         Point16 pos = start.Value;
-        Point16 dir = new (0, 1);
+        Point16 dir = new(0, 1);
         var visited = new HashSet<Point16>();
         int steps = 0;
         int maxSteps = tilemap.Width * tilemap.Height * 4;
@@ -918,7 +892,7 @@ public class Shape {
                 12 => new Point16(-1, 0), // TR + TL: left
                 13 => new Point16(0, 1), // BL + TR + TL: down
                 14 => new Point16(-1, 0), // BR + TR + TL: left
-                _ => new Point16(0, 0), // 0 or 15
+                _ => new Point16(0, 0) // 0 or 15
             };
 
             Point16 outlineOffset = value switch {
@@ -936,12 +910,10 @@ public class Shape {
                 12 => new Point16(1, -1), // TR + TL: TR
                 13 => new Point16(0, -1), // BL + TR + TL: TL
                 14 => new Point16(1, -1), // BR + TR + TL: TR
-                _ => new Point16(0, 0), // 0 or 15
+                _ => new Point16(0, 0) // 0 or 15
             };
 
-            if (nextDir != dir) {
-                outline.Add(pos + outlineOffset);
-            }
+            if (nextDir != dir) outline.Add(pos + outlineOffset);
 
             pos += nextDir;
             dir = nextDir;
@@ -952,7 +924,7 @@ public class Shape {
     }
 
     /// <summary>
-    /// converts 2x2 grid cell into a marching square index
+    ///     converts 2x2 grid cell into a marching square index
     /// </summary>
     /// <param name="tilemap"></param>
     /// <param name="x"></param>

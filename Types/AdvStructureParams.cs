@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
-using SpawnHouses.Structures;
 using Terraria.DataStructures;
 using Range = SpawnHouses.Structures.Range;
 
@@ -10,17 +9,11 @@ namespace SpawnHouses.Types;
 
 public class StructureParams {
     public bool CanAddEntryPoints;
-    public int EndEntryPointX;
     public EntryPoint[] EntryPoints;
     public int Height;
-
     public int Housing;
     public Range HousingRange;
-
-    public int Length;
     public TilePalette Palette;
-
-    public int StartEntryPointX;
     public StructureTag[] TagsBlacklist;
     public StructureTag[] TagsRequired;
     public int Volume;
@@ -37,19 +30,10 @@ public class StructureParams {
         TagsRequired = tagsRequired;
         TagsBlacklist = tagsBlacklist;
         EntryPoints = entryPoints;
-        StartEntryPointX = EntryPoints.Select(entryPoint => entryPoint.Start.X).Min();
-        EndEntryPointX = EntryPoints.Select(entryPoint => entryPoint.Direction is Directions.Left or Directions.Right ? entryPoint.Start.X : entryPoint.Start.X + entryPoint.Size).Max();
-        Length = EndEntryPointX - StartEntryPointX;
         Palette = tilePalette;
         VolumeRange = volumeRange;
         HousingRange = housingRange;
         CanAddEntryPoints = canAddEntryPoints;
-
-        int centerXMin = EntryPoints.Min(entryPoint => entryPoint.Start.X);
-        int centerXMax = EntryPoints.Max(entryPoint => entryPoint.End.X);
-        int centerYMin = EntryPoints.Min(entryPoint => entryPoint.Start.Y);
-        int centerYMax = EntryPoints.Max(entryPoint => entryPoint.End.Y);
-        Center = new Point16(centerXMin + (centerXMin + centerXMax) / 2, centerXMin + (centerYMin + centerYMax) / 2);
 
         if (EntryPoints.Select(entryPoint => entryPoint.Start.Y).Max() - EntryPoints.Select(entryPoint => entryPoint.Start.Y).Min() + 4 > VolumeRange.Min / Length)
             throw new ArgumentException($"Entry points are too far away vertically for a minimum height of {VolumeRange.Min / Length} (determined by min volume / length)");
@@ -61,11 +45,17 @@ public class StructureParams {
         ReRollRanges();
     }
 
-    /// <summary>calculated using the entry points</summary>
-    public Point16 Center { get; private set; }
+    public int StartEntryPointX => EntryPoints.Min(entryPoint => entryPoint.Start.X);
 
-    /// <summary>calculated using entry points, taking <see cref="Height" /> into account</summary>
-    public Point16 TopLeft => new(StartEntryPointX, EntryPoints.Select(entryPoint => entryPoint.End.Y).Max() - Height);
+    public int EndEntryPointX => EntryPoints.Max(entryPoint => entryPoint.End.X);
+
+    public int Length => EndEntryPointX - StartEntryPointX;
+
+    private int CenterYMin => EntryPoints.Min(entryPoint => entryPoint.Start.Y);
+    private int CenterYMax => EntryPoints.Max(entryPoint => entryPoint.End.Y);
+
+    /// <summary>calculated using entry points</summary>
+    public Point16 Center => new(StartEntryPointX + (StartEntryPointX + EndEntryPointX) / 2, CenterYMin + (CenterYMin + CenterYMax) / 2);
 
     public void ReRollRanges() {
         double scale = Terraria.WorldGen.genRand.NextDouble();
@@ -155,22 +145,18 @@ public class ComponentParams(
     IComponent component,
     TilePalette tilePalette,
     StructureTilemap tilemap) {
-    public IComponent Component = component; // not readonly because filling in components uses the same params object for multiple components
     public readonly StructureTilemap Tilemap = tilemap;
     public readonly TilePalette TilePalette = tilePalette;
+    public IComponent Component = component; // not readonly because filling in components uses the same params object for multiple components
 
     public static void ValidateRequiredTags(List<ComponentTag> tags) {
         bool useSimpleSloping = tags.Contains(ComponentTag.UseSimpleSloping);
         bool useGothicSloping = tags.Contains(ComponentTag.UseSimpleSloping);
         bool useHalfSloping = tags.Contains(ComponentTag.UseSimpleSloping);
-        if (useSimpleSloping && useGothicSloping) {
-            throw new Exception("cannot have mutually exclusive component tags \"UseSimpleSloping\" (id 25) and \"UseGothicSloping\" (id 26)");
-        }
-        if (useHalfSloping && useGothicSloping) {
-            throw new Exception("cannot have mutually exclusive component tags \"UseHalfSloping\" (id 27) and \"UseGothicSloping\" (id 26)");
-        }
-        if (useSimpleSloping && useHalfSloping) {
-            throw new Exception("cannot have mutually exclusive component tags \"UseSimpleSloping\" (id 25) and \"UseHalfSloping\" (id 27)");
-        }
+        if (useSimpleSloping && useGothicSloping) throw new Exception("cannot have mutually exclusive component tags \"UseSimpleSloping\" (id 25) and \"UseGothicSloping\" (id 26)");
+
+        if (useHalfSloping && useGothicSloping) throw new Exception("cannot have mutually exclusive component tags \"UseHalfSloping\" (id 27) and \"UseGothicSloping\" (id 26)");
+
+        if (useSimpleSloping && useHalfSloping) throw new Exception("cannot have mutually exclusive component tags \"UseSimpleSloping\" (id 25) and \"UseHalfSloping\" (id 27)");
     }
 }

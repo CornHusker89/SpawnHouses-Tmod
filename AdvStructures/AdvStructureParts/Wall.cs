@@ -4,22 +4,20 @@ using SpawnHouses.Types;
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
 public class Wall : IComponent {
-    public ushort Id { get; set; }
-    public Shape Volume { get; set; }
-    public List<ComponentTag> TagsRequired { get; set; }
-    public List<ComponentTag> TagsBlacklist { get; set; }
-
     public bool IsExterior;
 
     public Wall(Shape volume, bool isExterior = false) {
         Volume = volume;
         IsExterior = isExterior;
-        if (IsExterior) {
+        if (IsExterior)
             TagsRequired = [ComponentTag.External];
-        }
-        else {
+        else
             TagsRequired = [];
-        }
         TagsBlacklist = [];
     }
+
+    public ushort Id { get; set; }
+    public Shape Volume { get; set; }
+    public List<ComponentTag> TagsRequired { get; set; }
+    public List<ComponentTag> TagsBlacklist { get; set; }
 }

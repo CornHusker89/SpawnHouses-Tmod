@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.Helpers;
 using SpawnHouses.Types;
-using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
-using Console = System.Console;
 
 namespace SpawnHouses.AdvStructures.Generation.Components;
 
@@ -23,6 +21,10 @@ public static class RoofGen {
             ];
         }
 
+        public bool CanGenerate(ComponentParams componentParams) {
+            return false;
+        }
+
         public bool Generate(ComponentParams componentParams) {
             TilePalette p = componentParams.TilePalette;
             Point16 roofStart = new(componentParams.Component.Volume.BoundingBox.topLeft.X, componentParams.Component.Volume.BoundingBox.bottomRight.Y);
@@ -34,8 +36,8 @@ public static class RoofGen {
 
             var roofBottomFlats = RaycastHelper.GetFlatTiles(roofBottom);
             bool isTallRoof = roofBottomFlats.flatLengths.Sum() > roofLength / 2 &&
-                roofLength >= 22 &&
-                Terraria.WorldGen.genRand.Next(0, 4) == 0;
+                              roofLength >= 22 &&
+                              Terraria.WorldGen.genRand.Next(0, 4) == 0;
 
             bool isLeftFlushWithWall = componentParams.Tilemap[roofStart.X - 1, roofStart.Y - 2].HasTile;
             bool isRightFlushWithWall = componentParams.Tilemap[rightPosX + 1, roofBottom.pos[^1] - 2].HasTile;
@@ -157,8 +159,8 @@ public static class RoofGen {
 
             // 6th pass: create endcaps
             bool anySideEndsWithSlope = Math.Abs(roofBottom.slope[0]) > 0.05 || Math.Abs(roofBottom.slope[^1]) > 0.05;
-            bool hasTallEndCaps = (anySideEndsWithSlope || Terraria.WorldGen.genRand.NextDouble() < 0.35) 
-                && !componentParams.Component.TagsRequired.Contains(ComponentTag.RoofHasLargeOverhang);
+            bool hasTallEndCaps = (anySideEndsWithSlope || Terraria.WorldGen.genRand.NextDouble() < 0.35)
+                                  && !componentParams.Component.TagsRequired.Contains(ComponentTag.RoofHasLargeOverhang);
 
             // left cap
             if (!isLeftFlushWithWall) {
@@ -212,4 +214,16 @@ public static class RoofGen {
             return true;
         }
     }
+
+    // public class RoofGenerator2 : IComponentGenerator {
+    //     public ComponentTag[] GetPossibleTags() {
+    //         return [
+    //             ComponentTag.External
+    //         ];
+    //     }
+    //
+    //     public bool Generate(ComponentParams componentParams) {
+    //         
+    //     }
+    // }
 }

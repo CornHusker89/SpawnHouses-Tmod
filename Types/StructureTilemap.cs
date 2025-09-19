@@ -34,13 +34,24 @@ public class StructureTilemap {
             return _tiles[x, y] ?? (_tiles[x, y] = new StructureTile());
         }
     }
+
     public StructureTile this[Point16 point] => this[point.X, point.Y];
 
-    public bool InBounds(int x, int y) => x >= 0 && x < Width && y >= 0 && y < Height;
-    public bool InBounds(Point16 point) => InBounds(point.X, point.Y);
+    public bool InBounds(int x, int y) {
+        return x >= 0 && x < Width && y >= 0 && y < Height;
+    }
 
-    public bool InInterior(int x, int y) => InBounds(x, y) && _tiles[x, y].IsInside;
-    public bool InInterior(Point16 point) => InInterior(point.X, point.Y);
+    public bool InBounds(Point16 point) {
+        return InBounds(point.X, point.Y);
+    }
+
+    public bool InInterior(int x, int y) {
+        return InBounds(x, y) && _tiles[x, y].IsInside;
+    }
+
+    public bool InInterior(Point16 point) {
+        return InInterior(point.X, point.Y);
+    }
 
     /// <summary>
     ///     tests if the coordinates have a valid, initialized tile that is in bounds
@@ -48,7 +59,9 @@ public class StructureTilemap {
     /// <param name="x"></param>
     /// <param name="y"></param>
     /// <returns></returns>
-    public bool IsInitializedTile(int x, int y) => InBounds(x, y) && _tiles[x, y] != null;
+    public bool IsInitializedTile(int x, int y) {
+        return InBounds(x, y) && _tiles[x, y] != null;
+    }
 
     /// <summary>
     ///     gets tile from this tilemap using global world coordinates
@@ -61,15 +74,34 @@ public class StructureTilemap {
         y -= WorldTileOffset.Y;
         return this[x, y];
     }
-    public StructureTile GetTileByGlobalPos(Point16 pos) => this[pos - WorldTileOffset];
 
-    public int ConvertToRelative (int coordinate, bool isX) => coordinate - (isX ? WorldTileOffset.X : WorldTileOffset.Y);
-    public Point16 ConvertToRelative(int x, int y) => new (x - WorldTileOffset.X, y - WorldTileOffset.Y);
-    public Point16 ConvertToRelative(Point16 point) => ConvertToRelative(point.X, point.Y);
+    public StructureTile GetTileByGlobalPos(Point16 pos) {
+        return this[pos - WorldTileOffset];
+    }
 
-    public int ConvertToGlobal (int coordinate, bool isX) => coordinate + (isX ? WorldTileOffset.X : WorldTileOffset.Y);
-    public Point16 ConvertToGlobal(int x, int y) => new (x + WorldTileOffset.X, y + WorldTileOffset.Y);
-    public Point16 ConvertToGlobal(Point16 point) => ConvertToGlobal(point.X, point.Y);
+    public int ConvertToRelative(int coordinate, bool isX) {
+        return coordinate - (isX ? WorldTileOffset.X : WorldTileOffset.Y);
+    }
+
+    public Point16 ConvertToRelative(int x, int y) {
+        return new Point16(x - WorldTileOffset.X, y - WorldTileOffset.Y);
+    }
+
+    public Point16 ConvertToRelative(Point16 point) {
+        return ConvertToRelative(point.X, point.Y);
+    }
+
+    public int ConvertToGlobal(int coordinate, bool isX) {
+        return coordinate + (isX ? WorldTileOffset.X : WorldTileOffset.Y);
+    }
+
+    public Point16 ConvertToGlobal(int x, int y) {
+        return new Point16(x + WorldTileOffset.X, y + WorldTileOffset.Y);
+    }
+
+    public Point16 ConvertToGlobal(Point16 point) {
+        return ConvertToGlobal(point.X, point.Y);
+    }
 
     /// <summary>
     ///     offsets given <see cref="ExternalLayout" /> by this tilemap's tile offset
@@ -82,7 +114,15 @@ public class StructureTilemap {
         foreach (Gap gap in externalLayout.Gaps) gap.Volume.Offset(offset);
         foreach (Roof roof in externalLayout.Roofs) roof.Volume.Offset(offset);
     }
-    
+
+    /// <summary>
+    ///     offsets given <see cref="EntryPoint" /> by this tilemap's tile offset
+    /// </summary>
+    /// <param name="entryPoint"></param>
+    public void OffsetEntryPoint(EntryPoint entryPoint) {
+        entryPoint.Offset = WorldTileOffset * Point16.NegativeOne;
+    }
+
     public void PlaceTile(int x, int y, PaintedType paintedType, BlockType blockType = BlockType.Solid) {
         if (paintedType.Style == -1) {
             StructureTile tile = this[x, y];
@@ -101,10 +141,10 @@ public class StructureTilemap {
             // tile.TileColor = paintedType.PaintType;
         }
     }
-    
+
     /// <summary>
-    ///     changes the tile at this position to be the <see cref="paintedType"/>,
-    ///     does not change <see cref="StructureTile.BlockType"/>, <see cref="StructureTile.HasTile"/>, or <see cref="StructureTile.IsNullTile"/>
+    ///     changes the tile at this position to be the <see cref="paintedType" />,
+    ///     does not change <see cref="StructureTile.BlockType" />, <see cref="StructureTile.HasTile" />, or <see cref="StructureTile.IsNullTile" />
     /// </summary>
     /// <param name="x"></param>
     /// <param name="y"></param>
@@ -114,7 +154,7 @@ public class StructureTilemap {
         tile.TileType = paintedType.Type;
         tile.TileColor = paintedType.PaintType;
     }
-    
+
     public void PlaceWall(int x, int y, PaintedType paintedType) {
         StructureTile tile = this[x, y];
         tile.WallType = paintedType.Type;
