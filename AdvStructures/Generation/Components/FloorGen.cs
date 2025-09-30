@@ -1,5 +1,5 @@
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using SpawnHouses.Helpers;
 using SpawnHouses.Types;
 using Terraria.ID;
@@ -10,8 +10,8 @@ public static class FloorGen {
     /// <summary>
     ///     Fills a volume with the same floor blocks
     /// </summary>
-    public class FloorGenerator1 : IComponentGenerator {
-        public ComponentTag[] GetPossibleTags() {
+    public class FloorGenerator1 : IVolumeComponentGenerator {
+        public HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.External,
                 ComponentTag.GroundLevel,
@@ -21,15 +21,13 @@ public static class FloorGen {
             ];
         }
 
-        public bool Generate(ComponentParams componentParams) {
+        public bool Generate(VolumeComponentParams componentParams) {
             Func<int, int, bool[,], BlockType> sloping = componentParams.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
                 ? SlopeHelper.SimpleSlopes
                 : componentParams.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
                     ? SlopeHelper.HalfSlopes
                     : null;
-            componentParams.Component.Volume.ExecuteInArea((x, y, bt) => {
-                componentParams.Tilemap.PlaceTile(x, y, componentParams.TilePalette.FloorMain, bt);
-            }, sloping);
+            componentParams.Component.Volume.ExecuteInArea((x, y, bt) => { componentParams.Tilemap.PlaceTile(x, y, componentParams.Palette.FloorMain, bt); }, sloping);
             return true;
         }
     }
@@ -37,8 +35,8 @@ public static class FloorGen {
     /// <summary>
     ///     Fills a volume with random floor blocks
     /// </summary>
-    public class FloorGenerator2 : IComponentGenerator {
-        public ComponentTag[] GetPossibleTags() {
+    public class FloorGenerator2 : IVolumeComponentGenerator {
+        public HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.FloorSolid,
                 ComponentTag.External,
@@ -50,15 +48,13 @@ public static class FloorGen {
             ];
         }
 
-        public bool Generate(ComponentParams componentParams) {
+        public bool Generate(VolumeComponentParams componentParams) {
             Func<int, int, bool[,], BlockType> sloping = componentParams.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
                 ? SlopeHelper.SimpleSlopes
                 : componentParams.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
                     ? SlopeHelper.HalfSlopes
                     : null;
-            componentParams.Component.Volume.ExecuteInArea((x, y, bt) => {
-                componentParams.Tilemap.PlaceTile(x, y, PaintedType.PickRandom(componentParams.TilePalette.FloorAlt), bt);
-            }, sloping);
+            componentParams.Component.Volume.ExecuteInArea((x, y, bt) => { componentParams.Tilemap.PlaceTile(x, y, PaintedType.PickRandom(componentParams.Palette.FloorAlt), bt); }, sloping);
             return true;
         }
     }
@@ -66,8 +62,8 @@ public static class FloorGen {
     /// <summary>
     ///     Fills a volume with random blocks, but the top block consistent
     /// </summary>
-    public class FloorGenerator3 : IComponentGenerator {
-        public ComponentTag[] GetPossibleTags() {
+    public class FloorGenerator3 : IVolumeComponentGenerator {
+        public HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.FloorSolid,
                 ComponentTag.External,
@@ -79,11 +75,11 @@ public static class FloorGen {
             ];
         }
 
-        public bool CanGenerate(ComponentParams componentParams) {
+        public bool CanGenerate(VolumeComponentParams componentParams) {
             return componentParams.Component.Volume.Size.Y >= 2;
         }
 
-        public bool Generate(ComponentParams componentParams) {
+        public bool Generate(VolumeComponentParams componentParams) {
             Func<int, int, bool[,], BlockType> sloping = componentParams.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
                 ? SlopeHelper.SimpleSlopes
                 : componentParams.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
@@ -98,8 +94,8 @@ public static class FloorGen {
                     x,
                     y,
                     PaintedType.PickRandom(elevated
-                        ? componentParams.TilePalette.FloorAlt
-                        : componentParams.TilePalette.FloorAltElevated),
+                        ? componentParams.Palette.FloorAlt
+                        : componentParams.Palette.FloorAltElevated),
                     bt
                 );
 
@@ -112,8 +108,8 @@ public static class FloorGen {
 
             for (int index = 0; index < topY.Length; index++)
                 componentParams.Tilemap.SoftPlaceTile(
-                    xStart + index, topY[index], 
-                    elevated ? componentParams.TilePalette.FloorMainElevated : componentParams.TilePalette.FloorMain
+                    xStart + index, topY[index],
+                    elevated ? componentParams.Palette.FloorMainElevated : componentParams.Palette.FloorMain
                 );
             return true;
         }
@@ -122,19 +118,19 @@ public static class FloorGen {
     /// <summary>
     ///     Fills top and bottom of volume, adds support struts in the middle
     /// </summary>
-    public class FloorGenerator4 : IComponentGenerator {
-        public ComponentTag[] GetPossibleTags() {
+    public class FloorGenerator4 : IVolumeComponentGenerator {
+        public HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.FloorHollow,
                 ComponentTag.Elevated
             ];
         }
 
-        public bool CanGenerate(ComponentParams componentParams) {
+        public bool CanGenerate(VolumeComponentParams componentParams) {
             return componentParams.Component.Volume.GetTrueSize(false).average >= 3;
         }
 
-        public bool Generate(ComponentParams componentParams) {
+        public bool Generate(VolumeComponentParams componentParams) {
             bool elevated = componentParams.Component.TagsRequired.Contains(ComponentTag.Elevated);
             int xStart = componentParams.Component.Volume.BoundingBox.topLeft.X;
             int[] topY = new int[componentParams.Component.Volume.Size.X];
@@ -145,10 +141,10 @@ public static class FloorGen {
                 if ((x - xStart - 2) % supportInterval == 0 || x == xStart ||
                     x == componentParams.Component.Volume.BoundingBox.bottomRight.X) {
                     componentParams.Tilemap.PlaceTile(x, y,
-                        elevated ? componentParams.TilePalette.FloorMainElevated : componentParams.TilePalette.FloorMain);
+                        elevated ? componentParams.Palette.FloorMainElevated : componentParams.Palette.FloorMain);
                 }
                 else {
-                    componentParams.Tilemap.PlaceWall(x, y, componentParams.TilePalette.BackgroundFloorMain);
+                    componentParams.Tilemap.PlaceWall(x, y, componentParams.Palette.BackgroundFloorMain);
                     StructureTile tile = componentParams.Tilemap[x, y];
                     if (Terraria.WorldGen.genRand.Next(0, 3) == 0) {
                         tile.HasTile = true;
@@ -172,9 +168,9 @@ public static class FloorGen {
 
             for (int index = 0; index < topY.Length; index++) {
                 componentParams.Tilemap.PlaceTile(xStart + index, topY[index],
-                    elevated ? componentParams.TilePalette.FloorMainElevated : componentParams.TilePalette.FloorMain);
+                    elevated ? componentParams.Palette.FloorMainElevated : componentParams.Palette.FloorMain);
                 componentParams.Tilemap.PlaceTile(xStart + index, bottomY[index],
-                    elevated ? componentParams.TilePalette.FloorMainElevated : componentParams.TilePalette.FloorMain);
+                    elevated ? componentParams.Palette.FloorMainElevated : componentParams.Palette.FloorMain);
             }
 
             return true;

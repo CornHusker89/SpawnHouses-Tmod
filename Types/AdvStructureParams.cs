@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using Terraria.DataStructures;
@@ -141,22 +140,39 @@ public class RoomLayoutParams(
     }
 }
 
-public class ComponentParams(
-    IComponent component,
-    TilePalette tilePalette,
-    StructureTilemap tilemap) {
-    public readonly StructureTilemap Tilemap = tilemap;
-    public readonly TilePalette TilePalette = tilePalette;
-    public IComponent Component = component; // not readonly because filling in components uses the same params object for multiple components
+public static class ComponentParamsUtils {
+    public static ComponentParams CreateComponentParamsForType(IComponent component, TilePalette tilePalette, StructureTilemap tilemap) {
+        Type componentType = component.GetType();
+        if (componentType == typeof(VolumeComponentParams)) return new VolumeComponentParams((IVolumeComponent)component, tilePalette, tilemap);
 
-    public static void ValidateRequiredTags(List<ComponentTag> tags) {
-        bool useSimpleSloping = tags.Contains(ComponentTag.UseSimpleSloping);
-        bool useGothicSloping = tags.Contains(ComponentTag.UseSimpleSloping);
-        bool useHalfSloping = tags.Contains(ComponentTag.UseSimpleSloping);
-        if (useSimpleSloping && useGothicSloping) throw new Exception("cannot have mutually exclusive component tags \"UseSimpleSloping\" (id 25) and \"UseGothicSloping\" (id 26)");
+        if (componentType == typeof(PathComponentParams)) return new PathComponentParams((IPathComponent)component, tilePalette, tilemap);
 
-        if (useHalfSloping && useGothicSloping) throw new Exception("cannot have mutually exclusive component tags \"UseHalfSloping\" (id 27) and \"UseGothicSloping\" (id 26)");
+        throw new Exception($"Component type \"{componentType.FullName}\" does not have an associated parameter type");
+    }
+}
 
-        if (useSimpleSloping && useHalfSloping) throw new Exception("cannot have mutually exclusive component tags \"UseSimpleSloping\" (id 25) and \"UseHalfSloping\" (id 27)");
+public class ComponentParams {
+    public IComponent Component { get; set; }
+    public StructureTilemap Tilemap { get; set; }
+    public TilePalette Palette { get; set; }
+}
+
+public class VolumeComponentParams : ComponentParams {
+    public new IVolumeComponent Component { get; set; }
+
+    public VolumeComponentParams(IVolumeComponent component, TilePalette tilePalette, StructureTilemap tilemap) {
+        Component = component;
+        Tilemap = tilemap;
+        Palette = tilePalette;
+    }
+}
+
+public class PathComponentParams : ComponentParams {
+    public new IPathComponent Component { get; set; }
+
+    public PathComponentParams(IPathComponent component, TilePalette tilePalette, StructureTilemap tilemap) {
+        Component = component;
+        Tilemap = tilemap;
+        Palette = tilePalette;
     }
 }

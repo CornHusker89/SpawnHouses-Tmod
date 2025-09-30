@@ -29,39 +29,12 @@ public class Shape {
         Color.Red
     ];
 
-    private int _area = -1;
-
-    private Point16 _center = new(-1, -1);
-    private int _expandedArea = -1;
-
     public (Point16 topLeft, Point16 bottomRight) BoundingBox;
     public Point16[] Points;
     public Point16 Size;
 
 
     public bool IsBox { get; private set; } // because many of the shapes will be boxes, introduce optimizations for boxes
-
-    /// <summary>
-    ///     the amount of tiles this shape encloses
-    /// </summary>
-    public int Area {
-        get {
-            if (_area == -1)
-                _area = GetArea();
-            return _area;
-        }
-    }
-
-    /// <summary>
-    ///     the number of tiles this shape encloses if it were expanded by 1 tile in every direction
-    /// </summary>
-    public int ExpandedArea {
-        get {
-            if (_expandedArea == -1)
-                _expandedArea = GetExpandedShape(1).Area;
-            return _expandedArea;
-        }
-    }
 
     public Point16 Center => BoundingBox.topLeft + Size / new Point16(2, 2);
 
@@ -90,9 +63,6 @@ public class Shape {
     }
 
     private void Init(Point16[] points, bool optimize) {
-        _center = new Point16(-1, -1);
-        _area = -1;
-        _expandedArea = -1;
         switch (points.Length) {
             case < 2:
                 throw new ArgumentException("Shape must have at least 2 points.");
@@ -232,10 +202,106 @@ public class Shape {
 
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
+    #region Point Geometry Helpers
+
+    /// <summary>
+    ///     gets the slope between the start and end points
+    /// </summary>
+    /// <param name="start"></param>
+    /// <param name="end"></param>
+    /// <returns></returns>
+    private static float GetSlope(Point16 start, Point16 end) {
+        return (float)(end.Y - start.Y) / (end.X - start.X);
+    }
+
+    /// <summary>
+    ///     gets the angle between the 2 lines, or the angle formed by the middle point
+    /// </summary>
+    /// <param name="start"></param>
+    /// <param name="middle"></param>
+    /// <param name="end"></param>
+    /// <returns></returns>
+    private static float GetAngle(Point16 start, Point16 middle, Point16 end) {
+        // Create vectors BA and BC
+        float v1X = start.X - middle.X;
+        float v1Y = start.Y - middle.X;
+        float v2X = end.X - middle.X;
+        float v2Y = end.Y - middle.Y;
+
+        double dot = v1X * v2X + v1Y * v2Y;
+        double mag1 = Math.Sqrt(v1X * v1X + v1Y * v1Y);
+        double mag2 = Math.Sqrt(v2X * v2X + v2Y * v2Y);
+
+        if (mag1 == 0 || mag2 == 0) // avoid division by zero
+            return 0f;
+
+        double cosTheta = Math.Max(-1, Math.Min(1, dot / (mag1 * mag2)));
+        return (float)(Math.Acos(cosTheta) * (180.0 / Math.PI));
+    }
+
+    /// <summary>
+    ///     removes sets of vertices that affect the angle of their lines by less than <see cref="significantAngle" />
+    /// </summary>
+    /// <param name="significantAngle"></param>
+    /// <param name="maxSetSize">the largest number of points to consider in a single "set" to collapse. has serious effect on speed</param>
+    /// <returns></returns>
+    public List<Point16> CollapseVertices(float significantAngle = 10f, int maxSetSize = 3) {
+        if (Points.Length <= maxSetSize + 2) return Points.ToList();
+
+        HashSet<int> removedIndexes = [];
+
+        // TODO: maybe add a system for repeating sets when necessary??
+        for (int setSize = maxSetSize; setSize >= 1; setSize--)
+        for (int i = 0; i < Points.Length; i++) {
+            Point16 start = Points[i];
+            Point16 end = Points[(i + setSize + 1) % Points.Length];
+            int xSum = 0, ySum = 0;
+            for (int newPointIndex = 0; newPointIndex < setSize; newPointIndex++) {
+                Point16 point = Points[(i + newPointIndex) % Points.Length];
+                xSum += point.X;
+                ySum += point.Y;
+            }
+
+            Point16 averagePoint = new(xSum / setSize, ySum / setSize);
+
+            // ignore the set if the angle is significant
+            if (180 - GetAngle(start, averagePoint, end) >= significantAngle) continue;
+
+            for (int newPointIndex = 0; newPointIndex < setSize; newPointIndex++) removedIndexes.Add((i + newPointIndex) % Points.Length);
+        }
+
+        var returnList = ((Point16[])Points.Clone()).ToList();
+        for (int i = Points.Length - 1; i >= 0; i--)
+            if (removedIndexes.Contains(i))
+                returnList.RemoveAt(i);
+
+        return returnList;
+    }
+
+    #endregion
+
 
     #region Shape Self-Geometry
 
-    private int GetArea() {
+    /// <summary>
+    ///     normalize vector, intended to be used when getting edge/vertex normals
+    /// </summary>
+    /// <param name="normal"></param>
+    /// <param name="round"></param>
+    /// <returns></returns>
+    private static (double x, double y) Normalize((double x, double y) normal, bool round) {
+        double largestMagnitude = Math.Max(double.Abs(normal.x), double.Abs(normal.y));
+        if (largestMagnitude < 0.001f) return (0, 0);
+
+        double normalX = normal.x / largestMagnitude;
+        double normalY = normal.y / largestMagnitude;
+        return (round ? Math.Round(normalX) : normalX, round ? Math.Round(normalY) : normalY);
+    }
+
+    /// <summary>
+    ///     the number of tiles this shape encloses
+    /// </summary>
+    public int GetArea() {
         if (IsBox)
             return (BoundingBox.bottomRight.X - BoundingBox.topLeft.X) *
                    (BoundingBox.bottomRight.Y - BoundingBox.topLeft.Y);
@@ -249,21 +315,6 @@ public class Shape {
         }
 
         return (int)Math.Abs(area / 2);
-    }
-
-    /// <summary>
-    ///     normalize vector, intended to be used when getting edge/vertex normals
-    /// </summary>
-    /// <param name="normal"></param>
-    /// <param name="round"></param>
-    /// <returns></returns>
-    private static (double x, double y) Normalize((double x, double y) normal, bool round) {
-        double largestMagnitude = Math.Max(double.Abs(normal.x), double.Abs(normal.y));
-        if (largestMagnitude < 0.00001f) return (0, 0);
-
-        double normalX = normal.x / largestMagnitude;
-        double normalY = normal.y / largestMagnitude;
-        return (round ? Math.Round(normalX) : normalX, round ? Math.Round(normalY) : normalY);
     }
 
     /// <summary>
@@ -311,11 +362,11 @@ public class Shape {
     }
 
     /// <summary>
-    ///     gets ratio of bounding box size to actual shape area. can indicate how box-like the shape is
+    ///     gets the ratio of bounding box size to actual shape area. can indicate how box-like the shape is
     /// </summary>
     /// <returns></returns>
     public double GetBoundingBoxEfficiency() {
-        return (double)Size.X * Size.Y / Area;
+        return (double)Size.X * Size.Y / GetArea();
     }
 
     /// <summary>
@@ -323,7 +374,7 @@ public class Shape {
     /// </summary>
     /// <returns></returns>
     public int GetUnusedBoundingBoxArea() {
-        return Size.X * Size.Y - Area;
+        return Size.X * Size.Y - GetArea();
     }
 
     /// <summary>
@@ -356,12 +407,14 @@ public class Shape {
     /// <summary>
     ///     find all corners of a shape based on their x and y positions, useful for ensuring beams and such make sense visually
     /// </summary>
+    /// <param name="significantAngle">only vertices that create an angle larger than this will be considered</param>
     /// <returns></returns>
-    public List<Point16> GetCorners() {
+    public List<Point16> GetCorners(float significantAngle = 10) {
         List<Point16> corners = [];
         Shape expandedShape = GetExpandedShape(1);
 
-        foreach (Point16 point in expandedShape.Points) {
+        foreach (Point16 point in expandedShape.CollapseVertices(significantAngle)) {
+            Console.WriteLine(point);
             bool xCorner = point.X != expandedShape.BoundingBox.topLeft.X
                            && point.X != expandedShape.BoundingBox.bottomRight.X;
             bool yCorner = point.Y != expandedShape.BoundingBox.topLeft.Y
@@ -401,7 +454,12 @@ public class Shape {
         Init(Points, false);
     }
 
-
+    /// <summary>
+    ///     gets the largest, smallest, and average sizes along the entire shape, along the chosen axes
+    /// </summary>
+    /// <param name="xAxis"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
     public (int min, int max, double average) GetTrueSize(bool xAxis) {
         Dictionary<int, int> minValues = [], maxValues = [];
         ExecuteInArea((x, y) => {
@@ -866,7 +924,7 @@ public class Shape {
 
         Point16 pos = start.Value;
         Point16 dir = new(0, 1);
-        var visited = new HashSet<Point16>();
+        HashSet<Point16> visited = [];
         int steps = 0;
         int maxSteps = tilemap.Width * tilemap.Height * 4;
 

@@ -126,24 +126,11 @@ public class AdvStructure {
     }
 
     private IComponentGenerator GetComponentGenerator(ComponentParams componentParams, IComponentGenerator[] generators) {
-        List<IComponentGenerator> validGenerators = [];
-        foreach (IComponentGenerator possibleGenerator in generators) {
-            if (!possibleGenerator.CanGenerate(componentParams)) continue;
-            var requiredTags = componentParams.Component.TagsRequired.ToList();
-            bool valid = true;
-            foreach (ComponentTag possibleTag in possibleGenerator.GetPossibleTags()) {
-                if (componentParams.Component.TagsBlacklist.Contains(possibleTag)) {
-                    valid = false;
-                    break;
-                }
-
-                requiredTags.Remove(possibleTag);
-            }
-
-            if (valid && requiredTags.Count == 0)
-                validGenerators.Add(possibleGenerator);
-        }
-
+        var validGenerators = generators.Where(gen => gen.CanGenerate(componentParams)
+                                                      && gen.GetPossibleTags().IsSubsetOf(componentParams.Component.TagsRequired)
+                                                      && !gen.GetPossibleTags().Overlaps(componentParams.Component.TagsBlacklist))
+            .ToList();
+        
         if (validGenerators.Count == 0)
             throw new Exception($"No component generators were found that are compatible with given parameters. type: {componentParams.Component.GetType().FullName}, required tags: {EnumHelper.ToString(componentParams.Component.TagsRequired)}, blacklisted tags: {EnumHelper.ToString(componentParams.Component.TagsBlacklist)}");
 
@@ -165,25 +152,24 @@ public class AdvStructure {
         if (false) //(!HasLayout)
             throw new Exception("No layout has been set");
 
-        List<IComponent> components = [];
+        List<IVolumeComponent> components = [];
         components.AddRange(ExternalLayout.Floors);
         components.AddRange(ExternalLayout.Walls);
         components.AddRange(ExternalLayout.Gaps);
         // components.AddRange(ExternalLayout.Roofs);
-        // components.AddRange(Layout.Floors);
-        // components.AddRange(Layout.Walls);
-        // components.AddRange(Layout.Gaps);
-        // components.AddRange(Layout.Rooms);
-
-        ComponentParams componentParams = new(
-            null,
-            Params.Palette,
-            Tilemap
-        );
+        components.AddRange(Layout.Floors);
+        components.AddRange(Layout.Walls);
+        components.AddRange(Layout.Gaps);
+        components.AddRange(Layout.Rooms);
+        
         Dictionary<Type, List<IComponentGenerator>> generatorQueue = [];
         for (int i = 0; i < components.Count; i++) {
             IComponent component = components[i];
+            ComponentParams componentParams = ComponentParamsUtils.CreateComponentParamsForType(component, Params.Palette, Tilemap);
+            TagUtils.ValidateTagsRequired(component.TagsRequired);
+            TagUtils.ValidateTagsBlacklist(component.TagsBlacklist);
             component.Id = (ushort)i;
+            
             IComponentGenerator[] generators;
             switch (component) {
                 case Floor:
@@ -211,7 +197,7 @@ public class AdvStructure {
                     break;
                 }
             }
-
+            
             componentParams.Component = component;
             int generatorIndex = 0;
             Type componentType = component.GetType();
@@ -233,6 +219,7 @@ public class AdvStructure {
     }
 
     /// <summary>
+    ///     paste tiles from this tilemap into game tilemap 
     /// </summary>
     public void PlaceTilemap() {
         if (!HasFilledComponents)

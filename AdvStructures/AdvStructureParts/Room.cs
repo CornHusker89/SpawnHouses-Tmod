@@ -5,24 +5,25 @@ using SpawnHouses.Types;
 
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
-public class Room : IComponent {
+public class Room : IComponent, IVolumeComponent {
+    // IComponent
     public ushort Id { get; set; }
+    public HashSet<ComponentTag> TagsRequired { get; set; }
+    public HashSet<ComponentTag> TagsBlacklist { get; set; }
+
+    // IVolumeComponent
     public Shape Volume { get; set; }
-    public List<ComponentTag> TagsRequired { get; set; }
-    public List<ComponentTag> TagsBlacklist { get; set; }
     
     public List<Gap> Gaps;
-
     public bool IsEntryRoom;
     public Room? ParentRoom;
 
     public Room(Shape volume, List<Gap>? gaps = null) {
-        Volume = volume;
         TagsRequired = [];
         TagsBlacklist = [];
-        
-        Gaps = gaps ?? [];
+        Volume = volume;
 
+        Gaps = gaps ?? [];
         IsEntryRoom = true;
         ParentRoom = null;
     }

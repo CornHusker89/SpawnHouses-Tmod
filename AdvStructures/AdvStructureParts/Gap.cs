@@ -4,13 +4,23 @@ using SpawnHouses.Types;
 
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
-public class Gap : IComponent {
+public class Gap : IComponent, IVolumeComponent, IComponentExternalExt {
+    // IComponent
+    public ushort Id { get; set; }
+    public HashSet<ComponentTag> TagsRequired { get; set; }
+    public HashSet<ComponentTag> TagsBlacklist { get; set; }
+
+    // IVolumeComponent
+    public Shape Volume { get; set; }
+
+    // IExternalComponent
+    public bool IsExterior { get; set; }
+    
+    
     /// <summary>This will be null if the gap leads to an exterior</summary>
     public Room? HigherRoom;
 
     public bool IsChain;
-
-    public bool IsExterior;
 
     /// <summary>If the gap has rooms on it's left/right</summary>
     public bool IsHorizontal;
@@ -40,15 +50,12 @@ public class Gap : IComponent {
     /// <param name="room2"></param>
     /// <param name="isHorizontal">Has rooms on it's left/right</param>
     public Gap(Shape volume, Room? room1, Room? room2, bool isHorizontal) {
-        Volume = volume;
-        IsHorizontal = isHorizontal;
-        IsExterior = room2 == null;
-        if (IsExterior)
-            TagsRequired = [isHorizontal ? ComponentTag.IsWallGap : ComponentTag.IsFloorGap, ComponentTag.External];
-        else
-            TagsRequired = [isHorizontal ? ComponentTag.IsWallGap : ComponentTag.IsFloorGap];
+        TagsRequired = IsExterior ? [isHorizontal ? ComponentTag.IsWallGap : ComponentTag.IsFloorGap, ComponentTag.External] : [isHorizontal ? ComponentTag.IsWallGap : ComponentTag.IsFloorGap];
         TagsBlacklist = [];
+        Volume = volume;
+        IsExterior = room2 == null;
 
+        IsHorizontal = isHorizontal;
         if (IsExterior) {
             LowerRoom = room1;
         }
@@ -67,11 +74,6 @@ public class Gap : IComponent {
             ParentRoom = room1.ParentRoom;
         else if (room2?.ParentRoom != null) ParentRoom = room2.ParentRoom;
     }
-
-    public ushort Id { get; set; }
-    public Shape Volume { get; set; }
-    public List<ComponentTag> TagsRequired { get; set; }
-    public List<ComponentTag> TagsBlacklist { get; set; }
 
     /// <summary>
     ///     tests if the rooms and direction are the same, and the volumes collide

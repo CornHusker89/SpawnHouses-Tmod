@@ -1,6 +1,9 @@
+using System;
+using System.Collections.Generic;
+
 namespace SpawnHouses.Types;
 
-public enum StructureTag {
+public enum StructureTag : ushort {
     // ===== structureLayout =====
     IsSymmetric = 1,
     HasHousing = 2,
@@ -123,4 +126,41 @@ public enum PaletteTag {
     MediumBrown = 8,
     Red = 9,
     Turquoise = 10
+}
+
+public static class TagUtils {
+    /// <summary>
+    ///     a component's tags are considered invalid if a component has all tags in any set
+    /// </summary>
+    public static HashSet<ComponentTag>[] MutuallyExclusiveComponentTagsRequired { get; } = [
+        [ComponentTag.UseSimpleSloping, ComponentTag.UseGothicSloping],
+        [ComponentTag.UseHalfSloping, ComponentTag.UseSimpleSloping],
+        [ComponentTag.UseHalfSloping, ComponentTag.UseGothicSloping]
+    ];
+
+    /// <summary>
+    ///     a component's tags are considered invalid if a component has all tags in any set
+    /// </summary>
+    public static HashSet<ComponentTag>[] MutuallyExclusiveComponentTagsBlacklist { get; } = [
+    ];
+
+    public static void ValidateTagsRequired(HashSet<ComponentTag> tagsRequired) {
+        foreach (var exclusiveSet in MutuallyExclusiveComponentTagsRequired) {
+            if (!exclusiveSet.IsSubsetOf(tagsRequired)) continue;
+
+            string message = "Component has mutually exclusive component tags required {";
+            foreach (ComponentTag tag in exclusiveSet) message += $"{tag} (id {(ushort)tag}), ";
+            throw new Exception(message.Remove(message.Length - 2));
+        }
+    }
+
+    public static void ValidateTagsBlacklist(HashSet<ComponentTag> tagsRequired) {
+        foreach (var exclusiveSet in MutuallyExclusiveComponentTagsBlacklist) {
+            if (!exclusiveSet.IsSubsetOf(tagsRequired)) continue;
+
+            string message = "Component has mutually exclusive component tags blacklisted {";
+            foreach (ComponentTag tag in exclusiveSet) message += $"{tag} (id {(ushort)tag}), ";
+            throw new Exception(message.Remove(message.Length - 2));
+        }
+    }
 }

@@ -59,7 +59,9 @@ public static class StructureLayoutGen {
             );
 
             const int tilemapMargin = 5;
-            const int roofMargin = 12;
+            const int roofMargin = 24;
+
+            // TODO: compensate structure volume and roofMargin for the roof volume itself
 
             // structure parameters that aren't dependent on tilemap position
             int entryPointDistance = Math.Abs(p.EntryPoints[0].End.Y - p.EntryPoints[1].End.Y);
@@ -136,19 +138,17 @@ public static class StructureLayoutGen {
             advStructure.SetTilesExternalStatus();
 
             // finally finish the room layout
-            // advStructure.Layout = new RoomLayout([], [], 
-            //     advStructure.ExternalLayout.Gaps,
-            //     [
-            //     new Room(
-            //         Shape.GetStructureInterior(advStructure.Tilemap),
-            //         advStructure.ExternalLayout.Gaps
-            //     )
-            // ]);
+            advStructure.Layout = new RoomLayout([], [],
+                advStructure.ExternalLayout.Gaps,
+                [
+                    new Room(
+                        Shape.GetStructureInterior(advStructure.Tilemap),
+                        advStructure.ExternalLayout.Gaps
+                    )
+                ]);
 
-            // Console.WriteLine(advStructure.Layout.Rooms[0].Volume);
-
-            // advStructure.CompleteExternalGaps();
-            // RoomLayoutHelper.SubdivideRoom(advStructure.Layout, advStructure.Layout.Rooms[0], roomLayoutParams);
+            advStructure.CompleteExternalGaps();
+            RoomLayoutHelper.SubdivideRoom(advStructure.Layout, advStructure.Layout.Rooms[0], roomLayoutParams);
 
             return true;
         }

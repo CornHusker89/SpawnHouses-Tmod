@@ -20,10 +20,6 @@ internal class StructureManager : ModSystem {
     public static Mineshaft? Mineshaft;
     public static BeachHouse? BeachHouse;
 
-    public override void Load() {
-        AdvStructure.PopulateGenerators();
-    }
-
     public override void SaveWorldData(TagCompound tag) {
         tag["WorldVersion"] = WorldVersion;
 

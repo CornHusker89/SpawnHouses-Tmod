@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using SpawnHouses.Types;
 
 namespace SpawnHouses.AdvStructures.Generation.Components;
@@ -6,8 +7,8 @@ public class GapGen {
     /// <summary>
     ///     A gap floor, places platforms
     /// </summary>
-    public class FloorGapGenerator1 : IComponentGenerator {
-        public ComponentTag[] GetPossibleTags() {
+    public class FloorGapGenerator1 : IVolumeComponentGenerator {
+        public HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.IsFloorGap,
                 ComponentTag.Elevated,
@@ -17,7 +18,7 @@ public class GapGen {
             ];
         }
 
-        public bool Generate(ComponentParams componentParams) {
+        public bool Generate(VolumeComponentParams componentParams) {
             int xStart = componentParams.Component.Volume.BoundingBox.topLeft.X;
             int[] topY = new int[componentParams.Component.Volume.Size.X];
             int[] bottomY = new int[componentParams.Component.Volume.Size.X];
@@ -25,7 +26,7 @@ public class GapGen {
 
             componentParams.Component.Volume.ExecuteInArea((x, y) => {
                 if (placeWalls)
-                    componentParams.Tilemap.PlaceWall(x, y, componentParams.TilePalette.BackgroundFloorMain);
+                    componentParams.Tilemap.PlaceWall(x, y, componentParams.Palette.BackgroundFloorMain);
                 StructureTile tile = componentParams.Tilemap[x, y];
                 tile.HasTile = false;
 
@@ -41,8 +42,8 @@ public class GapGen {
             });
 
             for (int index = 0; index < topY.Length; index++) {
-                componentParams.Tilemap.PlaceTile(xStart + index, topY[index], componentParams.TilePalette.Platform);
-                componentParams.Tilemap.PlaceTile(xStart + index, bottomY[index], componentParams.TilePalette.Platform);
+                componentParams.Tilemap.PlaceTile(xStart + index, topY[index], componentParams.Palette.Platform);
+                componentParams.Tilemap.PlaceTile(xStart + index, bottomY[index], componentParams.Palette.Platform);
             }
 
             return true;
@@ -52,8 +53,8 @@ public class GapGen {
     /// <summary>
     ///     Fills a volume with random background walls
     /// </summary>
-    public class WallGapGenerator1 : IComponentGenerator {
-        public ComponentTag[] GetPossibleTags() {
+    public class WallGapGenerator1 : IVolumeComponentGenerator {
+        public HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.IsWallGap,
                 ComponentTag.Elevated,
@@ -63,9 +64,9 @@ public class GapGen {
             ];
         }
 
-        public bool Generate(ComponentParams componentParams) {
+        public bool Generate(VolumeComponentParams componentParams) {
             if (!componentParams.Component.TagsRequired.Contains(ComponentTag.External))
-                componentParams.Component.Volume.ExecuteInArea((x, y) => { componentParams.Tilemap.PlaceWall(x, y, PaintedType.PickRandom(componentParams.TilePalette.BackgroundWallAlt)); });
+                componentParams.Component.Volume.ExecuteInArea((x, y) => { componentParams.Tilemap.PlaceWall(x, y, PaintedType.PickRandom(componentParams.Palette.BackgroundWallAlt)); });
             return true;
         }
     }

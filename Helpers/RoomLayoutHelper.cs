@@ -19,7 +19,7 @@ public static class RoomLayoutHelper {
     /// <param name="volume"></param>
     /// <returns></returns>
     public static bool IsValidHousingSize(Shape volume) {
-        return volume.GetExpandedShape(1).Area >= 60;
+        return volume.GetExpandedShape(1).GetArea() >= 60;
     }
 
     /// <summary>
@@ -87,44 +87,41 @@ public static class RoomLayoutHelper {
         int maxLargeRooms = (int)Math.Ceiling(roomLayoutParams.LargeRoomChance * roomLayoutParams.Housing);
         for (int curHousing = 0; curHousing <= roomLayoutParams.Housing + extraCuts; curHousing++) {
             Shape roomVolume;
-            if (roomQueue.Count > 0) {
+            if (roomQueue.Count > 0)
                 roomVolume = roomQueue.Dequeue();
-            }
-            else {
+            else
                 break;
-            }
 
             // find the priority spots and blacklist spots for the current iteration's shape
             var iterationGaps = GetAdjacentGaps(roomVolume, room.Gaps);
             HashSet<int> iterationVerticalGapXs = [], iterationHorizontalGapYs = [];
             prioritySplitsOnAxis.RemoveHashSet(1); // clear any gap floors from previous iterations
-            foreach (Gap gap in iterationGaps) {
-                if (gap.IsHorizontal) 
+            foreach (Gap gap in iterationGaps)
+                if (gap.IsHorizontal)
                     for (int y = gap.Volume.BoundingBox.topLeft.Y; y <= gap.Volume.BoundingBox.bottomRight.Y; y++) {
                         iterationHorizontalGapYs.Add(y);
-                        
+
                         if (prioritizeSplitsOnGapFloors && gap.Volume.BoundingBox.bottomRight.Y != room.Volume.BoundingBox.bottomRight.Y)
                             prioritySplitsOnAxis.AddItem(new Point16(0, gap.Volume.BoundingBox.bottomRight.Y + 1), 1);
                     }
-                else 
-                    for (int x = gap.Volume.BoundingBox.topLeft.X; x <= gap.Volume.BoundingBox.bottomRight.X; x++) {
+                else
+                    for (int x = gap.Volume.BoundingBox.topLeft.X; x <= gap.Volume.BoundingBox.bottomRight.X; x++)
                         iterationVerticalGapXs.Add(x);
-                    }
-            }
 
             // set this iteration's parameters
             double inverseProgressFactor = double.Max(1 - (double)curHousing / roomLayoutParams.Housing, 0);
             int iterationFloorWidth = (int)Math.Round((roomLayoutParams.FloorWidth.Max - roomLayoutParams.FloorWidth.Min) * inverseProgressFactor) + roomLayoutParams.FloorWidth.Min;
             int iterationWallWidth = (int)Math.Round((roomLayoutParams.WallWidth.Max - roomLayoutParams.WallWidth.Min) * inverseProgressFactor) + roomLayoutParams.WallWidth.Min;
+            int expandedArea = roomVolume.GetExpandedShape(1).GetArea();
 
             bool canSplitAlongX =
                 roomVolume.Size.Y >= iterationFloorWidth + 2 * roomLayoutParams.RoomHeight.Min // make sure volume is tall enough to be split
-                && roomVolume.ExpandedArea > 120 // make sure volume is large enough to be split
+                && expandedArea > 120 // make sure volume is large enough to be split
                 && roomVolume.Size.X < roomVolume.Size.Y * 1.3; // make sure width/height ratio of resulting rooms isn't stupid
 
             bool canSplitAlongY =
                 roomVolume.Size.X >= iterationWallWidth + 2 * roomLayoutParams.RoomWidth.Min
-                && roomVolume.ExpandedArea > 120
+                && expandedArea > 120
                 && roomVolume.Size.Y < roomVolume.Size.X * 1.6;
 
             bool splitAlongX;
@@ -152,7 +149,7 @@ public static class RoomLayoutHelper {
                 extraCuts++;
                 continue;
             }
-            
+
             if (splitAlongX)
                 xCutCount++;
             else
@@ -167,30 +164,27 @@ public static class RoomLayoutHelper {
             List<Point16> validSplitStarts = [];
             foreach (var tuple in prioritySplitsOnAxis.ToSortedHashSetArray()) {
                 foreach (Point16 split in tuple.set) {
-                    if ((splitAlongX && split.Y < 0) || (!splitAlongX && split.X < 0)) { // ignore invalid coordinates
+                    if ((splitAlongX && split.Y < 0) || (!splitAlongX && split.X < 0)) // ignore invalid coordinates
                         continue;
-                    }
-                    
+
                     int splitPos = splitAlongX ? split.Y : split.X;
                     bool valid = true;
-                    for (int offset = 0; offset <= (splitAlongX ? iterationFloorWidth - 1 : iterationWallWidth - 1); offset++) {
+                    for (int offset = 0; offset <= (splitAlongX ? iterationFloorWidth - 1 : iterationWallWidth - 1); offset++)
                         if (splitAlongX ? iterationHorizontalGapYs.Contains(splitPos + offset) : iterationVerticalGapXs.Contains(splitPos + offset)) {
                             valid = false;
                             break;
                         }
-                    }
 
                     if (!valid) continue;
                     validSplitStarts.Add(split);
                 }
-                
-                if (validSplitStarts.Count != 0) { // if we find anything at a given priority level, stop there
+
+                if (validSplitStarts.Count != 0) // if we find anything at a given priority level, stop there
                     break;
-                }
             }
-            
+
             // if priority splits didn't get anything, then try using normal splits
-            if (validSplitStarts.Count == 0) {
+            if (validSplitStarts.Count == 0)
                 for (int pos = validCutRange.Min; pos <= validCutRange.Max; pos++) {
                     // check along entire split
                     bool valid = true;
@@ -203,7 +197,6 @@ public static class RoomLayoutHelper {
                     if (!valid) continue;
                     validSplitStarts.Add(new Point16(splitAlongX ? -1 : pos, splitAlongX ? pos : -1));
                 }
-            }
 
             if (validSplitStarts.Count == 0) {
                 finishedRoomVolumes.Add(roomVolume);
@@ -218,7 +211,7 @@ public static class RoomLayoutHelper {
                 : splitStart + iterationWallWidth - 1;
 
             (Shape? lower, Shape? middle, Shape? higher) roomSubsections = roomVolume.CutTwice(splitAlongX, splitStart, splitEnd);
-            
+
             // remove all other occurrences of the coordinate
             prioritySplitsOnAxis.AddToBlacklist(splitPoint);
             // foreach ((int priority, Point16 item) tuple in prioritySplitsOnAxis.ToSortedArrayWithPriority()) {
@@ -226,7 +219,7 @@ public static class RoomLayoutHelper {
             //         prioritySplitsOnAxis.AddToBlacklist(tuple.priority, tuple.item);
             //     }
             // }
-            
+
             if (roomSubsections.lower is not null) {
                 if (roomLayoutParams.IsWithinMaxSize(roomSubsections.lower) && Terraria.WorldGen.genRand.NextDouble() < (1 - Math.Pow(1 - roomLayoutParams.LargeRoomChance, roomLayoutParams.Attempts)) * 0.35 &&
                     largeRoomCount < maxLargeRooms && inverseProgressFactor < 0.92) {
@@ -563,9 +556,7 @@ public static class RoomLayoutHelper {
     /// <param name="prioritizeSplitsOnGapFloors"></param>
     /// <returns></returns>
     public static void SubdivideRoom(RoomLayout roomLayout, Room room, RoomLayoutParams roomLayoutParams, bool prioritizeSplitsOnGapFloors = true) {
-        if (!roomLayout.Rooms.Remove(room)) {
-            throw new Exception("room doesn't exist in the given RoomLayout");
-        }
+        if (!roomLayout.Rooms.Remove(room)) throw new Exception("room doesn't exist in the given RoomLayout");
 
         RoomLayoutVolumes? pickedLayoutVolumes = null;
         RoomLayoutParams modifiedParams = roomLayoutParams.Clone();
@@ -573,7 +564,7 @@ public static class RoomLayoutHelper {
 
         var possibleLayouts = new RoomLayoutVolumes[roomLayoutParams.Attempts];
         PriorityCollection<Point16> prioritySplitsOnAxis = new();
-        foreach (Point16 corner in room.Volume.GetCorners())
+        foreach (Point16 corner in room.Volume.GetCorners(25f))
             prioritySplitsOnAxis.AddItem(corner, 0);
 
         for (int attempt = 0; attempt < roomLayoutParams.Attempts; attempt++) {
@@ -607,9 +598,7 @@ public static class RoomLayoutHelper {
             }
             else {
                 // redundant connection checking
-                if (gap.HigherRoom != room) {
-                    throw new Exception("gap should've had this room before subdivision, but it didn't");
-                }
+                if (gap.HigherRoom != room) throw new Exception("gap should've had this room before subdivision, but it didn't");
 
                 gap.HigherRoom = roomToConnect;
             }

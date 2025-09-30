@@ -9,8 +9,8 @@ using Terraria.ID;
 namespace SpawnHouses.AdvStructures.Generation.Components;
 
 public static class RoofGen {
-    public class RoofGenerator1 : IComponentGenerator {
-        public ComponentTag[] GetPossibleTags() {
+    public class RoofGenerator1 : IVolumeComponentGenerator {
+        public HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.External,
                 ComponentTag.RoofShort,
@@ -21,12 +21,12 @@ public static class RoofGen {
             ];
         }
 
-        public bool CanGenerate(ComponentParams componentParams) {
+        public bool CanGenerate(VolumeComponentParams componentParams) {
             return false;
         }
 
-        public bool Generate(ComponentParams componentParams) {
-            TilePalette p = componentParams.TilePalette;
+        public bool Generate(VolumeComponentParams componentParams) {
+            TilePalette p = componentParams.Palette;
             Point16 roofStart = new(componentParams.Component.Volume.BoundingBox.topLeft.X, componentParams.Component.Volume.BoundingBox.bottomRight.Y);
             int roofLength = componentParams.Component.Volume.BoundingBox.bottomRight.X - roofStart.X + 1;
             var roofBottom = RaycastHelper.GetTopTilesPos(roofStart, roofLength, tilemap: componentParams.Tilemap);

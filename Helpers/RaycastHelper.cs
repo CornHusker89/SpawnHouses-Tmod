@@ -146,9 +146,7 @@ public static class RaycastHelper {
         return (pos, slope);
 
         bool IsValidTile(int x, int y) {
-            if (customTilemap) {
-                return tilemap![x, y].HasTile && (!requiresSolidTiles || tilemap![x, y].BlockType == BlockType.Solid);
-            }
+            if (customTilemap) return tilemap![x, y].HasTile && (!requiresSolidTiles || tilemap![x, y].BlockType == BlockType.Solid);
 
             Tile tile = Main.tile[x, y];
             return tile.HasTile && (!requiresSolidTiles || Terraria.WorldGen.SolidTile(tile));

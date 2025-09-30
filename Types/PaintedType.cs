@@ -1,5 +1,3 @@
-using System;
-using Terraria.DataStructures;
 using Terraria.ID;
 
 namespace SpawnHouses.Types;

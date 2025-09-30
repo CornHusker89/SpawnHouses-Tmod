@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using SpawnHouses.Types;
 using Terraria.ID;
 
@@ -7,14 +8,14 @@ public class DebugGen {
     /// <summary>
     ///     Fills with emerald gem spark
     /// </summary>
-    public class DebugBlocksGenerator1 : IComponentGenerator {
-        public ComponentTag[] GetPossibleTags() {
+    public class DebugBlocksGenerator1 : IVolumeComponentGenerator {
+        public HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.IsDebugBlocks
             ];
         }
 
-        public bool Generate(ComponentParams componentParams) {
+        public bool Generate(VolumeComponentParams componentParams) {
             componentParams.Component.Volume.ExecuteInArea((x, y) => {
                 StructureTile tile = componentParams.Tilemap[x, y];
                 tile.HasTile = true;
@@ -30,14 +31,14 @@ public class DebugGen {
     /// <summary>
     ///     Fills with sapphire gem spark
     /// </summary>
-    public class DebugBlocksGenerator2 : IComponentGenerator {
-        public ComponentTag[] GetPossibleTags() {
+    public class DebugBlocksGenerator2 : IVolumeComponentGenerator {
+        public HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.IsDebugBlocks
             ];
         }
 
-        public bool Generate(ComponentParams componentParams) {
+        public bool Generate(VolumeComponentParams componentParams) {
             componentParams.Component.Volume.ExecuteInArea((x, y) => {
                 StructureTile tile = componentParams.Tilemap[x, y];
                 tile.HasTile = true;
@@ -53,14 +54,14 @@ public class DebugGen {
     /// <summary>
     ///     Fills with ruby gem spark
     /// </summary>
-    public class DebugBlocksGenerator3 : IComponentGenerator {
-        public ComponentTag[] GetPossibleTags() {
+    public class DebugBlocksGenerator3 : IVolumeComponentGenerator {
+        public HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.IsDebugBlocks
             ];
         }
 
-        public bool Generate(ComponentParams componentParams) {
+        public bool Generate(VolumeComponentParams componentParams) {
             componentParams.Component.Volume.ExecuteInArea((x, y) => {
                 StructureTile tile = componentParams.Tilemap[x, y];
                 tile.HasTile = true;
@@ -76,14 +77,14 @@ public class DebugGen {
     /// <summary>
     ///     Fills with emerald gem spark
     /// </summary>
-    public class DebugWallsGenerator1 : IComponentGenerator {
-        public ComponentTag[] GetPossibleTags() {
+    public class DebugWallsGenerator1 : IVolumeComponentGenerator {
+        public HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.IsDebugWalls
             ];
         }
 
-        public bool Generate(ComponentParams componentParams) {
+        public bool Generate(VolumeComponentParams componentParams) {
             componentParams.Component.Volume.ExecuteInArea((x, y) => {
                 StructureTile tile = componentParams.Tilemap[x, y];
                 tile.WallType = WallID.EmeraldGemspark;
@@ -97,14 +98,14 @@ public class DebugGen {
     /// <summary>
     ///     Fills with sapphire gem spark
     /// </summary>
-    public class DebugWallsGenerator2 : IComponentGenerator {
-        public ComponentTag[] GetPossibleTags() {
+    public class DebugWallsGenerator2 : IVolumeComponentGenerator {
+        public HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.IsDebugWalls
             ];
         }
 
-        public bool Generate(ComponentParams componentParams) {
+        public bool Generate(VolumeComponentParams componentParams) {
             componentParams.Component.Volume.ExecuteInArea((x, y) => {
                 StructureTile tile = componentParams.Tilemap[x, y];
                 tile.WallType = WallID.SapphireGemspark;
@@ -118,14 +119,14 @@ public class DebugGen {
     /// <summary>
     ///     Fills with ruby gem spark
     /// </summary>
-    public class DebugWallsGenerator3 : IComponentGenerator {
-        public ComponentTag[] GetPossibleTags() {
+    public class DebugWallsGenerator3 : IVolumeComponentGenerator {
+        public HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.IsDebugWalls
             ];
         }
 
-        public bool Generate(ComponentParams componentParams) {
+        public bool Generate(VolumeComponentParams componentParams) {
             componentParams.Component.Volume.ExecuteInArea((x, y) => {
                 StructureTile tile = componentParams.Tilemap[x, y];
                 tile.WallType = WallID.RubyGemspark;

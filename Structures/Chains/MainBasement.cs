@@ -207,25 +207,24 @@ public class MainBasement : StructureChain {
         int centerY = structure.Y + structure.StructureYSize / 2;
 
         WorldUtils.Gen(new Point(centerX, centerY),
-            new Shapes.Circle((structure.StructureXSize + structure.StructureYSize + 2) / 2), new Actions.Custom(
-                (i, j, args) => {
-                    Tile tile = Main.tile[i, j];
-                    if (tile.WallType is WallID.DirtUnsafe or WallID.DirtUnsafe1 or WallID.DirtUnsafe2
-                        or WallID.DirtUnsafe3 or
-                        WallID.DirtUnsafe4 or WallID.FlowerUnsafe or WallID.RocksUnsafe1 or WallID.RocksUnsafe2 or
-                        WallID.RocksUnsafe3 or WallID.RocksUnsafe4 or WallID.GrassUnsafe or WallID.Cave2Unsafe
-                        or WallID.Cave3Unsafe
-                        or WallID.Cave4Unsafe or WallID.Cave5Unsafe or WallID.Cave6Unsafe or WallID.Cave7Unsafe) {
-                        tile.HasTile = true;
-                        tile.Slope = SlopeType.Solid;
-                        tile.IsHalfBlock = false;
+            new Shapes.Circle((structure.StructureXSize + structure.StructureYSize + 2) / 2), new Actions.Custom((i, j, args) => {
+                Tile tile = Main.tile[i, j];
+                if (tile.WallType is WallID.DirtUnsafe or WallID.DirtUnsafe1 or WallID.DirtUnsafe2
+                    or WallID.DirtUnsafe3 or
+                    WallID.DirtUnsafe4 or WallID.FlowerUnsafe or WallID.RocksUnsafe1 or WallID.RocksUnsafe2 or
+                    WallID.RocksUnsafe3 or WallID.RocksUnsafe4 or WallID.GrassUnsafe or WallID.Cave2Unsafe
+                    or WallID.Cave3Unsafe
+                    or WallID.Cave4Unsafe or WallID.Cave5Unsafe or WallID.Cave6Unsafe or WallID.Cave7Unsafe) {
+                    tile.HasTile = true;
+                    tile.Slope = SlopeType.Solid;
+                    tile.IsHalfBlock = false;
 
-                        if (!tile.HasTile || tile.TileType is TileID.SmallPiles or TileID.Vines or TileID.Grass)
-                            tile.TileType = TileID.Dirt;
-                    }
+                    if (!tile.HasTile || tile.TileType is TileID.SmallPiles or TileID.Vines or TileID.Grass)
+                        tile.TileType = TileID.Dirt;
+                }
 
-                    return true;
-                }));
+                return true;
+            }));
 
         WorldUtils.Gen(new Point(centerX, centerY),
             new Shapes.Circle((structure.StructureXSize + structure.StructureYSize + 2) / 2), Actions.Chain(
