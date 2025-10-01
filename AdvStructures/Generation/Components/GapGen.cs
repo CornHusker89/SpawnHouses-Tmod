@@ -18,16 +18,16 @@ public class GapGen {
             ];
         }
 
-        public bool Generate(VolumeComponentParams componentParams) {
-            int xStart = componentParams.Component.Volume.BoundingBox.topLeft.X;
-            int[] topY = new int[componentParams.Component.Volume.Size.X];
-            int[] bottomY = new int[componentParams.Component.Volume.Size.X];
-            bool placeWalls = !componentParams.Component.TagsRequired.Contains(ComponentTag.External);
+        public bool Generate(VolumeComponentParams param) {
+            int xStart = param.Component.Volume.BoundingBox.topLeft.X;
+            int[] topY = new int[param.Component.Volume.Size.X];
+            int[] bottomY = new int[param.Component.Volume.Size.X];
+            bool placeWalls = !param.Component.TagsRequired.Contains(ComponentTag.External);
 
-            componentParams.Component.Volume.ExecuteInArea((x, y) => {
+            param.Component.Volume.ExecuteInArea((x, y) => {
                 if (placeWalls)
-                    componentParams.Tilemap.PlaceWall(x, y, componentParams.Palette.BackgroundFloorMain);
-                StructureTile tile = componentParams.Tilemap[x, y];
+                    param.Tilemap.PlaceWall(x, y, param.Palette.BackgroundFloorMain);
+                StructureTile tile = param.Tilemap[x, y];
                 tile.HasTile = false;
 
                 if (topY[x - xStart] == 0)
@@ -42,8 +42,8 @@ public class GapGen {
             });
 
             for (int index = 0; index < topY.Length; index++) {
-                componentParams.Tilemap.PlaceTile(xStart + index, topY[index], componentParams.Palette.Platform);
-                componentParams.Tilemap.PlaceTile(xStart + index, bottomY[index], componentParams.Palette.Platform);
+                param.Tilemap.PlaceTile(xStart + index, topY[index], param.Palette.Platform);
+                param.Tilemap.PlaceTile(xStart + index, bottomY[index], param.Palette.Platform);
             }
 
             return true;
@@ -64,9 +64,9 @@ public class GapGen {
             ];
         }
 
-        public bool Generate(VolumeComponentParams componentParams) {
-            if (!componentParams.Component.TagsRequired.Contains(ComponentTag.External))
-                componentParams.Component.Volume.ExecuteInArea((x, y) => { componentParams.Tilemap.PlaceWall(x, y, PaintedType.PickRandom(componentParams.Palette.BackgroundWallAlt)); });
+        public bool Generate(VolumeComponentParams param) {
+            if (!param.Component.TagsRequired.Contains(ComponentTag.External))
+                param.Component.Volume.ExecuteInArea((x, y) => { param.Tilemap.PlaceWall(x, y, PaintedType.PickRandom(param.Palette.BackgroundWallAlt)); });
             return true;
         }
     }

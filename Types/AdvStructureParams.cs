@@ -140,18 +140,7 @@ public class RoomLayoutParams(
     }
 }
 
-public static class ComponentParamsUtils {
-    public static ComponentParams CreateComponentParamsForType(IComponent component, TilePalette tilePalette, StructureTilemap tilemap) {
-        Type componentType = component.GetType();
-        if (componentType == typeof(VolumeComponentParams)) return new VolumeComponentParams((IVolumeComponent)component, tilePalette, tilemap);
-
-        if (componentType == typeof(PathComponentParams)) return new PathComponentParams((IPathComponent)component, tilePalette, tilemap);
-
-        throw new Exception($"Component type \"{componentType.FullName}\" does not have an associated parameter type");
-    }
-}
-
-public class ComponentParams {
+public abstract class ComponentParams {
     public IComponent Component { get; set; }
     public StructureTilemap Tilemap { get; set; }
     public TilePalette Palette { get; set; }

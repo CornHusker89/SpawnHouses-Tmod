@@ -15,9 +15,9 @@ public class DebugGen {
             ];
         }
 
-        public bool Generate(VolumeComponentParams componentParams) {
-            componentParams.Component.Volume.ExecuteInArea((x, y) => {
-                StructureTile tile = componentParams.Tilemap[x, y];
+        public bool Generate(VolumeComponentParams param) {
+            param.Component.Volume.ExecuteInArea((x, y) => {
+                StructureTile tile = param.Tilemap[x, y];
                 tile.HasTile = true;
                 tile.BlockType = BlockType.Solid;
                 tile.TileType = TileID.EmeraldGemspark;
@@ -38,9 +38,9 @@ public class DebugGen {
             ];
         }
 
-        public bool Generate(VolumeComponentParams componentParams) {
-            componentParams.Component.Volume.ExecuteInArea((x, y) => {
-                StructureTile tile = componentParams.Tilemap[x, y];
+        public bool Generate(VolumeComponentParams param) {
+            param.Component.Volume.ExecuteInArea((x, y) => {
+                StructureTile tile = param.Tilemap[x, y];
                 tile.HasTile = true;
                 tile.BlockType = BlockType.Solid;
                 tile.TileType = TileID.SapphireGemspark;
@@ -61,9 +61,9 @@ public class DebugGen {
             ];
         }
 
-        public bool Generate(VolumeComponentParams componentParams) {
-            componentParams.Component.Volume.ExecuteInArea((x, y) => {
-                StructureTile tile = componentParams.Tilemap[x, y];
+        public bool Generate(VolumeComponentParams param) {
+            param.Component.Volume.ExecuteInArea((x, y) => {
+                StructureTile tile = param.Tilemap[x, y];
                 tile.HasTile = true;
                 tile.BlockType = BlockType.Solid;
                 tile.TileType = TileID.RubyGemspark;
@@ -84,9 +84,9 @@ public class DebugGen {
             ];
         }
 
-        public bool Generate(VolumeComponentParams componentParams) {
-            componentParams.Component.Volume.ExecuteInArea((x, y) => {
-                StructureTile tile = componentParams.Tilemap[x, y];
+        public bool Generate(VolumeComponentParams param) {
+            param.Component.Volume.ExecuteInArea((x, y) => {
+                StructureTile tile = param.Tilemap[x, y];
                 tile.WallType = WallID.EmeraldGemspark;
                 tile.WallColor = PaintID.None;
             });
@@ -105,9 +105,9 @@ public class DebugGen {
             ];
         }
 
-        public bool Generate(VolumeComponentParams componentParams) {
-            componentParams.Component.Volume.ExecuteInArea((x, y) => {
-                StructureTile tile = componentParams.Tilemap[x, y];
+        public bool Generate(VolumeComponentParams param) {
+            param.Component.Volume.ExecuteInArea((x, y) => {
+                StructureTile tile = param.Tilemap[x, y];
                 tile.WallType = WallID.SapphireGemspark;
                 tile.WallColor = PaintID.None;
             });
@@ -126,9 +126,9 @@ public class DebugGen {
             ];
         }
 
-        public bool Generate(VolumeComponentParams componentParams) {
-            componentParams.Component.Volume.ExecuteInArea((x, y) => {
-                StructureTile tile = componentParams.Tilemap[x, y];
+        public bool Generate(VolumeComponentParams param) {
+            param.Component.Volume.ExecuteInArea((x, y) => {
+                StructureTile tile = param.Tilemap[x, y];
                 tile.WallType = WallID.RubyGemspark;
                 tile.WallColor = PaintID.None;
             });

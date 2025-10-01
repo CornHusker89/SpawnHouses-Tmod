@@ -112,7 +112,7 @@ public class StructureTilemap {
         foreach (Floor floor in externalLayout.Floors) floor.Volume.Offset(offset);
         foreach (Wall wall in externalLayout.Walls) wall.Volume.Offset(offset);
         foreach (Gap gap in externalLayout.Gaps) gap.Volume.Offset(offset);
-        foreach (Roof roof in externalLayout.Roofs) roof.Volume.Offset(offset);
+        foreach (Roof roof in externalLayout.Roofs) roof.Line.Offset(offset);
     }
 
     /// <summary>

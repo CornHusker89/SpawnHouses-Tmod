@@ -3,15 +3,16 @@ using SpawnHouses.Types;
 
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
-public class Wall : IComponent, IVolumeComponent, IComponentExternalExt {
+public class Wall : IVolumeComponent, IComponentExternalExt {
+    
     // IComponent
     public ushort Id { get; set; }
     public HashSet<ComponentTag> TagsRequired { get; set; }
     public HashSet<ComponentTag> TagsBlacklist { get; set; }
-
+    
     // IVolumeComponent
     public Shape Volume { get; set; }
-
+    
     // IExternalComponent
     public bool IsExterior { get; set; }
 

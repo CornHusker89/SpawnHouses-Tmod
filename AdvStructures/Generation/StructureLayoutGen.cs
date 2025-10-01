@@ -60,7 +60,7 @@ public static class StructureLayoutGen {
 
             const int tilemapMargin = 5;
             const int roofMargin = 24;
-
+            
             // TODO: compensate structure volume and roofMargin for the roof volume itself
 
             // structure parameters that aren't dependent on tilemap position
@@ -138,7 +138,7 @@ public static class StructureLayoutGen {
             advStructure.SetTilesExternalStatus();
 
             // finally finish the room layout
-            advStructure.Layout = new RoomLayout([], [],
+            advStructure.Layout = new RoomLayout([], [], 
                 advStructure.ExternalLayout.Gaps,
                 [
                     new Room(

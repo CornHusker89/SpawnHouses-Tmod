@@ -165,9 +165,8 @@ public class AdvStructure {
         Dictionary<Type, List<IComponentGenerator>> generatorQueue = [];
         for (int i = 0; i < components.Count; i++) {
             IComponent component = components[i];
-            ComponentParams componentParams = ComponentParamsUtils.CreateComponentParamsForType(component, Params.Palette, Tilemap);
-            TagUtils.ValidateTagsRequired(component.TagsRequired);
-            TagUtils.ValidateTagsBlacklist(component.TagsBlacklist);
+            ComponentParams componentParams = ComponentUtils.CreateComponentParamsForType(component, Params.Palette, Tilemap);
+            ComponentUtils.ValidateComponent(component);
             component.Id = (ushort)i;
             
             IComponentGenerator[] generators;

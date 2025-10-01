@@ -14,14 +14,14 @@ public static class BackgroundGen {
             ];
         }
 
-        public bool Generate(VolumeComponentParams componentParams) {
-            componentParams.Component.Volume.ExecuteInArea((x, y) => {
-                if (y == componentParams.Component.Volume.BoundingBox.bottomRight.Y)
-                    componentParams.Tilemap.PlaceWall(x, y, PaintedType.PickRandom(componentParams.Palette.BackgroundRoomAlt));
-                else if (y == componentParams.Component.Volume.BoundingBox.bottomRight.Y - 1)
-                    componentParams.Tilemap.PlaceWall(x, y, componentParams.Palette.BackgroundRoomAccent);
+        public bool Generate(VolumeComponentParams param) {
+            param.Component.Volume.ExecuteInArea((x, y) => {
+                if (y == param.Component.Volume.BoundingBox.bottomRight.Y)
+                    param.Tilemap.PlaceWall(x, y, PaintedType.PickRandom(param.Palette.BackgroundRoomAlt));
+                else if (y == param.Component.Volume.BoundingBox.bottomRight.Y - 1)
+                    param.Tilemap.PlaceWall(x, y, param.Palette.BackgroundRoomAccent);
                 else
-                    componentParams.Tilemap.PlaceWall(x, y, componentParams.Palette.BackgroundRoomMain);
+                    param.Tilemap.PlaceWall(x, y, param.Palette.BackgroundRoomMain);
             });
 
             return true;
@@ -38,13 +38,13 @@ public static class BackgroundGen {
             ];
         }
 
-        public bool Generate(VolumeComponentParams componentParams) {
-            int bottomY = componentParams.Component.Volume.BoundingBox.bottomRight.Y;
-            componentParams.Component.Volume.ExecuteInArea((x, y) => {
+        public bool Generate(VolumeComponentParams param) {
+            int bottomY = param.Component.Volume.BoundingBox.bottomRight.Y;
+            param.Component.Volume.ExecuteInArea((x, y) => {
                 if (y == bottomY || y == bottomY - 1 || y == bottomY - 2)
-                    componentParams.Tilemap.PlaceWall(x, y, PaintedType.PickRandom(componentParams.Palette.BackgroundRoomAlt));
+                    param.Tilemap.PlaceWall(x, y, PaintedType.PickRandom(param.Palette.BackgroundRoomAlt));
                 else
-                    componentParams.Tilemap.PlaceWall(x, y, componentParams.Palette.BackgroundRoomMain);
+                    param.Tilemap.PlaceWall(x, y, param.Palette.BackgroundRoomMain);
             });
 
             return true;

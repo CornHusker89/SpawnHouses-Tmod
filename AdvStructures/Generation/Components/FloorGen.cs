@@ -21,13 +21,13 @@ public static class FloorGen {
             ];
         }
 
-        public bool Generate(VolumeComponentParams componentParams) {
-            Func<int, int, bool[,], BlockType> sloping = componentParams.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
+        public bool Generate(VolumeComponentParams param) {
+            Func<int, int, bool[,], BlockType> sloping = param.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
                 ? SlopeHelper.SimpleSlopes
-                : componentParams.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
+                : param.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
                     ? SlopeHelper.HalfSlopes
                     : null;
-            componentParams.Component.Volume.ExecuteInArea((x, y, bt) => { componentParams.Tilemap.PlaceTile(x, y, componentParams.Palette.FloorMain, bt); }, sloping);
+            param.Component.Volume.ExecuteInArea((x, y, bt) => { param.Tilemap.PlaceTile(x, y, param.Palette.FloorMain, bt); }, sloping);
             return true;
         }
     }
@@ -48,13 +48,13 @@ public static class FloorGen {
             ];
         }
 
-        public bool Generate(VolumeComponentParams componentParams) {
-            Func<int, int, bool[,], BlockType> sloping = componentParams.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
+        public bool Generate(VolumeComponentParams param) {
+            Func<int, int, bool[,], BlockType> sloping = param.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
                 ? SlopeHelper.SimpleSlopes
-                : componentParams.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
+                : param.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
                     ? SlopeHelper.HalfSlopes
                     : null;
-            componentParams.Component.Volume.ExecuteInArea((x, y, bt) => { componentParams.Tilemap.PlaceTile(x, y, PaintedType.PickRandom(componentParams.Palette.FloorAlt), bt); }, sloping);
+            param.Component.Volume.ExecuteInArea((x, y, bt) => { param.Tilemap.PlaceTile(x, y, PaintedType.PickRandom(param.Palette.FloorAlt), bt); }, sloping);
             return true;
         }
     }
@@ -79,23 +79,23 @@ public static class FloorGen {
             return componentParams.Component.Volume.Size.Y >= 2;
         }
 
-        public bool Generate(VolumeComponentParams componentParams) {
-            Func<int, int, bool[,], BlockType> sloping = componentParams.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
+        public bool Generate(VolumeComponentParams param) {
+            Func<int, int, bool[,], BlockType> sloping = param.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
                 ? SlopeHelper.SimpleSlopes
-                : componentParams.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
+                : param.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
                     ? SlopeHelper.HalfSlopes
                     : null;
-            bool elevated = componentParams.Component.TagsRequired.Contains(ComponentTag.Elevated);
-            int xStart = componentParams.Component.Volume.BoundingBox.topLeft.X;
-            int[] topY = new int[componentParams.Component.Volume.Size.X];
+            bool elevated = param.Component.TagsRequired.Contains(ComponentTag.Elevated);
+            int xStart = param.Component.Volume.BoundingBox.topLeft.X;
+            int[] topY = new int[param.Component.Volume.Size.X];
 
-            componentParams.Component.Volume.ExecuteInArea((x, y, bt) => {
-                componentParams.Tilemap.PlaceTile(
+            param.Component.Volume.ExecuteInArea((x, y, bt) => {
+                param.Tilemap.PlaceTile(
                     x,
                     y,
                     PaintedType.PickRandom(elevated
-                        ? componentParams.Palette.FloorAlt
-                        : componentParams.Palette.FloorAltElevated),
+                        ? param.Palette.FloorAlt
+                        : param.Palette.FloorAltElevated),
                     bt
                 );
 
@@ -107,9 +107,9 @@ public static class FloorGen {
             }, sloping);
 
             for (int index = 0; index < topY.Length; index++)
-                componentParams.Tilemap.SoftPlaceTile(
+                param.Tilemap.SoftPlaceTile(
                     xStart + index, topY[index],
-                    elevated ? componentParams.Palette.FloorMainElevated : componentParams.Palette.FloorMain
+                    elevated ? param.Palette.FloorMainElevated : param.Palette.FloorMain
                 );
             return true;
         }
@@ -130,22 +130,22 @@ public static class FloorGen {
             return componentParams.Component.Volume.GetTrueSize(false).average >= 3;
         }
 
-        public bool Generate(VolumeComponentParams componentParams) {
-            bool elevated = componentParams.Component.TagsRequired.Contains(ComponentTag.Elevated);
-            int xStart = componentParams.Component.Volume.BoundingBox.topLeft.X;
-            int[] topY = new int[componentParams.Component.Volume.Size.X];
-            int[] bottomY = new int[componentParams.Component.Volume.Size.X];
+        public bool Generate(VolumeComponentParams param) {
+            bool elevated = param.Component.TagsRequired.Contains(ComponentTag.Elevated);
+            int xStart = param.Component.Volume.BoundingBox.topLeft.X;
+            int[] topY = new int[param.Component.Volume.Size.X];
+            int[] bottomY = new int[param.Component.Volume.Size.X];
             int supportInterval = Terraria.WorldGen.genRand.Next(3, 5);
 
-            componentParams.Component.Volume.ExecuteInArea((x, y) => {
+            param.Component.Volume.ExecuteInArea((x, y) => {
                 if ((x - xStart - 2) % supportInterval == 0 || x == xStart ||
-                    x == componentParams.Component.Volume.BoundingBox.bottomRight.X) {
-                    componentParams.Tilemap.PlaceTile(x, y,
-                        elevated ? componentParams.Palette.FloorMainElevated : componentParams.Palette.FloorMain);
+                    x == param.Component.Volume.BoundingBox.bottomRight.X) {
+                    param.Tilemap.PlaceTile(x, y,
+                        elevated ? param.Palette.FloorMainElevated : param.Palette.FloorMain);
                 }
                 else {
-                    componentParams.Tilemap.PlaceWall(x, y, componentParams.Palette.BackgroundFloorMain);
-                    StructureTile tile = componentParams.Tilemap[x, y];
+                    param.Tilemap.PlaceWall(x, y, param.Palette.BackgroundFloorMain);
+                    StructureTile tile = param.Tilemap[x, y];
                     if (Terraria.WorldGen.genRand.Next(0, 3) == 0) {
                         tile.HasTile = true;
                         tile.TileType = TileID.Cobweb;
@@ -167,10 +167,10 @@ public static class FloorGen {
             });
 
             for (int index = 0; index < topY.Length; index++) {
-                componentParams.Tilemap.PlaceTile(xStart + index, topY[index],
-                    elevated ? componentParams.Palette.FloorMainElevated : componentParams.Palette.FloorMain);
-                componentParams.Tilemap.PlaceTile(xStart + index, bottomY[index],
-                    elevated ? componentParams.Palette.FloorMainElevated : componentParams.Palette.FloorMain);
+                param.Tilemap.PlaceTile(xStart + index, topY[index],
+                    elevated ? param.Palette.FloorMainElevated : param.Palette.FloorMain);
+                param.Tilemap.PlaceTile(xStart + index, bottomY[index],
+                    elevated ? param.Palette.FloorMainElevated : param.Palette.FloorMain);
             }
 
             return true;

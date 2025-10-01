@@ -4,6 +4,7 @@ using System.Collections.Generic;
 namespace SpawnHouses.Types;
 
 public enum StructureTag : ushort {
+    // current highest tag number is 15
     // ===== structureLayout =====
     IsSymmetric = 1,
     HasHousing = 2,
@@ -96,7 +97,9 @@ public enum ComponentTag {
     /// roof is tall enough that it doesn't follow the contour of the tiles it is placed on
     RoofTall = 15,
 
+    /// roof follows contour of the roof, and is within 4 blocks of the top
     RoofShort = 16,
+    
     RoofHasChimney = 17,
     RoofSlope1To1 = 18,
     RoofSlopeLessThan1 = 19,
@@ -129,6 +132,7 @@ public enum PaletteTag {
 }
 
 public static class TagUtils {
+
     /// <summary>
     ///     a component's tags are considered invalid if a component has all tags in any set
     /// </summary>
@@ -137,17 +141,18 @@ public static class TagUtils {
         [ComponentTag.UseHalfSloping, ComponentTag.UseSimpleSloping],
         [ComponentTag.UseHalfSloping, ComponentTag.UseGothicSloping]
     ];
-
+    
     /// <summary>
     ///     a component's tags are considered invalid if a component has all tags in any set
     /// </summary>
     public static HashSet<ComponentTag>[] MutuallyExclusiveComponentTagsBlacklist { get; } = [
-    ];
 
+    ];
+    
     public static void ValidateTagsRequired(HashSet<ComponentTag> tagsRequired) {
         foreach (var exclusiveSet in MutuallyExclusiveComponentTagsRequired) {
             if (!exclusiveSet.IsSubsetOf(tagsRequired)) continue;
-
+            
             string message = "Component has mutually exclusive component tags required {";
             foreach (ComponentTag tag in exclusiveSet) message += $"{tag} (id {(ushort)tag}), ";
             throw new Exception(message.Remove(message.Length - 2));
@@ -157,7 +162,7 @@ public static class TagUtils {
     public static void ValidateTagsBlacklist(HashSet<ComponentTag> tagsRequired) {
         foreach (var exclusiveSet in MutuallyExclusiveComponentTagsBlacklist) {
             if (!exclusiveSet.IsSubsetOf(tagsRequired)) continue;
-
+            
             string message = "Component has mutually exclusive component tags blacklisted {";
             foreach (ComponentTag tag in exclusiveSet) message += $"{tag} (id {(ushort)tag}), ";
             throw new Exception(message.Remove(message.Length - 2));

@@ -5,12 +5,13 @@ using SpawnHouses.Types;
 
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
-public class Room : IComponent, IVolumeComponent {
+public class Room : IVolumeComponent {
+    
     // IComponent
     public ushort Id { get; set; }
     public HashSet<ComponentTag> TagsRequired { get; set; }
     public HashSet<ComponentTag> TagsBlacklist { get; set; }
-
+    
     // IVolumeComponent
     public Shape Volume { get; set; }
     

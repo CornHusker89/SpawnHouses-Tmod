@@ -132,10 +132,7 @@ public class ExternalLayoutHelper {
             else {
                 // create a roof out of the last non-wall segments
                 if (roofPoints.Count != 0) {
-                    roofPoints.Add(thisPoint);
-                    for (int i = roofPoints.Count - 1; i >= 0; i--) roofPoints.Add(roofPoints[i] + new Point16(0, -roofHeight + 1));
-
-                    roofs.Add(new Roof(new Shape(roofPoints)));
+                    roofs.Add(new Roof(new Path(roofPoints)));
                     roofPoints.Clear();
                 }
 
@@ -151,10 +148,7 @@ public class ExternalLayoutHelper {
         }
 
         if (roofPoints.Count != 0) {
-            roofPoints.Add(path[^1]);
-            for (int i = roofPoints.Count - 1; i >= 0; i--) roofPoints.Add(roofPoints[i] + new Point16(0, -roofHeight + 1));
-
-            roofs.Add(new Roof(new Shape(roofPoints)));
+            roofs.Add(new Roof(new Path(roofPoints)));
         }
 
         return (floors, walls, roofs);

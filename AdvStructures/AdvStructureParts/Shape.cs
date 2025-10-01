@@ -21,7 +21,7 @@ namespace SpawnHouses.AdvStructures.AdvStructureParts;
 ///     generic 2D shape. has support for triangles, rectangles, and n-gons.
 /// </summary>
 /// <remarks>it's assumed that the points are in clockwise order</remarks>
-public class Shape {
+public class Shape : PointGeometry {
     private static readonly Color[] Colors = [
         Color.White,
         Color.Black,
@@ -30,7 +30,6 @@ public class Shape {
     ];
 
     public (Point16 topLeft, Point16 bottomRight) BoundingBox;
-    public Point16[] Points;
     public Point16 Size;
 
 
@@ -62,7 +61,7 @@ public class Shape {
         });
     }
 
-    private void Init(Point16[] points, bool optimize) {
+    protected sealed override void Init(Point16[] points, bool optimize) {
         switch (points.Length) {
             case < 2:
                 throw new ArgumentException("Shape must have at least 2 points.");
@@ -81,7 +80,7 @@ public class Shape {
                     break;
                 }
 
-                Points = optimize ? OptimizePoints(points) : points;
+                if (optimize) OptimizePoints(true);
 
                 switch (Points.Length) {
                     // this will only happen if the points are the same (shape area of 1)
@@ -132,53 +131,6 @@ public class Shape {
 
         return true;
     }
-
-    /// <summary>
-    ///     removes extra points in shape.
-    /// </summary>
-    /// <param name="points"></param>
-    /// <returns></returns>
-    /// <remarks>destructive, returns the input list</remarks>
-    public static Point16[] OptimizePoints(List<Point16> points) {
-        for (int i = 0; i < points.Count; i++) {
-            Point16 last = points[i - 1 != -1 ? i - 1 : points.Count - 1];
-            Point16 target = points[i];
-            Point16 next = points[i + 1 != points.Count ? i + 1 : 0];
-
-            if (points.Count == 1) break;
-
-            if (target == next) {
-                points.RemoveAt(i);
-                i--;
-                continue; // so that we don't interfere with the next condition
-            }
-
-            if ((target.X == last.X && target.X == next.X && ((last.Y < target.Y && target.Y < next.Y) || (last.Y > target.Y && target.Y > next.Y)))
-                || (target.Y == last.Y && target.Y == next.Y && ((last.X < target.X && target.X < next.X) || (last.X > target.X && target.X > next.X)))) {
-                points.RemoveAt(i);
-                i--;
-            }
-        }
-
-        if (points[0] == points[^1] && points.Count > 1) points.RemoveAt(points.Count - 1);
-
-        // ensure the shape isn't 1 wide/tall, which involves overlapping points by nature
-        bool same = true;
-        for (int i = 0; i < points.Count; i++) {
-            Point16 target = points[i];
-            Point16 next = points[i + 1 != points.Count ? i + 1 : 0];
-            if (next != target) same = false;
-        }
-
-        if (same) return [points[0]];
-
-        return points.ToArray();
-    }
-
-    public static Point16[] OptimizePoints(Point16[] points) {
-        return OptimizePoints(points.ToList());
-    }
-
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
@@ -443,15 +395,6 @@ public class Shape {
         }
 
         return corners;
-    }
-
-    /// <summary>
-    ///     offsets entire shape by given point
-    /// </summary>
-    /// <param name="offset"></param>
-    public void Offset(Point16 offset) {
-        for (int i = 0; i < Points.Length; i++) Points[i] += offset;
-        Init(Points, false);
     }
 
     /// <summary>
