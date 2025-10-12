@@ -81,11 +81,10 @@ public class ExternalLayoutHelper {
     /// <param name="isExternal"></param>
     /// <remarks>assumes that floors get priority over walls</remarks>
     /// <returns></returns>
-    public static (List<Floor> floors, List<Wall> walls, List<Roof> roofs) CreateTopFloorsAndWalls(List<Point16> path, int floorWidth, bool extendWallsHigher, int wallWidth, bool isExternal = true) {
+    public static (List<Floor> floors, List<Wall> walls, List<Roof> roofs) CreateTopFloorsWallsRoofs(List<Point16> path, int floorWidth, bool extendWallsHigher, int wallWidth, bool isExternal = true) {
         List<Floor> floors = [];
         List<Wall> walls = [];
         List<Roof> roofs = [];
-        const int roofHeight = 3;
 
         List<Point16> roofPoints = [];
         bool lastComponentWasFloor = false;
@@ -132,7 +131,10 @@ public class ExternalLayoutHelper {
             else {
                 // create a roof out of the last non-wall segments
                 if (roofPoints.Count != 0) {
-                    roofs.Add(new Roof(new Path(roofPoints)));
+                    if (lastComponentWasFloor) roofPoints.Add(path[pathIndex] + new Point16(nextPoint.Y < thisPoint.Y ? -1 : 0, 0));
+                    Roof roof = new(new Path(roofPoints));
+                    roof.Line.Offset(new Point16(0, -floorWidth));
+                    roofs.Add(roof);
                     roofPoints.Clear();
                 }
 
@@ -148,7 +150,10 @@ public class ExternalLayoutHelper {
         }
 
         if (roofPoints.Count != 0) {
-            roofs.Add(new Roof(new Path(roofPoints)));
+            if (lastComponentWasFloor) roofPoints.Add(path[^1]);
+            Roof roof = new(new Path(roofPoints));
+            roof.Line.Offset(new Point16(0, -floorWidth));
+            roofs.Add(roof);
         }
 
         return (floors, walls, roofs);
@@ -164,7 +169,7 @@ public class ExternalLayoutHelper {
     /// <param name="wallThickness"></param>
     /// <returns></returns>
     public static (List<Floor> floors, List<Wall> walls, List<Roof> roofs) CreateBasicRoof(Point16 left, Point16 right, StructureParams p, int floorThickness, int wallThickness) {
-        double[] validRoofSlopes = [0.333, 0.5, 1, 1.5, 2];
+        double[] validRoofSlopes = [0.5, 1, 1.5, 2];
         bool hasHigherSide = left.Y != right.Y;
         bool leftRoofHigher = left.Y < right.Y;
         int upperRoofBottomY = int.Min(left.Y, right.Y);
@@ -218,14 +223,14 @@ public class ExternalLayoutHelper {
             ];
         }
 
-        var result = CreateTopFloorsAndWalls(
+        var result = CreateTopFloorsWallsRoofs(
             path,
             floorThickness,
             true,
             wallThickness
         );
         foreach (Floor floor in result.floors) {
-            //floor.TagsRequired.Add(ComponentTag.UseSimpleSloping);
+            floor.TagsRequired.Add(ComponentTag.UseSimpleSloping);
         }
 
         if (hasRoofPeak)

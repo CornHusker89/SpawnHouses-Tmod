@@ -141,26 +141,28 @@ public class RoomLayoutParams(
 }
 
 public abstract class ComponentParams {
-    public IComponent Component { get; set; }
+    public IComponent Component { get; protected init; }
     public StructureTilemap Tilemap { get; set; }
     public TilePalette Palette { get; set; }
 }
 
 public class VolumeComponentParams : ComponentParams {
-    public new IVolumeComponent Component { get; set; }
+    public new IVolumeComponent Component { get; }
 
     public VolumeComponentParams(IVolumeComponent component, TilePalette tilePalette, StructureTilemap tilemap) {
         Component = component;
+        base.Component = component;
         Tilemap = tilemap;
         Palette = tilePalette;
     }
 }
 
 public class PathComponentParams : ComponentParams {
-    public new IPathComponent Component { get; set; }
+    public new IPathComponent Component { get; }
 
     public PathComponentParams(IPathComponent component, TilePalette tilePalette, StructureTilemap tilemap) {
         Component = component;
+        base.Component = component;
         Tilemap = tilemap;
         Palette = tilePalette;
     }

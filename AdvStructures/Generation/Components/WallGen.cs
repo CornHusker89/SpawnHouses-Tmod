@@ -7,8 +7,8 @@ public static class WallGen {
     /// <summary>
     ///     Fills a volume with the same wall blocks, with special blocks at the first and last x position of each row
     /// </summary>
-    public class WallGenerator1 : IVolumeComponentGenerator {
-        public HashSet<ComponentTag> GetPossibleTags() {
+    public class WallGenerator1 : VolumeComponentGenerator {
+        public override HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.External,
                 ComponentTag.Elevated,
@@ -17,7 +17,7 @@ public static class WallGen {
             ];
         }
 
-        public bool Generate(VolumeComponentParams param) {
+        public override bool Generate(VolumeComponentParams param) {
             bool elevated = param.Component.TagsRequired.Contains(ComponentTag.Elevated);
 
             param.Component.Volume.ExecuteInArea((x, y) => {
@@ -32,8 +32,8 @@ public static class WallGen {
     /// <summary>
     ///     Fills a volume with random blocks
     /// </summary>
-    public class WallGenerator2 : IVolumeComponentGenerator {
-        public HashSet<ComponentTag> GetPossibleTags() {
+    public class WallGenerator2 : VolumeComponentGenerator {
+        public override HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.External,
                 ComponentTag.Elevated,
@@ -42,7 +42,7 @@ public static class WallGen {
             ];
         }
 
-        public bool Generate(VolumeComponentParams param) {
+        public override bool Generate(VolumeComponentParams param) {
             bool elevated = param.Component.TagsRequired.Contains(ComponentTag.Elevated);
 
             param.Component.Volume.ExecuteInArea((x, y) => {
@@ -57,8 +57,8 @@ public static class WallGen {
     /// <summary>
     ///     Fills a volume with the same wall blocks, with special blocks at the first and last x position of each row
     /// </summary>
-    public class WallGenerator3 : IVolumeComponentGenerator {
-        public HashSet<ComponentTag> GetPossibleTags() {
+    public class WallGenerator3 : VolumeComponentGenerator {
+        public override HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.External,
                 ComponentTag.Elevated,
@@ -67,11 +67,11 @@ public static class WallGen {
             ];
         }
 
-        public bool CanGenerate(VolumeComponentParams componentParams) {
+        public override bool CanGenerate(VolumeComponentParams componentParams) {
             return componentParams.Component.Volume.GetTrueSize(true).average >= 4;
         }
 
-        public bool Generate(VolumeComponentParams param) {
+        public override bool Generate(VolumeComponentParams param) {
             bool elevated = param.Component.TagsRequired.Contains(ComponentTag.Elevated);
             int yStart = param.Component.Volume.BoundingBox.topLeft.Y;
             int[] lowX = new int[param.Component.Volume.Size.Y];
@@ -103,8 +103,8 @@ public static class WallGen {
     /// <summary>
     ///     Fills a volume with random wall blocks, with special blocks at the first and last x position of each row
     /// </summary>
-    public class WallGenerator4 : IVolumeComponentGenerator {
-        public HashSet<ComponentTag> GetPossibleTags() {
+    public class WallGenerator4 : VolumeComponentGenerator {
+        public override HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.External,
                 ComponentTag.Elevated,
@@ -113,11 +113,11 @@ public static class WallGen {
             ];
         }
 
-        public bool CanGenerate(VolumeComponentParams componentParams) {
+        public override bool CanGenerate(VolumeComponentParams componentParams) {
             return componentParams.Component.Volume.GetTrueSize(true).average >= 4;
         }
 
-        public bool Generate(VolumeComponentParams param) {
+        public override bool Generate(VolumeComponentParams param) {
             bool elevated = param.Component.TagsRequired.Contains(ComponentTag.Elevated);
             int yStart = param.Component.Volume.BoundingBox.topLeft.Y;
             int[] lowX = new int[param.Component.Volume.Size.Y];
@@ -145,8 +145,8 @@ public static class WallGen {
     /// <summary>
     ///     Fills a volume with random blocks, but the bottom block consistent
     /// </summary>
-    public class WallGenerator5 : IVolumeComponentGenerator {
-        public HashSet<ComponentTag> GetPossibleTags() {
+    public class WallGenerator5 : VolumeComponentGenerator {
+        public override HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.Elevated,
                 ComponentTag.GroundLevel,
@@ -154,7 +154,7 @@ public static class WallGen {
             ];
         }
 
-        public bool Generate(VolumeComponentParams param) {
+        public override bool Generate(VolumeComponentParams param) {
             bool elevated = param.Component.TagsRequired.Contains(ComponentTag.Elevated);
             int xStart = param.Component.Volume.BoundingBox.topLeft.X;
             int[] bottomY = new int[param.Component.Volume.Size.X];

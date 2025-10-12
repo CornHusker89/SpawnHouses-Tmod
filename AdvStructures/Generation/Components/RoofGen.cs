@@ -1,7 +1,10 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Helpers;
 using SpawnHouses.Types;
+using Terraria.DataStructures;
 
 namespace SpawnHouses.AdvStructures.Generation.Components;
 
@@ -212,11 +215,12 @@ public static class RoofGen {
     //     }
     // }
 
-    public class RoofGenerator2 : IPathComponentGenerator {
-        public HashSet<ComponentTag> GetPossibleTags() {
+    public class RoofGenerator2 : PathComponentGenerator {
+        public override HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.External,
                 ComponentTag.RoofShort,
+                ComponentTag.RoofHasLargeOverhang,
                 ComponentTag.RoofSlopeNone,
                 ComponentTag.RoofSlopeLessThan1,
                 ComponentTag.RoofSlope1To1,
@@ -224,9 +228,30 @@ public static class RoofGen {
             ];
         }
 
-        public bool Generate(PathComponentParams param) {
-            Shape shape = param.Component.Line.ToShape(1);
-            shape.ExecuteInArea((x, y, blockType) => { param.Tilemap.PlaceTile(x, y, param.Palette.RoofMain, blockType); }, SlopeHelper.SimpleSlopes);
+        public override bool Generate(PathComponentParams param) {
+            Path offsetPath = param.Component.Line.Clone();
+            bool isPathFlat = offsetPath.Points.All(p => p.Y == offsetPath.Points[0].Y);
+            int[] offsets = new int[offsetPath.Points.Length];
+            for (int i = 0; i < offsetPath.Points.Length - 1; i++) {
+                Point16 thisPoint = offsetPath.Points[i];
+                Point16 nextPoint = offsetPath.Points[i + 1];
+                int offsetFromSlope = (int)Math.Floor(Math.Abs(PointGeometry.GetSlope(thisPoint, nextPoint)));
+                offsets[i] -= offsetFromSlope;
+                offsets[i + 1] -= offsetFromSlope;
+            }
+
+            Console.WriteLine(PointGeometry.GetSlope(offsetPath.Points[0], offsetPath.Points[1]));
+            Console.WriteLine(PointGeometry.GetSlope(offsetPath.Points[^1], offsetPath.Points[^2]));
+            offsets[0] *= 1;
+            offsets[^1] *= 1;
+
+            for (int i = 0; i < offsetPath.Points.Length; i++) offsetPath.Points[i] += new Point16(0, offsets[i] - (isPathFlat ? 1 : 3));
+
+            Shape shape = offsetPath.ToShape(isPathFlat ? 2 : 3);
+            shape.ExecuteInArea((x, y, blockType) => { param.Tilemap.PlaceTile(x, y, param.Palette.RoofMain, blockType); }, SlopeHelper.SmoothTop);
+
+            shape.Offset(new Point16(0, 2));
+            shape.ExecuteInArea((x, y) => { param.Tilemap.PlaceWall(x, y, param.Palette.BackgroundRoofMain); });
             
             return true;
         }

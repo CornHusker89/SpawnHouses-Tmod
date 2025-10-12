@@ -10,8 +10,8 @@ public static class FloorGen {
     /// <summary>
     ///     Fills a volume with the same floor blocks
     /// </summary>
-    public class FloorGenerator1 : IVolumeComponentGenerator {
-        public HashSet<ComponentTag> GetPossibleTags() {
+    public class FloorGenerator1 : VolumeComponentGenerator {
+        public override HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.External,
                 ComponentTag.GroundLevel,
@@ -21,7 +21,7 @@ public static class FloorGen {
             ];
         }
 
-        public bool Generate(VolumeComponentParams param) {
+        public override bool Generate(VolumeComponentParams param) {
             Func<int, int, bool[,], BlockType> sloping = param.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
                 ? SlopeHelper.SimpleSlopes
                 : param.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
@@ -35,8 +35,8 @@ public static class FloorGen {
     /// <summary>
     ///     Fills a volume with random floor blocks
     /// </summary>
-    public class FloorGenerator2 : IVolumeComponentGenerator {
-        public HashSet<ComponentTag> GetPossibleTags() {
+    public class FloorGenerator2 : VolumeComponentGenerator {
+        public override HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.FloorSolid,
                 ComponentTag.External,
@@ -48,7 +48,7 @@ public static class FloorGen {
             ];
         }
 
-        public bool Generate(VolumeComponentParams param) {
+        public override bool Generate(VolumeComponentParams param) {
             Func<int, int, bool[,], BlockType> sloping = param.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
                 ? SlopeHelper.SimpleSlopes
                 : param.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
@@ -62,8 +62,8 @@ public static class FloorGen {
     /// <summary>
     ///     Fills a volume with random blocks, but the top block consistent
     /// </summary>
-    public class FloorGenerator3 : IVolumeComponentGenerator {
-        public HashSet<ComponentTag> GetPossibleTags() {
+    public class FloorGenerator3 : VolumeComponentGenerator {
+        public override HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.FloorSolid,
                 ComponentTag.External,
@@ -75,11 +75,11 @@ public static class FloorGen {
             ];
         }
 
-        public bool CanGenerate(VolumeComponentParams componentParams) {
+        public override bool CanGenerate(VolumeComponentParams componentParams) {
             return componentParams.Component.Volume.Size.Y >= 2;
         }
 
-        public bool Generate(VolumeComponentParams param) {
+        public override bool Generate(VolumeComponentParams param) {
             Func<int, int, bool[,], BlockType> sloping = param.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
                 ? SlopeHelper.SimpleSlopes
                 : param.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
@@ -118,19 +118,19 @@ public static class FloorGen {
     /// <summary>
     ///     Fills top and bottom of volume, adds support struts in the middle
     /// </summary>
-    public class FloorGenerator4 : IVolumeComponentGenerator {
-        public HashSet<ComponentTag> GetPossibleTags() {
+    public class FloorGenerator4 : VolumeComponentGenerator {
+        public override HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.FloorHollow,
                 ComponentTag.Elevated
             ];
         }
 
-        public bool CanGenerate(VolumeComponentParams componentParams) {
+        public override bool CanGenerate(VolumeComponentParams componentParams) {
             return componentParams.Component.Volume.GetTrueSize(false).average >= 3;
         }
 
-        public bool Generate(VolumeComponentParams param) {
+        public override bool Generate(VolumeComponentParams param) {
             bool elevated = param.Component.TagsRequired.Contains(ComponentTag.Elevated);
             int xStart = param.Component.Volume.BoundingBox.topLeft.X;
             int[] topY = new int[param.Component.Volume.Size.X];

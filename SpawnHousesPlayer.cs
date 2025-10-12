@@ -6,7 +6,7 @@ using Terraria.ModLoader;
 
 namespace SpawnHouses;
 
-public class Player : ModPlayer {
+public class SpawnHousesPlayer : ModPlayer {
     private int _frameCounter;
 
     public override void OnEnterWorld() {

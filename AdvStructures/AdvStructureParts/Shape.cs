@@ -62,9 +62,8 @@ public class Shape : PointGeometry {
     }
 
     protected sealed override void Init(Point16[] points, bool optimize) {
+        Points = points;
         switch (points.Length) {
-            case < 2:
-                throw new ArgumentException("Shape must have at least 2 points.");
             case 2:
                 Points = [
                     new Point16(points[0].X, points[0].Y),
@@ -76,10 +75,9 @@ public class Shape : PointGeometry {
                 break;
             default:
                 if (points.Length <= 3) {
-                    Points = points;
                     break;
                 }
-
+                
                 if (optimize) OptimizePoints(true);
 
                 switch (Points.Length) {
@@ -152,85 +150,7 @@ public class Shape : PointGeometry {
         Init(pointsArray, optimize);
     }
 
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-
-    #region Point Geometry Helpers
-
-    /// <summary>
-    ///     gets the slope between the start and end points
-    /// </summary>
-    /// <param name="start"></param>
-    /// <param name="end"></param>
-    /// <returns></returns>
-    private static float GetSlope(Point16 start, Point16 end) {
-        return (float)(end.Y - start.Y) / (end.X - start.X);
-    }
-
-    /// <summary>
-    ///     gets the angle between the 2 lines, or the angle formed by the middle point
-    /// </summary>
-    /// <param name="start"></param>
-    /// <param name="middle"></param>
-    /// <param name="end"></param>
-    /// <returns></returns>
-    private static float GetAngle(Point16 start, Point16 middle, Point16 end) {
-        // Create vectors BA and BC
-        float v1X = start.X - middle.X;
-        float v1Y = start.Y - middle.X;
-        float v2X = end.X - middle.X;
-        float v2Y = end.Y - middle.Y;
-
-        double dot = v1X * v2X + v1Y * v2Y;
-        double mag1 = Math.Sqrt(v1X * v1X + v1Y * v1Y);
-        double mag2 = Math.Sqrt(v2X * v2X + v2Y * v2Y);
-
-        if (mag1 == 0 || mag2 == 0) // avoid division by zero
-            return 0f;
-
-        double cosTheta = Math.Max(-1, Math.Min(1, dot / (mag1 * mag2)));
-        return (float)(Math.Acos(cosTheta) * (180.0 / Math.PI));
-    }
-
-    /// <summary>
-    ///     removes sets of vertices that affect the angle of their lines by less than <see cref="significantAngle" />
-    /// </summary>
-    /// <param name="significantAngle"></param>
-    /// <param name="maxSetSize">the largest number of points to consider in a single "set" to collapse. has serious effect on speed</param>
-    /// <returns></returns>
-    public List<Point16> CollapseVertices(float significantAngle = 10f, int maxSetSize = 3) {
-        if (Points.Length <= maxSetSize + 2) return Points.ToList();
-
-        HashSet<int> removedIndexes = [];
-
-        // TODO: maybe add a system for repeating sets when necessary??
-        for (int setSize = maxSetSize; setSize >= 1; setSize--)
-        for (int i = 0; i < Points.Length; i++) {
-            Point16 start = Points[i];
-            Point16 end = Points[(i + setSize + 1) % Points.Length];
-            int xSum = 0, ySum = 0;
-            for (int newPointIndex = 0; newPointIndex < setSize; newPointIndex++) {
-                Point16 point = Points[(i + newPointIndex) % Points.Length];
-                xSum += point.X;
-                ySum += point.Y;
-            }
-
-            Point16 averagePoint = new(xSum / setSize, ySum / setSize);
-
-            // ignore the set if the angle is significant
-            if (180 - GetAngle(start, averagePoint, end) >= significantAngle) continue;
-
-            for (int newPointIndex = 0; newPointIndex < setSize; newPointIndex++) removedIndexes.Add((i + newPointIndex) % Points.Length);
-        }
-
-        var returnList = ((Point16[])Points.Clone()).ToList();
-        for (int i = Points.Length - 1; i >= 0; i--)
-            if (removedIndexes.Contains(i))
-                returnList.RemoveAt(i);
-
-        return returnList;
-    }
-
-    #endregion
+#pragma warning restore CS8618
 
 
     #region Shape Self-Geometry
@@ -366,7 +286,6 @@ public class Shape : PointGeometry {
         Shape expandedShape = GetExpandedShape(1);
 
         foreach (Point16 point in expandedShape.CollapseVertices(significantAngle)) {
-            Console.WriteLine(point);
             bool xCorner = point.X != expandedShape.BoundingBox.topLeft.X
                            && point.X != expandedShape.BoundingBox.bottomRight.X;
             bool yCorner = point.Y != expandedShape.BoundingBox.topLeft.Y
@@ -723,7 +642,7 @@ public class Shape : PointGeometry {
         var lower = new List<Point16>();
         foreach (Point16 p in points) {
             while (lower.Count >= 2 &&
-                   Cross(lower[lower.Count - 2], lower[lower.Count - 1], p) <= 0)
+                   Cross(lower[^2], lower[^1], p) <= 0)
                 lower.RemoveAt(lower.Count - 1);
             lower.Add(p);
         }
@@ -732,7 +651,7 @@ public class Shape : PointGeometry {
         for (int i = points.Count - 1; i >= 0; i--) {
             Point16 p = points[i];
             while (upper.Count >= 2 &&
-                   Cross(upper[upper.Count - 2], upper[upper.Count - 1], p) <= 0)
+                   Cross(upper[^2], upper[^1], p) <= 0)
                 upper.RemoveAt(upper.Count - 1);
             upper.Add(p);
         }

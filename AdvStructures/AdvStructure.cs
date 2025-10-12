@@ -125,10 +125,10 @@ public class AdvStructure {
         }
     }
 
-    private IComponentGenerator GetComponentGenerator(ComponentParams componentParams, IComponentGenerator[] generators) {
+    private ComponentGenerator GetComponentGenerator(ComponentParams componentParams, ComponentGenerator[] generators) {
         var validGenerators = generators.Where(gen => gen.CanGenerate(componentParams)
-                                                      && gen.GetPossibleTags().IsSubsetOf(componentParams.Component.TagsRequired)
-                                                      && !gen.GetPossibleTags().Overlaps(componentParams.Component.TagsBlacklist))
+                                                      && componentParams.Component.TagsRequired.IsSubsetOf(gen.GetPossibleTags())
+                                                      && !componentParams.Component.TagsBlacklist.Overlaps(gen.GetPossibleTags()))
             .ToList();
         
         if (validGenerators.Count == 0)
@@ -152,24 +152,24 @@ public class AdvStructure {
         if (false) //(!HasLayout)
             throw new Exception("No layout has been set");
 
-        List<IVolumeComponent> components = [];
+        List<IComponent> components = [];
         components.AddRange(ExternalLayout.Floors);
         components.AddRange(ExternalLayout.Walls);
         components.AddRange(ExternalLayout.Gaps);
-        // components.AddRange(ExternalLayout.Roofs);
-        components.AddRange(Layout.Floors);
-        components.AddRange(Layout.Walls);
-        components.AddRange(Layout.Gaps);
-        components.AddRange(Layout.Rooms);
-        
-        Dictionary<Type, List<IComponentGenerator>> generatorQueue = [];
+        components.AddRange(ExternalLayout.Roofs);
+        // components.AddRange(Layout.Floors);
+        // components.AddRange(Layout.Walls);
+        // components.AddRange(Layout.Gaps);
+        // components.AddRange(Layout.Rooms);
+
+        Dictionary<Type, List<ComponentGenerator>> generatorQueue = [];
         for (int i = 0; i < components.Count; i++) {
             IComponent component = components[i];
             ComponentParams componentParams = ComponentUtils.CreateComponentParamsForType(component, Params.Palette, Tilemap);
             ComponentUtils.ValidateComponent(component);
             component.Id = (ushort)i;
-            
-            IComponentGenerator[] generators;
+
+            ComponentGenerator[] generators;
             switch (component) {
                 case Floor:
                     generators = FloorGenerators;
@@ -196,8 +196,7 @@ public class AdvStructure {
                     break;
                 }
             }
-            
-            componentParams.Component = component;
+
             int generatorIndex = 0;
             Type componentType = component.GetType();
             if (!generatorQueue.TryGetValue(componentType, out var generatorList)) {
@@ -239,34 +238,34 @@ public class AdvStructure {
     #region Generators
 
     public static IStructureLayoutGenerator[] StructureLayoutGenerators;
-    public static IComponentGenerator[] FloorGenerators;
-    public static IComponentGenerator[] WallGenerators;
-    public static IComponentGenerator[] BackgroundGenerators;
-    public static IComponentGenerator[] StairwayGenerators;
-    public static IComponentGenerator[] DecorGenerators;
-    public static IComponentGenerator[] RoofGenerators;
-    public static IComponentGenerator[] GapGenerators;
-    public static IComponentGenerator[] DebugGenerators;
+    public static ComponentGenerator[] FloorGenerators;
+    public static ComponentGenerator[] WallGenerators;
+    public static ComponentGenerator[] BackgroundGenerators;
+    public static ComponentGenerator[] StairwayGenerators;
+    public static ComponentGenerator[] DecorGenerators;
+    public static ComponentGenerator[] RoofGenerators;
+    public static ComponentGenerator[] GapGenerators;
+    public static ComponentGenerator[] DebugGenerators;
 
     public static void PopulateGenerators() {
         var types = typeof(StructureLayoutGen).GetNestedTypes();
         StructureLayoutGenerators = types.Select(t => Activator.CreateInstance(t) as IStructureLayoutGenerator).ToArray();
         types = typeof(FloorGen).GetNestedTypes();
-        FloorGenerators = types.Select(t => Activator.CreateInstance(t) as IComponentGenerator).ToArray();
+        FloorGenerators = types.Select(t => Activator.CreateInstance(t) as ComponentGenerator).ToArray();
         types = typeof(WallGen).GetNestedTypes();
-        WallGenerators = types.Select(t => Activator.CreateInstance(t) as IComponentGenerator).ToArray();
+        WallGenerators = types.Select(t => Activator.CreateInstance(t) as ComponentGenerator).ToArray();
         types = typeof(BackgroundGen).GetNestedTypes();
-        BackgroundGenerators = types.Select(t => Activator.CreateInstance(t) as IComponentGenerator).ToArray();
+        BackgroundGenerators = types.Select(t => Activator.CreateInstance(t) as ComponentGenerator).ToArray();
         types = typeof(StairwayGen).GetNestedTypes();
-        StairwayGenerators = types.Select(t => Activator.CreateInstance(t) as IComponentGenerator).ToArray();
+        StairwayGenerators = types.Select(t => Activator.CreateInstance(t) as ComponentGenerator).ToArray();
         types = typeof(DecorGen).GetNestedTypes();
-        DecorGenerators = types.Select(t => Activator.CreateInstance(t) as IComponentGenerator).ToArray();
+        DecorGenerators = types.Select(t => Activator.CreateInstance(t) as ComponentGenerator).ToArray();
         types = typeof(RoofGen).GetNestedTypes();
-        RoofGenerators = types.Select(t => Activator.CreateInstance(t) as IComponentGenerator).ToArray();
+        RoofGenerators = types.Select(t => Activator.CreateInstance(t) as ComponentGenerator).ToArray();
         types = typeof(GapGen).GetNestedTypes();
-        GapGenerators = types.Select(t => Activator.CreateInstance(t) as IComponentGenerator).ToArray();
+        GapGenerators = types.Select(t => Activator.CreateInstance(t) as ComponentGenerator).ToArray();
         types = typeof(DebugGen).GetNestedTypes();
-        DebugGenerators = types.Select(t => Activator.CreateInstance(t) as IComponentGenerator).ToArray();
+        DebugGenerators = types.Select(t => Activator.CreateInstance(t) as ComponentGenerator).ToArray();
     }
 
     #endregion

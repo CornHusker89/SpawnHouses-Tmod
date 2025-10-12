@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using Terraria.DataStructures;
 
@@ -9,9 +11,35 @@ public abstract class PointGeometry {
     protected abstract void Init(Point16[] points, bool optimize);
 
     /// <summary>
+    /// </summary>
+    /// <param name="pointIndex">index in <see cref="Points" /> to start at, ends at this +1</param>
+    /// <returns></returns>
+    /// <remarks>will not wrap around, beware of out-of-bounds errors</remarks>
+    public float GetSlope(int pointIndex) {
+        return (float)(Points[pointIndex].Y - Points[pointIndex + 1].Y) / (Points[pointIndex].X - Points[pointIndex + 1].X);
+    }
+
+    public static float GetSlope(Point16 point1, Point16 point2) {
+        return (float)(point2.Y - point1.Y) / (point2.X - point1.X);
+    }
+
+    /// <summary>
+    /// </summary>
+    /// <param name="first"></param>
+    /// <param name="middle"></param>
+    /// <param name="last"></param>
+    /// <returns></returns>
+    protected bool IsMiddlePointNeeded(Point16 first, Point16 middle, Point16 last) {
+        float firstToLastSlope = GetSlope(first, last);
+        float firstToMiddleSlope = GetSlope(first, middle);
+        float middleToLastSlope = GetSlope(middle, last);
+        return Math.Abs(firstToLastSlope - firstToMiddleSlope) > 0.05 || Math.Abs(firstToLastSlope - middleToLastSlope) > 0.05;
+    }
+
+    /// <summary>
     ///     removes extra points in shape.
     /// </summary>
-    /// <param name="wrapAround">if true, loop will assume that the first and last points are connected</param>
+    /// <param name="wrapAround">if true, will assume that the first and last points are connected</param>
     /// <returns></returns>
     /// <remarks>destructive, returns the input list</remarks>
     public void OptimizePoints(bool wrapAround) {
@@ -19,7 +47,7 @@ public abstract class PointGeometry {
         for (int i = wrapAround ? 0 : 1; i < (wrapAround ? newPoints.Count : newPoints.Count - 1); i++) {
             Point16 last = newPoints[i - 1 != -1 ? i - 1 : newPoints.Count - 1];
             Point16 target = newPoints[i];
-            Point16 next = newPoints[i + 1 != newPoints.Count ? i + 1 : 0];
+            Point16 next = newPoints[(i + 1) % newPoints.Count];
 
             if (newPoints.Count == 1) break;
 
@@ -29,8 +57,7 @@ public abstract class PointGeometry {
                 continue; // so that we don't interfere with the next condition
             }
 
-            if ((target.X == last.X && target.X == next.X && ((last.Y < target.Y && target.Y < next.Y) || (last.Y > target.Y && target.Y > next.Y)))
-                || (target.Y == last.Y && target.Y == next.Y && ((last.X < target.X && target.X < next.X) || (last.X > target.X && target.X > next.X)))) {
+            if (!IsMiddlePointNeeded(last, target, next)) {
                 newPoints.RemoveAt(i);
                 i--;
             }
@@ -52,5 +79,69 @@ public abstract class PointGeometry {
     public void Offset(Point16 offset) {
         for (int i = 0; i < Points.Length; i++) Points[i] += offset;
         Init(Points, false);
+    }
+
+    /// <summary>
+    ///     gets the angle between the 2 lines, or the angle formed by the middle point
+    /// </summary>
+    /// <param name="start"></param>
+    /// <param name="middle"></param>
+    /// <param name="end"></param>
+    /// <returns></returns>
+    private static float GetAngle(Point16 start, Point16 middle, Point16 end) {
+        // Create vectors BA and BC
+        float v1X = start.X - middle.X;
+        float v1Y = start.Y - middle.X;
+        float v2X = end.X - middle.X;
+        float v2Y = end.Y - middle.Y;
+
+        double dot = v1X * v2X + v1Y * v2Y;
+        double mag1 = Math.Sqrt(v1X * v1X + v1Y * v1Y);
+        double mag2 = Math.Sqrt(v2X * v2X + v2Y * v2Y);
+
+        if (mag1 == 0 || mag2 == 0) // avoid division by zero
+            return 0f;
+
+        double cosTheta = Math.Max(-1, Math.Min(1, dot / (mag1 * mag2)));
+        return (float)(Math.Acos(cosTheta) * (180.0 / Math.PI));
+    }
+
+    /// <summary>
+    ///     removes sets of vertices that affect the angle of their lines by less than <see cref="significantAngle" />
+    /// </summary>
+    /// <param name="significantAngle"></param>
+    /// <param name="maxSetSize">the largest number of points to consider in a single "set" to collapse. has serious effect on speed</param>
+    /// <returns></returns>
+    public List<Point16> CollapseVertices(float significantAngle = 10f, int maxSetSize = 3) {
+        if (Points.Length <= maxSetSize + 2) return Points.ToList();
+
+        HashSet<int> removedIndexes = [];
+
+        // TODO: maybe add a system for repeating sets when necessary??
+        for (int setSize = maxSetSize; setSize >= 1; setSize--)
+        for (int i = 0; i < Points.Length; i++) {
+            Point16 start = Points[i];
+            Point16 end = Points[(i + setSize + 1) % Points.Length];
+            int xSum = 0, ySum = 0;
+            for (int newPointIndex = 0; newPointIndex < setSize; newPointIndex++) {
+                Point16 point = Points[(i + newPointIndex) % Points.Length];
+                xSum += point.X;
+                ySum += point.Y;
+            }
+
+            Point16 averagePoint = new(xSum / setSize, ySum / setSize);
+
+            // ignore the set if the angle is significant
+            if (180 - GetAngle(start, averagePoint, end) >= significantAngle) continue;
+
+            for (int newPointIndex = 0; newPointIndex < setSize; newPointIndex++) removedIndexes.Add((i + newPointIndex) % Points.Length);
+        }
+
+        var returnList = ((Point16[])Points.Clone()).ToList();
+        for (int i = Points.Length - 1; i >= 0; i--)
+            if (removedIndexes.Contains(i))
+                returnList.RemoveAt(i);
+
+        return returnList;
     }
 }

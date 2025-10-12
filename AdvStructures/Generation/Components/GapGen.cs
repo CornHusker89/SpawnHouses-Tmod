@@ -7,8 +7,8 @@ public class GapGen {
     /// <summary>
     ///     A gap floor, places platforms
     /// </summary>
-    public class FloorGapGenerator1 : IVolumeComponentGenerator {
-        public HashSet<ComponentTag> GetPossibleTags() {
+    public class FloorGapGenerator1 : VolumeComponentGenerator {
+        public override HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.IsFloorGap,
                 ComponentTag.Elevated,
@@ -18,7 +18,7 @@ public class GapGen {
             ];
         }
 
-        public bool Generate(VolumeComponentParams param) {
+        public override bool Generate(VolumeComponentParams param) {
             int xStart = param.Component.Volume.BoundingBox.topLeft.X;
             int[] topY = new int[param.Component.Volume.Size.X];
             int[] bottomY = new int[param.Component.Volume.Size.X];
@@ -53,8 +53,8 @@ public class GapGen {
     /// <summary>
     ///     Fills a volume with random background walls
     /// </summary>
-    public class WallGapGenerator1 : IVolumeComponentGenerator {
-        public HashSet<ComponentTag> GetPossibleTags() {
+    public class WallGapGenerator1 : VolumeComponentGenerator {
+        public override HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.IsWallGap,
                 ComponentTag.Elevated,
@@ -64,7 +64,7 @@ public class GapGen {
             ];
         }
 
-        public bool Generate(VolumeComponentParams param) {
+        public override bool Generate(VolumeComponentParams param) {
             if (!param.Component.TagsRequired.Contains(ComponentTag.External))
                 param.Component.Volume.ExecuteInArea((x, y) => { param.Tilemap.PlaceWall(x, y, PaintedType.PickRandom(param.Palette.BackgroundWallAlt)); });
             return true;

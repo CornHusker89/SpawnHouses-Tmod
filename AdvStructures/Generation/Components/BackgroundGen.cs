@@ -7,14 +7,14 @@ public static class BackgroundGen {
     /// <summary>
     ///     Fills mostly with random walls, but has specific walls on bottom edge
     /// </summary>
-    public class BackgroundGenerator1 : IVolumeComponentGenerator {
-        public HashSet<ComponentTag> GetPossibleTags() {
+    public class BackgroundGenerator1 : VolumeComponentGenerator {
+        public override HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.BackgroundIsHousingValid
             ];
         }
 
-        public bool Generate(VolumeComponentParams param) {
+        public override bool Generate(VolumeComponentParams param) {
             param.Component.Volume.ExecuteInArea((x, y) => {
                 if (y == param.Component.Volume.BoundingBox.bottomRight.Y)
                     param.Tilemap.PlaceWall(x, y, PaintedType.PickRandom(param.Palette.BackgroundRoomAlt));
@@ -31,14 +31,14 @@ public static class BackgroundGen {
     /// <summary>
     ///     Fills mostly with random walls, but places main walls on bottom 3
     /// </summary>
-    public class BackgroundGenerator2 : IVolumeComponentGenerator {
-        public HashSet<ComponentTag> GetPossibleTags() {
+    public class BackgroundGenerator2 : VolumeComponentGenerator {
+        public override HashSet<ComponentTag> GetPossibleTags() {
             return [
                 ComponentTag.BackgroundIsHousingValid
             ];
         }
 
-        public bool Generate(VolumeComponentParams param) {
+        public override bool Generate(VolumeComponentParams param) {
             int bottomY = param.Component.Volume.BoundingBox.bottomRight.Y;
             param.Component.Volume.ExecuteInArea((x, y) => {
                 if (y == bottomY || y == bottomY - 1 || y == bottomY - 2)

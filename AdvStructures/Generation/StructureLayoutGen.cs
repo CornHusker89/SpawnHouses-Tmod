@@ -97,7 +97,7 @@ public static class StructureLayoutGen {
 
             // structure parameters that are dependent on tilemap position
             int floorTopY = upper.End.Y + 1 + verticalOffset;
-            int roofHeightModifier = p.Height / 5 + 1; // if uneven roof, adjust each side by this much
+            int roofHeightModifier = (int)((p.Height / 5.6 + 2) * Terraria.WorldGen.genRand.NextFloat(1, 1.25f)); // if uneven roof, adjust each side by this much
             int upperRoofBottomY = floorTopY - p.Height + 1;
             if (hasHigherSide && upperRoofBottomY + roofHeightModifier >= (leftRoofHigher ? right.Start.Y : left.Start.Y)) // check that an uneven roof won't cause collision with entry points
                 hasHigherSide = false;
