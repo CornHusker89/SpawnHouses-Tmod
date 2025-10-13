@@ -556,25 +556,6 @@ public class Shape : PointGeometry {
         return true;
     }
 
-    private bool RayIntersectsSegment(Point16 point, Point16 segmentStart, Point16 segmentEnd) {
-        if (segmentStart.Y > segmentEnd.Y)
-            (segmentStart, segmentEnd) = (segmentEnd, segmentStart);
-
-        // check if the point is outside the segment's Y range
-        if (point.Y <= segmentStart.Y || point.Y > segmentEnd.Y)
-            return false;
-
-        // check if the point is to the right of the segment
-        if (point.X >= Math.Max(segmentStart.X, segmentEnd.X))
-            return false;
-
-        // check for intersection
-        double slope = (segmentEnd.X - segmentStart.X) / (double)(segmentEnd.Y - segmentStart.Y);
-        double intersectX = segmentStart.X + (point.Y - segmentStart.Y) * slope;
-
-        return point.X < intersectX;
-    }
-
     private List<Point16> GetUniqueAxes(Shape shape) {
         List<Point16> axes = [];
 
@@ -665,10 +646,6 @@ public class Shape : PointGeometry {
         return lower;
     }
 
-    private static int Cross(Point16 o, Point16 a, Point16 b) {
-        return (a.X - o.X) * (b.Y - o.Y) - (a.Y - o.Y) * (b.X - o.X);
-    }
-
     #endregion
 
 
@@ -708,7 +685,7 @@ public class Shape : PointGeometry {
 
             if (currentInside != nextInside) // edge crosses the clipping boundary
             {
-                Point16 intersectPoint = Intersect(current, next, cutXAxis, cutCoord);
+                Point16 intersectPoint = GetIntersectionPoint(current, next, cutXAxis, cutCoord);
 
                 // move the intersect point so that it's outside the cut instead of directly on it
                 if (!includeCut)
@@ -738,24 +715,6 @@ public class Shape : PointGeometry {
         if (cutXAxis)
             return keepLower ? point.Y < cutCoord : point.Y > cutCoord;
         return keepLower ? point.X < cutCoord : point.X > cutCoord;
-    }
-
-    private Point16 Intersect(Point16 p1, Point16 p2, bool cutXAxis, int cutCoord) {
-        int dx = p2.X - p1.X;
-        int dy = p2.Y - p1.Y;
-
-        if (cutXAxis) {
-            if (dy == 0) return new Point16(p1.X, cutCoord); // horizontal line edge case
-            double t = (cutCoord - p1.Y) / (double)dy;
-            int newX = (int)Math.Round(p1.X + t * dx);
-            return new Point16(newX, cutCoord);
-        }
-        else {
-            if (dx == 0) return new Point16(cutCoord, p1.Y); // vertical line edge case
-            double t = (cutCoord - p1.X) / (double)dx;
-            int newY = (int)Math.Round(p1.Y + t * dy);
-            return new Point16(cutCoord, newY);
-        }
     }
 
     #endregion

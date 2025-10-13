@@ -144,4 +144,45 @@ public abstract class PointGeometry {
 
         return returnList;
     }
+
+    protected static bool RayIntersectsSegment(Point16 point, Point16 segmentStart, Point16 segmentEnd) {
+        if (segmentStart.Y > segmentEnd.Y)
+            (segmentStart, segmentEnd) = (segmentEnd, segmentStart);
+
+        // check if the point is outside the segment's Y range
+        if (point.Y <= segmentStart.Y || point.Y > segmentEnd.Y)
+            return false;
+
+        // check if the point is to the right of the segment
+        if (point.X >= Math.Max(segmentStart.X, segmentEnd.X))
+            return false;
+
+        // check for intersection
+        double slope = (segmentEnd.X - segmentStart.X) / (double)(segmentEnd.Y - segmentStart.Y);
+        double intersectX = segmentStart.X + (point.Y - segmentStart.Y) * slope;
+
+        return point.X < intersectX;
+    }
+
+    protected static int Cross(Point16 o, Point16 a, Point16 b) {
+        return (a.X - o.X) * (b.Y - o.Y) - (a.Y - o.Y) * (b.X - o.X);
+    }
+
+    protected static Point16 GetIntersectionPoint(Point16 segmentStart, Point16 segmentEnd, bool cutXAxis, int cutCoord) {
+        int dx = segmentEnd.X - segmentStart.X;
+        int dy = segmentEnd.Y - segmentStart.Y;
+
+        if (cutXAxis) {
+            if (dy == 0) return new Point16(segmentStart.X, cutCoord); // horizontal line edge case
+            double t = (cutCoord - segmentStart.Y) / (double)dy;
+            int newX = (int)Math.Round(segmentStart.X + t * dx);
+            return new Point16(newX, cutCoord);
+        }
+        else {
+            if (dx == 0) return new Point16(cutCoord, segmentStart.Y); // vertical line edge case
+            double t = (cutCoord - segmentStart.X) / (double)dx;
+            int newY = (int)Math.Round(segmentStart.Y + t * dy);
+            return new Point16(cutCoord, newY);
+        }
+    }
 }

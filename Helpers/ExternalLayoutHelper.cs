@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Types;
+using Terraria;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Helpers;
@@ -160,67 +161,85 @@ public class ExternalLayoutHelper {
     }
 
     /// <summary>
-    ///     creates a basic 1 or 2-segment roof, can create roof slopes and can handle different starting and ending Ys
+    ///     creates a basic muti-segment roof, can create roof slopes and can handle different starting and ending Ys
     /// </summary>
     /// <param name="left">X must be less than <see cref="right" />'s X</param>
     /// <param name="right">X must be greater than <see cref="left" />'s X</param>
-    /// <param name="p"></param>
     /// <param name="floorThickness"></param>
     /// <param name="wallThickness"></param>
     /// <returns></returns>
-    public static (List<Floor> floors, List<Wall> walls, List<Roof> roofs) CreateBasicRoof(Point16 left, Point16 right, StructureParams p, int floorThickness, int wallThickness) {
-        double[] validRoofSlopes = [0.5, 1, 1.5, 2];
+    public static (List<Floor> floors, List<Wall> walls, List<Roof> roofs) CreateBasicRoof(Point16 left, Point16 right, int floorThickness, int wallThickness) {
+        double[] validSplitRoofSlopes = [0.67, 1, 1.5, 2];
+        double[] validSingleRoofSlopes = [1, 1.33];
+        int startX = left.X + 1 - wallThickness;
+        int endX = right.X - 1 + wallThickness;
+        int fullLength = right.X - left.X - 2 + 2 * wallThickness;
         bool hasHigherSide = left.Y != right.Y;
         bool leftRoofHigher = left.Y < right.Y;
         int upperRoofBottomY = int.Min(left.Y, right.Y);
         int lowerRoofBottomY = int.Max(left.Y, right.Y);
-        int unevenRoofStartX = Terraria.WorldGen.genRand.Next(p.StartEntryPointX + (int)(p.Length * 0.4), p.StartEntryPointX + (int)(p.Length * 0.6))
-                               + (int)(p.Length * 0.14) * (leftRoofHigher ? 1 : -1);
-        bool hasSlopedSideRoof = Terraria.WorldGen.genRand.NextDouble() < 0.75;
-        bool hasRoofPeak = Terraria.WorldGen.genRand.NextDouble() < 0.9;
-        double peakRoofSlope = validRoofSlopes[Terraria.WorldGen.genRand.Next(validRoofSlopes.Length)];
+        int unevenRoofStartX = leftRoofHigher
+            ? Terraria.WorldGen.genRand.Next(startX + (int)(fullLength * 0.5), endX - (int)(fullLength * 0.35))
+            : Terraria.WorldGen.genRand.Next(startX + (int)(fullLength * 0.35), endX - (int)(fullLength * 0.5));
+        bool hasSplitRoof = hasHigherSide && Terraria.WorldGen.genRand.NextBool(2, 3);
+        bool hasSlopedSideRoof = Terraria.WorldGen.genRand.NextBool(3, 4);
+        bool hasRoofPeak = Terraria.WorldGen.genRand.NextBool(9, 10);
+        double peakRoofSlope = Terraria.WorldGen.genRand.NextFromList(hasSplitRoof ? validSplitRoofSlopes : validSingleRoofSlopes);
         double sideRoofSlope = double.Min(peakRoofSlope, 0.5);
 
         List<Point16> path;
-        if (hasHigherSide) {
+        if (hasSplitRoof) {
             int lowerRoofLength = leftRoofHigher
-                ? p.EndEntryPointX - 1 + wallThickness - unevenRoofStartX
-                : unevenRoofStartX - (p.StartEntryPointX + 1 - wallThickness);
+                ? endX - unevenRoofStartX
+                : unevenRoofStartX - startX;
             if (hasSlopedSideRoof) {
                 int lowerRoofOffset = (int)(sideRoofSlope * lowerRoofLength);
                 path = [
-                    new Point16(p.StartEntryPointX + 1 - wallThickness, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
+                    new Point16(startX, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
                     new Point16(unevenRoofStartX, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY - lowerRoofOffset),
                     new Point16(unevenRoofStartX, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY - lowerRoofOffset),
-                    new Point16(p.EndEntryPointX - 1 + wallThickness, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY)
+                    new Point16(endX, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY)
                 ];
             }
             else {
                 path = [
-                    new Point16(p.StartEntryPointX + 1 - wallThickness, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
+                    new Point16(startX, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
                     new Point16(unevenRoofStartX, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
                     new Point16(unevenRoofStartX, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
-                    new Point16(p.EndEntryPointX - 1 + wallThickness, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY)
+                    new Point16(endX, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY)
                 ];
             }
 
             // add roof peak if required
             if (hasRoofPeak) {
-                int higherRoofLength = p.Length - lowerRoofLength;
+                int higherRoofLength = fullLength - lowerRoofLength;
                 int roofPeakX = leftRoofHigher
-                    ? (int)(p.StartEntryPointX + 1 - wallThickness + higherRoofLength * 0.5)
-                    : (int)(unevenRoofStartX + higherRoofLength * 0.5);
+                    ? (int)Math.Ceiling(startX + higherRoofLength * 0.5)
+                    : (int)Math.Ceiling(unevenRoofStartX + higherRoofLength * 0.5);
                 int roofPeakOffset = (int)(peakRoofSlope * 0.5 * higherRoofLength);
                 path.Insert(leftRoofHigher ? 1 : 3, new Point16(roofPeakX, upperRoofBottomY - roofPeakOffset));
+                if (higherRoofLength % 2 == 1) path.Insert(leftRoofHigher ? 1 : 3, new Point16(roofPeakX - 1, upperRoofBottomY - roofPeakOffset));
             }
         }
         else {
-            int roofLength = p.EndEntryPointX - p.StartEntryPointX;
-            path = [
-                new Point16(p.StartEntryPointX + 1 - wallThickness, upperRoofBottomY),
-                new Point16(p.StartEntryPointX + roofLength / 2, upperRoofBottomY - (int)(peakRoofSlope * roofLength * 0.5)),
-                new Point16(p.EndEntryPointX - 1 + wallThickness, upperRoofBottomY)
-            ];
+            if (hasHigherSide) {
+                double middleX = (peakRoofSlope * (startX + endX) - (right.Y - left.Y)) / (2 * peakRoofSlope);
+                Point16 middlePoint = new((int)Math.Ceiling(middleX), (int)(left.Y - peakRoofSlope * (middleX - startX)));
+
+                path = [
+                    new Point16(startX, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
+                    middlePoint,
+                    new Point16(endX, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY)
+                ];
+            }
+            else {
+                path = [
+                    new Point16(startX, upperRoofBottomY),
+                    new Point16(startX + fullLength / 2, upperRoofBottomY - (int)(peakRoofSlope * fullLength * 0.5)),
+                    new Point16(endX, upperRoofBottomY)
+                ];
+                if (fullLength % 2 == 1) path.Insert(2, new Point16(startX + 1 + fullLength / 2, upperRoofBottomY - (int)(peakRoofSlope * fullLength * 0.5)));
+            }
         }
 
         var result = CreateTopFloorsWallsRoofs(

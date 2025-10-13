@@ -240,18 +240,15 @@ public static class RoofGen {
                 offsets[i + 1] -= offsetFromSlope;
             }
 
-            Console.WriteLine(PointGeometry.GetSlope(offsetPath.Points[0], offsetPath.Points[1]));
-            Console.WriteLine(PointGeometry.GetSlope(offsetPath.Points[^1], offsetPath.Points[^2]));
-            offsets[0] *= 1;
-            offsets[^1] *= 1;
-
-            for (int i = 0; i < offsetPath.Points.Length; i++) offsetPath.Points[i] += new Point16(0, offsets[i] - (isPathFlat ? 1 : 3));
+            for (int i = 0; i < offsetPath.Points.Length; i++) offsetPath.Points[i] += new Point16(0, offsets[i] - (isPathFlat ? 1 : 2));
 
             Shape shape = offsetPath.ToShape(isPathFlat ? 2 : 3);
             shape.ExecuteInArea((x, y, blockType) => { param.Tilemap.PlaceTile(x, y, param.Palette.RoofMain, blockType); }, SlopeHelper.SmoothTop);
 
             shape.Offset(new Point16(0, 2));
-            shape.ExecuteInArea((x, y) => { param.Tilemap.PlaceWall(x, y, param.Palette.BackgroundRoofMain); });
+            shape.ExecuteInArea((x, y) => {
+                if (x != 0 && x != shape.Size.X - 1) param.Tilemap.PlaceWall(x, y, param.Palette.BackgroundRoofMain);
+            });
             
             return true;
         }

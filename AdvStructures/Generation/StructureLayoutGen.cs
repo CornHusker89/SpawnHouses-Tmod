@@ -58,8 +58,8 @@ public static class StructureLayoutGen {
                 0.3f
             );
 
-            const int tilemapMargin = 5;
-            const int roofMargin = 24;
+            const int tilemapMargin = 7;
+            const int roofMargin = 35;
             
             // TODO: compensate structure volume and roofMargin for the roof volume itself
 
@@ -69,7 +69,7 @@ public static class StructureLayoutGen {
             int externalWallThickness = roomLayoutParams.WallWidth.Max;
             int externalFloorThickness = roomLayoutParams.FloorWidth.Max;
             int verticalOffset = hasBasement ? 7 : 0;
-            bool hasHigherSide = Terraria.WorldGen.genRand.NextDouble() < 0.75;
+            bool hasHigherSide = Terraria.WorldGen.genRand.NextDouble() < 0.85;
             bool leftRoofHigher = Terraria.WorldGen.genRand.NextBool();
 
             advStructure.Tilemap = new StructureTilemap(
@@ -97,7 +97,7 @@ public static class StructureLayoutGen {
 
             // structure parameters that are dependent on tilemap position
             int floorTopY = upper.End.Y + 1 + verticalOffset;
-            int roofHeightModifier = (int)((p.Height / 5.6 + 2) * Terraria.WorldGen.genRand.NextFloat(1, 1.25f)); // if uneven roof, adjust each side by this much
+            int roofHeightModifier = (int)((p.Height / 6.3 + 2) * Terraria.WorldGen.genRand.NextFloat(1, 1.35f)); // if uneven roof, adjust each side by this much
             int upperRoofBottomY = floorTopY - p.Height + 1;
             if (hasHigherSide && upperRoofBottomY + roofHeightModifier >= (leftRoofHigher ? right.Start.Y : left.Start.Y)) // check that an uneven roof won't cause collision with entry points
                 hasHigherSide = false;
@@ -108,7 +108,6 @@ public static class StructureLayoutGen {
             var (exteriorFloors, exteriorWalls, roofs) = ExternalLayoutHelper.CreateBasicRoof(
                 new Point16(p.StartEntryPointX + 1 - externalWallThickness, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
                 new Point16(p.EndEntryPointX - 1 + externalWallThickness, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
-                p,
                 externalFloorThickness,
                 externalWallThickness
             );
