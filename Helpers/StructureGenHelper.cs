@@ -50,11 +50,11 @@ public static class StructureGenHelper {
     /// </summary>
     /// <param name="start"></param>
     /// <param name="tileID"></param>
-    /// <param name="wallBlacklistIDs"></param>
-    public static void PlaceBush(Point start, ushort tileID = WallID.LivingLeaf, params ushort[] wallBlacklistIDs) {
+    /// <param name="wallBlocklistIDs"></param>
+    public static void PlaceBush(Point start, ushort tileID = WallID.LivingLeaf, params ushort[] wallBlocklistIDs) {
         void PlaceWall(int i, int j) {
             Tile tile = Main.tile[i, j];
-            if (!wallBlacklistIDs.Contains(tile.WallType))
+            if (!wallBlocklistIDs.Contains(tile.WallType))
                 tile.WallType = tileID;
         }
 

@@ -7,8 +7,23 @@ namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
 public abstract class PointGeometry {
     public Point16[] Points;
+    public (Point16 topLeft, Point16 bottomRight) BoundingBox;
+    public Point16 Size;
 
     protected abstract void Init(Point16[] points, bool optimize);
+
+    protected void SetBoundingBoxAndSize() {
+        int minX = int.MaxValue, maxX = 0, minY = int.MaxValue, maxY = 0;
+        foreach (Point16 point in Points) {
+            minX = Math.Min(point.X, minX);
+            maxX = Math.Max(point.X, maxX);
+            minY = Math.Min(point.Y, minY);
+            maxY = Math.Max(point.Y, maxY);
+        }
+
+        BoundingBox = (new Point16(minX, minY), new Point16(maxX, maxY));
+        Size = new Point16(1 + maxX - minX, 1 + maxY - minY);
+    }
 
     /// <summary>
     /// </summary>
@@ -20,6 +35,7 @@ public abstract class PointGeometry {
     }
 
     public static float GetSlope(Point16 point1, Point16 point2) {
+        if (point1.X == point2.X) return float.MaxValue;
         return (float)(point2.Y - point1.Y) / (point2.X - point1.X);
     }
 
@@ -33,7 +49,10 @@ public abstract class PointGeometry {
         float firstToLastSlope = GetSlope(first, last);
         float firstToMiddleSlope = GetSlope(first, middle);
         float middleToLastSlope = GetSlope(middle, last);
-        return Math.Abs(firstToLastSlope - firstToMiddleSlope) > 0.05 || Math.Abs(firstToLastSlope - middleToLastSlope) > 0.05;
+        bool slopeNegligible = Math.Abs(firstToLastSlope - firstToMiddleSlope) < 0.03 && Math.Abs(firstToLastSlope - middleToLastSlope) < 0.03;
+        bool pointXsConsecutive = (first.X <= middle.X && middle.X <= last.X) || (first.X >= middle.X && middle.X >= last.X);
+        bool pointYsConsecutive = (first.Y <= middle.Y && middle.Y <= last.Y) || (first.Y >= middle.Y && middle.Y >= last.Y);
+        return !slopeNegligible || !pointXsConsecutive || !pointYsConsecutive;
     }
 
     /// <summary>
@@ -41,7 +60,7 @@ public abstract class PointGeometry {
     /// </summary>
     /// <param name="wrapAround">if true, will assume that the first and last points are connected</param>
     /// <returns></returns>
-    /// <remarks>destructive, returns the input list</remarks>
+    /// <remarks>destructive, modifies <see cref="Points"/></remarks>
     public void OptimizePoints(bool wrapAround) {
         var newPoints = Points.ToList();
         for (int i = wrapAround ? 0 : 1; i < (wrapAround ? newPoints.Count : newPoints.Count - 1); i++) {
@@ -112,29 +131,42 @@ public abstract class PointGeometry {
     /// <param name="significantAngle"></param>
     /// <param name="maxSetSize">the largest number of points to consider in a single "set" to collapse. has serious effect on speed</param>
     /// <returns></returns>
-    public List<Point16> CollapseVertices(float significantAngle = 10f, int maxSetSize = 3) {
+    public List<Point16> CollapseVertices(float significantAngle = 10f, int maxSetSize = 6) {
         if (Points.Length <= maxSetSize + 2) return Points.ToList();
 
         HashSet<int> removedIndexes = [];
 
-        // TODO: maybe add a system for repeating sets when necessary??
-        for (int setSize = maxSetSize; setSize >= 1; setSize--)
-        for (int i = 0; i < Points.Length; i++) {
-            Point16 start = Points[i];
-            Point16 end = Points[(i + setSize + 1) % Points.Length];
-            int xSum = 0, ySum = 0;
-            for (int newPointIndex = 0; newPointIndex < setSize; newPointIndex++) {
-                Point16 point = Points[(i + newPointIndex) % Points.Length];
-                xSum += point.X;
-                ySum += point.Y;
+        bool removedItem = false;
+        for (int setSize = maxSetSize; setSize >= 1; setSize--) {
+            for (int i = 0; i < Points.Length; i++) {
+                Point16 start = Points[i];
+                Point16 end = Points[(i + setSize + 1) % Points.Length];
+                int xSum = 0, ySum = 0;
+                bool allRemoved = true;
+                for (int newPointIndex = 0; newPointIndex < setSize; newPointIndex++) {
+                    Point16 point = Points[(i + newPointIndex) % Points.Length];
+                    if (!removedIndexes.Contains(i)) allRemoved = false;
+                    xSum += point.X;
+                    ySum += point.Y;
+                }
+
+                if (allRemoved) continue;
+
+                Point16 averagePoint = new(xSum / setSize, ySum / setSize);
+
+                // ignore the set if the angle is significant
+                if (180 - GetAngle(start, averagePoint, end) >= significantAngle) continue;
+
+                for (int newPointIndex = 0; newPointIndex < setSize; newPointIndex++) {
+                    removedIndexes.Add((i + newPointIndex) % Points.Length);
+                    removedItem = true;
+                }
             }
 
-            Point16 averagePoint = new(xSum / setSize, ySum / setSize);
-
-            // ignore the set if the angle is significant
-            if (180 - GetAngle(start, averagePoint, end) >= significantAngle) continue;
-
-            for (int newPointIndex = 0; newPointIndex < setSize; newPointIndex++) removedIndexes.Add((i + newPointIndex) % Points.Length);
+            if (removedItem) {
+                removedItem = false;
+                setSize++;
+            }
         }
 
         var returnList = ((Point16[])Points.Clone()).ToList();

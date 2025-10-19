@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Types;
 
 namespace SpawnHouses.AdvStructures.Generation.Components;
@@ -7,6 +8,7 @@ public static class BackgroundGen {
     /// <summary>
     ///     Fills mostly with random walls, but has specific walls on bottom edge
     /// </summary>
+    [ComponentGenerator(typeof(Room))]
     public class BackgroundGenerator1 : VolumeComponentGenerator {
         public override HashSet<ComponentTag> GetPossibleTags() {
             return [
@@ -31,6 +33,7 @@ public static class BackgroundGen {
     /// <summary>
     ///     Fills mostly with random walls, but places main walls on bottom 3
     /// </summary>
+    [ComponentGenerator(typeof(Room))]
     public class BackgroundGenerator2 : VolumeComponentGenerator {
         public override HashSet<ComponentTag> GetPossibleTags() {
             return [

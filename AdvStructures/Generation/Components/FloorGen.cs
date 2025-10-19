@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Helpers;
 using SpawnHouses.Types;
 using Terraria.ID;
@@ -10,6 +11,7 @@ public static class FloorGen {
     /// <summary>
     ///     Fills a volume with the same floor blocks
     /// </summary>
+    [ComponentGenerator(typeof(Floor))]
     public class FloorGenerator1 : VolumeComponentGenerator {
         public override HashSet<ComponentTag> GetPossibleTags() {
             return [
@@ -22,9 +24,9 @@ public static class FloorGen {
         }
 
         public override bool Generate(VolumeComponentParams param) {
-            Func<int, int, bool[,], BlockType> sloping = param.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
+            Func<int, int, bool[,], BlockType> sloping = param.Component.TagsRequired.ContainsKey(ComponentTag.UseSimpleSloping)
                 ? SlopeHelper.SimpleSlopes
-                : param.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
+                : param.Component.TagsRequired.ContainsKey(ComponentTag.UseSimpleSloping)
                     ? SlopeHelper.HalfSlopes
                     : null;
             param.Component.Volume.ExecuteInArea((x, y, bt) => { param.Tilemap.PlaceTile(x, y, param.Palette.FloorMain, bt); }, sloping);
@@ -35,6 +37,7 @@ public static class FloorGen {
     /// <summary>
     ///     Fills a volume with random floor blocks
     /// </summary>
+    [ComponentGenerator(typeof(Floor))]
     public class FloorGenerator2 : VolumeComponentGenerator {
         public override HashSet<ComponentTag> GetPossibleTags() {
             return [
@@ -49,9 +52,9 @@ public static class FloorGen {
         }
 
         public override bool Generate(VolumeComponentParams param) {
-            Func<int, int, bool[,], BlockType> sloping = param.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
+            Func<int, int, bool[,], BlockType> sloping = param.Component.TagsRequired.ContainsKey(ComponentTag.UseSimpleSloping)
                 ? SlopeHelper.SimpleSlopes
-                : param.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
+                : param.Component.TagsRequired.ContainsKey(ComponentTag.UseSimpleSloping)
                     ? SlopeHelper.HalfSlopes
                     : null;
             param.Component.Volume.ExecuteInArea((x, y, bt) => { param.Tilemap.PlaceTile(x, y, PaintedType.PickRandom(param.Palette.FloorAlt), bt); }, sloping);
@@ -62,6 +65,7 @@ public static class FloorGen {
     /// <summary>
     ///     Fills a volume with random blocks, but the top block consistent
     /// </summary>
+    [ComponentGenerator(typeof(Floor))]
     public class FloorGenerator3 : VolumeComponentGenerator {
         public override HashSet<ComponentTag> GetPossibleTags() {
             return [
@@ -80,12 +84,12 @@ public static class FloorGen {
         }
 
         public override bool Generate(VolumeComponentParams param) {
-            Func<int, int, bool[,], BlockType> sloping = param.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
+            Func<int, int, bool[,], BlockType> sloping = param.Component.TagsRequired.ContainsKey(ComponentTag.UseSimpleSloping)
                 ? SlopeHelper.SimpleSlopes
-                : param.Component.TagsRequired.Contains(ComponentTag.UseSimpleSloping)
+                : param.Component.TagsRequired.ContainsKey(ComponentTag.UseSimpleSloping)
                     ? SlopeHelper.HalfSlopes
                     : null;
-            bool elevated = param.Component.TagsRequired.Contains(ComponentTag.Elevated);
+            bool elevated = param.Component.TagsRequired.ContainsKey(ComponentTag.Elevated);
             int xStart = param.Component.Volume.BoundingBox.topLeft.X;
             int[] topY = new int[param.Component.Volume.Size.X];
 
@@ -118,6 +122,7 @@ public static class FloorGen {
     /// <summary>
     ///     Fills top and bottom of volume, adds support struts in the middle
     /// </summary>
+    [ComponentGenerator(typeof(Floor))]
     public class FloorGenerator4 : VolumeComponentGenerator {
         public override HashSet<ComponentTag> GetPossibleTags() {
             return [
@@ -131,7 +136,7 @@ public static class FloorGen {
         }
 
         public override bool Generate(VolumeComponentParams param) {
-            bool elevated = param.Component.TagsRequired.Contains(ComponentTag.Elevated);
+            bool elevated = param.Component.TagsRequired.ContainsKey(ComponentTag.Elevated);
             int xStart = param.Component.Volume.BoundingBox.topLeft.X;
             int[] topY = new int[param.Component.Volume.Size.X];
             int[] bottomY = new int[param.Component.Volume.Size.X];

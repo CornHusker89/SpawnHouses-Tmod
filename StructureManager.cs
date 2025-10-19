@@ -21,7 +21,7 @@ internal class StructureManager : ModSystem {
     public static BeachHouse? BeachHouse;
 
     public override void Load() {
-        AdvStructure.PopulateGenerators();
+        AdvStructure.LoadGenerators();
     }
 
     public override void SaveWorldData(TagCompound tag) {

@@ -1,4 +1,6 @@
+#nullable enable
 using System;
+using System.Collections.Generic;
 using SpawnHouses.AdvStructures;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Structures;
@@ -21,27 +23,23 @@ public class SpawnTest : ModItem {
         Item.rare = ItemRarityID.Blue;
     }
 
-    public override bool AltFunctionUse(Terraria.Player player) {
+    public override bool AltFunctionUse(Player player) {
         return true;
     }
 
-    // WorldUtils.Gen(new Point(x + length / 2, y - length), new Shapes.Circle((length + 50) / 2), Actions.Chain(
-    //     new Actions.SetFrames(),
-    //     new Actions.Custom((i, j, args) => {
-    //         Framing.WallFrame(i, j);
-    //         return true;
-    //     })
-    // ));
-
-    public override bool? UseItem(Terraria.Player player) {
+    public override bool? UseItem(Player player) {
         int x = (Main.MouseWorld / 16).ToPoint16().X;
         int y = (Main.MouseWorld / 16).ToPoint16().Y;
 
         Console.WriteLine(x + ", " + y);
 
+        float scale = Terraria.WorldGen.genRand.NextFloat();
         Structure = new AdvStructure(
             new StructureParams(
-                [StructureTag.HasHousing],
+                new Dictionary<StructureTag, object?>([
+                    new KeyValuePair<StructureTag, object?>(StructureTag.HasRooms, new Range(3, 5).Evaluate(scale)),
+                    new KeyValuePair<StructureTag, object?>(StructureTag.HasHousing, new Range(3, 5).Evaluate(scale))
+                ]),
                 [],
                 [
                     new EntryPoint(
@@ -56,8 +54,7 @@ public class SpawnTest : ModItem {
                     )
                 ],
                 TilePalette.Palette1,
-                new Range(350, 500),
-                new Range(3, 5),
+                new Range(350, 500).Evaluate(scale),
                 true
             )
         );

@@ -1,11 +1,14 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using SpawnHouses.Helpers;
 using SpawnHouses.Structures.Bridges;
 using SpawnHouses.Structures.ChainStructures;
 using SpawnHouses.Structures.Structures;
 using SpawnHouses.Structures.Structures.ChainStructures;
+using Terraria;
 using Terraria.ModLoader;
 
 namespace SpawnHouses.Structures;
@@ -261,6 +264,19 @@ public class Range(int min, int max) {
     public int Max = max;
     public int Min = min;
 
+    public bool Evaluated = false;
+    private int _value;
+    public int Value => Evaluated ? _value : Evaluate();
+
+    public int Evaluate(float scale = -1) {
+        if (Math.Abs(scale - -1) < 0.01) scale = Terraria.WorldGen.genRand.NextFloat();
+
+        if (scale is < 0 or > 1) throw new ArgumentOutOfRangeException(nameof(scale), "scale must be between 0 and 1");
+
+        _value = (int)(Min + (Max - Min) * scale);
+        return _value;
+    }
+
     public bool InRange(int value) {
         return value >= Min && value <= Max;
     }
@@ -293,6 +309,20 @@ public static class EnumHelper {
 
         string s = "";
         foreach (T value in enumerable) s += value + ", ";
+        return s.Remove(s.Length - 2);
+    }
+
+    public static string ToString<T>(Dictionary<T, object?> values) where T : Enum {
+        var enumerable = values.ToArray();
+        if (enumerable.Length == 0) return "(empty)";
+
+        string s = "";
+        foreach (var pair in enumerable) {
+            s += pair.Key.ToString();
+            if (pair.Value != null) s += $" (data: {pair.Value})";
+            s += ", ";
+        }
+
         return s.Remove(s.Length - 2);
     }
 }

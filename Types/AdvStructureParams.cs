@@ -1,4 +1,6 @@
+#nullable enable
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using Terraria.DataStructures;
@@ -7,75 +9,72 @@ using Range = SpawnHouses.Structures.Range;
 namespace SpawnHouses.Types;
 
 public class StructureParams {
-    public bool CanAddEntryPoints;
-    public EntryPoint[] EntryPoints;
-    public int Height;
-    public int Housing;
-    public Range HousingRange;
-    public TilePalette Palette;
-    public StructureTag[] TagsBlacklist;
-    public StructureTag[] TagsRequired;
-    public int Volume;
-    public Range VolumeRange;
+    public readonly bool CanAddEntryPoints;
+    public readonly EntryPoint[] EntryPoints;
+    public readonly TilePalette Palette;
+    public readonly Dictionary<StructureTag, object?> TagsRequired;
+    public readonly HashSet<StructureTag> TagsBlocklist;
+    public readonly int Volume;
 
     public StructureParams(
-        StructureTag[] tagsRequired,
-        StructureTag[] tagsBlacklist,
+        Dictionary<StructureTag, object?> tagsRequired,
+        HashSet<StructureTag> tagsBlocklist,
         EntryPoint[] entryPoints,
         TilePalette tilePalette,
-        Range volumeRange,
-        Range housingRange,
+        int volume,
         bool canAddEntryPoints) {
         TagsRequired = tagsRequired;
-        TagsBlacklist = tagsBlacklist;
+        TagsBlocklist = tagsBlocklist;
         EntryPoints = entryPoints;
         Palette = tilePalette;
-        VolumeRange = volumeRange;
-        HousingRange = housingRange;
+        Volume = volume;
         CanAddEntryPoints = canAddEntryPoints;
 
-        if (EntryPoints.Select(entryPoint => entryPoint.Start.Y).Max() - EntryPoints.Select(entryPoint => entryPoint.Start.Y).Min() + 4 > VolumeRange.Min / Length)
-            throw new ArgumentException($"Entry points are too far away vertically for a minimum height of {VolumeRange.Min / Length} (determined by min volume / length)");
-        if (tagsRequired.Contains(StructureTag.HasOnlyRectangleRooms) && tagsRequired.Contains(StructureTag.HasNoRectangleRooms))
+        if (EntryPoints.Select(entryPoint => entryPoint.Start.Y).Max() - EntryPoints.Select(entryPoint => entryPoint.Start.Y).Min() + 4 > Volume / Length)
+            throw new ArgumentException($"Entry points are too far away vertically for a minimum height of {Volume / Length} (determined by min volume / length)");
+        if (tagsRequired.ContainsKey(StructureTag.HasOnlyRectangleRooms) && tagsRequired.ContainsKey(StructureTag.HasNoRectangleRooms))
             throw new ArgumentException("Cannot require mutually exclusive structure tags \"HasOnlyRectangleRooms\" (id 3) and \"HasNoRectangleRooms\" (id 4)");
-        if (tagsRequired.Contains(StructureTag.AboveGround) && tagsRequired.Contains(StructureTag.UnderGround))
+        if (tagsRequired.ContainsKey(StructureTag.AboveGround) && tagsRequired.ContainsKey(StructureTag.UnderGround))
             throw new ArgumentException("Cannot require mutually exclusive structure tags \"AboveGround\" (id 9) and \"UnderGround\" (id 10)");
 
-        ReRollRanges();
+        if (Height <= 4)
+            throw new ArgumentException($"Volume ({Volume}) is too small compared to the length ({Length}) of the structure, resulting in a too-low total height of {Height}");
+
+        if (TagsRequired.ContainsKey(StructureTag.HasHousing)) {
+            if (!TagsRequired.ContainsKey(StructureTag.HasRooms)) throw new ArgumentException("Must have rooms tag to have housing");
+            int roomCount = GetTagData<int>(StructureTag.HasRooms);
+            int housing = GetTagData<int>(StructureTag.HasHousing);
+            if (Volume / housing < 60)
+                throw new ArgumentException($"Volume minimum of {Volume} is too small given the housing minimum of {housing}");
+            if (Volume / housing < 60)
+                throw new ArgumentException($"Volume maximum of {Volume} is too small given the housing maximum of {housing}");
+            if (housing < 1)
+                throw new ArgumentException("housing must be greater than 0");
+            if (TagsBlocklist.Contains(StructureTag.HasHousing))
+                throw new ArgumentException("Structure cannot have a max housing > 0 while blocklisting components with housing");
+            if (roomCount > housing) throw new ArgumentException($"Room count ({roomCount}) must be greater than or equal to housing ({housing})");
+        }
     }
 
-    public int StartEntryPointX => EntryPoints.Min(entryPoint => entryPoint.Start.X);
+    public int LeftEntryPointX => EntryPoints.Min(entryPoint => entryPoint.Start.X);
+    public int RightEntryPointX => EntryPoints.Max(entryPoint => entryPoint.End.X);
 
-    public int EndEntryPointX => EntryPoints.Max(entryPoint => entryPoint.End.X);
-
-    public int Length => EndEntryPointX - StartEntryPointX;
+    public int Length => RightEntryPointX - LeftEntryPointX;
+    public int Height => Volume / Length;
 
     private int CenterYMin => EntryPoints.Min(entryPoint => entryPoint.Start.Y);
     private int CenterYMax => EntryPoints.Max(entryPoint => entryPoint.End.Y);
 
     /// <summary>calculated using entry points</summary>
-    public Point16 Center => new(StartEntryPointX + (StartEntryPointX + EndEntryPointX) / 2, CenterYMin + (CenterYMin + CenterYMax) / 2);
+    public Point16 Center => new(LeftEntryPointX + (LeftEntryPointX + RightEntryPointX) / 2, CenterYMin + (CenterYMin + CenterYMax) / 2);
 
-    public void ReRollRanges() {
-        double scale = Terraria.WorldGen.genRand.NextDouble();
-        Volume = (int)(VolumeRange.Min + (VolumeRange.Max - VolumeRange.Min) * scale);
-        Height = Volume / Length;
-        Housing = (int)(HousingRange.Min + (HousingRange.Max - HousingRange.Min) * scale);
+    public T GetTagData<T>(StructureTag targetTag) {
+        if (!TagsRequired.TryGetValue(targetTag, out object? value)) throw new Exception("targetTag not found within given tag list");
 
-        if (VolumeRange.Min / HousingRange.Min < 60)
-            throw new ArgumentException($"Volume minimum of {VolumeRange.Min} is too small given the housing minimum of {HousingRange.Min}");
-        if (VolumeRange.Max / HousingRange.Max < 60)
-            throw new ArgumentException($"Volume maximum of {VolumeRange.Max} is too small given the housing maximum of {HousingRange.Max}");
-        if (Height <= 4)
-            throw new ArgumentException($"Volume ({Volume}) is too small compared to the length ({Length}) of the structure, resulting in a too-low total height of {Height}");
-        if (HousingRange.Min < 0)
-            throw new ArgumentException("Min housing cannot be less than 0");
-        if (HousingRange.Max < 0)
-            throw new ArgumentException("Max housing cannot be less than 0");
-        if (HousingRange.Max < HousingRange.Min)
-            throw new ArgumentException("Max Housing is less than min housing");
-        if (HousingRange.Max > 0 && TagsBlacklist.Contains(StructureTag.HasHousing))
-            throw new ArgumentException("Structure cannot have a max housing > 0 while blacklisting components with housing");
+        if (value == null) throw new Exception($"tag data for {targetTag} is null, could not return any data");
+        T typedValue = (T)value;
+        if (typedValue == null) throw new Exception($"tag data for {targetTag} could not be cast to target type of \"{typeof(T).Name}\"");
+        return typedValue;
     }
 }
 
@@ -83,7 +82,8 @@ public class RoomLayoutParams(
     Shape mainVolume,
     EntryPoint[] entryPoints,
     TilePalette tilePalette,
-    int housing,
+    Dictionary<StructureTag, object?> tagsRequired,
+    HashSet<StructureTag> tagsBlocklist,
     Range roomHeight,
     Range roomWidth,
     Range floorWidth,
@@ -91,16 +91,18 @@ public class RoomLayoutParams(
     float largeRoomChance = 0.2f,
     int attempts = 5
 ) {
-    public int Attempts = attempts;
-    public EntryPoint[] EntryPoints = entryPoints;
-    public Range FloorWidth = floorWidth;
-    public int Housing = housing;
-    public float LargeRoomChance = largeRoomChance;
+    public readonly int Attempts = attempts;
+    public readonly EntryPoint[] EntryPoints = entryPoints;
+    public readonly Range FloorWidth = floorWidth;
+    public readonly Dictionary<StructureTag, object?> TagsRequired = tagsRequired;
+    public readonly HashSet<StructureTag> TagsBlocklist = tagsBlocklist;
+    public readonly float LargeRoomChance = largeRoomChance;
+    public readonly Range RoomHeight = roomHeight;
+    public readonly Range RoomWidth = roomWidth;
+    public readonly TilePalette TilePalette = tilePalette;
+    public readonly Range WallWidth = wallWidth;
+    
     public Shape MainVolume = mainVolume;
-    public Range RoomHeight = roomHeight;
-    public Range RoomWidth = roomWidth;
-    public TilePalette TilePalette = tilePalette;
-    public Range WallWidth = wallWidth;
 
     /// <summary>
     ///     returns a shallow copy of these params
@@ -111,7 +113,8 @@ public class RoomLayoutParams(
             MainVolume,
             EntryPoints,
             TilePalette,
-            Housing,
+            TagsRequired,
+            TagsBlocklist,
             RoomHeight,
             RoomWidth,
             FloorWidth,
@@ -119,6 +122,14 @@ public class RoomLayoutParams(
             LargeRoomChance,
             Attempts
         );
+    }
+
+    public T GetTagData<T>(StructureTag targetTag) {
+        if (!TagsRequired.TryGetValue(targetTag, out object? value)) throw new Exception("targetTag not found within given tag list");
+        if (value == null) throw new Exception($"tag data for {targetTag} is null, could not return any data");
+        T typedValue = (T)value;
+        if (typedValue == null) throw new Exception($"tag data for {targetTag} could not be cast to target type of \"{typeof(T).Name}\"");
+        return typedValue;
     }
 
     /// <summary>
@@ -141,15 +152,15 @@ public class RoomLayoutParams(
 }
 
 public abstract class ComponentParams {
-    public IComponent Component { get; protected init; }
-    public StructureTilemap Tilemap { get; set; }
-    public TilePalette Palette { get; set; }
+    public Component Component { get; protected init; }
+    public StructureTilemap Tilemap { get; protected init; }
+    public TilePalette Palette { get; protected init; }
 }
 
 public class VolumeComponentParams : ComponentParams {
-    public new IVolumeComponent Component { get; }
+    public new VolumeComponent Component { get; }
 
-    public VolumeComponentParams(IVolumeComponent component, TilePalette tilePalette, StructureTilemap tilemap) {
+    public VolumeComponentParams(VolumeComponent component, TilePalette tilePalette, StructureTilemap tilemap) {
         Component = component;
         base.Component = component;
         Tilemap = tilemap;
@@ -158,9 +169,9 @@ public class VolumeComponentParams : ComponentParams {
 }
 
 public class PathComponentParams : ComponentParams {
-    public new IPathComponent Component { get; }
+    public new PathComponent Component { get; }
 
-    public PathComponentParams(IPathComponent component, TilePalette tilePalette, StructureTilemap tilemap) {
+    public PathComponentParams(PathComponent component, TilePalette tilePalette, StructureTilemap tilemap) {
         Component = component;
         base.Component = component;
         Tilemap = tilemap;

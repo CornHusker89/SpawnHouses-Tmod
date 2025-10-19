@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.AdvStructures.Generation;
-using SpawnHouses.AdvStructures.Generation.Components;
 using SpawnHouses.Helpers;
 using SpawnHouses.Structures;
 using SpawnHouses.Types;
+using Terraria;
 
 namespace SpawnHouses.AdvStructures;
 
@@ -38,41 +39,25 @@ public class AdvStructure {
     public bool HasLayout => Layout != null;
 
     /// <summary>
-    ///     calculates a structure's layout, and does not alter tiles
+    ///     calculates a structure's layout but does not apply component generators
     /// </summary>
     /// <param name="generator">layout generator to be used. leave null for a random method</param>
-    public bool ApplyLayoutMethod(IStructureLayoutGenerator generator = null) {
+    public void ApplyLayoutMethod(IStructureLayoutGenerator generator = null) {
+        TagUtils.ValidateTagDataTypes(Params.TagsRequired);
         if (generator == null) {
-            List<IStructureLayoutGenerator> validGenerators = [];
+            var validGenerators = StructureLayoutGenerators.Where(gen => gen.CanGenerate(Params)
+                                                                         && Params.TagsRequired.Keys.ToHashSet().IsSubsetOf(gen.GetPossibleTags())
+                                                                         && !Params.TagsBlocklist.Overlaps(gen.GetPossibleTags()))
+                .ToArray();
 
-            foreach (IStructureLayoutGenerator possibleGenerator in StructureLayoutGenerators) {
-                if (!possibleGenerator.CanGenerate(Params)) continue;
-
-                var requiredTags = Params.TagsRequired.ToList();
-                bool valid = true;
-                foreach (StructureTag possibleTag in possibleGenerator.GetPossibleTags()) {
-                    if (Params.TagsBlacklist.Contains(possibleTag)) {
-                        valid = false;
-                        break;
-                    }
-
-                    requiredTags.Remove(possibleTag);
-                }
-
-                if (valid && requiredTags.Count == 0)
-                    validGenerators.Add(possibleGenerator);
-            }
-
-            if (validGenerators.Count == 0) throw new Exception($"No structure layout generators found were compatible with the given parameters. required tags: {EnumHelper.ToString(Params.TagsRequired)}, blacklisted tags: {EnumHelper.ToString(Params.TagsBlacklist)}");
-
-            generator = validGenerators[Terraria.WorldGen.genRand.Next(0, validGenerators.Count)];
+            if (validGenerators.Length == 0) throw new Exception($"No structure layout generators found were compatible with the given parameters. required tags: {EnumHelper.ToString(Params.TagsRequired)}, blocklisted tags: {EnumHelper.ToString(Params.TagsBlocklist)}");
+            generator = Terraria.WorldGen.genRand.NextFromList(validGenerators);
         }
 
         bool result = generator.Generate(this);
-        if (!result)
+        if (!result) {
             throw new Exception("error in structure layout generator");
-
-        return true;
+        }
     }
 
     /// <summary>
@@ -125,16 +110,16 @@ public class AdvStructure {
         }
     }
 
-    private ComponentGenerator GetComponentGenerator(ComponentParams componentParams, ComponentGenerator[] generators) {
+    private ComponentGenerator GetComponentGenerator(ComponentParams componentParams, List<ComponentGenerator> generators) {
         var validGenerators = generators.Where(gen => gen.CanGenerate(componentParams)
-                                                      && componentParams.Component.TagsRequired.IsSubsetOf(gen.GetPossibleTags())
-                                                      && !componentParams.Component.TagsBlacklist.Overlaps(gen.GetPossibleTags()))
-            .ToList();
-        
-        if (validGenerators.Count == 0)
-            throw new Exception($"No component generators were found that are compatible with given parameters. type: {componentParams.Component.GetType().FullName}, required tags: {EnumHelper.ToString(componentParams.Component.TagsRequired)}, blacklisted tags: {EnumHelper.ToString(componentParams.Component.TagsBlacklist)}");
+                                                      && componentParams.Component.TagsRequired.Keys.ToHashSet().IsSubsetOf(gen.GetPossibleTags())
+                                                      && !componentParams.Component.TagsBlocklist.Overlaps(gen.GetPossibleTags()))
+            .ToArray();
 
-        return validGenerators[Terraria.WorldGen.genRand.Next(0, validGenerators.Count)];
+        if (validGenerators.Length == 0)
+            throw new Exception($"No component generators were found that are compatible with given parameters. type: {componentParams.Component.GetType().FullName}, required tags: {EnumHelper.ToString(componentParams.Component.TagsRequired)}, blocklisted tags: {EnumHelper.ToString(componentParams.Component.TagsBlocklist)}");
+
+        return Terraria.WorldGen.genRand.NextFromList(validGenerators);
     }
 
     /// <summary>
@@ -149,56 +134,29 @@ public class AdvStructure {
     /// </summary>
     /// <exception cref="Exception">Throws when no layout has been set</exception>
     public void FillComponents() {
-        if (false) //(!HasLayout)
+        if (!HasLayout)
             throw new Exception("No layout has been set");
 
-        List<IComponent> components = [];
+        List<Component> components = [];
         components.AddRange(ExternalLayout.Floors);
         components.AddRange(ExternalLayout.Walls);
         components.AddRange(ExternalLayout.Gaps);
         components.AddRange(ExternalLayout.Roofs);
-        // components.AddRange(Layout.Floors);
-        // components.AddRange(Layout.Walls);
-        // components.AddRange(Layout.Gaps);
-        // components.AddRange(Layout.Rooms);
+        components.AddRange(Layout.Floors);
+        components.AddRange(Layout.Walls);
+        components.AddRange(Layout.Gaps);
+        components.AddRange(Layout.Rooms);
 
         Dictionary<Type, List<ComponentGenerator>> generatorQueue = [];
         for (int i = 0; i < components.Count; i++) {
-            IComponent component = components[i];
-            ComponentParams componentParams = ComponentUtils.CreateComponentParamsForType(component, Params.Palette, Tilemap);
+            Component component = components[i];
             ComponentUtils.ValidateComponent(component);
+            ComponentParams componentParams = ComponentUtils.CreateComponentParamsForType(component, Params.Palette, Tilemap);
             component.Id = (ushort)i;
-
-            ComponentGenerator[] generators;
-            switch (component) {
-                case Floor:
-                    generators = FloorGenerators;
-                    break;
-                case Wall:
-                    generators = WallGenerators;
-                    break;
-                case Room:
-                    generators = BackgroundGenerators;
-                    // generators = StairwayGenerators;
-                    // generators = DecorGenerators;
-                    break;
-                case Roof:
-                    generators = RoofGenerators;
-                    break;
-                case Gap:
-                    generators = GapGenerators;
-                    break;
-                default: {
-                    if (component.TagsRequired.Contains(ComponentTag.IsDebugBlocks) || component.TagsRequired.Contains(ComponentTag.IsDebugWalls))
-                        generators = DebugGenerators;
-                    else
-                        throw new Exception($"component type {component.GetType()} generators not found");
-                    break;
-                }
-            }
-
+            
             int generatorIndex = 0;
             Type componentType = component.GetType();
+            if (!ComponentGenerators.TryGetValue(componentType, out var generators)) throw new Exception($"component type {component.GetType().FullName} generators not found");
             if (!generatorQueue.TryGetValue(componentType, out var generatorList)) {
                 generatorList = [GetComponentGenerator(componentParams, generators)];
                 generatorQueue[componentType] = generatorList;
@@ -237,36 +195,39 @@ public class AdvStructure {
 
     #region Generators
 
-    public static IStructureLayoutGenerator[] StructureLayoutGenerators;
-    public static ComponentGenerator[] FloorGenerators;
-    public static ComponentGenerator[] WallGenerators;
-    public static ComponentGenerator[] BackgroundGenerators;
-    public static ComponentGenerator[] StairwayGenerators;
-    public static ComponentGenerator[] DecorGenerators;
-    public static ComponentGenerator[] RoofGenerators;
-    public static ComponentGenerator[] GapGenerators;
-    public static ComponentGenerator[] DebugGenerators;
+    public static readonly List<IStructureLayoutGenerator> StructureLayoutGenerators = [];
 
-    public static void PopulateGenerators() {
-        var types = typeof(StructureLayoutGen).GetNestedTypes();
-        StructureLayoutGenerators = types.Select(t => Activator.CreateInstance(t) as IStructureLayoutGenerator).ToArray();
-        types = typeof(FloorGen).GetNestedTypes();
-        FloorGenerators = types.Select(t => Activator.CreateInstance(t) as ComponentGenerator).ToArray();
-        types = typeof(WallGen).GetNestedTypes();
-        WallGenerators = types.Select(t => Activator.CreateInstance(t) as ComponentGenerator).ToArray();
-        types = typeof(BackgroundGen).GetNestedTypes();
-        BackgroundGenerators = types.Select(t => Activator.CreateInstance(t) as ComponentGenerator).ToArray();
-        types = typeof(StairwayGen).GetNestedTypes();
-        StairwayGenerators = types.Select(t => Activator.CreateInstance(t) as ComponentGenerator).ToArray();
-        types = typeof(DecorGen).GetNestedTypes();
-        DecorGenerators = types.Select(t => Activator.CreateInstance(t) as ComponentGenerator).ToArray();
-        types = typeof(RoofGen).GetNestedTypes();
-        RoofGenerators = types.Select(t => Activator.CreateInstance(t) as ComponentGenerator).ToArray();
-        types = typeof(GapGen).GetNestedTypes();
-        GapGenerators = types.Select(t => Activator.CreateInstance(t) as ComponentGenerator).ToArray();
-        types = typeof(DebugGen).GetNestedTypes();
-        DebugGenerators = types.Select(t => Activator.CreateInstance(t) as ComponentGenerator).ToArray();
+    /// <summary>type corresponds to the final component's type</summary>
+    public static readonly Dictionary<Type, List<ComponentGenerator>> ComponentGenerators = new();
+
+    internal static void LoadGenerators() {
+        LoadGenerators(Assembly.GetExecutingAssembly());
+    }
+
+    public static void LoadGenerators(Assembly assembly) {
+        var pluginTypes = assembly.GetTypes();
+        foreach (Type type in pluginTypes) {
+            ComponentGeneratorAttribute componentInfo = type.GetCustomAttribute<ComponentGeneratorAttribute>();
+            StructureLayoutGeneratorAttribute structureLayoutInfo = type.GetCustomAttribute<StructureLayoutGeneratorAttribute>();
+
+            if (componentInfo != null && structureLayoutInfo != null) throw new Exception($"{type.FullName} has both structure layout and component generator attributes, which are mutually exclusive");
+
+            if (componentInfo != null) {
+                if (!ComponentGenerators.TryGetValue(componentInfo.ComponentType, out var generatorList)) ComponentGenerators[componentInfo.ComponentType] = generatorList = [];
+                generatorList.Add((ComponentGenerator)Activator.CreateInstance(type));
+            }
+
+            if (structureLayoutInfo != null) StructureLayoutGenerators.Add((IStructureLayoutGenerator)Activator.CreateInstance(type));
+        }
     }
 
     #endregion
 }
+
+[AttributeUsage(AttributeTargets.Class)]
+public class ComponentGeneratorAttribute(Type componentType) : Attribute {
+    public readonly Type ComponentType = componentType;
+}
+
+[AttributeUsage(AttributeTargets.Class)]
+public class StructureLayoutGeneratorAttribute : Attribute;

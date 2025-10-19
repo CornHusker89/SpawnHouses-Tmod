@@ -4,15 +4,7 @@ using SpawnHouses.Types;
 
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
-public class Gap : IVolumeComponent, IComponentExternalExt {
-    
-    // IComponent
-    public ushort Id { get; set; }
-    public HashSet<ComponentTag> TagsRequired { get; set; }
-    public HashSet<ComponentTag> TagsBlacklist { get; set; }
-    
-    // IVolumeComponent
-    public Shape Volume { get; set; }
+public class Gap : VolumeComponent, IExternalComponent {
     
     // IExternalComponent
     public bool IsExterior { get; set; }
@@ -51,8 +43,11 @@ public class Gap : IVolumeComponent, IComponentExternalExt {
     /// <param name="room2"></param>
     /// <param name="isHorizontal">Has rooms on it's left/right</param>
     public Gap(Shape volume, Room? room1, Room? room2, bool isHorizontal) {
-        TagsRequired = IsExterior ? [isHorizontal ? ComponentTag.IsWallGap : ComponentTag.IsFloorGap, ComponentTag.External] : [isHorizontal ? ComponentTag.IsWallGap : ComponentTag.IsFloorGap];
-        TagsBlacklist = [];
+        TagsRequired = new Dictionary<ComponentTag, object?>();
+        if (IsExterior) AddRequiredTag(ComponentTag.External);
+        AddRequiredTag(isHorizontal ? ComponentTag.IsWallGap : ComponentTag.IsFloorGap);
+
+        TagsBlocklist = [];
         Volume = volume;
         IsExterior = room2 == null;
 

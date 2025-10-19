@@ -249,12 +249,17 @@ public class ExternalLayoutHelper {
             wallThickness
         );
         foreach (Floor floor in result.floors) {
-            floor.TagsRequired.Add(ComponentTag.UseSimpleSloping);
+            floor.AddRequiredTag(ComponentTag.UseSimpleSloping);
         }
 
-        if (hasRoofPeak)
-            foreach (Roof roof in result.roofs)
-                roof.TagsRequired.Add(ComponentTag.RoofHasLargeOverhang);
+        foreach (Roof roof in result.roofs) {
+            roof.AddRequiredTag(ComponentTag.RoofHasLargeOverhang);
+        }
+
+        if (hasSplitRoof && hasRoofPeak) {
+            result.roofs[!leftRoofHigher ? 1 : 0].AddRequiredTag(ComponentTag.RoofTall);
+            if (hasSlopedSideRoof && Terraria.WorldGen.genRand.NextBool(1, 2)) result.roofs[!leftRoofHigher ? 0 : 1].AddRequiredTag(ComponentTag.RoofTall);
+        }
 
         return result;
     }

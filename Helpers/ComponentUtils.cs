@@ -1,15 +1,16 @@
 using System;
+using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Types;
 
 namespace SpawnHouses.Helpers;
 
 public static class ComponentUtils {
-    public static ComponentParams CreateComponentParamsForType(IComponent component, TilePalette tilePalette, StructureTilemap tilemap) {
+    public static ComponentParams CreateComponentParamsForType(Component component, TilePalette tilePalette, StructureTilemap tilemap) {
         Type componentType = component.GetType();
-        if (typeof(IVolumeComponent).IsAssignableFrom(componentType)) return new VolumeComponentParams((IVolumeComponent)component, tilePalette, tilemap);
+        if (componentType.IsSubclassOf(typeof(VolumeComponent))) return new VolumeComponentParams((VolumeComponent)component, tilePalette, tilemap);
 
-        if (typeof(IPathComponent).IsAssignableFrom(componentType)) return new PathComponentParams((IPathComponent)component, tilePalette, tilemap);
+        if (componentType.IsSubclassOf(typeof(PathComponent))) return new PathComponentParams((PathComponent)component, tilePalette, tilemap);
 
         throw new Exception($"Component type \"{componentType.FullName}\" does not have an associated parameter type");
     }
@@ -17,8 +18,11 @@ public static class ComponentUtils {
     /// <summary>
     ///     ensures that the passed component has no misconfigured data. throws error if it is misconfigured
     /// </summary>
-    public static void ValidateComponent(IComponent component) {
-        TagUtils.ValidateTagsRequired(component.TagsRequired);
-        TagUtils.ValidateTagsBlacklist(component.TagsBlacklist);
+    public static void ValidateComponent(Component component) {
+        var tagsRequiredSet = component.TagsRequired.Keys.ToHashSet();
+        TagUtils.ValidateExclusiveTagsRequired(tagsRequiredSet);
+        TagUtils.ValidateExclusiveTagsBlocklist(component.TagsBlocklist);
+        if (tagsRequiredSet.Overlaps(component.TagsBlocklist)) throw new Exception("Component tags required and tags blocklist cannot have any common elements");
+        TagUtils.ValidateTagDataTypes(component.TagsRequired);
     }
 }

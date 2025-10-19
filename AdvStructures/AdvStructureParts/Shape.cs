@@ -29,10 +29,6 @@ public class Shape : PointGeometry {
         Color.Red
     ];
 
-    public (Point16 topLeft, Point16 bottomRight) BoundingBox;
-    public Point16 Size;
-
-
     public bool IsBox { get; private set; } // because many of the shapes will be boxes, introduce optimizations for boxes
 
     public Point16 Center => BoundingBox.topLeft + Size / new Point16(2, 2);
@@ -101,16 +97,7 @@ public class Shape : PointGeometry {
                 break;
         }
 
-        int minX = Main.maxTilesX, maxX = 0, minY = Main.maxTilesY, maxY = 0;
-        foreach (Point16 point in Points) {
-            minX = Math.Min(point.X, minX);
-            maxX = Math.Max(point.X, maxX);
-            minY = Math.Min(point.Y, minY);
-            maxY = Math.Max(point.Y, maxY);
-        }
-
-        BoundingBox = (new Point16(minX, minY), new Point16(maxX, maxY));
-        Size = new Point16(1 + maxX - minX, 1 + maxY - minY);
+        SetBoundingBoxAndSize();
     }
 
     public override string ToString() {
@@ -279,12 +266,14 @@ public class Shape : PointGeometry {
     /// <summary>
     ///     find all corners of a shape based on their x and y positions, useful for ensuring beams and such make sense visually
     /// </summary>
-    /// <param name="significantAngle">only vertices that create an angle larger than this will be considered</param>
+    /// <param name="significantAngle">only vertices that create an angle (deg) larger than this will be considered</param>
     /// <returns></returns>
-    public List<Point16> GetCorners(float significantAngle = 10) {
+    public List<Point16> GetCorners(float significantAngle = 10f) {
         List<Point16> corners = [];
         Shape expandedShape = GetExpandedShape(1);
 
+        var a = expandedShape.CollapseVertices(significantAngle);
+        
         foreach (Point16 point in expandedShape.CollapseVertices(significantAngle)) {
             bool xCorner = point.X != expandedShape.BoundingBox.topLeft.X
                            && point.X != expandedShape.BoundingBox.bottomRight.X;

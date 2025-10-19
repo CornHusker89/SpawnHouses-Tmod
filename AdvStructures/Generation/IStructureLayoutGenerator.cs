@@ -1,9 +1,10 @@
+using System.Collections.Generic;
 using SpawnHouses.Types;
 
 namespace SpawnHouses.AdvStructures.Generation;
 
 public interface IStructureLayoutGenerator {
-    public StructureTag[] GetPossibleTags();
+    public HashSet<StructureTag> GetPossibleTags();
 
     public bool CanGenerate(StructureParams structureParams);
 

@@ -1,19 +1,10 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using SpawnHouses.Types;
 
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
-public class Room : IVolumeComponent {
-    
-    // IComponent
-    public ushort Id { get; set; }
-    public HashSet<ComponentTag> TagsRequired { get; set; }
-    public HashSet<ComponentTag> TagsBlacklist { get; set; }
-    
-    // IVolumeComponent
-    public Shape Volume { get; set; }
+public class Room : VolumeComponent {
     
     public List<Gap> Gaps;
     public bool IsEntryRoom;
@@ -21,7 +12,7 @@ public class Room : IVolumeComponent {
 
     public Room(Shape volume, List<Gap>? gaps = null) {
         TagsRequired = [];
-        TagsBlacklist = [];
+        TagsBlocklist = [];
         Volume = volume;
 
         Gaps = gaps ?? [];

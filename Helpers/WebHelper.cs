@@ -6,17 +6,17 @@ using System.Text;
 using System.Text.Json;
 using Terraria.ModLoader;
 
-namespace SpawnHouses;
+namespace SpawnHouses.Helpers;
 
 public class WebHelper {
-    private readonly HttpClient Client;
+    private readonly HttpClient _client;
 
     public WebHelper() {
-        Client = new HttpClient {
+        _client = new HttpClient {
             Timeout = TimeSpan.FromSeconds(3)
         };
 
-        Client.DefaultRequestHeaders.Authorization =
+        _client.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", "AFadsfnjhAF7432Fjfh12272JHF82");
     }
 
@@ -26,7 +26,7 @@ public class WebHelper {
     public Dictionary<string, int> GetSpawnCount() {
         try {
             ModContent.GetInstance<SpawnHouses>().Logger.Info("Getting spawn count info from Web API");
-            HttpResponseMessage response = Client.GetAsync("https://spawnhousescounter.xyz/api/get").Result;
+            HttpResponseMessage response = _client.GetAsync("https://spawnhousescounter.xyz/api/get").Result;
             response.EnsureSuccessStatusCode();
             string responseBody = response.Content.ReadAsStringAsync().Result;
             return JsonSerializer.Deserialize<Dictionary<string, int>>(responseBody);
@@ -47,7 +47,7 @@ public class WebHelper {
                 ["mineshaft"] = mineshaft ? 1 : 0
             };
             StringContent content = new(JsonSerializer.Serialize(dict), Encoding.UTF8, "application/json");
-            HttpResponseMessage response = Client.PostAsync("https://spawnhousescounter.xyz/api/add", content).Result;
+            HttpResponseMessage response = _client.PostAsync("https://spawnhousescounter.xyz/api/add", content).Result;
             response.EnsureSuccessStatusCode();
         }
         catch {

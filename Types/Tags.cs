@@ -1,13 +1,24 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace SpawnHouses.Types;
 
+[AttributeUsage(AttributeTargets.Field)]
+public class TagData(Type type) : Attribute {
+    public Type Type = type;
+}
+
 public enum StructureTag : ushort {
-    // current highest tag number is 15
-    // ===== structureLayout =====
+    // current highest tag number is 16
     IsSymmetric = 1,
+
+    [TagData(typeof(int))] HasRooms = 16,
+
+    [TagData(typeof(int))]
     HasHousing = 2,
+    
     HasOnlyRectangleRooms = 3,
     HasNoRectangleRooms = 4,
 
@@ -113,9 +124,6 @@ public enum ComponentTag {
     // ===== gap =====
 
 
-    // ===== debug =====
-    IsDebugBlocks = 23,
-    IsDebugWalls = 24
 }
 
 public enum PaletteTag {
@@ -145,11 +153,11 @@ public static class TagUtils {
     /// <summary>
     ///     a component's tags are considered invalid if a component has all tags in any set
     /// </summary>
-    public static HashSet<ComponentTag>[] MutuallyExclusiveComponentTagsBlacklist { get; } = [
+    public static HashSet<ComponentTag>[] MutuallyExclusiveComponentTagsBlocklist { get; } = [
 
     ];
-    
-    public static void ValidateTagsRequired(HashSet<ComponentTag> tagsRequired) {
+
+    public static void ValidateExclusiveTagsRequired(HashSet<ComponentTag> tagsRequired) {
         foreach (var exclusiveSet in MutuallyExclusiveComponentTagsRequired) {
             if (!exclusiveSet.IsSubsetOf(tagsRequired)) continue;
             
@@ -159,13 +167,29 @@ public static class TagUtils {
         }
     }
 
-    public static void ValidateTagsBlacklist(HashSet<ComponentTag> tagsRequired) {
-        foreach (var exclusiveSet in MutuallyExclusiveComponentTagsBlacklist) {
+    public static void ValidateExclusiveTagsBlocklist(HashSet<ComponentTag> tagsRequired) {
+        foreach (var exclusiveSet in MutuallyExclusiveComponentTagsBlocklist) {
             if (!exclusiveSet.IsSubsetOf(tagsRequired)) continue;
-            
-            string message = "Component has mutually exclusive component tags blacklisted {";
+
+            string message = "Component has mutually exclusive component tags blocklisted {";
             foreach (ComponentTag tag in exclusiveSet) message += $"{tag} (id {(ushort)tag}), ";
             throw new Exception(message.Remove(message.Length - 2));
+        }
+    }
+
+    public static void ValidateTagDataTypes(Dictionary<ComponentTag, object?> tagDataTypes) {
+        foreach (var tagValuePair in tagDataTypes) {
+            FieldInfo enumField = typeof(ComponentTag).GetField(tagValuePair.Key.ToString())!;
+            TagData? attribute = enumField.GetCustomAttribute<TagData>();
+            if (attribute != null && tagValuePair.Value != null && attribute.Type != tagValuePair.Value.GetType()) throw new Exception($"Expected tag data type ({attribute.Type}( does not match actual type ({tagValuePair.Value.GetType()})");
+        }
+    }
+
+    public static void ValidateTagDataTypes(Dictionary<StructureTag, object?> tagDataTypes) {
+        foreach (var tagValuePair in tagDataTypes) {
+            FieldInfo enumField = typeof(StructureTag).GetField(tagValuePair.Key.ToString())!;
+            TagData? attribute = enumField.GetCustomAttribute<TagData>();
+            if (attribute != null && tagValuePair.Value != null && attribute.Type != tagValuePair.Value.GetType()) throw new Exception($"Expected tag data type ({attribute.Type}( does not match actual type ({tagValuePair.Value.GetType()})");
         }
     }
 }

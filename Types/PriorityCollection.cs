@@ -6,43 +6,43 @@ namespace SpawnHouses.Types;
 
 /// <summary>
 ///     contains multiple hashsets, sorted based on priority. intended for use when determining priority splits with the bsp algorithm.
-///     has a blacklist feature to exclude specific items
+///     has a blocklist feature to exclude specific items
 /// </summary>
 public class PriorityCollection<T> {
-    private readonly Dictionary<int, HashSet<T>> _blacklistedItems = new();
+    private readonly Dictionary<int, HashSet<T>> _blocklistedItems = new();
     private readonly Dictionary<int, HashSet<T>> _sets = new();
 
     /// <summary>
     ///     the total number of items within all sets
     /// </summary>
-    /// <remarks>respects blacklisted items</remarks>
+    /// <remarks>respects blocklisted items</remarks>
     public int TotalLength => _sets.Keys.Sum(priority => GetHashSet(priority).Count);
-
+    
     /// <summary>
     ///     the number of sets in the collection
     /// </summary>
-    /// <remarks>excludes sets that are empty due to blacklisted items</remarks>
+    /// <remarks>excludes sets that are empty due to blocklisted items</remarks>
     public int SetsLength => _sets.Keys.Count(priority => GetHashSet(priority).Count != 0);
 
     /// <summary>
     ///     retrieves the hashset of the given priority
     /// </summary>
     /// <param name="priority"></param>
-    /// <remarks>respects item blacklists</remarks>
+    /// <remarks>respects item blocklists</remarks>
     /// <returns></returns>
     public HashSet<T> GetHashSet(int priority) {
-        if (!_blacklistedItems.TryGetValue(priority, out var value)) {
+        if (!_blocklistedItems.TryGetValue(priority, out var value)) {
             value = [];
-            _blacklistedItems[priority] = value;
+            _blocklistedItems[priority] = value;
         }
-
+        
         return _sets[priority].Except(value).ToHashSet();
     }
 
     /// <summary>
     ///     gets an array of valid priorities
     /// </summary>
-    /// <remarks>gives in ascending order, respects blacklist</remarks>
+    /// <remarks>gives in ascending order, respects blocklist</remarks>
     public int[] GetValidPriorities() {
         return _sets.Keys.Where(priority => GetHashSet(priority).Count != 0)
             .OrderBy(priority => priority)
@@ -117,14 +117,14 @@ public class PriorityCollection<T> {
     }
 
     /// <summary>
-    ///     adds an item to the blacklist, at the lowest priority it is found in the normal sets where the value is not already blacklisted
+    ///     adds an item to the blocklist, at the lowest priority it is found in the normal sets where the value is not already blocklisted
     /// </summary>
     /// <param name="item"></param>
     /// <returns>returns false if item is not found in the normal sets</returns>
-    public bool AddToBlacklist(T item) {
+    public bool AddToBlocklist(T item) {
         foreach (int priority in GetValidPriorities().Where(key => _sets[key].Contains(item))) {
-            if (!_blacklistedItems.TryGetValue(priority, out var set))
-                _blacklistedItems.Add(priority, [item]);
+            if (!_blocklistedItems.TryGetValue(priority, out var set))
+                _blocklistedItems.Add(priority, [item]);
             else
                 set.Add(item);
             return true;
@@ -134,13 +134,13 @@ public class PriorityCollection<T> {
     }
 
     /// <summary>
-    ///     adds an item at a specific priority the blacklist
+    ///     adds an item at a specific priority the blocklist
     /// </summary>
     /// <param name="priority"></param>
     /// <param name="item"></param>
-    public bool AddToBlacklist(int priority, T item) {
-        if (!_blacklistedItems.TryGetValue(priority, out var set)) {
-            _blacklistedItems.Add(priority, [item]);
+    public bool AddToBlocklist(int priority, T item) {
+        if (!_blocklistedItems.TryGetValue(priority, out var set)) {
+            _blocklistedItems.Add(priority, [item]);
             return true;
         }
 
@@ -148,10 +148,10 @@ public class PriorityCollection<T> {
     }
 
     /// <summary>
-    ///     removes all items from the blacklist
+    ///     removes all items from the blocklist
     /// </summary>
-    public void ClearBlacklist() {
-        _blacklistedItems.Clear();
+    public void ClearBlocklist() {
+        _blocklistedItems.Clear();
     }
 
     /// <summary>

@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Helpers;
@@ -15,9 +16,11 @@ public static class StructureLayoutGen {
     /// <summary>
     ///     literally just a square. can only have 2 entry points
     /// </summary>
+    [StructureLayoutGenerator]
     public class StructureLayoutGenerator1 : IStructureLayoutGenerator {
-        public StructureTag[] GetPossibleTags() {
+        public HashSet<StructureTag> GetPossibleTags() {
             return [
+                StructureTag.HasRooms,
                 StructureTag.HasHousing,
                 StructureTag.HasOnlyRectangleRooms,
                 StructureTag.HasLargeRoom,
@@ -50,7 +53,8 @@ public static class StructureLayoutGen {
                 null,
                 p.EntryPoints,
                 p.Palette,
-                p.Housing,
+                p.TagsRequired,
+                p.TagsBlocklist,
                 new Range(4, 13),
                 new Range(7, p.Length),
                 new Range(1, 1),
@@ -76,7 +80,7 @@ public static class StructureLayoutGen {
                 (ushort)(p.Length + 2 * (tilemapMargin + externalWallThickness)),
                 (ushort)(p.Height + 2 * (tilemapMargin + externalFloorThickness) + roofMargin),
                 new Point16(
-                    p.StartEntryPointX - externalWallThickness - tilemapMargin,
+                    p.LeftEntryPointX - externalWallThickness - tilemapMargin,
                     int.Max(p.EntryPoints[0].Start.Y, p.EntryPoints[1].Start.Y) + 5 + verticalOffset - p.Height - externalFloorThickness - roofMargin - tilemapMargin
                 )
             );
@@ -106,14 +110,14 @@ public static class StructureLayoutGen {
             if (hasHigherSide) upperRoofBottomY -= roofHeightModifier;
 
             var (exteriorFloors, exteriorWalls, roofs) = ExternalLayoutHelper.CreateBasicRoof(
-                new Point16(p.StartEntryPointX + 1 - externalWallThickness, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
-                new Point16(p.EndEntryPointX - 1 + externalWallThickness, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
+                new Point16(p.LeftEntryPointX + 1 - externalWallThickness, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
+                new Point16(p.RightEntryPointX - 1 + externalWallThickness, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
                 externalFloorThickness,
                 externalWallThickness
             );
 
-            exteriorFloors.Add(ExternalLayoutHelper.CreateFloor(floorTopY, p.StartEntryPointX + 1 - (hasBasement ? 0 : externalWallThickness),
-                p.EndEntryPointX - 1 + (hasBasement ? 0 : externalWallThickness), true, externalFloorThickness));
+            exteriorFloors.Add(ExternalLayoutHelper.CreateFloor(floorTopY, p.LeftEntryPointX + 1 - (hasBasement ? 0 : externalWallThickness),
+                p.RightEntryPointX - 1 + (hasBasement ? 0 : externalWallThickness), true, externalFloorThickness));
 
             // if the top of either entry point is NOT flush with the roof
             if (left.Start.Y - 1 != (leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY))
@@ -136,7 +140,7 @@ public static class StructureLayoutGen {
 
             advStructure.SetTilesExternalStatus();
 
-            // finally finish the room layout
+            // finally, finish the room layout
             advStructure.Layout = new RoomLayout([], [], 
                 advStructure.ExternalLayout.Gaps,
                 [
@@ -145,7 +149,7 @@ public static class StructureLayoutGen {
                         advStructure.ExternalLayout.Gaps
                     )
                 ]);
-
+            
             advStructure.CompleteExternalGaps();
             RoomLayoutHelper.SubdivideRoom(advStructure.Layout, advStructure.Layout.Rooms[0], roomLayoutParams);
 

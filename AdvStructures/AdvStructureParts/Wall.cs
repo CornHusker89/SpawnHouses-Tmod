@@ -1,24 +1,17 @@
+#nullable enable
 using System.Collections.Generic;
 using SpawnHouses.Types;
 
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
-public class Wall : IVolumeComponent, IComponentExternalExt {
-    
-    // IComponent
-    public ushort Id { get; set; }
-    public HashSet<ComponentTag> TagsRequired { get; set; }
-    public HashSet<ComponentTag> TagsBlacklist { get; set; }
-    
-    // IVolumeComponent
-    public Shape Volume { get; set; }
+public class Wall : VolumeComponent, IExternalComponent {
     
     // IExternalComponent
     public bool IsExterior { get; set; }
 
     public Wall(Shape volume, bool isExterior = false) {
-        TagsRequired = IsExterior ? [ComponentTag.External] : [];
-        TagsBlacklist = [];
+        TagsRequired = new Dictionary<ComponentTag, object?>(IsExterior ? [new KeyValuePair<ComponentTag, object?>(ComponentTag.External, null)] : []);
+        TagsBlocklist = [];
         Volume = volume;
         IsExterior = isExterior;
     }
