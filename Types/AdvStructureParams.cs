@@ -8,12 +8,10 @@ using Range = SpawnHouses.Structures.Range;
 
 namespace SpawnHouses.Types;
 
-public class StructureParams {
+public class StructureParams : StructureTagSystem {
     public readonly bool CanAddEntryPoints;
     public readonly EntryPoint[] EntryPoints;
     public readonly TilePalette Palette;
-    public readonly Dictionary<StructureTag, object?> TagsRequired;
-    public readonly HashSet<StructureTag> TagsBlocklist;
     public readonly int Volume;
 
     public StructureParams(
@@ -40,10 +38,12 @@ public class StructureParams {
         if (Height <= 4)
             throw new ArgumentException($"Volume ({Volume}) is too small compared to the length ({Length}) of the structure, resulting in a too-low total height of {Height}");
 
-        if (TagsRequired.ContainsKey(StructureTag.HasHousing)) {
-            if (!TagsRequired.ContainsKey(StructureTag.HasRooms)) throw new ArgumentException("Must have rooms tag to have housing");
-            int roomCount = GetTagData<int>(StructureTag.HasRooms);
-            int housing = GetTagData<int>(StructureTag.HasHousing);
+        int? housing = GetTagDataSafe<int?>(StructureTag.HasHousing);
+
+        if (housing != null) {
+            int? roomCount = GetTagDataSafe<int?>(StructureTag.HasRooms);
+            if (roomCount == null) throw new ArgumentException("Must have rooms tag to have housing");
+            
             if (Volume / housing < 60)
                 throw new ArgumentException($"Volume minimum of {Volume} is too small given the housing minimum of {housing}");
             if (Volume / housing < 60)
@@ -67,42 +67,48 @@ public class StructureParams {
 
     /// <summary>calculated using entry points</summary>
     public Point16 Center => new(LeftEntryPointX + (LeftEntryPointX + RightEntryPointX) / 2, CenterYMin + (CenterYMin + CenterYMax) / 2);
-
-    public T GetTagData<T>(StructureTag targetTag) {
-        if (!TagsRequired.TryGetValue(targetTag, out object? value)) throw new Exception("targetTag not found within given tag list");
-
-        if (value == null) throw new Exception($"tag data for {targetTag} is null, could not return any data");
-        T typedValue = (T)value;
-        if (typedValue == null) throw new Exception($"tag data for {targetTag} could not be cast to target type of \"{typeof(T).Name}\"");
-        return typedValue;
-    }
 }
 
-public class RoomLayoutParams(
-    Shape mainVolume,
-    EntryPoint[] entryPoints,
-    TilePalette tilePalette,
-    Dictionary<StructureTag, object?> tagsRequired,
-    HashSet<StructureTag> tagsBlocklist,
-    Range roomHeight,
-    Range roomWidth,
-    Range floorWidth,
-    Range wallWidth,
-    float largeRoomChance = 0.2f,
-    int attempts = 5
-) {
-    public readonly int Attempts = attempts;
-    public readonly EntryPoint[] EntryPoints = entryPoints;
-    public readonly Range FloorWidth = floorWidth;
-    public readonly Dictionary<StructureTag, object?> TagsRequired = tagsRequired;
-    public readonly HashSet<StructureTag> TagsBlocklist = tagsBlocklist;
-    public readonly float LargeRoomChance = largeRoomChance;
-    public readonly Range RoomHeight = roomHeight;
-    public readonly Range RoomWidth = roomWidth;
-    public readonly TilePalette TilePalette = tilePalette;
-    public readonly Range WallWidth = wallWidth;
-    
-    public Shape MainVolume = mainVolume;
+public class RoomLayoutParams : StructureTagSystem {
+    public readonly int Attempts;
+    public readonly EntryPoint[] EntryPoints;
+    public readonly Range FloorWidth;
+    public readonly float LargeRoomChance;
+    public readonly Range RoomHeight;
+    public readonly Range RoomWidth;
+    public readonly TilePalette TilePalette;
+    public readonly Range WallWidth;
+
+    public Shape MainVolume;
+
+
+    public RoomLayoutParams(
+        Shape mainVolume,
+        EntryPoint[] entryPoints,
+        TilePalette tilePalette,
+        Dictionary<StructureTag, object?> tagsRequired,
+        HashSet<StructureTag> tagsBlocklist,
+        Range roomHeight,
+        Range roomWidth,
+        Range floorWidth,
+        Range wallWidth,
+        float largeRoomChance = 0.2f,
+        int attempts = 5
+    ) {
+        TagsRequired = tagsRequired;
+        TagsBlocklist = tagsBlocklist;
+
+        MainVolume = mainVolume;
+
+        Attempts = attempts;
+        EntryPoints = entryPoints;
+        FloorWidth = floorWidth;
+        LargeRoomChance = largeRoomChance;
+        RoomHeight = roomHeight;
+        RoomWidth = roomWidth;
+        TilePalette = tilePalette;
+        WallWidth = wallWidth;
+    }
 
     /// <summary>
     ///     returns a shallow copy of these params
@@ -122,14 +128,6 @@ public class RoomLayoutParams(
             LargeRoomChance,
             Attempts
         );
-    }
-
-    public T GetTagData<T>(StructureTag targetTag) {
-        if (!TagsRequired.TryGetValue(targetTag, out object? value)) throw new Exception("targetTag not found within given tag list");
-        if (value == null) throw new Exception($"tag data for {targetTag} is null, could not return any data");
-        T typedValue = (T)value;
-        if (typedValue == null) throw new Exception($"tag data for {targetTag} could not be cast to target type of \"{typeof(T).Name}\"");
-        return typedValue;
     }
 
     /// <summary>

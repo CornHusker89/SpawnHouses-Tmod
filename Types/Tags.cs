@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using SpawnHouses.Helpers;
 
 namespace SpawnHouses.Types;
 
@@ -57,26 +58,19 @@ public enum StructureTag : ushort {
 }
 
 public enum ComponentTag {
-    // current highest tag number is: 27
+    // current highest tag number is: 31
     // ===== all =====
     Elevated = 1,
     GroundLevel = 2,
     UnderGround = 3,
     External = 4,
 
-    /// when filling volumes, use
-    /// <see cref="Helpers.SlopeHelper.SimpleSlopes" />
-    UseSimpleSloping = 25,
+    /// use sloping algorithm when filling volumes
+    [TagData(typeof(SlopingAlgorithm))] ApplySloping = 28,
 
-    /// when filling volumes, use
-    /// <see cref="Helpers.SlopeHelper.GothicSlopes" />
-    UseGothicSloping = 26,
-
-    /// when filling volumes, use
-    /// <see cref="Helpers.SlopeHelper.HalfSlopes" />
-    UseHalfSloping = 27,
-
-
+    /// apply sloping algorithm using only this component's tiles as opposed to the whole structure
+    [TagData(typeof(SlopeModifier))] SlopingModifier = 31,
+    
     // ===== floor =====
     IsFloorGap = 6,
 
@@ -108,14 +102,10 @@ public enum ComponentTag {
     /// roof is tall enough that it doesn't follow the contour of the tiles it is placed on
     RoofTall = 15,
 
-    /// roof follows contour of the roof, and is within 4 blocks of the top
+    /// roof is short enough to generally follow the contour of the path
     RoofShort = 16,
     
     RoofHasChimney = 17,
-    RoofSlope1To1 = 18,
-    RoofSlopeLessThan1 = 19,
-    RoofSlopeGreaterThan1 = 20,
-    RoofSlopeNone = 21,
 
     /// roof has an overhang of more than 1 tile
     RoofHasLargeOverhang = 22,
@@ -139,15 +129,94 @@ public enum PaletteTag {
     Turquoise = 10
 }
 
+public abstract class StructureTagSystem {
+    public Dictionary<StructureTag, object?> TagsRequired;
+    public HashSet<StructureTag> TagsBlocklist;
+
+    /// <summary>
+    ///     gets tag data from component's tag. throws when tag doesn't exist, has no data, or when cast fails.
+    ///     for safe version see <see cref="GetTagDataSafe{T}" />
+    /// </summary>
+    /// <param name="targetTag"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
+    public T GetTagData<T>(StructureTag targetTag) {
+        if (!TagsRequired.TryGetValue(targetTag, out object? value)) throw new Exception("targetTag not found within given tag list");
+        if (value == null) throw new Exception($"tag data for {targetTag} is null, could not return any data");
+        T typedValue = (T)value;
+        if (typedValue == null) throw new Exception($"tag data for {targetTag} could not be cast to target type of \"{typeof(T).Name}\"");
+        return typedValue;
+    }
+
+    /// <summary>
+    ///     gets tag data from tags. returns default (recommended to use nullable types) when tag isn't found, but throws if tag is found bus has no data or if cast fails.
+    ///     for unsafe version see <see cref="GetTagData{T}" />
+    /// </summary>
+    /// <param name="targetTag"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
+    public T? GetTagDataSafe<T>(StructureTag targetTag) {
+        if (!TagsRequired.TryGetValue(targetTag, out object? value)) return default;
+
+        if (value == null) throw new Exception($"Target tag \"{targetTag}\" found but had no associated data");
+        if (value is not T typedValue) throw new ArgumentException($"tag data for {targetTag} could not be cast to target type of \"{typeof(T).Name}\"");
+        return typedValue;
+    }
+}
+
+public abstract class ComponentTagSystem {
+    public Dictionary<ComponentTag, object?> TagsRequired { get; set; }
+    public HashSet<ComponentTag> TagsBlocklist { get; set; }
+
+    public void AddRequiredTag(ComponentTag tag) {
+        TagsRequired[tag] = null;
+    }
+
+    public void AddRequiredTag<T>(ComponentTag tag, T tagData) {
+        TagsRequired[tag] = tagData;
+    }
+
+    /// <summary>
+    ///     gets tag data from component's tag. throws when tag doesn't exist, has no data, or when cast fails.
+    ///     for safe version see <see cref="GetTagDataSafe{T}" />
+    /// </summary>
+    /// <param name="targetTag"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
+    public T GetTagData<T>(ComponentTag targetTag) {
+        if (!TagsRequired.TryGetValue(targetTag, out object? value)) throw new ArgumentException("targetTag not found within given tag list");
+
+        if (value == null) throw new Exception($"Target tag \"{targetTag}\" found but had no associated data");
+        if (value is not T typedValue) throw new Exception($"tag data for {targetTag} could not be cast to target type of \"{typeof(T).Name}\"");
+        return typedValue;
+    }
+
+    /// <summary>
+    ///     gets tag data from component's tag. returns default (recommended to use nullable types) when tag isn't found, but throws if tag is found bus has no data or if cast fails.
+    ///     for unsafe version see <see cref="GetTagData{T}" />
+    /// </summary>
+    /// <param name="targetTag"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
+    public T? GetTagDataSafe<T>(ComponentTag targetTag) {
+        if (!TagsRequired.TryGetValue(targetTag, out object? value)) return default;
+
+        if (value == null) throw new Exception($"Target tag \"{targetTag}\" found but had no associated data");
+        if (value is not T typedValue) throw new ArgumentException($"tag data for {targetTag} could not be cast to target type of \"{typeof(T).Name}\"");
+        return typedValue;
+    }
+}
+
 public static class TagUtils {
 
     /// <summary>
     ///     a component's tags are considered invalid if a component has all tags in any set
     /// </summary>
     public static HashSet<ComponentTag>[] MutuallyExclusiveComponentTagsRequired { get; } = [
-        [ComponentTag.UseSimpleSloping, ComponentTag.UseGothicSloping],
-        [ComponentTag.UseHalfSloping, ComponentTag.UseSimpleSloping],
-        [ComponentTag.UseHalfSloping, ComponentTag.UseGothicSloping]
     ];
     
     /// <summary>

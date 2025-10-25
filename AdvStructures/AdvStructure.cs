@@ -181,13 +181,7 @@ public class AdvStructure {
         if (!HasFilledComponents)
             throw new Exception("No filled components have been set");
 
-        for (int x = 0; x < Tilemap.Width; x++)
-        for (int y = 0; y < Tilemap.Height; y++)
-            Tilemap[x, y].PasteTile(Tilemap.ConvertToGlobal(x, y));
-
-        for (int x = 0; x < Tilemap.Width; x++)
-        for (int y = 0; y < Tilemap.Height; y++)
-            Tilemap[x, y].SetFrames(Tilemap.ConvertToGlobal(x, y));
+        Tilemap.ApplyTilemap();
     }
 
     public void FinishHousing() {

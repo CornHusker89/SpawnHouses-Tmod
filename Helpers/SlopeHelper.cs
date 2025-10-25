@@ -8,7 +8,7 @@ public class SlopeHelper {
     ///     normal-looking sloping, creates a smooth edge along entire shape using a combination of slopes and half-blocks
     /// </summary>
     /// <returns></returns>
-    public static BlockType SimpleSlopes(int x, int y, bool[,] tilemap) {
+    public static readonly SlopingAlgorithm SimpleSlopes = (x, y, tilemap) => {
         int value = 0;
         if (x != 0 && tilemap[x - 1, y]) value += 1;
         if (x != tilemap.GetUpperBound(0) && tilemap[x + 1, y]) value += 2;
@@ -42,14 +42,14 @@ public class SlopeHelper {
                 BlockType.Solid,
             _ => throw new Exception("no slope condition was met when evaluating shape slopes")
         };
-    }
-    
+    };
+
     /// <summary>
     ///     same as <see cref="SimpleSlopes"/> but will substitute blocks to create a contrast between a smooth top
     ///     surface and straight bottom
     /// </summary>
     /// <returns></returns>
-    public static BlockType SmoothTop(int x, int y, bool[,] tilemap) {
+    public static readonly SlopingAlgorithm SmoothTop = (x, y, tilemap) => {
         int value = 0;
         if (x != 0 && tilemap[x - 1, y]) value += 1;
         if (x != tilemap.GetUpperBound(0) && tilemap[x + 1, y]) value += 2;
@@ -87,13 +87,13 @@ public class SlopeHelper {
                 BlockType.Solid,
             _ => throw new Exception("no slope condition was met when evaluating shape slopes")
         };
-    }
+    };
 
     /// <summary>
     ///     
     /// </summary>
     /// <returns></returns>
-    public static BlockType GothicSlopes(int x, int y, bool[,] tilemap) {
+    public static readonly SlopingAlgorithm GothicSlopes = (x, y, tilemap) => {
         int value = 0;
         if (x != 0 && tilemap[x - 1, y]) value += 1;
         if (x != tilemap.GetUpperBound(0) && tilemap[x + 1, y]) value += 2;
@@ -128,13 +128,13 @@ public class SlopeHelper {
                 BlockType.Solid,
             _ => throw new Exception("no slope condition was met when evaluating shape slopes")
         };
-    }
+    };
 
     /// <summary>
     ///     
     /// </summary>
     /// <returns></returns>
-    public static BlockType HalfSlopes(int x, int y, bool[,] tilemap) {
+    public static readonly SlopingAlgorithm HalfSlopes = (x, y, tilemap) => {
         int value = 0;
         if (x != 0 && tilemap[x - 1, y]) value += 1;
         if (x != tilemap.GetUpperBound(0) && tilemap[x + 1, y]) value += 2;
@@ -169,5 +169,18 @@ public class SlopeHelper {
                 BlockType.Solid,
             _ => throw new Exception("no slope condition was met when evaluating shape slopes")
         };
-    }
+    };
+}
+
+public delegate BlockType SlopingAlgorithm(int x, int y, bool[,] tilemap);
+
+public enum SlopeModifier {
+    /// applies sloping algorithm taking entire tilemap into consideration
+    GlobalSloping,
+
+    /// applies sloping algorithm only taking this shape into consideration
+    LocalSloping,
+
+    /// applies sloping algorithm taking entire tilemap into consideration, but excludes anything that uses LocalSloping
+    GlobalOnlySloping
 }

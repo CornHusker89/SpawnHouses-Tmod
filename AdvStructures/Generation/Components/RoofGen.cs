@@ -223,18 +223,13 @@ public static class RoofGen {
                 ComponentTag.RoofShort,
                 ComponentTag.RoofTall,
                 ComponentTag.RoofHasLargeOverhang,
-                ComponentTag.RoofSlopeNone,
-                ComponentTag.RoofSlopeLessThan1,
-                ComponentTag.RoofSlope1To1,
-                ComponentTag.RoofSlopeGreaterThan1
             ];
         }
 
         public override bool Generate(PathComponentParams param) {
-            bool isPathFlat = param.Component.Line.Points.All(p => p.Y == param.Component.Line.Points[0].Y);
+            bool isPathFlat = param.Component.Line.Points.All(point => point.Y == param.Component.Line.Points[0].Y);
 
             // extend roof endcaps if necessary
-            (Point16 left, Point16 right) endpoints = param.Component.Line.SortEndpoints();
             bool bigEndCaps = param.Component.TagsRequired.ContainsKey(ComponentTag.RoofHasLargeOverhang);
             if (param.Component.Line.StartExtendable) {
                 
@@ -259,13 +254,13 @@ public static class RoofGen {
                 }
 
                 if (tallRightSide) {
-                    Shape topLeftShape = topPath.FillFromCorner(new Point16(1, 0));
-                    topLeftShape.ExecuteInArea((x, y) => { param.Tilemap.PlaceWall(x, y, param.Palette.BackgroundRoofMain); });
+                    Shape topRightShape = topPath.FillFromCorner(new Point16(1, 0));
+                    topRightShape.ExecuteInArea((x, y) => { param.Tilemap.PlaceWall(x, y, param.Palette.BackgroundRoofMain); });
                 }
             }
 
             // create bottom wall section
-            Shape wallsShape = upperMiddlePath.ToShape(param.Component.Line.Points.Length);
+            Shape wallsShape = upperMiddlePath.ToShape(param.Component.Line);
             wallsShape.ExecuteInArea((x, y) => {
                 if (x != wallsShape.BoundingBox.topLeft.X && x != wallsShape.BoundingBox.bottomRight.X) param.Tilemap.PlaceWall(x, y, param.Palette.BackgroundRoofMain);
             });

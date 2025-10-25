@@ -2,14 +2,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
+using SpawnHouses.Helpers;
 using SpawnHouses.Structures;
 using SpawnHouses.Types;
-using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 
@@ -22,39 +18,15 @@ namespace SpawnHouses.AdvStructures.AdvStructureParts;
 /// </summary>
 /// <remarks>it's assumed that the points are in clockwise order</remarks>
 public class Shape : PointGeometry {
-    private static readonly Color[] Colors = [
-        Color.White,
-        Color.Black,
-        Color.Aquamarine,
-        Color.Red
-    ];
-
+    
     public bool IsBox { get; private set; } // because many of the shapes will be boxes, introduce optimizations for boxes
 
     public Point16 Center => BoundingBox.topLeft + Size / new Point16(2, 2);
 
-    private static Color GetColor(int index) {
-        return Colors[index % Colors.Length];
-    }
+    private bool[,]? _booleanTilemap;
 
-    /// <param name="shapes">shapes to create outline with</param>
-    /// <param name="duration">effect duration, in seconds</param>
-    public static void CreateOutline(Shape[] shapes, int duration = 10) {
-        Task.Run(() => {
-            Stopwatch stopwatch = Stopwatch.StartNew();
-            while (stopwatch.ElapsedMilliseconds / 1000 < duration) {
-                for (int i = 0; i < shapes.Length; i++) {
-                    for (int j = 0; j < shapes[i].Points.Length - 1; j++)
-                        Dust.QuickDustLine(shapes[i].Points[j].ToVector2() * 16 - new Vector2(8, 8),
-                            shapes[i].Points[j + 1].ToVector2() * 16 - new Vector2(8, 8), 20f, GetColor(i));
-
-                    Dust.QuickDustLine(shapes[i].Points[0].ToVector2() * 16 - new Vector2(8, 8),
-                        shapes[i].Points[^1].ToVector2() * 16 - new Vector2(8, 8), 20f, GetColor(i));
-                }
-
-                Thread.Sleep(200);
-            }
-        });
+    public bool[,] BooleanTilemap {
+        get { return _booleanTilemap ??= GetBooleanTilemap(); }
     }
 
     protected sealed override void Init(Point16[] points, bool optimize) {
@@ -347,6 +319,12 @@ public class Shape : PointGeometry {
         return (min, max, average);
     }
 
+    private bool[,] GetBooleanTilemap() {
+        bool[,] tilemap = new bool[BoundingBox.bottomRight.X + 1, BoundingBox.bottomRight.Y + 1];
+        ExecuteInArea((x, y) => { tilemap[x, y] = true; });
+        return tilemap;
+    }
+
     #endregion
 
 
@@ -481,10 +459,10 @@ public class Shape : PointGeometry {
     /// <param name="action"></param>
     /// <param name="slopingAlgorithm">
     ///     function to determine the <see cref="BlockType" /> passed to the action.
-    ///     if none is passed, this function will only pass <see cref="BlockType.Solid" />.
+    ///     if none is passed, this function will only pass BlockType <see cref="BlockType.Solid" />.
     ///     examples of these functions are found in <see cref="Helpers.SlopeHelper" />
     /// </param>
-    public void ExecuteInArea(Action<int, int, BlockType> action, Func<int, int, bool[,], BlockType>? slopingAlgorithm = null) {
+    public void ExecuteInArea(Action<int, int, BlockType> action, SlopingAlgorithm? slopingAlgorithm = null) {
         if (slopingAlgorithm is null) {
             ExecuteInArea((x, y) => { action(x, y, BlockType.Solid); });
             return;

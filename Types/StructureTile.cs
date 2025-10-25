@@ -1,3 +1,4 @@
+using SpawnHouses.Helpers;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -9,7 +10,38 @@ namespace SpawnHouses.Types;
 ///     has many of the same properties as the tML Tile, but uses direct references and has a few more properties
 /// </summary>
 public class StructureTile {
-    // Slopes
+    #region Custom Fields
+
+    public SlopingAlgorithm SlopingAlg;
+
+    public SlopeModifier SlopeModifier;
+
+    public bool IsOutside;
+
+    public bool IsInside;
+
+    public bool IsExteriorComponent;
+
+    public bool IsFloor;
+
+    public bool IsWall;
+
+    public bool IsGap;
+
+    /// <summary>
+    ///     If true, when the tilemap is pasted, the original tile here will remain
+    /// </summary>
+    public bool IsNullTile;
+
+    /// <summary>
+    ///     If true, when the tilemap is pasted, the original wall here will remain
+    /// </summary>
+    public bool IsNullWall;
+
+    #endregion
+
+
+    #region Vanilla Fields
 
     /// <summary>
     ///     The <see cref="Slope" /> and <see cref="IsHalfBlock" /> of this tile combined, which can be changed by hammering.
@@ -45,30 +77,7 @@ public class StructureTile {
     ///     Actuated tiles are <strong>not</strong> solid.
     /// </remarks>
     public bool IsActuated;
-
-    // Custom fields
-
-    public bool IsExteriorComponent;
-
-    public bool IsFloor;
-
-    public bool IsGap;
-
-    public bool IsInside;
-
-    /// <summary>
-    ///     If true, when the tilemap is pasted, the original tile here will remain
-    /// </summary>
-    public bool IsNullTile;
-
-    /// <summary>
-    ///     If true, when the tilemap is pasted, the original wall here will remain
-    /// </summary>
-    public bool IsNullWall;
-
-    public bool IsOutside;
-
-    public bool IsWall;
+    
 
     // Colors
 
@@ -102,9 +111,14 @@ public class StructureTile {
     /// </summary>
     public ushort WallType;
 
+    #endregion
+
+
+    #region Vanilla Properties
+
     /// <summary>
     ///     Whether there is a tile at this position that isn't actuated.<br />
-    ///     Legacy/vanilla equivalent is <see cref="nactive" />.
+    ///     Legacy/vanilla equivalent is <see cref="inactive" />.
     /// </summary>
     /// <remarks>
     ///     Actuated tiles are not solid, so use <see cref="HasUnactuatedTile" /> instead of <see cref="HasTile" /> for
@@ -141,7 +155,8 @@ public class StructureTile {
     /// </summary>
     public bool RightSlope => BlockType == BlockType.SlopeDownLeft || BlockType == BlockType.SlopeUpLeft;
 
-
+    #endregion
+    
     /// <summary>
     ///     Resets the tile data at this position.<br />
     ///     Sets <see cref="HasTile" /> and <see cref="IsActuated" /> to <see langword="false" /> and sets the
@@ -157,10 +172,11 @@ public class StructureTile {
     }
 
     /// <summary>
-    ///     copies all of this data to Main.tile at the given position
+    ///     copies all of this tile's data to Main.tile at the given global position
     /// </summary>
     /// <param name="x"></param>
     /// <param name="y"></param>
+    /// <remarks>does not apply tile <see cref="BlockType"/></remarks>
     public void PasteTile(int x, int y) {
         Tile tile = Main.tile[x, y];
         if (!IsNullTile) {
@@ -169,7 +185,6 @@ public class StructureTile {
             tile.IsActuated = IsActuated;
             tile.HasActuator = HasActuator;
             tile.TileColor = TileColor;
-            tile.BlockType = BlockType;
         }
 
         if (!IsNullWall) {
@@ -178,16 +193,36 @@ public class StructureTile {
         }
     }
 
+    /// <summary>
+    ///     copies all of this tile's data to Main.tile at the given global position
+    /// </summary>
+    /// <param name="point"></param>
+    /// <remarks>does not apply tile <see cref="BlockType" /></remarks>
     public void PasteTile(Point16 point) {
         PasteTile(point.X, point.Y);
     }
 
-    public void SetFrames(int x, int y) {
+    /// <summary>
+    ///     copies <see cref="BlockType" /> of this tile to Main.tile at the given global position
+    /// </summary>
+    public void ApplySlopes(int x, int y) {
+        Tile tile = Main.tile[x, y];
+        tile.BlockType = BlockType;
+    }
+
+    /// <summary>
+    ///     copies <see cref="BlockType" /> of this tile to Main.tile at the given global position
+    /// </summary>
+    public void ApplySlopes(Point16 point) {
+        ApplySlopes(point.X, point.Y);
+    }
+
+    public static void SetFrames(int x, int y) {
         WorldUtils.TileFrame(x, y);
         Framing.WallFrame(x, y);
     }
 
-    public void SetFrames(Point16 point) {
+    public static void SetFrames(Point16 point) {
         SetFrames(point.X, point.Y);
     }
 }

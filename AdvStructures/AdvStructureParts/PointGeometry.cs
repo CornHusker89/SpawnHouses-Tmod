@@ -27,11 +27,11 @@ public abstract class PointGeometry {
 
     /// <summary>
     /// </summary>
-    /// <param name="pointIndex">index in <see cref="Points" /> to start at, ends at this +1</param>
+    /// <param name="edgeIndex">edge index to retrieve</param>
     /// <returns></returns>
-    /// <remarks>will not wrap around, beware of out-of-bounds errors</remarks>
-    public float GetSlope(int pointIndex) {
-        return (float)(Points[pointIndex].Y - Points[pointIndex + 1].Y) / (Points[pointIndex].X - Points[pointIndex + 1].X);
+    /// <remarks>edge count = point count - 1. will not wrap around, beware of out-of-bounds errors</remarks>
+    public float GetSlope(int edgeIndex) {
+        return (float)(Points[edgeIndex].Y - Points[edgeIndex + 1].Y) / (Points[edgeIndex].X - Points[edgeIndex + 1].X);
     }
 
     public static float GetSlope(Point16 point1, Point16 point2) {

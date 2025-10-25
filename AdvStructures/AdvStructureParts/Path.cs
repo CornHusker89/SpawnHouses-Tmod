@@ -73,6 +73,17 @@ public class Path : PointGeometry {
     }
 
     /// <summary>
+    ///     returns an array of all slopes that occur along the path.
+    /// </summary>
+    /// <returns></returns>
+    /// <remarks>signs are kept so depending on geometry, some slopes may be negative</remarks>
+    public float[] GetSlopes() {
+        float[] returnValue = new float[Points.Length - 1];
+        for (int i = 0; i < Points.Length - 1; i++) returnValue[i] = GetSlope(i);
+        return returnValue;
+    }
+
+    /// <summary>
     ///     creates loop and expands either up or down, forming a shape
     /// </summary>
     /// <param name="height"></param>

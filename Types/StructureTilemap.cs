@@ -1,5 +1,6 @@
 using System;
 using SpawnHouses.AdvStructures.AdvStructureParts;
+using SpawnHouses.Helpers;
 using Terraria.DataStructures;
 using Terraria.ID;
 
@@ -124,22 +125,28 @@ public class StructureTilemap {
     }
 
     public void PlaceTile(int x, int y, PaintedType paintedType, BlockType blockType = BlockType.Solid) {
-        if (paintedType.Style == -1) {
-            StructureTile tile = this[x, y];
-            tile.HasTile = true;
-            tile.BlockType = blockType;
-            tile.TileType = paintedType.Type;
-            tile.TileColor = paintedType.PaintType;
-            tile.IsNullTile = false;
-        }
-        else {
-            throw new NotImplementedException();
+        if (paintedType.Style != -1) throw new NotImplementedException();
 
-            // can't use this because it needs a custom tilemap
-            // Terraria.WorldGen.PlaceTile(x, y, paintedType.Type, true, true, style: paintedType.Style);
-            // StructureTile tile = tilemap[x, y];
-            // tile.TileColor = paintedType.PaintType;
+        StructureTile tile = this[x, y];
+        tile.HasTile = true;
+        tile.BlockType = blockType;
+        tile.TileType = paintedType.Type;
+        tile.TileColor = paintedType.PaintType;
+        tile.IsNullTile = false;
+    }
+
+    public void PlaceTile(int x, int y, PaintedType paintedType, SlopingAlgorithm slopingAlgorithm, SlopeModifier slopeModifier = SlopeModifier.GlobalSloping) {
+        if (paintedType.Style != -1) {
+            throw new NotImplementedException();
         }
+
+        StructureTile tile = this[x, y];
+        tile.HasTile = true;
+        tile.TileType = paintedType.Type;
+        tile.TileColor = paintedType.PaintType;
+        tile.IsNullTile = false;
+        tile.SlopingAlg = slopingAlgorithm;
+        tile.SlopeModifier = slopeModifier;
     }
 
     /// <summary>
@@ -160,5 +167,43 @@ public class StructureTilemap {
         tile.WallType = paintedType.Type;
         tile.WallColor = paintedType.PaintType;
         tile.IsNullWall = false;
+    }
+
+    /// <summary>
+    ///     applies this tilemap (with it's offset) onto main game tilemap
+    /// </summary>
+    public void ApplyTilemap() {
+        bool[,] globalTilemap = new bool[Width, Height];
+        bool[,] globalNonLocalTilemap = new bool[Width, Height];
+        for (int x = 0; x < Width; x++)
+        for (int y = 0; y < Height; y++) {
+            StructureTile tile = this[x, y];
+            tile.PasteTile(ConvertToGlobal(x, y));
+            globalTilemap[x, y] = tile.HasTile;
+        }
+
+        for (int x = 0; x < Width; x++)
+        for (int y = 0; y < Height; y++) {
+            StructureTile tile = this[x, y];
+            if (tile.SlopingAlg != null) {
+                bool[,] tilemap;
+                if (tile.SlopeModifier == SlopeModifier.GlobalSloping)
+                    tilemap = globalTilemap;
+                else if (tile.SlopeModifier == SlopeModifier.GlobalOnlySloping)
+                    tilemap = globalNonLocalTilemap;
+                else
+                    throw new Exception($"tile has unsupported slope modifier {tile.SlopeModifier} for standalone placement");
+
+                tile.BlockType = tile.SlopingAlg(x, y, tilemap);
+                tile.SlopingAlg = null;
+            }
+
+            if (tile.HasTile)
+                tile.ApplySlopes(ConvertToGlobal(x, y));
+        }
+
+        for (int x = 0; x < Width; x++)
+        for (int y = 0; y < Height; y++)
+            StructureTile.SetFrames(ConvertToGlobal(x, y));
     }
 }

@@ -1,4 +1,4 @@
-using System;
+#nullable enable
 using System.Collections.Generic;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Helpers;
@@ -18,18 +18,15 @@ public static class FloorGen {
                 ComponentTag.External,
                 ComponentTag.GroundLevel,
                 ComponentTag.UnderGround,
-                ComponentTag.UseSimpleSloping,
-                ComponentTag.UseHalfSloping
+
+                // from FillShape
+                ComponentTag.ApplySloping,
+                ComponentTag.SlopingModifier
             ];
         }
 
         public override bool Generate(VolumeComponentParams param) {
-            Func<int, int, bool[,], BlockType> sloping = param.Component.TagsRequired.ContainsKey(ComponentTag.UseSimpleSloping)
-                ? SlopeHelper.SimpleSlopes
-                : param.Component.TagsRequired.ContainsKey(ComponentTag.UseSimpleSloping)
-                    ? SlopeHelper.HalfSlopes
-                    : null;
-            param.Component.Volume.ExecuteInArea((x, y, bt) => { param.Tilemap.PlaceTile(x, y, param.Palette.FloorMain, bt); }, sloping);
+            ComponentFillHelper.FillShape(param.Component.Volume, param, param.Palette.FloorMain);
             return true;
         }
     }
@@ -46,18 +43,16 @@ public static class FloorGen {
                 ComponentTag.Elevated,
                 ComponentTag.GroundLevel,
                 ComponentTag.UnderGround,
-                ComponentTag.UseSimpleSloping,
-                ComponentTag.UseHalfSloping
+
+                // from FillShape
+                ComponentTag.ApplySloping,
+                ComponentTag.SlopingModifier
             ];
         }
 
         public override bool Generate(VolumeComponentParams param) {
-            Func<int, int, bool[,], BlockType> sloping = param.Component.TagsRequired.ContainsKey(ComponentTag.UseSimpleSloping)
-                ? SlopeHelper.SimpleSlopes
-                : param.Component.TagsRequired.ContainsKey(ComponentTag.UseSimpleSloping)
-                    ? SlopeHelper.HalfSlopes
-                    : null;
-            param.Component.Volume.ExecuteInArea((x, y, bt) => { param.Tilemap.PlaceTile(x, y, PaintedType.PickRandom(param.Palette.FloorAlt), bt); }, sloping);
+            ComponentFillHelper.FillShape(param.Component.Volume, param, PaintedType.PickRandom(
+                param.Component.TagsRequired.ContainsKey(ComponentTag.Elevated) ? param.Palette.FloorAltElevated : param.Palette.FloorAlt));
             return true;
         }
     }
@@ -74,8 +69,10 @@ public static class FloorGen {
                 ComponentTag.Elevated,
                 ComponentTag.GroundLevel,
                 ComponentTag.UnderGround,
-                ComponentTag.UseSimpleSloping,
-                ComponentTag.UseHalfSloping
+
+                // from FillShape
+                ComponentTag.ApplySloping,
+                ComponentTag.SlopingModifier
             ];
         }
 
@@ -84,31 +81,18 @@ public static class FloorGen {
         }
 
         public override bool Generate(VolumeComponentParams param) {
-            Func<int, int, bool[,], BlockType> sloping = param.Component.TagsRequired.ContainsKey(ComponentTag.UseSimpleSloping)
-                ? SlopeHelper.SimpleSlopes
-                : param.Component.TagsRequired.ContainsKey(ComponentTag.UseSimpleSloping)
-                    ? SlopeHelper.HalfSlopes
-                    : null;
             bool elevated = param.Component.TagsRequired.ContainsKey(ComponentTag.Elevated);
             int xStart = param.Component.Volume.BoundingBox.topLeft.X;
             int[] topY = new int[param.Component.Volume.Size.X];
 
-            param.Component.Volume.ExecuteInArea((x, y, bt) => {
-                param.Tilemap.PlaceTile(
-                    x,
-                    y,
-                    PaintedType.PickRandom(elevated
-                        ? param.Palette.FloorAlt
-                        : param.Palette.FloorAltElevated),
-                    bt
-                );
+            ComponentFillHelper.FillShape(param.Component.Volume, param, PaintedType.PickRandom(elevated ? param.Palette.FloorAlt : param.Palette.FloorAltElevated),
+                (x, y) => {
+                    if (topY[x - xStart] == 0)
+                        topY[x - xStart] = y;
 
-                if (topY[x - xStart] == 0)
-                    topY[x - xStart] = y;
-
-                if (y < topY[x - xStart])
-                    topY[x - xStart] = y;
-            }, sloping);
+                    if (y < topY[x - xStart])
+                        topY[x - xStart] = y;
+                });
 
             for (int index = 0; index < topY.Length; index++)
                 param.Tilemap.SoftPlaceTile(
