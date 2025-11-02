@@ -45,7 +45,7 @@ public class SlopeHelper {
     };
 
     /// <summary>
-    ///     same as <see cref="SimpleSlopes"/> but will substitute blocks to create a contrast between a smooth top
+    ///     same as <see cref="SimpleSlopes"/> but slightly different to create a contrast between a smooth top
     ///     surface and straight bottom
     /// </summary>
     /// <returns></returns>
@@ -175,12 +175,12 @@ public class SlopeHelper {
 public delegate BlockType SlopingAlgorithm(int x, int y, bool[,] tilemap);
 
 public enum SlopeModifier {
-    /// applies sloping algorithm taking entire tilemap into consideration
-    GlobalSloping,
-
-    /// applies sloping algorithm only taking this shape into consideration
-    LocalSloping,
+    /// applies sloping algorithm taking entire tilemap into consideration. default sloping modifier
+    GlobalSloping = 0,
 
     /// applies sloping algorithm taking entire tilemap into consideration, but excludes anything that uses LocalSloping
-    GlobalOnlySloping
+    GlobalOnlySloping,
+
+    /// applies sloping algorithm only taking this shape into consideration
+    LocalSloping
 }

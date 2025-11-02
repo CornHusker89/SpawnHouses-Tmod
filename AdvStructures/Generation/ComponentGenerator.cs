@@ -44,7 +44,7 @@ public abstract class PathComponentGenerator : ComponentGenerator {
         throw new Exception("PathComponentGenerators must use PathComponentParams");
     }
 
-    public bool CanGenerate(PathComponentParams componentParams) {
+    public virtual bool CanGenerate(PathComponentParams componentParams) {
         return true;
     }
 

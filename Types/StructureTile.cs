@@ -14,7 +14,7 @@ public class StructureTile {
 
     public SlopingAlgorithm SlopingAlg;
 
-    public SlopeModifier SlopeModifier;
+    public SlopeModifier SlopeModifier = SlopeModifier.GlobalOnlySloping;
 
     public bool IsOutside;
 

@@ -223,9 +223,11 @@ public static class RoofGen {
                 ComponentTag.RoofShort,
                 ComponentTag.RoofTall,
                 ComponentTag.RoofHasLargeOverhang,
+                ComponentTag.ApplySloping,
+                ComponentTag.SlopingModifier
             ];
         }
-
+            
         public override bool Generate(PathComponentParams param) {
             bool isPathFlat = param.Component.Line.Points.All(point => point.Y == param.Component.Line.Points[0].Y);
 
@@ -242,7 +244,7 @@ public static class RoofGen {
             topPath.Reverse();
 
             Shape offsetShape = upperMiddlePath.ToShape(topPath);
-            offsetShape.ExecuteInArea((x, y, blockType) => { param.Tilemap.PlaceTile(x, y, param.Palette.RoofMain, blockType); }, SlopeHelper.SmoothTop);
+            ComponentFillHelper.FillShapeTiles(offsetShape, param, param.Palette.RoofMain);
 
             // add large roof parts if necessary
             if (param.Component.TagsRequired.ContainsKey(ComponentTag.RoofTall)) {
@@ -250,12 +252,12 @@ public static class RoofGen {
                 bool tallRightSide = !tallLeftSide || Terraria.WorldGen.genRand.NextBool(3, 4);
                 if (tallLeftSide) {
                     Shape topLeftShape = topPath.FillFromCorner(new Point16(0, 0));
-                    topLeftShape.ExecuteInArea((x, y) => { param.Tilemap.PlaceWall(x, y, param.Palette.BackgroundRoofMain); });
+                    ComponentFillHelper.FillShapeWalls(topLeftShape, param, param.Palette.BackgroundRoofMain);
                 }
 
                 if (tallRightSide) {
                     Shape topRightShape = topPath.FillFromCorner(new Point16(1, 0));
-                    topRightShape.ExecuteInArea((x, y) => { param.Tilemap.PlaceWall(x, y, param.Palette.BackgroundRoofMain); });
+                    ComponentFillHelper.FillShapeWalls(topRightShape, param, param.Palette.BackgroundRoofMain);
                 }
             }
 

@@ -180,6 +180,7 @@ public class StructureTilemap {
             StructureTile tile = this[x, y];
             tile.PasteTile(ConvertToGlobal(x, y));
             globalTilemap[x, y] = tile.HasTile;
+            globalNonLocalTilemap[x, y] = tile.HasTile && tile.SlopeModifier != SlopeModifier.LocalSloping;
         }
 
         for (int x = 0; x < Width; x++)
@@ -187,15 +188,20 @@ public class StructureTilemap {
             StructureTile tile = this[x, y];
             if (tile.SlopingAlg != null) {
                 bool[,] tilemap;
-                if (tile.SlopeModifier == SlopeModifier.GlobalSloping)
-                    tilemap = globalTilemap;
-                else if (tile.SlopeModifier == SlopeModifier.GlobalOnlySloping)
-                    tilemap = globalNonLocalTilemap;
-                else
-                    throw new Exception($"tile has unsupported slope modifier {tile.SlopeModifier} for standalone placement");
-
-                tile.BlockType = tile.SlopingAlg(x, y, tilemap);
-                tile.SlopingAlg = null;
+                switch (tile.SlopeModifier) {
+                    case SlopeModifier.GlobalSloping:
+                        tilemap = globalTilemap;
+                        tile.BlockType = tile.SlopingAlg(x, y, tilemap);
+                        break;
+                    case SlopeModifier.GlobalOnlySloping:
+                        tilemap = globalNonLocalTilemap;
+                        tile.BlockType = tile.SlopingAlg(x, y, tilemap);
+                        break;
+                    case SlopeModifier.LocalSloping:
+                        break;
+                    default:
+                        throw new Exception($"tile has unsupported slope modifier {tile.SlopeModifier} for standalone placement");
+                }
             }
 
             if (tile.HasTile)

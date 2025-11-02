@@ -104,8 +104,8 @@ public enum ComponentTag {
 
     /// roof is short enough to generally follow the contour of the path
     RoofShort = 16,
-    
-    RoofHasChimney = 17,
+
+    [TagData(typeof(int))] RoofHasChimney = 17,
 
     /// roof has an overhang of more than 1 tile
     RoofHasLargeOverhang = 22,

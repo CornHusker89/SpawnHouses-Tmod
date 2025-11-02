@@ -26,7 +26,7 @@ public static class FloorGen {
         }
 
         public override bool Generate(VolumeComponentParams param) {
-            ComponentFillHelper.FillShape(param.Component.Volume, param, param.Palette.FloorMain);
+            ComponentFillHelper.FillShapeTiles(param.Component.Volume, param, param.Palette.FloorMain);
             return true;
         }
     }
@@ -51,7 +51,7 @@ public static class FloorGen {
         }
 
         public override bool Generate(VolumeComponentParams param) {
-            ComponentFillHelper.FillShape(param.Component.Volume, param, PaintedType.PickRandom(
+            ComponentFillHelper.FillShapeTiles(param.Component.Volume, param, PaintedType.PickRandom(
                 param.Component.TagsRequired.ContainsKey(ComponentTag.Elevated) ? param.Palette.FloorAltElevated : param.Palette.FloorAlt));
             return true;
         }
@@ -85,13 +85,14 @@ public static class FloorGen {
             int xStart = param.Component.Volume.BoundingBox.topLeft.X;
             int[] topY = new int[param.Component.Volume.Size.X];
 
-            ComponentFillHelper.FillShape(param.Component.Volume, param, PaintedType.PickRandom(elevated ? param.Palette.FloorAlt : param.Palette.FloorAltElevated),
+            ComponentFillHelper.FillShapeTiles(param.Component.Volume, param, PaintedType.PickRandom(elevated ? param.Palette.FloorAlt : param.Palette.FloorAltElevated),
                 (x, y) => {
                     if (topY[x - xStart] == 0)
                         topY[x - xStart] = y;
 
                     if (y < topY[x - xStart])
                         topY[x - xStart] = y;
+                    return true;
                 });
 
             for (int index = 0; index < topY.Length; index++)
