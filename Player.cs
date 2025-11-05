@@ -1,4 +1,3 @@
-using System;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Structures;
 using SpawnHouses.Structures.Structures;
@@ -7,7 +6,7 @@ using Terraria.ModLoader;
 
 namespace SpawnHouses;
 
-public class Player : ModPlayer
+public class SpawnHousesPlayer : ModPlayer
 {
     public override void OnEnterWorld()
     {
