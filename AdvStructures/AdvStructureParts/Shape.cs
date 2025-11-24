@@ -25,6 +25,9 @@ public class Shape : PointGeometry {
 
     private bool[,]? _booleanTilemap;
 
+    /// <summary>
+    ///     2d array of this shape showing if there is a tile, 0-indexed
+    /// </summary>
     public bool[,] BooleanTilemap {
         get { return _booleanTilemap ??= GetBooleanTilemap(); }
     }
@@ -236,39 +239,36 @@ public class Shape : PointGeometry {
     }
 
     /// <summary>
-    ///     find all corners of a shape based on their x and y positions, useful for ensuring beams and such make sense visually
+    ///     find all corners of a shape (expanded out by 1 tile) based on their x and y positions, useful for ensuring beams and such make sense visually
     /// </summary>
-    /// <param name="significantAngle">only vertices that create an angle (deg) larger than this will be considered</param>
+    /// <param name="significantAngle">only vertices that create a deviation (in deg) larger than this will be considered</param>
     /// <returns></returns>
-    public List<Point16> GetCorners(float significantAngle = 10f) {
-        List<Point16> corners = [];
-        Shape expandedShape = GetExpandedShape(1);
-
-        var a = expandedShape.CollapseVertices(significantAngle);
-        
-        foreach (Point16 point in expandedShape.CollapseVertices(significantAngle)) {
-            bool xCorner = point.X != expandedShape.BoundingBox.topLeft.X
-                           && point.X != expandedShape.BoundingBox.bottomRight.X;
-            bool yCorner = point.Y != expandedShape.BoundingBox.topLeft.Y
-                           && point.Y != expandedShape.BoundingBox.bottomRight.Y;
+    public List<PartialPoint16> GetCorners(float significantAngle = 30f) {
+        List<PartialPoint16> corners = [];
+        foreach (Point16 point in GetExpandedShape(1).CollapseVertices(significantAngle)) {
+            bool xCorner = point.X > BoundingBox.topLeft.X
+                           && point.X < BoundingBox.bottomRight.X;
+            bool yCorner = point.Y > BoundingBox.topLeft.Y
+                           && point.Y < BoundingBox.bottomRight.Y;
             if (xCorner && yCorner)
-                corners.Add(new Point16(point.X, point.Y));
+                corners.Add(new PartialPoint16(point));
             else if (xCorner && !yCorner)
-                corners.Add(new Point16(point.X, (short)-1));
-            else if (!xCorner && yCorner) corners.Add(new Point16((short)-1, point.Y));
+                corners.Add(new PartialPoint16(point.X, 0, hasY: false));
+            else if (!xCorner && yCorner)
+                corners.Add(new PartialPoint16(0, point.Y, false));
         }
 
         // sanitize list to remove repeat values
         for (int i = 0; i < corners.Count; i++) {
-            Point16 target = corners[i];
-            if (target.X == -1 == (target.Y == -1)) // only check cases where only 1 axis is valid
+            PartialPoint16 target = corners[i];
+            if (target.HasX == target.HasY) // only check cases where only 1 axis is valid
                 continue;
 
-            Point16 last = corners[i - 1 != -1 ? i - 1 : corners.Count - 1];
-            Point16 next = corners[i + 1 != corners.Count ? i + 1 : 0];
+            PartialPoint16 last = corners[i - 1 != -1 ? i - 1 : corners.Count - 1];
+            PartialPoint16 next = corners[i + 1 != corners.Count ? i + 1 : 0];
 
-            if ((last.X != -1 && last.Y != -1 && (target.X == last.X || target.Y == last.Y))
-                || (next.X != -1 && next.Y != -1 && (target.X == next.X || target.Y == next.Y))) {
+            if ((last is { HasX: true, HasY: true } && (target.X == last.X || target.Y == last.Y))
+                || (next is { HasX: true, HasY: true } && (target.X == next.X || target.Y == next.Y))) {
                 corners.RemoveAt(i);
                 i--;
             }
@@ -283,7 +283,7 @@ public class Shape : PointGeometry {
     /// <param name="xAxis"></param>
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
-    public (int min, int max, double average) GetTrueSize(bool xAxis) {
+    public (int min, int max, double average) GetDetailedAxisSizes(bool xAxis) {
         Dictionary<int, int> minValues = [], maxValues = [];
         ExecuteInArea((x, y) => {
             if (!minValues.TryGetValue(xAxis ? y : x, out int oldMinValue)) {
@@ -319,9 +319,13 @@ public class Shape : PointGeometry {
         return (min, max, average);
     }
 
+    /// <summary>
+    ///     get a 2d array of this shape showing if there is a tile, always 0-indexed
+    /// </summary>
+    /// <returns></returns>
     private bool[,] GetBooleanTilemap() {
-        bool[,] tilemap = new bool[BoundingBox.bottomRight.X + 1, BoundingBox.bottomRight.Y + 1];
-        ExecuteInArea((x, y) => { tilemap[x, y] = true; });
+        bool[,] tilemap = new bool[Size.X, Size.Y];
+        ExecuteInArea((x, y) => { tilemap[x - BoundingBox.topLeft.X, y - BoundingBox.topLeft.Y] = true; });
         return tilemap;
     }
 

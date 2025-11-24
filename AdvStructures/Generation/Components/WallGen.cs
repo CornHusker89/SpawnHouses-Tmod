@@ -72,7 +72,7 @@ public static class WallGen {
         }
 
         public override bool CanGenerate(VolumeComponentParams componentParams) {
-            return componentParams.Component.Volume.GetTrueSize(true).average >= 4;
+            return componentParams.Component.Volume.GetDetailedAxisSizes(true).average >= 4;
         }
 
         public override bool Generate(VolumeComponentParams param) {
@@ -119,7 +119,7 @@ public static class WallGen {
         }
 
         public override bool CanGenerate(VolumeComponentParams componentParams) {
-            return componentParams.Component.Volume.GetTrueSize(true).average >= 4;
+            return componentParams.Component.Volume.GetDetailedAxisSizes(true).average >= 4;
         }
 
         public override bool Generate(VolumeComponentParams param) {

@@ -1,5 +1,6 @@
 using System;
 using SpawnHouses.AdvStructures.AdvStructureParts;
+using SpawnHouses.Types;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -15,32 +16,32 @@ public class SpawnTest2 : ModItem {
         Item.rare = ItemRarityID.Blue;
     }
 
-    public override bool AltFunctionUse(Terraria.Player player) {
+    public override bool AltFunctionUse(Player player) {
         return true;
     }
 
-    public override bool? UseItem(Terraria.Player player) {
+    public override bool? UseItem(Player player) {
         int x = (Main.MouseWorld / 16).ToPoint16().X;
         int y = (Main.MouseWorld / 16).ToPoint16().Y;
 
-        // Point16 point = SpawnTest.Structure.Tilemap.ConvertToRelative(x, y);
-        // Console.WriteLine(point);
-        // if (SpawnTest.Structure.Tilemap.InBounds(point))
-        //     Console.WriteLine(SpawnTest.Structure.Tilemap[point].IsInside);
-
         Shape s = new(
             new Point16(x, y),
-            new Point16(x, y),
-            new Point16(x, y + 8),
-            new Point16(x + 10, y + 8),
-            new Point16(x + 10, y + 15),
-            new Point16(x, y + 15)
+            new Point16(x + 20, y),
+            new Point16(x + 40, y + 20),
+            new Point16(x + 38, y + 20),
+            new Point16(x, y + 17)
         );
 
+        Console.WriteLine("shape points: ");
         Console.WriteLine(s);
 
-        s.ExecuteInArea((x, y) => Terraria.WorldGen.PlaceTile(x, y, TileID.EmeraldGemspark));
+        s.ExecuteInArea((xNew, yNew) => { Terraria.WorldGen.PlaceTile(xNew, yNew, TileID.AmberGemspark); });
 
+        foreach (Point16 p in s.Points) Terraria.WorldGen.PlaceTile(p.X, p.Y, TileID.EmeraldGemspark);
+
+        var lst = s.GetCorners();
+        Console.WriteLine("final corners:");
+        foreach (PartialPoint16 a in lst) Console.WriteLine(a);
 
         return true;
     }

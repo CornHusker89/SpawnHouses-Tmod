@@ -8,6 +8,9 @@ namespace SpawnHouses.AdvStructures.AdvStructureParts;
 public class Path : PointGeometry {
     public bool StartExtendable;
     public bool EndExtendable;
+
+    public bool LowerExtendable => Points[0].X <= Points[^1].X ? StartExtendable : EndExtendable;
+    public bool HigherExtendable => Points[0].X <= Points[^1].X ? EndExtendable : StartExtendable;
     
     protected sealed override void Init(Point16[] points, bool optimize) {
         if (points.Length == 0) throw new Exception("path must have at least one point");
@@ -44,6 +47,20 @@ public class Path : PointGeometry {
 
     public (Point16 left, Point16 right) SortEndpoints() {
         return Points[0].X <= Points[^1].X ? (Points[0], Points[^1]) : (Points[^1], Points[0]);
+    }
+
+    public void SetLeftExtendable(bool extendable) {
+        if (Points[0].X <= Points[^1].X)
+            StartExtendable = extendable;
+        else
+            EndExtendable = extendable;
+    }
+
+    public void SetRightExtendable(bool extendable) {
+        if (Points[0].X > Points[^1].X)
+            StartExtendable = extendable;
+        else
+            EndExtendable = extendable;
     }
 
     /// <summary>
@@ -133,7 +150,7 @@ public class Path : PointGeometry {
     /// <param name="corner">determines where fill starts from, both axes should be either 0 or 1</param>
     /// <returns></returns>
     public Shape FillFromCorner(Point16 corner) {
-        if (corner.X is not (0 or 1) || corner.Y is not (0 or 1)) throw new Exception("both axes of corner should be either 0 or 1");
+        if (corner.X is not (0 or 1) || corner.Y is not (0 or 1)) throw new Exception("both axes of corner should be either 0 or 1 to represent the lower or higher sides, in that order");
 
         Point16 outsideCorner = BoundingBox.topLeft + (Size + Point16.NegativeOne) * corner;
         int xIndex = -1, xLength = int.MaxValue, yIndex = -1, yLength = int.MaxValue;

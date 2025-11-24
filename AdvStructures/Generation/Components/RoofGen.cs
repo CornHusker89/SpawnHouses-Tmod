@@ -252,20 +252,21 @@ public static class RoofGen {
                 bool tallRightSide = !tallLeftSide || Terraria.WorldGen.genRand.NextBool(3, 4);
                 if (tallLeftSide) {
                     Shape topLeftShape = topPath.FillFromCorner(new Point16(0, 0));
-                    ComponentFillHelper.FillShapeWalls(topLeftShape, param, param.Palette.BackgroundRoofMain);
+                    ComponentFillHelper.FillShapeWalls(topLeftShape, param, param.Palette.BackgroundRoofMain,
+                        (x, y) => x > topLeftShape.BoundingBox.topLeft.X && x < topLeftShape.BoundingBox.bottomRight.X);
                 }
 
                 if (tallRightSide) {
                     Shape topRightShape = topPath.FillFromCorner(new Point16(1, 0));
-                    ComponentFillHelper.FillShapeWalls(topRightShape, param, param.Palette.BackgroundRoofMain);
+                    ComponentFillHelper.FillShapeWalls(topRightShape, param, param.Palette.BackgroundRoofMain,
+                        (x, y) => x > topRightShape.BoundingBox.topLeft.X && x < topRightShape.BoundingBox.bottomRight.X);
                 }
             }
 
             // create bottom wall section
             Shape wallsShape = upperMiddlePath.ToShape(param.Component.Line);
-            wallsShape.ExecuteInArea((x, y) => {
-                if (x != wallsShape.BoundingBox.topLeft.X && x != wallsShape.BoundingBox.bottomRight.X) param.Tilemap.PlaceWall(x, y, param.Palette.BackgroundRoofMain);
-            });
+            ComponentFillHelper.FillShapeWalls(wallsShape, param, param.Palette.BackgroundRoofMain,
+                (x, _) => (x > wallsShape.BoundingBox.topLeft.X || !param.Component.Line.LowerExtendable) && (x < wallsShape.BoundingBox.bottomRight.X || !param.Component.Line.HigherExtendable));
             
             return true;
         }

@@ -89,6 +89,7 @@ public class ExternalLayoutHelper {
 
         List<Point16> roofPoints = [];
         bool lastComponentWasFloor = false;
+        bool thisRoofStartExtendable = true;
         for (int pathIndex = 0; pathIndex < path.Count - 1; pathIndex++) {
             Point16 thisPoint = path[pathIndex];
             Point16 nextPoint = path[pathIndex + 1];
@@ -103,6 +104,7 @@ public class ExternalLayoutHelper {
                 roofPoints.Add(
                     !lastComponentWasFloor && lastPoint != null && lastPoint.Value.Y < thisPoint.Y ? thisPoint + new Point16(1, 0) : thisPoint
                 );
+                if (lastPoint?.Y < thisPoint.Y) thisRoofStartExtendable = false;
 
                 if (thisPoint.Y == nextPoint.Y) {
                     floors.Add(CreateFloor(thisPoint.Y, thisPoint.X - (lastComponentWasFloor ? wallWidth + 1 : 0),
@@ -133,10 +135,11 @@ public class ExternalLayoutHelper {
                 // create a roof out of the last non-wall segments
                 if (roofPoints.Count != 0) {
                     if (lastComponentWasFloor) roofPoints.Add(path[pathIndex] + new Point16(nextPoint.Y < thisPoint.Y ? -1 : 0, 0));
-                    Roof roof = new(new Path(roofPoints));
+                    Roof roof = new(new Path(roofPoints, thisRoofStartExtendable, nextPoint.Y <= thisPoint.Y));
                     roof.Line.Offset(new Point16(0, -floorWidth));
                     roofs.Add(roof);
                     roofPoints.Clear();
+                    thisRoofStartExtendable = true;
                 }
 
                 if (lastComponentWasFloor)
@@ -152,7 +155,7 @@ public class ExternalLayoutHelper {
 
         if (roofPoints.Count != 0) {
             if (lastComponentWasFloor) roofPoints.Add(path[^1]);
-            Roof roof = new(new Path(roofPoints));
+            Roof roof = new(new Path(roofPoints, thisRoofStartExtendable));
             roof.Line.Offset(new Point16(0, -floorWidth));
             roofs.Add(roof);
         }

@@ -117,7 +117,7 @@ public static class FloorGen {
         }
 
         public override bool CanGenerate(VolumeComponentParams componentParams) {
-            return componentParams.Component.Volume.GetTrueSize(false).average >= 3;
+            return componentParams.Component.Volume.GetDetailedAxisSizes(false).average >= 3;
         }
 
         public override bool Generate(VolumeComponentParams param) {

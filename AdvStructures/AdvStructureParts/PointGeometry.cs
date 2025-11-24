@@ -40,12 +40,13 @@ public abstract class PointGeometry {
     }
 
     /// <summary>
+    ///     true if the presence of the middle point changes the line from first to last
     /// </summary>
     /// <param name="first"></param>
     /// <param name="middle"></param>
     /// <param name="last"></param>
     /// <returns></returns>
-    protected bool IsMiddlePointNeeded(Point16 first, Point16 middle, Point16 last) {
+    protected bool MiddlePointAffectsSlope(Point16 first, Point16 middle, Point16 last) {
         float firstToLastSlope = GetSlope(first, last);
         float firstToMiddleSlope = GetSlope(first, middle);
         float middleToLastSlope = GetSlope(middle, last);
@@ -56,7 +57,7 @@ public abstract class PointGeometry {
     }
 
     /// <summary>
-    ///     removes extra points in shape.
+    ///     removes extra points in shape, lossless for the overall shape geometry
     /// </summary>
     /// <param name="wrapAround">if true, will assume that the first and last points are connected</param>
     /// <returns></returns>
@@ -76,7 +77,7 @@ public abstract class PointGeometry {
                 continue; // so that we don't interfere with the next condition
             }
 
-            if (!IsMiddlePointNeeded(last, target, next)) {
+            if (!MiddlePointAffectsSlope(last, target, next)) {
                 newPoints.RemoveAt(i);
                 i--;
             }
@@ -110,7 +111,7 @@ public abstract class PointGeometry {
     private static float GetAngle(Point16 start, Point16 middle, Point16 end) {
         // Create vectors BA and BC
         float v1X = start.X - middle.X;
-        float v1Y = start.Y - middle.X;
+        float v1Y = start.Y - middle.Y;
         float v2X = end.X - middle.X;
         float v2Y = end.Y - middle.Y;
 
@@ -126,35 +127,48 @@ public abstract class PointGeometry {
     }
 
     /// <summary>
-    ///     removes sets of vertices that affect the angle of their lines by less than <see cref="significantAngle" />
+    ///     removes sets of vertices that affect the angle of their lines by less than <see cref="significantAngle"/>
     /// </summary>
     /// <param name="significantAngle"></param>
+    /// <param name="maxSetProportion">how physically large a set of points can be within a set. prevents combining (and removing) points into too large sets</param>
     /// <param name="maxSetSize">the largest number of points to consider in a single "set" to collapse. has serious effect on speed</param>
     /// <returns></returns>
-    public List<Point16> CollapseVertices(float significantAngle = 10f, int maxSetSize = 6) {
-        if (Points.Length <= maxSetSize + 2) return Points.ToList();
+    public List<Point16> CollapseVertices(float significantAngle = 20f, float maxSetProportion = 0.65f, int maxSetSize = 6) {
+        if (Points.Length == 3)
+            return Points.ToList();
+        if (Points.Length <= maxSetSize + 2)
+            maxSetSize = Points.Length - 2;
 
         HashSet<int> removedIndexes = [];
+        float maxSetWidth = Size.X * maxSetProportion;
+        float maxSetHeight = Size.X * maxSetProportion;
 
         bool removedItem = false;
         for (int setSize = maxSetSize; setSize >= 1; setSize--) {
             for (int i = 0; i < Points.Length; i++) {
-                Point16 start = Points[i];
+                Point16 start = Points[(i - 1 + Points.Length) % Points.Length];
                 Point16 end = Points[(i + setSize + 1) % Points.Length];
-                int xSum = 0, ySum = 0;
+                int xSum = 0, ySum = 0, xMin = 0, xMax = 0, yMin = 0, yMax = 0;
                 bool allRemoved = true;
                 for (int newPointIndex = 0; newPointIndex < setSize; newPointIndex++) {
                     Point16 point = Points[(i + newPointIndex) % Points.Length];
                     if (!removedIndexes.Contains(i)) allRemoved = false;
                     xSum += point.X;
                     ySum += point.Y;
+                    xMin = Math.Min(xMin, point.X);
+                    xMax = Math.Max(xMax, point.X);
+                    yMin = Math.Min(yMin, point.Y);
+                    yMax = Math.Max(yMax, point.Y);
                 }
 
                 if (allRemoved) continue;
+                if (xMax - xMin > maxSetWidth || yMax - yMin > maxSetHeight) continue;
 
                 Point16 averagePoint = new(xSum / setSize, ySum / setSize);
 
                 // ignore the set if the angle is significant
+                Console.WriteLine($"setsize: {setSize}, index: {i}, angle: {180 - GetAngle(start, averagePoint, end)}");
+                
                 if (180 - GetAngle(start, averagePoint, end) >= significantAngle) continue;
 
                 for (int newPointIndex = 0; newPointIndex < setSize; newPointIndex++) {

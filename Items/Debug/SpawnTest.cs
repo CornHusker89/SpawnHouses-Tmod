@@ -37,8 +37,8 @@ public class SpawnTest : ModItem {
         Structure = new AdvStructure(
             new StructureParams(
                 new Dictionary<StructureTag, object?>([
-                    new KeyValuePair<StructureTag, object?>(StructureTag.HasRooms, new Range(3, 5).Evaluate(scale)),
-                    new KeyValuePair<StructureTag, object?>(StructureTag.HasHousing, new Range(3, 5).Evaluate(scale))
+                    new KeyValuePair<StructureTag, object?>(StructureTag.HasRooms, new Range(5, 7).Evaluate(scale)),
+                    new KeyValuePair<StructureTag, object?>(StructureTag.HasHousing, new Range(5, 7).Evaluate(scale))
                 ]),
                 [],
                 [
