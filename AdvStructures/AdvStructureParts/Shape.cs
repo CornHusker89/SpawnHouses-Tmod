@@ -135,20 +135,27 @@ public class Shape : PointGeometry {
     /// <summary>
     ///     the number of tiles this shape encloses
     /// </summary>
-    public int GetArea() {
+    /// <param name="approximate">if an approximation algorithm is used. otherwise, area is evaluated using <see cref="ExecuteInArea(System.Action{int,int})"/></param>
+    public int GetArea(bool approximate = false) {
         if (IsBox)
             return (BoundingBox.bottomRight.X - BoundingBox.topLeft.X) *
                    (BoundingBox.bottomRight.Y - BoundingBox.topLeft.Y);
 
-        double area = 0;
-        for (int i = 0; i < Points.Length; i++) {
-            Point16 current = Points[i];
-            Point16 next = Points[(i + 1) % Points.Length];
+        if (approximate) {
+            double area = 0;
+            for (int i = 0; i < Points.Length; i++) {
+                Point16 current = Points[i];
+                Point16 next = Points[(i + 1) % Points.Length];
 
-            area += current.X * next.Y - next.X * current.Y;
+                area += current.X * next.Y - next.X * current.Y;
+            }
+
+            return (int)Math.Abs(area / 2);
         }
 
-        return (int)Math.Abs(area / 2);
+        int count = 0;
+        ExecuteInArea((_, _) => count++);
+        return count;
     }
 
     /// <summary>
@@ -622,45 +629,45 @@ public class Shape : PointGeometry {
 
     #region Slicing Shape
 
-    public (Shape? lower, Shape? middle, Shape? higher) CutTwice(bool cutXAxis, int cutCoord1, int cutCoord2) {
-        if (cutCoord2 < cutCoord1)
-            (cutCoord1, cutCoord2) = (cutCoord2, cutCoord1);
+    public (Shape? lower, Shape? middle, Shape? higher) CutTwice(bool cutXAxis, int cutPos1, int cutPos2) {
+        if (cutPos2 < cutPos1)
+            (cutPos1, cutPos2) = (cutPos2, cutPos1);
 
         // upper left piece
-        Shape? shapeA = ClipPolygon(cutXAxis, cutCoord1, true, false);
+        Shape? shapeA = ClipPolygon(cutXAxis, cutPos1, true, false);
 
         // remainder after the first cut
-        Shape? remainder = ClipPolygon(cutXAxis, cutCoord1, false, true);
+        Shape? remainder = ClipPolygon(cutXAxis, cutPos1, false, true);
 
         // middle piece (clip remainder again)
-        Shape? shapeB = remainder?.ClipPolygon(cutXAxis, cutCoord2, true, true);
+        Shape? shapeB = remainder?.ClipPolygon(cutXAxis, cutPos2, true, true);
 
         // lower right piece
-        Shape? shapeC = remainder?.ClipPolygon(cutXAxis, cutCoord2, false, false);
+        Shape? shapeC = remainder?.ClipPolygon(cutXAxis, cutPos2, false, false);
 
         return (shapeA, shapeB, shapeC);
     }
 
-    private Shape? ClipPolygon(bool cutXAxis, int cutCoord, bool keepLower, bool includeCut) {
+    private Shape? ClipPolygon(bool splitAlongX, int cutPos, bool keepLower, bool includeCut) {
         var outputList = new List<Point16>();
 
         for (int i = 0; i < Points.Length; i++) {
             Point16 current = Points[i];
             Point16 next = Points[(i + 1) % Points.Length];
 
-            bool currentInside = IsInside(current, cutXAxis, cutCoord, keepLower, includeCut);
-            bool nextInside = IsInside(next, cutXAxis, cutCoord, keepLower, includeCut);
+            bool currentInside = IsInside(current, splitAlongX, cutPos, keepLower, includeCut);
+            bool nextInside = IsInside(next, splitAlongX, cutPos, keepLower, includeCut);
 
             if (currentInside)
                 outputList.Add(current); // always keep the current point if it's inside
 
             if (currentInside != nextInside) // edge crosses the clipping boundary
             {
-                Point16 intersectPoint = GetIntersectionPoint(current, next, cutXAxis, cutCoord);
+                Point16 intersectPoint = GetIntersectionPoint(current, next, splitAlongX, cutPos);
 
                 // move the intersect point so that it's outside the cut instead of directly on it
                 if (!includeCut)
-                    if (cutXAxis)
+                    if (splitAlongX)
                         intersectPoint = keepLower
                             ? new Point16(intersectPoint.X, intersectPoint.Y - 1)
                             : new Point16(intersectPoint.X, intersectPoint.Y + 1);
@@ -676,6 +683,15 @@ public class Shape : PointGeometry {
         return outputList.Count < 3 ? null : new Shape(outputList);
     }
 
+    /// <summary>
+    ///     if a point is inside the cut polygon
+    /// </summary>
+    /// <param name="point"></param>
+    /// <param name="cutXAxis"></param>
+    /// <param name="cutCoord"></param>
+    /// <param name="keepLower"></param>
+    /// <param name="includeCut"></param>
+    /// <returns></returns>
     private bool IsInside(Point16 point, bool cutXAxis, int cutCoord, bool keepLower, bool includeCut) {
         if (includeCut) {
             if (cutXAxis)
@@ -686,6 +702,18 @@ public class Shape : PointGeometry {
         if (cutXAxis)
             return keepLower ? point.Y < cutCoord : point.Y > cutCoord;
         return keepLower ? point.X < cutCoord : point.X > cutCoord;
+    }
+
+    /// <summary>
+    ///     efficient way of getting the area of a shape after cutting along an axis. excludes area along cut
+    /// </summary>
+    /// <param name="splitAlongX"></param>
+    /// <param name="cutPos"></param>
+    /// <param name="keepLower">if the upper or lower half is used for the area calculation</param>
+    /// <param name="preciseArea">if the area-getting algorithm uses a precise (though slower) version</param>
+    /// <returns></returns>
+    public Shape? CutOnce(bool splitAlongX, int cutPos, bool keepLower, bool preciseArea) {
+        return ClipPolygon(splitAlongX, cutPos, keepLower, false);
     }
 
     #endregion

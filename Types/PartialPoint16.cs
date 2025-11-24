@@ -1,3 +1,4 @@
+using System;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Types;
@@ -20,6 +21,15 @@ public struct PartialPoint16 {
         HasY = hasY;
         X = HasX ? x : -1;
         Y = HasY ? y : -1;
+    }
+
+    public override bool Equals(object obj) {
+        if (obj is PartialPoint16 other) return (X == other.X || !HasX) && (Y == other.Y || HasY);
+        return base.Equals(obj);
+    }
+
+    public override int GetHashCode() {
+        return HashCode.Combine(X, Y);
     }
 
     public override string ToString() {

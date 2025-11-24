@@ -17,7 +17,6 @@ public static class RoomLayoutHelper {
     public static bool IsValidHousingSize(Shape volume) {
         return volume.GetExpandedShape(1).GetArea() >= 60;
     }
-
     /// <summary>
     ///     gets closest room to the point using the perimeter of each room
     /// </summary>
@@ -98,7 +97,7 @@ public static class RoomLayoutHelper {
     #region Room Subdivision
 
     private static (bool success, bool cutOnX) EvaluateCutOnX(RoomLayoutParams param, Shape roomVolume, int floorWidth, int wallWidth, int xCutCount, int yCutCount) {
-        int expandedArea = roomVolume.GetExpandedShape(1).GetArea();
+        int expandedArea = roomVolume.GetExpandedShape(1).GetArea(true);
         bool canSplitAlongX =
             roomVolume.Size.Y >= floorWidth + 2 * param.RoomHeight.Min // make sure volume is tall enough to be split
             && expandedArea > 120 // make sure volume is large enough to be split
@@ -127,10 +126,36 @@ public static class RoomLayoutHelper {
         }
     }
 
-    private static List<PartialPoint16> DetermineValidSplits(PriorityCollection<PartialPoint16> prioritySplits, bool splitAlongX, int splitWidth,
+    /// <summary>
+    ///     removes splits that would make invalid rooms from the list of possible splits
+    /// </summary>
+    /// <param name="splitStarts"></param>
+    /// <param name="shape"></param>
+    /// <param name="splitAlongX"></param>
+    /// <param name="iterationSplitWidth"></param>
+    private static void PruneInvalidSplits(HashSet<int> splitStarts, Shape shape, bool splitAlongX, int iterationSplitWidth) {
+        foreach (int splitStartPos in splitStarts) {
+            Shape? cutShape = shape.CutOnce(splitAlongX, splitStartPos + iterationSplitWidth - 1, true, true);
+            if (cutShape == null || !IsValidHousingSize(cutShape))
+                splitStarts.Remove(splitStartPos);
+        }
+    }
+
+    /// <summary>
+    ///     gets all possible splits along cut range
+    /// </summary>
+    /// <param name="roomVolume"></param>
+    /// <param name="prioritySplits"></param>
+    /// <param name="splitAlongX"></param>
+    /// <param name="splitWidth"></param>
+    /// <param name="verticalGapXs"></param>
+    /// <param name="horizontalGapYs"></param>
+    /// <param name="validCutRange"></param>
+    /// <returns></returns>
+    private static HashSet<int> GetValidSplits(Shape roomVolume, PriorityCollection<PartialPoint16> prioritySplits, bool splitAlongX, int splitWidth,
         HashSet<int> verticalGapXs, HashSet<int> horizontalGapYs, Range validCutRange) {
         // ensure that, taking blocklisted coordinates into account, there is valid places for the split
-        List<PartialPoint16> validSplitStarts = [];
+        HashSet<int> validSplitStarts = [];
         foreach (var tuple in prioritySplits.ToSortedHashSetArray()) {
             foreach (PartialPoint16 split in tuple.set) {
                 if ((splitAlongX && split.HasY) || (!splitAlongX && split.HasX)) // ignore invalid coordinates
@@ -145,12 +170,14 @@ public static class RoomLayoutHelper {
                     }
 
                 if (!valid) continue;
-                validSplitStarts.Add(split);
+                validSplitStarts.Add(splitAlongX ? split.Y : split.X);
             }
 
             if (validSplitStarts.Count != 0) // if we find anything at a given priority level, stop there
                 break;
         }
+
+        if (validSplitStarts.Count != 0) PruneInvalidSplits(validSplitStarts, roomVolume, splitAlongX, splitWidth);
 
         // if priority splits didn't get anything, then try using normal splits
         if (validSplitStarts.Count == 0)
@@ -164,9 +191,10 @@ public static class RoomLayoutHelper {
                     }
 
                 if (!valid) continue;
-                validSplitStarts.Add(new PartialPoint16(pos, pos, !splitAlongX, splitAlongX));
+                validSplitStarts.Add(pos);
             }
 
+        PruneInvalidSplits(validSplitStarts, roomVolume, splitAlongX, splitWidth);
         return validSplitStarts;
     }
 
@@ -236,7 +264,7 @@ public static class RoomLayoutHelper {
                 (splitAlongX ? roomVolume.BoundingBox.bottomRight.Y : roomVolume.BoundingBox.bottomRight.X) - outerBoundaryWidth - iterationSplitWidth
             );
 
-            var validSplitStarts = DetermineValidSplits(prioritySplits, splitAlongX, iterationSplitWidth, iterationVerticalGapXs, iterationHorizontalGapYs, validCutRange);
+            var validSplitStarts = GetValidSplits(roomVolume, prioritySplits, splitAlongX, iterationSplitWidth, iterationVerticalGapXs, iterationHorizontalGapYs, validCutRange);
             
             if (validSplitStarts.Count == 0) {
                 finishedRoomVolumes.Add(roomVolume);
@@ -244,11 +272,8 @@ public static class RoomLayoutHelper {
                 continue;
             }
 
-            PartialPoint16 splitPoint = Terraria.WorldGen.genRand.NextFromCollection(validSplitStarts);
-            int splitStart = splitAlongX ? splitPoint.Y : splitPoint.X;
-            int splitEnd = splitAlongX
-                ? splitStart + iterationFloorWidth - 1
-                : splitStart + iterationWallWidth - 1;
+            int splitStart = Terraria.WorldGen.genRand.NextFromCollection(validSplitStarts.ToList());
+            int splitEnd = splitStart + iterationSplitWidth - 1;
 
             (Shape? lower, Shape? middle, Shape? higher) roomSubsections = roomVolume.CutTwice(splitAlongX, splitStart, splitEnd);
 
@@ -256,8 +281,8 @@ public static class RoomLayoutHelper {
                 xCutCount++;
             else
                 yCutCount++;
-            
-            prioritySplits.AddToBlocklist(splitPoint);
+
+            prioritySplits.AddToBlocklist(new PartialPoint16(splitStart, splitStart, !splitAlongX, splitAlongX));
 
             if (roomSubsections.lower is not null) {
                 if (param.IsWithinMaxSize(roomSubsections.lower) && Terraria.WorldGen.genRand.NextDouble() < (1 - Math.Pow(1 - param.LargeRoomChance, param.Attempts)) * 0.35 &&
@@ -312,7 +337,7 @@ public static class RoomLayoutHelper {
         modifiedParams.MainVolume = room.Volume;
 
         var possibleLayouts = new RoomLayoutVolumes[roomLayoutParams.Attempts];
-        PriorityCollection<PartialPoint16> prioritySplits = new();
+        PriorityCollection<PartialPoint16> prioritySplits = new((thisObj, otherObj) => (thisObj.X == otherObj.X || !thisObj.HasX) && (thisObj.Y == otherObj.Y || thisObj.HasY));
         foreach (PartialPoint16 corner in room.Volume.GetCorners())
             prioritySplits.AddItem(corner, 1);
 

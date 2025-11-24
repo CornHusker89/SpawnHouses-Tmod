@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,11 +7,32 @@ namespace SpawnHouses.Types;
 
 /// <summary>
 ///     contains multiple hashsets, sorted based on priority. intended for use when determining priority splits with the bsp algorithm.
-///     has a blocklist feature to exclude specific items
+///     has a blocklist feature to exclude specific items, can include custom equality operator
 /// </summary>
 public class PriorityCollection<T> {
+    private class EqualityComparer<TEq> : IEqualityComparer<TEq> {
+        private readonly Func<TEq, TEq, bool> _func;
+
+        public EqualityComparer(Func<TEq, TEq, bool> func) {
+            _func = func;
+        }
+
+        public bool Equals(TEq? x, TEq? y) {
+            return x != null && y != null && _func(x, y);
+        }
+
+        public int GetHashCode(TEq obj) {
+            return 0;
+        }
+    }
+    
     private readonly Dictionary<int, HashSet<T>> _blocklistedItems = new();
     private readonly Dictionary<int, HashSet<T>> _sets = new();
+    private readonly EqualityComparer<T>? _equalityComparison;
+
+    public PriorityCollection(Func<T, T, bool>? equalityComparison = null) {
+        _equalityComparison = equalityComparison == null ? null : new EqualityComparer<T>(equalityComparison);
+    }
 
     /// <summary>
     ///     the total number of items within all sets
@@ -35,8 +57,8 @@ public class PriorityCollection<T> {
             value = [];
             _blocklistedItems[priority] = value;
         }
-        
-        return _sets[priority].Except(value).ToHashSet();
+
+        return _sets[priority].Except(value, _equalityComparison).ToHashSet();
     }
 
     /// <summary>
