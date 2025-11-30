@@ -26,6 +26,11 @@ public abstract class PointGeometry {
     }
 
     /// <summary>
+    ///     the geometric center of the bounding box
+    /// </summary>
+    public Point16 Center => BoundingBox.topLeft + Size / new Point16(2, 2);
+
+    /// <summary>
     /// </summary>
     /// <param name="edgeIndex">edge index to retrieve</param>
     /// <returns></returns>

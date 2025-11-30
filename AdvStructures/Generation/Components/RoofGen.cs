@@ -250,23 +250,33 @@ public static class RoofGen {
             if (param.Component.TagsRequired.ContainsKey(ComponentTag.RoofTall)) {
                 bool tallLeftSide = Terraria.WorldGen.genRand.NextBool(3, 4);
                 bool tallRightSide = !tallLeftSide || Terraria.WorldGen.genRand.NextBool(3, 4);
-                if (tallLeftSide) {
-                    Shape topLeftShape = topPath.FillFromCorner(new Point16(0, 0));
-                    ComponentFillHelper.FillShapeWalls(topLeftShape, param, param.Palette.BackgroundRoofMain,
-                        (x, y) => x > topLeftShape.BoundingBox.topLeft.X && x < topLeftShape.BoundingBox.bottomRight.X);
-                }
 
-                if (tallRightSide) {
-                    Shape topRightShape = topPath.FillFromCorner(new Point16(1, 0));
-                    ComponentFillHelper.FillShapeWalls(topRightShape, param, param.Palette.BackgroundRoofMain,
-                        (x, y) => x > topRightShape.BoundingBox.topLeft.X && x < topRightShape.BoundingBox.bottomRight.X);
+                switch (tallLeftSide) {
+                    case true when tallRightSide: {
+                        Shape topShape = topPath.FillFromBoundingBox(new PartialPoint16(0, 0, false), new Point16(0, -2));
+                        ComponentFillHelper.FillShapeWalls(topShape, param, param.Palette.BackgroundRoofMain,
+                            (x, y) => x > topShape.BoundingBox.topLeft.X && x < topShape.BoundingBox.bottomRight.X);
+                        break;
+                    }
+                    case true: {
+                        Shape topLeftShape = topPath.FillFromCorner(new Point16(0, 0));
+                        ComponentFillHelper.FillShapeWalls(topLeftShape, param, param.Palette.BackgroundRoofMain,
+                            (x, y) => x > topLeftShape.BoundingBox.topLeft.X && x < topLeftShape.BoundingBox.bottomRight.X);
+                        break;
+                    }
+                    default: { // tall right side
+                        Shape topRightShape = topPath.FillFromCorner(new Point16(1, 0));
+                        ComponentFillHelper.FillShapeWalls(topRightShape, param, param.Palette.BackgroundRoofMain,
+                            (x, y) => x > topRightShape.BoundingBox.topLeft.X && x < topRightShape.BoundingBox.bottomRight.X);
+                        break;
+                    }
                 }
             }
 
             // create bottom wall section
             Shape wallsShape = upperMiddlePath.ToShape(param.Component.Line);
             ComponentFillHelper.FillShapeWalls(wallsShape, param, param.Palette.BackgroundRoofMain,
-                (x, _) => (x > wallsShape.BoundingBox.topLeft.X || !param.Component.Line.LowerExtendable) && (x < wallsShape.BoundingBox.bottomRight.X || !param.Component.Line.HigherExtendable));
+                (x, _) => (x > wallsShape.BoundingBox.topLeft.X || !param.Component.Line.LowerXExtendable) && (x < wallsShape.BoundingBox.bottomRight.X || !param.Component.Line.HigherXExtendable));
             
             return true;
         }

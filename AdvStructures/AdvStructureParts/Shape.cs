@@ -1,4 +1,5 @@
 #nullable enable
+#pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
 
 using System;
 using System.Collections.Generic;
@@ -11,8 +12,6 @@ using Terraria.ID;
 
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
-#pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
-
 /// <summary>
 ///     generic 2D shape. has support for triangles, rectangles, and n-gons.
 /// </summary>
@@ -20,8 +19,6 @@ namespace SpawnHouses.AdvStructures.AdvStructureParts;
 public class Shape : PointGeometry {
     
     public bool IsBox { get; private set; } // because many of the shapes will be boxes, introduce optimizations for boxes
-
-    public Point16 Center => BoundingBox.topLeft + Size / new Point16(2, 2);
 
     private bool[,]? _booleanTilemap;
 
@@ -91,8 +88,6 @@ public class Shape : PointGeometry {
 
         return true;
     }
-
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
     /// <param name="points">If only 2 points are passed, will assume a box</param>
     /// <returns></returns>

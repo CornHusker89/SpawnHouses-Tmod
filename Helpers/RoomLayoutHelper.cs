@@ -100,12 +100,12 @@ public static class RoomLayoutHelper {
         int expandedArea = roomVolume.GetExpandedShape(1).GetArea(true);
         bool canSplitAlongX =
             roomVolume.Size.Y >= floorWidth + 2 * param.RoomHeight.Min // make sure volume is tall enough to be split
-            && expandedArea > 120 // make sure volume is large enough to be split
+            && expandedArea > 90 // make sure area is large enough to be split (area is approximated and it's thoroughly checked later, so it's low balled)
             && roomVolume.Size.X < roomVolume.Size.Y * 1.3; // make sure width/height ratio of resulting rooms isn't stupid
 
         bool canSplitAlongY =
             roomVolume.Size.X >= wallWidth + 2 * param.RoomWidth.Min
-            && expandedArea > 120
+            && expandedArea > 90
             && roomVolume.Size.Y < roomVolume.Size.X * 1.6;
 
         switch (canSplitAlongX) {
@@ -173,11 +173,11 @@ public static class RoomLayoutHelper {
                 validSplitStarts.Add(splitAlongX ? split.Y : split.X);
             }
 
+            if (validSplitStarts.Count != 0) PruneInvalidSplits(validSplitStarts, roomVolume, splitAlongX, splitWidth);
+
             if (validSplitStarts.Count != 0) // if we find anything at a given priority level, stop there
                 break;
         }
-
-        if (validSplitStarts.Count != 0) PruneInvalidSplits(validSplitStarts, roomVolume, splitAlongX, splitWidth);
 
         // if priority splits didn't get anything, then try using normal splits
         if (validSplitStarts.Count == 0)
@@ -199,7 +199,7 @@ public static class RoomLayoutHelper {
     }
 
     /// <summary>
-    ///     uses a binary space partitioning algorithm to procedurally split a room into a <see cref="RoomLayout" />
+    ///     uses a binary space partitioning algorithm to procedurally split a room into a <see cref="RoomLayout"/>
     /// </summary>
     /// <param name="param"></param>
     /// <param name="prioritySplits"></param>
@@ -331,6 +331,7 @@ public static class RoomLayoutHelper {
     /// <returns></returns>
     public static void SubdivideRoom(RoomLayout roomLayout, Room room, RoomLayoutParams roomLayoutParams, bool prioritizeSplitsOnGapFloors = true) {
         if (!roomLayout.Rooms.Remove(room)) throw new Exception("room doesn't exist in the given RoomLayout");
+        if (room.Volume.GetArea(true) < 90) return;
 
         RoomLayoutVolumes? pickedLayoutVolumes = null;
         RoomLayoutParams modifiedParams = roomLayoutParams.Clone();
