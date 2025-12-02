@@ -3,6 +3,7 @@ using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
+using SpawnHouses.Structures;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -10,11 +11,11 @@ namespace SpawnHouses;
 
 public class SpawnHousesModMenu : ModMenu {
     public override bool IsAvailable => true;
-    public override string DisplayName => "Nighttime Forest (Generated Housing)";
+    public override string DisplayName => $"Nighttime Forest ({ModInstance.Mod.DisplayName})"; 
     public override ModSurfaceBackgroundStyle MenuBackgroundStyle => ModContent.GetInstance<CustomMenuBackgroundStyle>();
 
     public override bool PreDrawLogo(SpriteBatch spriteBatch, ref Vector2 logoDrawCenter, ref float logoRotation, ref float logoScale, ref Color drawColor) {
-        logoScale = 0.85f;
+        logoScale = 0.9f;
         return true;
     }
 }
@@ -29,16 +30,21 @@ public class CustomMenuBackgroundStyle : ModSurfaceBackgroundStyle {
     private readonly Asset<Texture2D>[] _cloudsTextures = new Asset<Texture2D>[55];
     private Asset<Texture2D> _skyTexture;
 
+    private readonly float _skyDetailFrameInterval = 1000f / 5;
+    private readonly float _frontFrameInterval = 1000f / 7.5f;
 
-    private const float SkyDetailFrameInterval = 1000f / 6;
-    private const float FrontFrameInterval = 1000f / 9;
+    private readonly float _frameZoom = 1.1f;
 
-    private readonly float ParalaxScale = -8;
-    private readonly float ForestFrontParallaxFactor = 1.1f;
-    private readonly float ForestBackParallaxFactor = 0.7f;
-    private readonly float MountainFrontParallaxFactor = 0.6f;
-    private readonly float MountainBackParallaxFactor = 0.32f;
-    private readonly float CloudsParallaxFactor = 0.2f;
+    private readonly float _parallaxScale = -3.6f;
+    private readonly float _forestFrontParallaxFactor = 1.25f;
+    private readonly float _forestBackParallaxFactor = 0.7f;
+    private readonly float _mountainFrontParallaxFactor = 0.7f;
+    private readonly float _mountainBackParallaxFactor = 0.4f;
+    private readonly float _cloudsParallaxFactor = 0.25f;
+
+    private readonly int _mountainFrontYOffset = (int)(Main.screenWidth * 0f);
+    private readonly int _mountainBackYOffset = (int)(Main.screenWidth * 0.02f);
+    private readonly int _skyYOffset = (int)(Main.screenHeight * 0f);
 
     public override void Load() {
         _stopwatch = Stopwatch.StartNew();
@@ -86,11 +92,11 @@ public class CustomMenuBackgroundStyle : ModSurfaceBackgroundStyle {
     }
 
     public override bool PreDrawCloseBackground(SpriteBatch spriteBatch) {
-        Vector2 mousePos = (Main.MouseScreen - Main.ScreenSize.ToVector2() / 0.65f) / 100f;
-        int frameOffsetX = (int)(Main.screenWidth * -0.1f);
-        int frameOffsetY = (int)(Main.screenHeight * -0.1f);
-        int frameWidth = (int)(Main.screenWidth * 1.1f);
-        int frameHeight = (int)(Main.screenHeight * 1.1f);
+        Vector2 mousePos = (Main.MouseScreen - Main.LastLoadedResolution.ToVector2() / 2f) / 100f;
+        int frameOffsetX = (int)(Main.screenWidth * (1 - _frameZoom) / 2);
+        int frameOffsetY = (int)(Main.screenHeight * (1 - _frameZoom) / 2);
+        int frameWidth = (int)(Main.screenWidth * _frameZoom);
+        int frameHeight = (int)(Main.screenHeight * _frameZoom);
         
         spriteBatch.Draw(
             _skyTexture.Value,
@@ -99,32 +105,32 @@ public class CustomMenuBackgroundStyle : ModSurfaceBackgroundStyle {
         );
 
         spriteBatch.Draw(
-            _cloudsTextures[(int)Math.Round(_stopwatch.ElapsedMilliseconds / SkyDetailFrameInterval) % 55].Value,
-            new Rectangle(frameOffsetX + (int)(mousePos.X * CloudsParallaxFactor * ParalaxScale), frameOffsetY + (int)(mousePos.Y * CloudsParallaxFactor * ParalaxScale), frameWidth, frameHeight),
+            _cloudsTextures[(int)Math.Round(_stopwatch.ElapsedMilliseconds / _skyDetailFrameInterval) % 55].Value,
+            new Rectangle(frameOffsetX + (int)(mousePos.X * _cloudsParallaxFactor * _parallaxScale), frameOffsetY + _skyYOffset + (int)(mousePos.Y * _cloudsParallaxFactor * _parallaxScale), frameWidth, frameHeight),
             Color.White
         );
 
         spriteBatch.Draw(
             _mountainBackTexture.Value,
-            new Rectangle(frameOffsetX + (int)(mousePos.X * MountainBackParallaxFactor * ParalaxScale), frameOffsetY + (int)(mousePos.Y * MountainBackParallaxFactor * ParalaxScale), frameWidth, frameHeight),
+            new Rectangle(frameOffsetX + (int)(mousePos.X * _mountainBackParallaxFactor * _parallaxScale), frameOffsetY + _mountainBackYOffset + (int)(mousePos.Y * _mountainBackParallaxFactor * _parallaxScale), frameWidth, frameHeight),
             Color.White
         );
         
         spriteBatch.Draw(
             _mountainFrontTexture.Value,
-            new Rectangle(frameOffsetX + (int)(mousePos.X * MountainFrontParallaxFactor * ParalaxScale), frameOffsetY + (int)(mousePos.Y * MountainFrontParallaxFactor * ParalaxScale), frameWidth, frameHeight),
+            new Rectangle(frameOffsetX + (int)(mousePos.X * _mountainFrontParallaxFactor * _parallaxScale), frameOffsetY + _mountainFrontYOffset + (int)(mousePos.Y * _mountainFrontParallaxFactor * _parallaxScale), frameWidth, frameHeight),
             Color.White
         );
 
         spriteBatch.Draw(
-            _forestBackTextures[(int)Math.Round(_stopwatch.ElapsedMilliseconds / FrontFrameInterval) % 6].Value,
-            new Rectangle(frameOffsetX + (int)(mousePos.X * ForestBackParallaxFactor * ParalaxScale), frameOffsetY + (int)(mousePos.Y * ForestBackParallaxFactor * ParalaxScale), frameWidth, frameHeight),
+            _forestBackTextures[(int)Math.Round(_stopwatch.ElapsedMilliseconds / _frontFrameInterval) % 6].Value,
+            new Rectangle(frameOffsetX + (int)(mousePos.X * _forestBackParallaxFactor * _parallaxScale), frameOffsetY + (int)(mousePos.Y * _forestBackParallaxFactor * _parallaxScale), frameWidth, frameHeight),
             Color.White
         );
 
         spriteBatch.Draw(
             _forestFrontTexture.Value,
-            new Rectangle(frameOffsetX + (int)(mousePos.X * ForestFrontParallaxFactor * ParalaxScale), frameOffsetY + (int)(mousePos.Y * ForestFrontParallaxFactor * ParalaxScale), frameWidth, frameHeight),
+            new Rectangle(frameOffsetX + (int)(mousePos.X * _forestFrontParallaxFactor * _parallaxScale), frameOffsetY + (int)(mousePos.Y * _forestFrontParallaxFactor * _parallaxScale), frameWidth, frameHeight),
             Color.White
         );
 
