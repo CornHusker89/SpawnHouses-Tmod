@@ -1,2 +1,3 @@
-Version 1.2.0
-Minor Changes
+Version 1.3.0
+Major Changes
+ - Added new menu background "Nighttime Forest"

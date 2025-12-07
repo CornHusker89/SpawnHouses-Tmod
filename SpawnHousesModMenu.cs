@@ -11,17 +11,24 @@ namespace SpawnHouses;
 
 public class SpawnHousesModMenu : ModMenu {
     public override bool IsAvailable => true;
-    public override string DisplayName => $"Nighttime Forest ({ModInstance.Mod.DisplayName})"; 
-    public override ModSurfaceBackgroundStyle MenuBackgroundStyle => ModContent.GetInstance<CustomMenuBackgroundStyle>();
+    public override string DisplayName => $"Nighttime Forest ({ModInstance.Mod.DisplayName})";
+    public override ModSurfaceBackgroundStyle MenuBackgroundStyle => ModContent.GetInstance<NighttimeForestBackgroundStyle>();
 
-    public override bool PreDrawLogo(SpriteBatch spriteBatch, ref Vector2 logoDrawCenter, ref float logoRotation, ref float logoScale, ref Color drawColor) {
-        logoScale = 0.9f;
+    public override bool PreDrawLogo(SpriteBatch spriteBatch, ref Vector2 logoDrawCenter, ref float logoRotation,
+        ref float logoScale, ref Color drawColor) {
+        logoScale = 0.93f;
         return true;
     }
+
+    // public override void OnDeselected() {
+    //     base.OnDeselected();
+    // }
 }
 
-public class CustomMenuBackgroundStyle : ModSurfaceBackgroundStyle {
+public class NighttimeForestBackgroundStyle : ModSurfaceBackgroundStyle {
     private Stopwatch _stopwatch;
+    private readonly Vector2[] _mousePosHistory = new Vector2[12];
+    private int _mousePosHistoryIndex;
 
     private Asset<Texture2D> _forestFrontTexture;
     private Asset<Texture2D>[] _forestBackTextures;
@@ -36,15 +43,13 @@ public class CustomMenuBackgroundStyle : ModSurfaceBackgroundStyle {
     private readonly float _frameZoom = 1.1f;
 
     private readonly float _parallaxScale = -3.6f;
-    private readonly float _forestFrontParallaxFactor = 1.25f;
+    private readonly float _forestFrontParallaxFactor = 1.4f;
     private readonly float _forestBackParallaxFactor = 0.7f;
     private readonly float _mountainFrontParallaxFactor = 0.7f;
     private readonly float _mountainBackParallaxFactor = 0.4f;
     private readonly float _cloudsParallaxFactor = 0.25f;
 
-    private readonly int _mountainFrontYOffset = (int)(Main.screenWidth * 0f);
-    private readonly int _mountainBackYOffset = (int)(Main.screenWidth * 0.02f);
-    private readonly int _skyYOffset = (int)(Main.screenHeight * 0f);
+    private float _transparency;
 
     public override void Load() {
         _stopwatch = Stopwatch.StartNew();
@@ -91,65 +96,98 @@ public class CustomMenuBackgroundStyle : ModSurfaceBackgroundStyle {
         });
     }
 
+    // public override int ChooseCloseTexture(ref float scale, ref double parallax, ref float a, ref float b) {
+    //     return base.ChooseCloseTexture(ref scale, ref parallax, ref a, ref b);
+    // }
+
     public override bool PreDrawCloseBackground(SpriteBatch spriteBatch) {
-        Vector2 mousePos = (Main.MouseScreen - Main.LastLoadedResolution.ToVector2() / 2f) / 100f;
+        // get the average mouse position over <_mousePosHistory.Length> frames
+        _mousePosHistoryIndex++;
+        if (_mousePosHistoryIndex == _mousePosHistory.Length)
+            _mousePosHistoryIndex = 0;
+        Vector2 thisMousePos = (Main.MouseScreen - Main.LastLoadedResolution.ToVector2() / 2f) / 100f;
+        _mousePosHistory[_mousePosHistoryIndex] = thisMousePos;
+        float mousePosXRunningTotal = 0, mousePosYRunningTotal = 0;
+        foreach (Vector2 pos in _mousePosHistory) {
+            mousePosXRunningTotal += pos.X;
+            mousePosYRunningTotal += pos.Y;
+        }
+
+        mousePosXRunningTotal /= _mousePosHistory.Length;
+        mousePosYRunningTotal /= _mousePosHistory.Length;
+        Vector2 averageMousePos = new(mousePosXRunningTotal, mousePosYRunningTotal);
+            
+        
         int frameOffsetX = (int)(Main.screenWidth * (1 - _frameZoom) / 2);
         int frameOffsetY = (int)(Main.screenHeight * (1 - _frameZoom) / 2);
         int frameWidth = (int)(Main.screenWidth * _frameZoom);
         int frameHeight = (int)(Main.screenHeight * _frameZoom);
+
+        _transparency = (float)Math.Floor(Main.bgAlphaFrontLayer[Slot]);
         
         spriteBatch.Draw(
             _skyTexture.Value,
             new Rectangle(0, 0, Main.screenWidth, Main.screenHeight),
-            Color.White
+            Color.White * _transparency
         );
 
         spriteBatch.Draw(
             _cloudsTextures[(int)Math.Round(_stopwatch.ElapsedMilliseconds / _skyDetailFrameInterval) % 55].Value,
-            new Rectangle(frameOffsetX + (int)(mousePos.X * _cloudsParallaxFactor * _parallaxScale), frameOffsetY + _skyYOffset + (int)(mousePos.Y * _cloudsParallaxFactor * _parallaxScale), frameWidth, frameHeight),
-            Color.White
+            new Rectangle(frameOffsetX + (int)(averageMousePos.X * _cloudsParallaxFactor * _parallaxScale),
+                frameOffsetY + (int)(averageMousePos.Y * _cloudsParallaxFactor * _parallaxScale),
+                frameWidth,
+                frameHeight),
+            Color.White * _transparency
         );
 
         spriteBatch.Draw(
             _mountainBackTexture.Value,
-            new Rectangle(frameOffsetX + (int)(mousePos.X * _mountainBackParallaxFactor * _parallaxScale), frameOffsetY + _mountainBackYOffset + (int)(mousePos.Y * _mountainBackParallaxFactor * _parallaxScale), frameWidth, frameHeight),
-            Color.White
+            new Rectangle(frameOffsetX + (int)(averageMousePos.X * _mountainBackParallaxFactor * _parallaxScale),
+                frameOffsetY + (int)(averageMousePos.Y * _mountainBackParallaxFactor * _parallaxScale),
+                frameWidth,
+                frameHeight),
+            Color.White * _transparency
         );
         
         spriteBatch.Draw(
             _mountainFrontTexture.Value,
-            new Rectangle(frameOffsetX + (int)(mousePos.X * _mountainFrontParallaxFactor * _parallaxScale), frameOffsetY + _mountainFrontYOffset + (int)(mousePos.Y * _mountainFrontParallaxFactor * _parallaxScale), frameWidth, frameHeight),
-            Color.White
+            new Rectangle(frameOffsetX + (int)(averageMousePos.X * _mountainFrontParallaxFactor * _parallaxScale),
+                frameOffsetY + (int)(averageMousePos.Y * _mountainFrontParallaxFactor * _parallaxScale),
+                frameWidth,
+                frameHeight),
+            Color.White * _transparency
         );
 
         spriteBatch.Draw(
             _forestBackTextures[(int)Math.Round(_stopwatch.ElapsedMilliseconds / _frontFrameInterval) % 6].Value,
-            new Rectangle(frameOffsetX + (int)(mousePos.X * _forestBackParallaxFactor * _parallaxScale), frameOffsetY + (int)(mousePos.Y * _forestBackParallaxFactor * _parallaxScale), frameWidth, frameHeight),
-            Color.White
+            new Rectangle(frameOffsetX + (int)(averageMousePos.X * _forestBackParallaxFactor * _parallaxScale),
+                frameOffsetY + (int)(averageMousePos.Y * _forestBackParallaxFactor * _parallaxScale),
+                frameWidth,
+                frameHeight),
+            Color.White * _transparency
         );
 
         spriteBatch.Draw(
             _forestFrontTexture.Value,
-            new Rectangle(frameOffsetX + (int)(mousePos.X * _forestFrontParallaxFactor * _parallaxScale), frameOffsetY + (int)(mousePos.Y * _forestFrontParallaxFactor * _parallaxScale), frameWidth, frameHeight),
-            Color.White
+            new Rectangle(frameOffsetX + (int)(averageMousePos.X * _forestFrontParallaxFactor * _parallaxScale),
+                frameOffsetY + (int)(averageMousePos.Y * _forestFrontParallaxFactor * _parallaxScale),
+                frameWidth,
+                frameHeight),
+            Color.White * _transparency
         );
 
-        return false;
+        return true;
     }
 
     public override void ModifyFarFades(float[] fades, float transitionSpeed) {
+        // Console.WriteLine(transitionSpeed);
+        
         for (int i = 0; i < fades.Length; i++) {
             if (i == Slot) {
-                fades[i] += transitionSpeed * 2;
-                if (fades[i] > 1f) {
-                    fades[i] = 1f;
-                }
+                fades[i] = 1;
             }
             else {
-                fades[i] -= transitionSpeed * 2;
-                if (fades[i] < 0f) {
-                    fades[i] = 0f;
-                }
+                fades[i] = 0;
             }
         }
     }
