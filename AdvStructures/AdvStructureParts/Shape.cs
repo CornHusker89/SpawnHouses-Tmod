@@ -14,16 +14,16 @@ namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
 /// <summary>
 ///     generic 2D shape. has support for triangles, rectangles, and n-gons.
+///     can also support shapes made up of 1 or 2 points
 /// </summary>
 /// <remarks>it's assumed that the points are in clockwise order</remarks>
 public class Shape : PointGeometry {
-    
     public bool IsBox { get; private set; } // because many of the shapes will be boxes, introduce optimizations for boxes
 
     private bool[,]? _booleanTilemap;
 
     /// <summary>
-    ///     2d array of this shape showing if there is a tile, 0-indexed
+    ///     2d array of this shape showing if there is a tile, always 0-indexed
     /// </summary>
     public bool[,] BooleanTilemap {
         get { return _booleanTilemap ??= GetBooleanTilemap(); }
@@ -31,42 +31,29 @@ public class Shape : PointGeometry {
 
     protected sealed override void Init(Point16[] points, bool optimize) {
         Points = points;
-        switch (points.Length) {
-            case 2:
-                Points = [
-                    new Point16(points[0].X, points[0].Y),
-                    new Point16(points[1].X, points[0].Y),
-                    new Point16(points[1].X, points[1].Y),
-                    new Point16(points[0].X, points[1].Y)
-                ];
+
+        if (optimize) OptimizePoints(true);
+
+        switch (Points.Length) {
+            case 1:
                 IsBox = true;
                 break;
-            default:
-                if (points.Length <= 3) {
-                    break;
-                }
-                
-                if (optimize) OptimizePoints(true);
-
-                switch (Points.Length) {
-                    // this will only happen if the points are the same (shape area of 1)
-                    case 1:
-                        IsBox = true;
-                        break;
-                    // test if the points form a box
-                    case 4: {
-                        HashSet<int> x = [], y = [];
-                        foreach (Point16 point in Points) {
-                            x.Add(point.X);
-                            y.Add(point.Y);
-                        }
-
-                        IsBox = x.Count <= 2 && y.Count <= 2;
-                        break;
-                    }
-                }
-
+            case 2:
+                IsBox = Points[0].X == Points[1].X || Points[0].Y == Points[1].Y;
                 break;
+            case 3:
+                break;
+            default: {
+                // test if the points form a box
+                HashSet<int> x = [], y = [];
+                foreach (Point16 point in Points) {
+                    x.Add(point.X);
+                    y.Add(point.Y);
+                }
+
+                IsBox = x.Count <= 2 && y.Count <= 2;
+                break;
+            }
         }
 
         SetBoundingBoxAndSize();
@@ -89,20 +76,47 @@ public class Shape : PointGeometry {
         return true;
     }
 
-    /// <param name="points">If only 2 points are passed, will assume a box</param>
+    /// <param name="points"></param>
     /// <returns></returns>
+    /// <remarks>does not support box shorthand</remarks>
     public Shape(params Point16[] points) {
         Init(points, true);
     }
 
-    /// <param name="points">If only 2 points are passed, will assume a box</param>
+    /// <param name="boxShorthand">if true and only 2 points are passed, will assume a box with 4 intended points</param>
+    /// <param name="points"></param>
     /// <returns></returns>
-    public Shape(IEnumerable<Point16> points) {
+    public Shape(bool boxShorthand, params Point16[] points) {
+        if (boxShorthand && points.Length == 2)
+            points = [
+                new Point16(points[0].X, points[0].Y),
+                new Point16(points[1].X, points[0].Y),
+                new Point16(points[1].X, points[1].Y),
+                new Point16(points[0].X, points[1].Y)
+            ];
+        Init(points, true);
+    }
+
+    /// <param name="points"></param>
+    /// <param name="boxShorthand">if true and only 2 points are passed, will assume a box with 4 intended points</param>
+    /// <returns></returns>
+    public Shape(IEnumerable<Point16> points, bool boxShorthand = false) {
         var pointsArray = points.ToArray();
+        if (boxShorthand && pointsArray.Length == 2)
+            points = [
+                new Point16(pointsArray[0].X, pointsArray[0].Y),
+                new Point16(pointsArray[1].X, pointsArray[0].Y),
+                new Point16(pointsArray[1].X, pointsArray[1].Y),
+                new Point16(pointsArray[0].X, pointsArray[1].Y)
+            ];
         Init(pointsArray, true);
     }
 
-    private Shape(IEnumerable<Point16> points, bool optimize) {
+    /// <param name="points"></param>
+    /// <param name="optimize"></param>
+    /// <param name="boxShorthand">if true and only 2 points are passed, will assume a box with 4 intended points</param>
+    /// <returns></returns>
+    private Shape(IEnumerable<Point16> points, bool optimize, bool boxShorthand = false) {
         var pointsArray = points.ToArray();
         Init(pointsArray, optimize);
     }
@@ -233,11 +247,11 @@ public class Shape : PointGeometry {
     }
 
     /// <summary>
-    ///     creates new shape, expanded by <see cref="expansion" /> tiles
+    ///     creates new shape, expanded by <paramref name="expansion"/> tiles
     /// </summary>
     /// <returns></returns>
     public Shape GetExpandedShape(int expansion) {
-        return new Shape(ExpandPoints(expansion), false);
+        return new Shape(ExpandPoints(expansion));
     }
 
     /// <summary>
@@ -501,7 +515,7 @@ public class Shape : PointGeometry {
             Point16 point1 = Points[i];
             Point16 point2 = Points[(i + 1) % Points.Length];
 
-            if (RayIntersectsSegment(point, point1, point2))
+            if (RightFacingRayIntersectsSegment(point, point1, point2))
                 crossingCount++;
         }
 
@@ -793,7 +807,7 @@ public class Shape : PointGeometry {
             steps++;
         } while (pos != start.Value && !visited.Contains(pos) && steps < maxSteps);
 
-        return new Shape(outline.ToArray());
+        return new Shape(outline);
     }
 
     /// <summary>

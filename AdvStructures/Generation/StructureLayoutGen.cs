@@ -14,7 +14,7 @@ namespace SpawnHouses.AdvStructures.Generation;
 
 public static class StructureLayoutGen {
     /// <summary>
-    ///     literally just a square. can only have 2 entry points
+    ///     a square, possibly with square extrusions. can only have 2 entry points
     /// </summary>
     [StructureLayoutGenerator]
     public class StructureLayoutGenerator1 : IStructureLayoutGenerator {
@@ -64,12 +64,12 @@ public static class StructureLayoutGen {
 
             const int tilemapMargin = 7;
             const int roofMargin = 35;
-            
-            // TODO: compensate structure volume and roofMargin for the roof volume itself
+
+            // TODO: compensate structure volume and roofMargin for the non-square volume at the top
 
             // structure parameters that aren't dependent on tilemap position
-            int entryPointDistance = Math.Abs(p.EntryPoints[0].End.Y - p.EntryPoints[1].End.Y);
-            bool hasBasement = Terraria.WorldGen.genRand.NextDouble() < 0.4 && p.Height - entryPointDistance > 15; //40% if conditions are met
+            int entryPointVerticalDistance = Math.Abs(p.EntryPoints[0].End.Y - p.EntryPoints[1].End.Y);
+            bool hasBasement = Terraria.WorldGen.genRand.NextDouble() < 0.4 && p.Height - entryPointVerticalDistance > 12; //40% if conditions are met
             int externalWallThickness = roomLayoutParams.WallWidth.Max;
             int externalFloorThickness = roomLayoutParams.FloorWidth.Max;
             int verticalOffset = hasBasement ? 7 : 0;
@@ -141,7 +141,7 @@ public static class StructureLayoutGen {
             advStructure.SetTilesExternalStatus();
 
             // finally, finish the room layout
-            advStructure.Layout = new RoomLayout([], [], 
+            advStructure.Layout = new RoomLayout([], [],
                 advStructure.ExternalLayout.Gaps,
                 [
                     new Room(
@@ -149,7 +149,7 @@ public static class StructureLayoutGen {
                         advStructure.ExternalLayout.Gaps
                     )
                 ]);
-            
+
             advStructure.CompleteExternalGaps();
             RoomLayoutHelper.SubdivideRoom(advStructure.Layout, advStructure.Layout.Rooms[0], roomLayoutParams);
 

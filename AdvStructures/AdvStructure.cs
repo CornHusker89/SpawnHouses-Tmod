@@ -17,8 +17,6 @@ public class AdvStructure {
     public RoomLayout Layout;
     public StructureParams Params;
     public StructureTilemap Tilemap;
-    public int XSize, YSize, HousingCount;
-
 
     /// <summary>
     /// </summary>
@@ -55,9 +53,7 @@ public class AdvStructure {
         }
 
         bool result = generator.Generate(this);
-        if (!result) {
-            throw new Exception("error in structure layout generator");
-        }
+        if (!result) throw new Exception("error in structure layout generator");
     }
 
     /// <summary>
@@ -130,7 +126,7 @@ public class AdvStructure {
     }
 
     /// <summary>
-    ///     Fills current layout with tiles
+    ///     Fills current layout with tiles/walls
     /// </summary>
     /// <exception cref="Exception">Throws when no layout has been set</exception>
     public void FillComponents() {
@@ -153,7 +149,7 @@ public class AdvStructure {
             ComponentUtils.ValidateComponent(component);
             ComponentParams componentParams = ComponentUtils.CreateComponentParamsForType(component, Params.Palette, Tilemap);
             component.Id = (ushort)i;
-            
+
             int generatorIndex = 0;
             Type componentType = component.GetType();
             if (!ComponentGenerators.TryGetValue(componentType, out var generators)) throw new Exception($"component type {component.GetType().FullName} generators not found");

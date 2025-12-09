@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Types;
+using Terraria.DataStructures;
 
 namespace SpawnHouses.AdvStructures.Generation.Components;
 
@@ -27,6 +28,7 @@ public class GapGen {
             bool placeWalls = !param.Component.TagsRequired.ContainsKey(ComponentTag.External);
 
             param.Component.Volume.ExecuteInArea((x, y) => {
+                param.Tilemap[x, y].ClearTile(false);
                 if (placeWalls)
                     param.Tilemap.PlaceWall(x, y, param.Palette.BackgroundFloorMain);
                 StructureTile tile = param.Tilemap[x, y];
@@ -67,9 +69,18 @@ public class GapGen {
             ];
         }
 
+        public override bool CanGenerate(VolumeComponentParams componentParams) {
+            return componentParams.Component.Volume.GetDetailedAxisSizes(false).max == 3;
+        }
+
         public override bool Generate(VolumeComponentParams param) {
             if (!param.Component.TagsRequired.ContainsKey(ComponentTag.External))
-                param.Component.Volume.ExecuteInArea((x, y) => { param.Tilemap.PlaceWall(x, y, PaintedType.PickRandom(param.Palette.BackgroundWallAlt)); });
+                param.Component.Volume.ExecuteInArea((x, y) => {
+                    param.Tilemap.PlaceWall(x, y, param.Palette.BackgroundWallMain);
+                    param.Tilemap[x, y].ClearTile(false);
+                });
+            Point16 doorPos = param.Component.Volume.BoundingBox.bottomRight;
+            Terraria.WorldGen.PlaceTile(doorPos.X, doorPos.Y, param.Palette.);
             return true;
         }
     }

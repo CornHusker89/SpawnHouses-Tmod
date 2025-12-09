@@ -1,6 +1,7 @@
 using System;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Helpers;
+using SpawnHouses.Types.Palette;
 using Terraria.DataStructures;
 using Terraria.ID;
 
@@ -124,48 +125,42 @@ public class StructureTilemap {
         entryPoint.Offset = WorldTileOffset * Point16.NegativeOne;
     }
 
-    public void PlaceTile(int x, int y, PaintedType paintedType, BlockType blockType = BlockType.Solid) {
+    public void PlaceTile(int x, int y, TilePaintedType paintedType, BlockType blockType = BlockType.Solid) {
         if (paintedType.Style != -1) throw new NotImplementedException();
 
         StructureTile tile = this[x, y];
         tile.HasTile = true;
         tile.BlockType = blockType;
-        tile.TileType = paintedType.Type;
-        tile.TileColor = paintedType.PaintType;
+        (tile.TileType, tile.TileColor) = paintedType.Ids;
         tile.IsNullTile = false;
     }
 
-    public void PlaceTile(int x, int y, PaintedType paintedType, SlopingAlgorithm slopingAlgorithm, SlopeModifier slopeModifier = SlopeModifier.GlobalSloping) {
-        if (paintedType.Style != -1) {
-            throw new NotImplementedException();
-        }
+    public void PlaceTile(int x, int y, TilePaintedType paintedType, SlopingAlgorithm slopingAlgorithm, SlopeModifier slopeModifier = SlopeModifier.GlobalSloping) {
+        if (paintedType.Style != -1) throw new NotImplementedException();
 
         StructureTile tile = this[x, y];
         tile.HasTile = true;
-        tile.TileType = paintedType.Type;
-        tile.TileColor = paintedType.PaintType;
+        (tile.TileType, tile.TileColor) = paintedType.Ids;
         tile.IsNullTile = false;
         tile.SlopingAlg = slopingAlgorithm;
         tile.SlopeModifier = slopeModifier;
     }
 
     /// <summary>
-    ///     changes the tile at this position to be the <see cref="paintedType" />,
+    ///     changes the tile at this position to be the <paramref name="paintedType"/>,
     ///     does not change <see cref="StructureTile.BlockType" />, <see cref="StructureTile.HasTile" />, or <see cref="StructureTile.IsNullTile" />
     /// </summary>
     /// <param name="x"></param>
     /// <param name="y"></param>
     /// <param name="paintedType"></param>
-    public void SoftPlaceTile(int x, int y, PaintedType paintedType) {
+    public void SoftPlaceTile(int x, int y, TilePaintedType paintedType) {
         StructureTile tile = this[x, y];
-        tile.TileType = paintedType.Type;
-        tile.TileColor = paintedType.PaintType;
+        (tile.TileType, tile.TileColor) = paintedType.Ids;
     }
 
-    public void PlaceWall(int x, int y, PaintedType paintedType) {
+    public void PlaceWall(int x, int y, WallPaintedType paintedType) {
         StructureTile tile = this[x, y];
-        tile.WallType = paintedType.Type;
-        tile.WallColor = paintedType.PaintType;
+        (tile.WallType, tile.WallColor) = paintedType.Ids;
         tile.IsNullWall = false;
     }
 

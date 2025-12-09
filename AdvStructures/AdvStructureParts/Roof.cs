@@ -5,7 +5,6 @@ using SpawnHouses.Types;
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
 public class Roof : PathComponent, IExternalComponent {
-
     // IComponentExternalExt
     public bool IsExterior { get; set; } = true;
 

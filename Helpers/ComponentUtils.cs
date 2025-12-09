@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Types;
+using SpawnHouses.Types.Palette;
 
 namespace SpawnHouses.Helpers;
 

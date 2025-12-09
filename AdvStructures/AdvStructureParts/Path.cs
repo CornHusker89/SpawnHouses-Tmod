@@ -29,7 +29,7 @@ public class Path : PointGeometry {
                 StartExtendable = value;
         }
     }
-    
+
     protected sealed override void Init(Point16[] points, bool optimize) {
         if (points.Length == 0) throw new Exception("path must have at least one point");
 
@@ -63,7 +63,7 @@ public class Path : PointGeometry {
     ///     vector that represents the net change over the whole path
     /// </summary>
     public Point16 PathVector => new(Points[^1].X - Points[0].X, Points[^1].Y - Points[0].Y);
-    
+
     public Path Clone() {
         return new Path(Points, false, StartExtendable, EndExtendable);
     }
@@ -276,13 +276,4 @@ public class Path : PointGeometry {
         newPointsFromBoundingBox.CopyTo(shapePointsArray, shapePointsArray.Length - numAddedPoints);
         return new Shape(shapePointsArray);
     }
-}   
-
-
-
-
-
-
-
-
-
+}

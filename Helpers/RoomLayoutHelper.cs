@@ -17,6 +17,7 @@ public static class RoomLayoutHelper {
     public static bool IsValidHousingSize(Shape volume) {
         return volume.GetExpandedShape(1).GetArea() >= 60;
     }
+
     /// <summary>
     ///     gets closest room to the point using the perimeter of each room
     /// </summary>
@@ -57,7 +58,7 @@ public static class RoomLayoutHelper {
         Shape expandedVolume = volume.GetExpandedShape(1);
         return gaps.FindAll(gap => expandedVolume.HasIntersection(gap.Volume));
     }
-    
+
     /// <summary>
     ///     creates actual floor and wall objects from volumes
     /// </summary>
@@ -265,7 +266,7 @@ public static class RoomLayoutHelper {
             );
 
             var validSplitStarts = GetValidSplits(roomVolume, prioritySplits, splitAlongX, iterationSplitWidth, iterationVerticalGapXs, iterationHorizontalGapYs, validCutRange);
-            
+
             if (validSplitStarts.Count == 0) {
                 finishedRoomVolumes.Add(roomVolume);
                 extraCuts++;
@@ -320,7 +321,7 @@ public static class RoomLayoutHelper {
         prioritySplits.ClearBlocklist();
         return new RoomLayoutVolumes(floorVolumes, wallVolumes, finishedRoomVolumes);
     }
-    
+
     /// <summary>
     ///     procedural BSP algorithm to split rooms
     /// </summary>
@@ -374,7 +375,7 @@ public static class RoomLayoutHelper {
                 gap.LowerRoom = roomToConnect;
             }
             else {
-                // redundant connection checking
+                // extra connection checking
                 if (gap.HigherRoom != room) throw new Exception("gap should've had this room before subdivision, but it didn't");
 
                 gap.HigherRoom = roomToConnect;
@@ -406,26 +407,19 @@ public static class RoomLayoutHelper {
 
             room.Volume.ExecuteOnPerimeter((x, y, direction) => {
                 Point16 pos = new(x, y);
-                Point16 step = new(0, 0);
                 if (lastDirection == Directions.None) lastDirection = direction;
 
-                switch (direction) {
-                    case Directions.Up:
-                        step = new Point16(0, -1);
-                        break;
-                    case Directions.Down:
-                        step = new Point16(0, 1);
-                        break;
-                    case Directions.Left:
-                        step = new Point16(-1, 0);
-                        break;
-                    case Directions.Right:
-                        step = new Point16(1, 0);
-                        break;
-                }
+                Point16 step = direction switch {
+                    Directions.Up => new Point16(0, -1),
+                    Directions.Down => new Point16(0, 1),
+                    Directions.Left => new Point16(-1, 0),
+                    Directions.Right => new Point16(1, 0),
+                    _ => new Point16(0, 0)
+                };
 
                 pos += step;
-                while (direction is Directions.Up or Directions.Down ? roomLayoutVolumes.InFloor(pos) : roomLayoutVolumes.InWall(pos)) pos += step;
+                while (direction is Directions.Up or Directions.Down ? roomLayoutVolumes.InFloor(pos) : roomLayoutVolumes.InWall(pos))
+                    pos += step;
 
                 Room? foundRoom = GetRoomFromPos(rooms, pos);
                 if (foundRoom == room) foundRoom = null; // invalidate casts that find its own room
@@ -483,7 +477,7 @@ public static class RoomLayoutHelper {
     }
 
     /// <summary>
-    ///     Removes impractically small gaps, moves and resizes large gaps
+    ///     Removes impractically small gaps, moves and shrinks large gaps
     /// </summary>
     /// <param name="gaps"></param>
     /// <returns></returns>
@@ -597,7 +591,7 @@ public static class RoomLayoutHelper {
         var (allGaps, rooms) = RaycastGaps(roomLayoutVolumes);
         RemoveDuplicateGaps(allGaps);
         ResizeAndMoveGaps(allGaps);
-        PruneGaps(rooms, roomLayoutParams.EntryPoints);
+        //PruneGaps(rooms, roomLayoutParams.EntryPoints);
 
         return (allGaps, rooms);
     }
@@ -623,6 +617,7 @@ public static class RoomLayoutHelper {
             if (entryPoint.IsHorizontal)
                 gaps[i] = new Gap(
                     new Shape(
+                        true,
                         entryPoint.Start,
                         entryPoint.End + new Point16(entryPoint.Direction is Directions.Right ? wallWidth - 1 : -wallWidth + 1, 0)
                     ),
@@ -631,6 +626,7 @@ public static class RoomLayoutHelper {
             else
                 gaps[i] = new Gap(
                     new Shape(
+                        true,
                         entryPoint.Start,
                         entryPoint.End + new Point16(0, entryPoint.Direction is Directions.Down ? floorWidth - 1 : -floorWidth + 1)
                     ),

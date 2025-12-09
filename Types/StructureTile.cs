@@ -77,7 +77,7 @@ public class StructureTile {
     ///     Actuated tiles are <strong>not</strong> solid.
     /// </remarks>
     public bool IsActuated;
-    
+
 
     // Colors
 
@@ -156,7 +156,7 @@ public class StructureTile {
     public bool RightSlope => BlockType == BlockType.SlopeDownLeft || BlockType == BlockType.SlopeUpLeft;
 
     #endregion
-    
+
     /// <summary>
     ///     Resets the tile data at this position.<br />
     ///     Sets <see cref="HasTile" /> and <see cref="IsActuated" /> to <see langword="false" /> and sets the
@@ -165,10 +165,11 @@ public class StructureTile {
     /// <remarks>
     ///     Does not reset data related to walls, wires, or anything else. For that, use <see cref="ClearEverything" />.
     /// </remarks>
-    public void ClearTile() {
+    public void ClearTile(bool nullTile) {
         BlockType = BlockType.Solid;
         HasTile = false;
         IsActuated = false;
+        IsNullTile = nullTile;
     }
 
     /// <summary>

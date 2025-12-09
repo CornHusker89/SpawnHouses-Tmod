@@ -41,7 +41,8 @@ public class SpawnHousesConfig : ModConfig {
         }
     }
 
-    [JsonIgnore] public float SpawnPointBasementMultiplier { get; set; } = 1;
+    [JsonIgnore]
+    public float SpawnPointBasementMultiplier { get; set; } = 1;
 
     [DefaultValue(2)]
     [Range(2, 2)]
@@ -56,9 +57,11 @@ public class SpawnHousesConfig : ModConfig {
     [DefaultValue(true)]
     public bool MagicStorageIntegrations { get; set; }
 
-    [DefaultValue(false)] public bool SpawnPointHouseOffset { get; set; }
+    [DefaultValue(false)]
+    public bool SpawnPointHouseOffset { get; set; }
 
-    [DefaultValue(true)] public bool SpawnPointHouseSetsSpawn { get; set; }
+    [DefaultValue(true)]
+    public bool SpawnPointHouseSetsSpawn { get; set; }
 
     [DefaultValue(0.5f)]
     [Slider]
@@ -85,7 +88,8 @@ public class SpawnHousesConfig : ModConfig {
         }
     }
 
-    [DefaultValue(true)] public bool EnableMineshaft { get; set; } = true;
+    [DefaultValue(true)]
+    public bool EnableMineshaft { get; set; } = true;
 
     [DefaultValue(true)]
     public bool EnableBeachHouse {

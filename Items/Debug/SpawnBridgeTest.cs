@@ -17,12 +17,12 @@ public class SpawnBridgeTest : ModItem {
     public override void AddRecipes() {
     }
 
-    public override bool AltFunctionUse(Terraria.Player player) {
+    public override bool AltFunctionUse(Player player) {
         return true;
     }
 
 
-    public override bool? UseItem(Terraria.Player player) {
+    public override bool? UseItem(Player player) {
         bool foundLocation = false;
         ushort x = 0;
         ushort y = 0;

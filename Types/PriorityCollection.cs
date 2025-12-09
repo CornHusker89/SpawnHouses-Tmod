@@ -25,7 +25,7 @@ public class PriorityCollection<T> {
             return 0;
         }
     }
-    
+
     private readonly Dictionary<int, HashSet<T>> _blocklistedItems = new();
     private readonly Dictionary<int, HashSet<T>> _sets = new();
     private readonly EqualityComparer<T>? _equalityComparison;
@@ -39,7 +39,7 @@ public class PriorityCollection<T> {
     /// </summary>
     /// <remarks>respects blocklisted items</remarks>
     public int TotalLength => _sets.Keys.Sum(priority => GetHashSet(priority).Count);
-    
+
     /// <summary>
     ///     the number of sets in the collection
     /// </summary>

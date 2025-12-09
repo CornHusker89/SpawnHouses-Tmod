@@ -5,7 +5,6 @@ using System.Collections.Generic;
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
 public class Room : VolumeComponent {
-    
     public List<Gap> Gaps;
     public bool IsEntryRoom;
     public Room? ParentRoom;
@@ -29,7 +28,6 @@ public class Room : VolumeComponent {
     ///     Gets the room on the other side of the gap. Gap must be in this room's gaps
     /// </summary>
     /// <param name="gap"></param>
-    /// <param name="throwException">if the gap is not found and this is true, the method will throw an error </param>
     /// <returns>The other room, null if it doesn't exist</returns>
     public Room? TraverseGap(Gap gap) {
         if (!Gaps.Contains(gap)) throw new Exception("Gap not found in this room's gaps");

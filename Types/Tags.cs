@@ -15,11 +15,12 @@ public enum StructureTag : ushort {
     // current highest tag number is 16
     IsSymmetric = 1,
 
-    [TagData(typeof(int))] HasRooms = 16,
+    [TagData(typeof(int))]
+    HasRooms = 16,
 
     [TagData(typeof(int))]
     HasHousing = 2,
-    
+
     HasOnlyRectangleRooms = 3,
     HasNoRectangleRooms = 4,
 
@@ -58,7 +59,7 @@ public enum StructureTag : ushort {
 }
 
 public enum ComponentTag {
-    // current highest tag number is: 31
+    // current highest tag number is: 40
     // ===== all =====
     Elevated = 1,
     GroundLevel = 2,
@@ -66,11 +67,13 @@ public enum ComponentTag {
     External = 4,
 
     /// use sloping algorithm when filling volumes
-    [TagData(typeof(SlopingAlgorithm))] ApplySloping = 28,
+    [TagData(typeof(SlopingAlgorithm))]
+    ApplySloping = 28,
 
-    /// apply sloping algorithm using only this component's tiles as opposed to the whole structure
-    [TagData(typeof(SlopeModifier))] SlopingModifier = 31,
-    
+    /// apply sloping algorithm with different contexts
+    [TagData(typeof(SlopeModifier))]
+    SlopingModifier = 31,
+
     // ===== floor =====
     IsFloorGap = 6,
 
@@ -83,11 +86,20 @@ public enum ComponentTag {
     IsWallGap = 9,
 
 
-    // ===== background =====
-    BackgroundHasWindow = 10,
-    BackgroundIsHousingInvalid = 11,
-    BackgroundIsHousingValid = 12,
+    // ===== room =====
+    RoomTypeStorage = 37,
+    RoomTypeLiving = 38,
+    RoomTypeBedroom = 39,
+    RoomTypeWorkshop = 40,
+    RoomHasWindow = 32,
+    RoomIsHousingNotValid = 33,
+    RoomIsHousingValid = 34,
 
+    RoomHasArbitraryBeams = 35,
+
+    [TagData(typeof(int[]))]
+    RoomHasSpecificBeams = 36,
+    
 
     // ===== stairway =====
     StairwayRequiresJumping = 13,
@@ -105,15 +117,14 @@ public enum ComponentTag {
     /// roof is short enough to generally follow the contour of the path
     RoofShort = 16,
 
-    [TagData(typeof(int))] RoofHasChimney = 17,
+    [TagData(typeof(int[]))]
+    RoofHasChimney = 17,
 
     /// roof has an overhang of more than 1 tile
-    RoofHasLargeOverhang = 22,
+    RoofHasLargeOverhang = 22
 
 
     // ===== gap =====
-
-
 }
 
 public enum PaletteTag {
@@ -212,24 +223,22 @@ public abstract class ComponentTagSystem {
 }
 
 public static class TagUtils {
-
     /// <summary>
     ///     a component's tags are considered invalid if a component has all tags in any set
     /// </summary>
     public static HashSet<ComponentTag>[] MutuallyExclusiveComponentTagsRequired { get; } = [
     ];
-    
+
     /// <summary>
     ///     a component's tags are considered invalid if a component has all tags in any set
     /// </summary>
     public static HashSet<ComponentTag>[] MutuallyExclusiveComponentTagsBlocklist { get; } = [
-
     ];
 
     public static void ValidateExclusiveTagsRequired(HashSet<ComponentTag> tagsRequired) {
         foreach (var exclusiveSet in MutuallyExclusiveComponentTagsRequired) {
             if (!exclusiveSet.IsSubsetOf(tagsRequired)) continue;
-            
+
             string message = "Component has mutually exclusive component tags required {";
             foreach (ComponentTag tag in exclusiveSet) message += $"{tag} (id {(ushort)tag}), ";
             throw new Exception(message.Remove(message.Length - 2));

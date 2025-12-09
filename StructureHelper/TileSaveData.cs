@@ -8,50 +8,50 @@ namespace SpawnHouses.StructureHelper;
 ///     A struct representing tile data to be saved/loaded from structure files.
 /// </summary>
 public struct TileSaveData : TagSerializable {
-	/// <summary>
-	///     The tile to be placed, either a number if a vanilla tile (ID), or a fully qualified internal name for modded tiles.
-	/// </summary>
-	public string tile;
+    /// <summary>
+    ///     The tile to be placed, either a number if a vanilla tile (ID), or a fully qualified internal name for modded tiles.
+    /// </summary>
+    public string tile;
 
-	/// <summary>
-	///     The wall to be placed, either a number if a vanilla wall (ID), or a fully qualified internal name for modded walls.
-	/// </summary>
-	public string wall;
+    /// <summary>
+    ///     The wall to be placed, either a number if a vanilla wall (ID), or a fully qualified internal name for modded walls.
+    /// </summary>
+    public string wall;
 
-	/// <summary>
-	///     The X frame of a tile
-	/// </summary>
-	public short frameX;
+    /// <summary>
+    ///     The X frame of a tile
+    /// </summary>
+    public short frameX;
 
-	/// <summary>
-	///     the Y frame of a tile
-	/// </summary>
-	public short frameY;
+    /// <summary>
+    ///     the Y frame of a tile
+    /// </summary>
+    public short frameY;
 
-	/// <summary>
-	///     One part of the packed vanilla data about a tile
-	/// </summary>
-	public int wallWireData;
+    /// <summary>
+    ///     One part of the packed vanilla data about a tile
+    /// </summary>
+    public int wallWireData;
 
-	/// <summary>
-	///     The other part of the packed vanilla data about a tile
-	/// </summary>
-	public short packedLiquidData;
+    /// <summary>
+    ///     The other part of the packed vanilla data about a tile
+    /// </summary>
+    public short packedLiquidData;
 
-	/// <summary>
-	///     Data about certain coatings added by 1.4.4
-	/// </summary>
-	public byte brightInvisibleData;
+    /// <summary>
+    ///     Data about certain coatings added by 1.4.4
+    /// </summary>
+    public byte brightInvisibleData;
 
-	/// <summary>
-	///     The fully qualiified name of a modded tile entity, if one should exist here
-	/// </summary>
-	public string TEType;
+    /// <summary>
+    ///     The fully qualiified name of a modded tile entity, if one should exist here
+    /// </summary>
+    public string TEType;
 
-	/// <summary>
-	///     The data associated with a tile entity associated here
-	/// </summary>
-	public TagCompound TEData;
+    /// <summary>
+    ///     The data associated with a tile entity associated here
+    /// </summary>
+    public TagCompound TEData;
 
     public static Func<TagCompound, TileSaveData> DESERIALIZER = s => DeserializeData(s);
 

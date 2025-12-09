@@ -17,11 +17,11 @@ public class SpawnChainTest : ModItem {
     public override void AddRecipes() {
     }
 
-    public override bool AltFunctionUse(Terraria.Player player) {
+    public override bool AltFunctionUse(Player player) {
         return true;
     }
 
-    public override bool? UseItem(Terraria.Player player) {
+    public override bool? UseItem(Player player) {
         Point16 point = (Main.MouseWorld / 16).ToPoint16();
 
         TestChain chain = new((ushort)point.X, (ushort)point.Y);

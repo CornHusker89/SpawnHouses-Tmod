@@ -4,7 +4,7 @@ using SpawnHouses.Types;
 
 namespace SpawnHouses.AdvStructures.Generation.Components;
 
-public static class BackgroundGen {
+public static class RoomGen {
     /// <summary>
     ///     Fills mostly with random walls, but has specific walls on bottom edge
     /// </summary>
@@ -19,7 +19,7 @@ public static class BackgroundGen {
         public override bool Generate(VolumeComponentParams param) {
             param.Component.Volume.ExecuteInArea((x, y) => {
                 if (y == param.Component.Volume.BoundingBox.bottomRight.Y)
-                    param.Tilemap.PlaceWall(x, y, PaintedType.PickRandom(param.Palette.BackgroundRoomAlt));
+                    param.Tilemap.PlaceWall(x, y, param.Palette.BackgroundRoomAlt);
                 else if (y == param.Component.Volume.BoundingBox.bottomRight.Y - 1)
                     param.Tilemap.PlaceWall(x, y, param.Palette.BackgroundRoomAccent);
                 else
@@ -45,7 +45,7 @@ public static class BackgroundGen {
             int bottomY = param.Component.Volume.BoundingBox.bottomRight.Y;
             param.Component.Volume.ExecuteInArea((x, y) => {
                 if (y == bottomY || y == bottomY - 1 || y == bottomY - 2)
-                    param.Tilemap.PlaceWall(x, y, PaintedType.PickRandom(param.Palette.BackgroundRoomAlt));
+                    param.Tilemap.PlaceWall(x, y, param.Palette.BackgroundRoomAlt);
                 else
                     param.Tilemap.PlaceWall(x, y, param.Palette.BackgroundRoomMain);
             });

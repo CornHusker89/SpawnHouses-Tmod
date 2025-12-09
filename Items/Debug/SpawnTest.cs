@@ -5,6 +5,7 @@ using SpawnHouses.AdvStructures;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Structures;
 using SpawnHouses.Types;
+using SpawnHouses.Types.Palette;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;

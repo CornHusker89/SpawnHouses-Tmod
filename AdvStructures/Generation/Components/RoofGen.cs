@@ -227,14 +227,13 @@ public static class RoofGen {
                 ComponentTag.SlopingModifier
             ];
         }
-            
+
         public override bool Generate(PathComponentParams param) {
             bool isPathFlat = param.Component.Line.Points.All(point => point.Y == param.Component.Line.Points[0].Y);
 
             // extend roof endcaps if necessary
             bool bigEndCaps = param.Component.TagsRequired.ContainsKey(ComponentTag.RoofHasLargeOverhang);
             if (param.Component.Line.StartExtendable) {
-                
             }
 
             Path upperMiddlePath = param.Component.Line.Clone();
@@ -277,7 +276,7 @@ public static class RoofGen {
             Shape wallsShape = upperMiddlePath.ToShape(param.Component.Line);
             ComponentFillHelper.FillShapeWalls(wallsShape, param, param.Palette.BackgroundRoofMain,
                 (x, _) => (x > wallsShape.BoundingBox.topLeft.X || !param.Component.Line.LowerXExtendable) && (x < wallsShape.BoundingBox.bottomRight.X || !param.Component.Line.HigherXExtendable));
-            
+
             return true;
         }
     }

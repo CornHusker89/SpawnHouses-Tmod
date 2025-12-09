@@ -173,7 +173,7 @@ public abstract class PointGeometry {
 
                 // ignore the set if the angle is significant
                 Console.WriteLine($"setsize: {setSize}, index: {i}, angle: {180 - GetAngle(start, averagePoint, end)}");
-                
+
                 if (180 - GetAngle(start, averagePoint, end) >= significantAngle) continue;
 
                 for (int newPointIndex = 0; newPointIndex < setSize; newPointIndex++) {
@@ -196,23 +196,27 @@ public abstract class PointGeometry {
         return returnList;
     }
 
-    protected static bool RayIntersectsSegment(Point16 point, Point16 segmentStart, Point16 segmentEnd) {
+    protected static bool RightFacingRayIntersectsSegment(Point16 rayStartPoint, Point16 segmentStart, Point16 segmentEnd) {
         if (segmentStart.Y > segmentEnd.Y)
             (segmentStart, segmentEnd) = (segmentEnd, segmentStart);
 
         // check if the point is outside the segment's Y range
-        if (point.Y <= segmentStart.Y || point.Y > segmentEnd.Y)
+        if (rayStartPoint.Y < segmentStart.Y || rayStartPoint.Y > segmentEnd.Y)
             return false;
 
         // check if the point is to the right of the segment
-        if (point.X >= Math.Max(segmentStart.X, segmentEnd.X))
+        if (rayStartPoint.X > Math.Max(segmentStart.X, segmentEnd.X))
             return false;
 
         // check for intersection
-        double slope = (segmentEnd.X - segmentStart.X) / (double)(segmentEnd.Y - segmentStart.Y);
-        double intersectX = segmentStart.X + (point.Y - segmentStart.Y) * slope;
+        int minX = Math.Min(segmentStart.X, segmentEnd.X);
+        int maxX = Math.Max(segmentStart.X, segmentEnd.X);
+        int minY = Math.Min(segmentStart.Y, segmentEnd.Y);
+        int maxY = Math.Max(segmentStart.Y, segmentEnd.Y);
+        double slope = (maxX - minX) / (double)(maxY - minY);
+        double intersectX = minX + (maxY - minY) * slope;
 
-        return point.X < intersectX;
+        return rayStartPoint.X <= intersectX;
     }
 
     protected static int Cross(Point16 o, Point16 a, Point16 b) {

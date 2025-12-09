@@ -17,12 +17,12 @@ public class FlipRegion : ModItem {
     public override void AddRecipes() {
     }
 
-    public override bool AltFunctionUse(Terraria.Player player) {
+    public override bool AltFunctionUse(Player player) {
         return true;
     }
 
 
-    public override bool? UseItem(Terraria.Player player) {
+    public override bool? UseItem(Player player) {
         SlopeType flipDir(SlopeType originalDir) {
             if (originalDir == SlopeType.SlopeDownLeft)
                 return SlopeType.SlopeDownRight;

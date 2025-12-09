@@ -48,11 +48,7 @@ public static class WallGen {
         public override bool Generate(VolumeComponentParams param) {
             bool elevated = param.Component.TagsRequired.ContainsKey(ComponentTag.Elevated);
 
-            param.Component.Volume.ExecuteInArea((x, y) => {
-                param.Tilemap.PlaceTile(x, y,
-                    PaintedType.PickRandom(elevated ? param.Palette.WallAltElevated : param.Palette.WallAlt)
-                );
-            });
+            param.Component.Volume.ExecuteInArea((x, y) => { param.Tilemap.PlaceTile(x, y, elevated ? param.Palette.WallAltElevated : param.Palette.WallAlt); });
             return true;
         }
     }
@@ -128,8 +124,7 @@ public static class WallGen {
             int[] lowX = new int[param.Component.Volume.Size.Y];
             int[] highX = new int[param.Component.Volume.Size.Y];
             param.Component.Volume.ExecuteInArea((x, y) => {
-                param.Tilemap.PlaceTile(x, y, PaintedType.PickRandom(
-                    elevated ? param.Palette.WallAltElevated : param.Palette.WallAlt));
+                param.Tilemap.PlaceTile(x, y, elevated ? param.Palette.WallAltElevated : param.Palette.WallAlt);
 
                 if (lowX[y - yStart] == 0) lowX[y - yStart] = x;
                 if (highX[y - yStart] == 0) highX[y - yStart] = x;
@@ -166,8 +161,7 @@ public static class WallGen {
             int[] bottomY = new int[param.Component.Volume.Size.X];
 
             param.Component.Volume.ExecuteInArea((x, y) => {
-                param.Tilemap.PlaceTile(x, y, PaintedType.PickRandom(
-                    elevated ? param.Palette.WallAltElevated : param.Palette.WallAlt));
+                param.Tilemap.PlaceTile(x, y, elevated ? param.Palette.WallAltElevated : param.Palette.WallAlt);
 
                 if (bottomY[x - xStart] == 0)
                     bottomY[x - xStart] = y;

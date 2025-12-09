@@ -5,11 +5,10 @@ using SpawnHouses.Types;
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
 public class Gap : VolumeComponent, IExternalComponent {
-    
     // IExternalComponent
     public bool IsExterior { get; set; }
-    
-    
+
+
     /// <summary>This will be null if the gap leads to an exterior</summary>
     public Room? HigherRoom;
 

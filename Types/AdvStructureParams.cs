@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
+using SpawnHouses.Types.Palette;
 using Terraria.DataStructures;
 using Range = SpawnHouses.Structures.Range;
 
@@ -43,7 +44,7 @@ public class StructureParams : StructureTagSystem {
         if (housing != null) {
             int? roomCount = GetTagDataSafe<int?>(StructureTag.HasRooms);
             if (roomCount == null) throw new ArgumentException("Must have rooms tag to have housing");
-            
+
             if (Volume / housing < 60)
                 throw new ArgumentException($"Volume minimum of {Volume} is too small given the housing minimum of {housing}");
             if (Volume / housing < 60)

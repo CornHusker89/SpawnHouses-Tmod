@@ -5,7 +5,6 @@ using SpawnHouses.Types;
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
 public class Wall : VolumeComponent, IExternalComponent {
-    
     // IExternalComponent
     public bool IsExterior { get; set; }
 

@@ -42,6 +42,7 @@ public class ExternalLayoutHelper {
     public static Floor CreateFloor(int y, int xStart, int xEnd, bool extendHigher, int width, bool isExternal = true) {
         return new Floor(
             new Shape(
+                true,
                 new Point16(xStart, y),
                 new Point16(xEnd, y + (extendHigher ? width - 1 : -width + 1))
             ),
@@ -65,6 +66,7 @@ public class ExternalLayoutHelper {
     public static Wall CreateWall(int x, int yStart, int yEnd, bool extendHigher, int width, bool isExternal = true) {
         return new Wall(
             new Shape(
+                true,
                 new Point16(x, yStart),
                 new Point16(x + (extendHigher ? width - 1 : -width + 1), yEnd)
             ),
