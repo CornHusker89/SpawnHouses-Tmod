@@ -59,11 +59,8 @@ public enum StructureTag : ushort {
 }
 
 public enum ComponentTag {
-    // current highest tag number is: 40
+    // current highest tag number is: 41
     // ===== all =====
-    Elevated = 1,
-    GroundLevel = 2,
-    UnderGround = 3,
     External = 4,
 
     /// use sloping algorithm when filling volumes
@@ -73,6 +70,8 @@ public enum ComponentTag {
     /// apply sloping algorithm with different contexts
     [TagData(typeof(SlopeModifier))]
     SlopingModifier = 31,
+
+    HasDebris = 40,
 
     // ===== floor =====
     IsFloorGap = 6,
@@ -92,8 +91,8 @@ public enum ComponentTag {
     RoomTypeBedroom = 39,
     RoomTypeWorkshop = 40,
     RoomHasWindow = 32,
-    RoomIsHousingNotValid = 33,
-    RoomIsHousingValid = 34,
+    RoomHousingNotValid = 33,
+    RoomHousingValid = 34,
 
     RoomHasArbitraryBeams = 35,
 

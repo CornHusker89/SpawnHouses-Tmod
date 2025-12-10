@@ -53,6 +53,51 @@ public class PaintedTypeWallSet {
 }
 
 /// <summary>
+///     <see cref="PaintedType" />s that is related to roofs
+/// </summary>
+public class PaintedTypeRoofSet {
+    /// <summary>
+    ///     for most large-scale tile filling
+    /// </summary>
+    public required TilePaintedType Primary;
+
+    /// <summary>
+    ///     tiles that don't tile with <see cref="Primary" /> but follow that palette, ex. <see cref="Terraria.ID.TileID.AccentSlab" />
+    /// </summary>
+    public required TilePaintedType NonTiling;
+
+    /// <summary>
+    ///     wall that is placed near the bottom to provide an accent
+    /// </summary>
+    public required WallPaintedType BottomBackgroundAccent;
+
+    /// <summary>
+    ///     wall that represents horizontal "beams"
+    /// </summary>
+    public required WallPaintedType HorizontalBeamBackground;
+
+    /// <summary>
+    ///     wall that represents vertical "beams"
+    /// </summary>
+    public required WallPaintedType VerticalBeamBackground;
+
+    /// <summary>
+    ///     tile for literal beams, which can be actuated
+    /// </summary>
+    public required TilePaintedType BeamTile;
+
+    /// <summary>
+    ///     whether the beam tile needs to be actuated
+    /// </summary>
+    public required bool BeamTileActuation;
+
+    /// <summary>
+    ///     redundant wall for <see cref="Primary" />
+    /// </summary>
+    public required WallPaintedType PrimaryBackground;
+}
+
+/// <summary>
 ///     <see cref="PaintedType" />s that is related to rooms
 /// </summary>
 public class PaintedTypeRoomSet {
@@ -64,7 +109,7 @@ public class PaintedTypeRoomSet {
     /// <summary>
     ///     wall that is placed near the bottom to provide an accent
     /// </summary>
-    public required WallPaintedType BottomAccent;
+    public required WallPaintedType BottomBackgroundAccent;
 
     /// <summary>
     ///     wall that represents horizontal "beams"

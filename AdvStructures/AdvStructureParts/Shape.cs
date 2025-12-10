@@ -296,24 +296,24 @@ public class Shape : PointGeometry {
     /// <summary>
     ///     gets the largest, smallest, and average sizes along the entire shape, along the chosen axes
     /// </summary>
-    /// <param name="xAxis"></param>
+    /// <param name="acrossXAxis"></param>
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
-    public (int min, int max, double average) GetDetailedAxisSizes(bool xAxis) {
+    public (int min, int max, double average) GetDetailedAxisSizes(bool acrossXAxis) {
         Dictionary<int, int> minValues = [], maxValues = [];
         ExecuteInArea((x, y) => {
-            if (!minValues.TryGetValue(xAxis ? y : x, out int oldMinValue)) {
-                minValues[xAxis ? y : x] = x;
+            if (!minValues.TryGetValue(acrossXAxis ? y : x, out int oldMinValue)) {
+                minValues[acrossXAxis ? y : x] = x;
             }
             else {
-                if (x < oldMinValue) minValues[xAxis ? y : x] = y;
+                if (x < oldMinValue) minValues[acrossXAxis ? y : x] = y;
             }
 
-            if (!maxValues.TryGetValue(xAxis ? y : x, out int oldMaxValue)) {
-                maxValues[xAxis ? y : x] = x;
+            if (!maxValues.TryGetValue(acrossXAxis ? y : x, out int oldMaxValue)) {
+                maxValues[acrossXAxis ? y : x] = x;
             }
             else {
-                if (x < oldMaxValue) maxValues[xAxis ? y : x] = y;
+                if (x < oldMaxValue) maxValues[acrossXAxis ? y : x] = y;
             }
         });
 
@@ -487,15 +487,13 @@ public class Shape : PointGeometry {
             ExecuteInArea((x, y) => { action(x, y, BlockType.Solid); });
             return;
         }
-
-        bool[,] tilemap = new bool[Size.X, Size.Y];
-        ExecuteInArea((x, y) => tilemap[x - BoundingBox.topLeft.X, y - BoundingBox.topLeft.Y] = true);
+        
         for (int x = 0; x < Size.X; x++) {
             int xWorldCoord = x + BoundingBox.topLeft.X;
             for (int y = 0; y < Size.Y; y++) {
                 int yWorldCoord = y + BoundingBox.topLeft.Y;
-                if (!tilemap[x, y]) continue;
-                action(xWorldCoord, yWorldCoord, slopingAlgorithm(x, y, tilemap));
+                if (!BooleanTilemap[x, y]) continue;
+                action(xWorldCoord, yWorldCoord, slopingAlgorithm(x, y, BooleanTilemap));
             }
         }
     }

@@ -7,11 +7,14 @@ namespace SpawnHouses.Types.Palette;
 public class TilePalette {
     public StructureTag[] PossibleTags;
 
-    public required PaintedTypeFloorSet ExteriorFloor;
-    public required PaintedTypeFloorSet InteriorFloor;
+    // ----- Sets -----
+    public required PaintedTypeFloorSet ExternalFloor;
+    public required PaintedTypeFloorSet InternalFloor;
 
-    public required PaintedTypeWallSet ExteriorWall;
-    public required PaintedTypeWallSet InteriorWall;
+    public required PaintedTypeWallSet ExternalWall;
+    public required PaintedTypeWallSet InternalWall;
+
+    public required PaintedTypeRoofSet Roof;
 
     public required PaintedTypeRoomSet LivingRoom;
     public required PaintedTypeDecorSet LivingDecor;
@@ -22,7 +25,14 @@ public class TilePalette {
     public required PaintedTypeRoomSet WorkshopRoom;
     public required PaintedTypeDecorSet WorkshopDecor;
 
-    #region Sets
+    // ----- One-off Tiles -----
+
+    /// <summary>
+    ///     tile, 1-wide, 1-tall that can be placed standalone to represent a junk-y, debris area
+    /// </summary>
+    public required TilePaintedType? Debris1X1;
+
+    #region Set Presets
 
     private static readonly PaintedTypeFloorSet FloorWoodRough = new() {
         Primary = new TilePaintedType([TileID.LivingMahogany, TileID.WoodBlock], [PaintID.BrownPaint, PaintID.None]),
@@ -52,9 +62,20 @@ public class TilePalette {
         PrimaryBackground = new WallPaintedType(WallID.LivingWood)
     };
 
+    private static readonly PaintedTypeRoofSet RoofShinglesDynastyWood = new() {
+        Primary = new TilePaintedType(TileID.BlueDynastyShingles, PaintID.BrownPaint),
+        NonTiling = new TilePaintedType(TileID.RedDynastyShingles, PaintID.BrownPaint),
+        BottomBackgroundAccent = new WallPaintedType(WallID.BlueDungeonSlab, PaintID.GrayPaint),
+        HorizontalBeamBackground = new WallPaintedType(WallID.Wood),
+        VerticalBeamBackground = new WallPaintedType(WallID.SpookyWood),
+        BeamTile = new TilePaintedType(TileID.WoodenBeam),
+        BeamTileActuation = false,
+        PrimaryBackground = new WallPaintedType(WallID.GrayBrick)
+    };
+
     private static readonly PaintedTypeRoomSet RoomLivingMedieval = new() {
         Primary = new WallPaintedType(WallID.WhiteDynasty),
-        BottomAccent = new WallPaintedType(WallID.BlueDungeonSlab, PaintID.GrayPaint),
+        BottomBackgroundAccent = new WallPaintedType(WallID.BlueDungeonSlab, PaintID.GrayPaint),
         HorizontalBeamBackground = new WallPaintedType(WallID.Wood),
         VerticalBeamBackground = new WallPaintedType(WallID.SpookyWood),
         BeamTile = new TilePaintedType(TileID.WoodenBeam),
@@ -92,11 +113,12 @@ public class TilePalette {
 
     #region Palettes
 
-    public static readonly TilePalette Stone1 = new() {
-        ExteriorFloor = FloorWoodRough,
-        InteriorFloor = FloorWoodSmooth,
-        ExteriorWall = WallMixedStone,
-        InteriorWall = WallWoodSmooth,
+    public static readonly TilePalette Medieval = new() {
+        ExternalFloor = FloorWoodRough,
+        InternalFloor = FloorWoodSmooth,
+        ExternalWall = WallMixedStone,
+        InternalWall = WallWoodSmooth,
+        Roof = RoofShinglesDynastyWood,
 
         LivingRoom = RoomLivingMedieval,
         LivingDecor = DecorLivingMedieval,
@@ -105,7 +127,9 @@ public class TilePalette {
         StorageRoom = RoomLivingMedieval,
         StorageDecor = DecorLivingMedieval,
         WorkshopRoom = RoomLivingMedieval,
-        WorkshopDecor = DecorLivingMedieval
+        WorkshopDecor = DecorLivingMedieval,
+
+        Debris1X1 = new TilePaintedType(TileID.Cobweb)
     };
 
     #endregion

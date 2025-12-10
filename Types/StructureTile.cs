@@ -162,6 +162,7 @@ public class StructureTile {
     ///     Sets <see cref="HasTile" /> and <see cref="IsActuated" /> to <see langword="false" /> and sets the
     ///     <see cref="BlockType" /> to <see cref="Terraria.ID.BlockType.Solid" />.
     /// </summary>
+    /// <param name="nullTile">If true, when the tilemap is pasted, the original tile here will remain</param>
     /// <remarks>
     ///     Does not reset data related to walls, wires, or anything else. For that, use <see cref="ClearEverything" />.
     /// </remarks>

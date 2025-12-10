@@ -1,178 +1,65 @@
 using System.Collections.Generic;
+using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
+using SpawnHouses.Helpers;
 using SpawnHouses.Types;
 
 namespace SpawnHouses.AdvStructures.Generation.Components;
 
 public static class WallGen {
     /// <summary>
-    ///     Fills a volume with the same wall blocks, with special blocks at the first and last x position of each row
+    ///     Fills the volume with primary walls
     /// </summary>
     [ComponentGenerator(typeof(Wall))]
     public class WallGenerator1 : VolumeComponentGenerator {
-        public override HashSet<ComponentTag> GetPossibleTags() {
-            return [
-                ComponentTag.External,
-                ComponentTag.Elevated,
-                ComponentTag.GroundLevel,
-                ComponentTag.UnderGround
-            ];
-        }
+        public new readonly HashSet<ComponentTag> PossibleTags = new HashSet<ComponentTag>(
+            [
+                ComponentTag.External
+            ])
+            .Concat(ComponentHelper.FillShapeTiles.PossibleTags)
+            .ToHashSet();
 
         public override bool Generate(VolumeComponentParams param) {
-            bool elevated = param.Component.TagsRequired.ContainsKey(ComponentTag.Elevated);
-
-            param.Component.Volume.ExecuteInArea((x, y) => {
-                param.Tilemap.PlaceTile(x, y,
-                    elevated ? param.Palette.WallMainElevated : param.Palette.WallMain
-                );
-            });
+            bool external = param.Component.TagsRequired.ContainsKey(ComponentTag.External);
+            ComponentHelper.FillShapeTiles.Action(param.Component.Volume, param, (_, _) => (external ? param.Palette.ExternalWall : param.Palette.InternalWall).Primary);
             return true;
         }
     }
 
     /// <summary>
-    ///     Fills a volume with random blocks
+    ///     Fills a volume with random wall blocks, with special vertical blocks at the first and last x position of every other row
     /// </summary>
     [ComponentGenerator(typeof(Wall))]
     public class WallGenerator2 : VolumeComponentGenerator {
-        public override HashSet<ComponentTag> GetPossibleTags() {
-            return [
-                ComponentTag.External,
-                ComponentTag.Elevated,
-                ComponentTag.GroundLevel,
-                ComponentTag.UnderGround
-            ];
-        }
+        public new readonly HashSet<ComponentTag> PossibleTags = new HashSet<ComponentTag>(
+            [
+                ComponentTag.External
+            ])
+            .Concat(ComponentHelper.FillShapeTiles.PossibleTags)
+            .ToHashSet();
 
         public override bool Generate(VolumeComponentParams param) {
-            bool elevated = param.Component.TagsRequired.ContainsKey(ComponentTag.Elevated);
-
-            param.Component.Volume.ExecuteInArea((x, y) => { param.Tilemap.PlaceTile(x, y, elevated ? param.Palette.WallAltElevated : param.Palette.WallAlt); });
-            return true;
-        }
-    }
-
-    /// <summary>
-    ///     Fills a volume with the same wall blocks, with special blocks at the first and last x position of each row
-    /// </summary>
-    [ComponentGenerator(typeof(Wall))]
-    public class WallGenerator3 : VolumeComponentGenerator {
-        public override HashSet<ComponentTag> GetPossibleTags() {
-            return [
-                ComponentTag.External,
-                ComponentTag.Elevated,
-                ComponentTag.GroundLevel,
-                ComponentTag.UnderGround
-            ];
-        }
-
-        public override bool CanGenerate(VolumeComponentParams componentParams) {
-            return componentParams.Component.Volume.GetDetailedAxisSizes(true).average >= 4;
-        }
-
-        public override bool Generate(VolumeComponentParams param) {
-            bool elevated = param.Component.TagsRequired.ContainsKey(ComponentTag.Elevated);
+            bool external = param.Component.TagsRequired.ContainsKey(ComponentTag.External);
             int yStart = param.Component.Volume.BoundingBox.topLeft.Y;
+            int yEnd = param.Component.Volume.BoundingBox.bottomRight.Y;
             int[] lowX = new int[param.Component.Volume.Size.Y];
             int[] highX = new int[param.Component.Volume.Size.Y];
             param.Component.Volume.ExecuteInArea((x, y) => {
-                param.Tilemap.PlaceTile(x, y,
-                    elevated ? param.Palette.WallMainElevated : param.Palette.WallMain);
-
-                if (lowX[y - yStart] == 0)
-                    lowX[y - yStart] = x;
-                if (highX[y - yStart] == 0)
-                    highX[y - yStart] = x;
-
-                if (x < lowX[y - yStart])
-                    lowX[y - yStart] = x;
-                if (x > highX[y - yStart])
-                    highX[y - yStart] = x;
-            });
-
-            for (int index = 0; index < lowX.Length; index++) {
-                param.Tilemap.PlaceTile(lowX[index], yStart + index, param.Palette.WallSpecial);
-                param.Tilemap.PlaceTile(highX[index], yStart + index, param.Palette.WallSpecial);
-            }
-
-            return true;
-        }
-    }
-
-    /// <summary>
-    ///     Fills a volume with random wall blocks, with special blocks at the first and last x position of each row
-    /// </summary>
-    [ComponentGenerator(typeof(Wall))]
-    public class WallGenerator4 : VolumeComponentGenerator {
-        public override HashSet<ComponentTag> GetPossibleTags() {
-            return [
-                ComponentTag.External,
-                ComponentTag.Elevated,
-                ComponentTag.GroundLevel,
-                ComponentTag.UnderGround
-            ];
-        }
-
-        public override bool CanGenerate(VolumeComponentParams componentParams) {
-            return componentParams.Component.Volume.GetDetailedAxisSizes(true).average >= 4;
-        }
-
-        public override bool Generate(VolumeComponentParams param) {
-            bool elevated = param.Component.TagsRequired.ContainsKey(ComponentTag.Elevated);
-            int yStart = param.Component.Volume.BoundingBox.topLeft.Y;
-            int[] lowX = new int[param.Component.Volume.Size.Y];
-            int[] highX = new int[param.Component.Volume.Size.Y];
-            param.Component.Volume.ExecuteInArea((x, y) => {
-                param.Tilemap.PlaceTile(x, y, elevated ? param.Palette.WallAltElevated : param.Palette.WallAlt);
-
+                // replace default values
                 if (lowX[y - yStart] == 0) lowX[y - yStart] = x;
                 if (highX[y - yStart] == 0) highX[y - yStart] = x;
 
+                // move values to true positions
                 if (x < lowX[y - yStart]) lowX[y - yStart] = x;
                 if (x > highX[y - yStart]) highX[y - yStart] = x;
             });
 
-            for (int index = 0; index < lowX.Length; index++) {
-                param.Tilemap.PlaceTile(lowX[index], yStart + index, param.Palette.WallSpecial);
-                param.Tilemap.PlaceTile(highX[index], yStart + index, param.Palette.WallSpecial);
-            }
-
-            return true;
-        }
-    }
-
-    /// <summary>
-    ///     Fills a volume with random blocks, but the bottom block consistent
-    /// </summary>
-    [ComponentGenerator(typeof(Wall))]
-    public class WallGenerator5 : VolumeComponentGenerator {
-        public override HashSet<ComponentTag> GetPossibleTags() {
-            return [
-                ComponentTag.Elevated,
-                ComponentTag.GroundLevel,
-                ComponentTag.UnderGround
-            ];
-        }
-
-        public override bool Generate(VolumeComponentParams param) {
-            bool elevated = param.Component.TagsRequired.ContainsKey(ComponentTag.Elevated);
-            int xStart = param.Component.Volume.BoundingBox.topLeft.X;
-            int[] bottomY = new int[param.Component.Volume.Size.X];
-
-            param.Component.Volume.ExecuteInArea((x, y) => {
-                param.Tilemap.PlaceTile(x, y, elevated ? param.Palette.WallAltElevated : param.Palette.WallAlt);
-
-                if (bottomY[x - xStart] == 0)
-                    bottomY[x - xStart] = y;
-
-                if (y > bottomY[x - xStart])
-                    bottomY[x - xStart] = y;
-            });
-
-            for (int index = 0; index < bottomY.Length; index++)
-                param.Tilemap.PlaceTile(xStart + index, bottomY[index],
-                    elevated ? param.Palette.WallAccentElevated : param.Palette.WallAccent);
+            ComponentHelper.FillShapeTiles.Action(param.Component.Volume, param, (x, y) =>
+                // make sure that: not at very top or bottom, every other line, either highest x or lowest x
+                y != yStart && y != yEnd && y % 2 == 0 && (x == lowX[y - yStart] || x == highX[y - yStart])
+                    ? (external ? param.Palette.ExternalWall : param.Palette.InternalWall).VerticalDetail
+                    : (external ? param.Palette.ExternalWall : param.Palette.InternalWall).Primary
+            );
 
             return true;
         }

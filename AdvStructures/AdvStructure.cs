@@ -108,8 +108,8 @@ public class AdvStructure {
 
     private ComponentGenerator GetComponentGenerator(ComponentParams componentParams, List<ComponentGenerator> generators) {
         var validGenerators = generators.Where(gen => gen.CanGenerate(componentParams)
-                                                      && componentParams.Component.TagsRequired.Keys.ToHashSet().IsSubsetOf(gen.GetPossibleTags())
-                                                      && !componentParams.Component.TagsBlocklist.Overlaps(gen.GetPossibleTags()))
+                                                      && componentParams.Component.TagsRequired.Keys.ToHashSet().IsSubsetOf(gen.PossibleTags)
+                                                      && !componentParams.Component.TagsBlocklist.Overlaps(gen.PossibleTags))
             .ToArray();
 
         if (validGenerators.Length == 0)
@@ -203,11 +203,24 @@ public class AdvStructure {
             if (componentInfo != null && structureLayoutInfo != null) throw new Exception($"{type.FullName} has both structure layout and component generator attributes, which are mutually exclusive");
 
             if (componentInfo != null) {
-                if (!ComponentGenerators.TryGetValue(componentInfo.ComponentType, out var generatorList)) ComponentGenerators[componentInfo.ComponentType] = generatorList = [];
-                generatorList.Add((ComponentGenerator)Activator.CreateInstance(type));
+                if (!type.IsSubclassOf(typeof(VolumeComponentGenerator)) && !type.IsSubclassOf(typeof(PathComponentGenerator)))
+                    throw new Exception($"component generator \"{type.FullName}\" must derive from either {nameof(VolumeComponentGenerator)} or {nameof(PathComponentGenerator)}");
+                if (!ComponentGenerators.TryGetValue(componentInfo.ComponentType, out var generatorList))
+                    ComponentGenerators[componentInfo.ComponentType] = generatorList = [];
+                ComponentGenerator instance = (ComponentGenerator)Activator.CreateInstance(type);
+                if (type.GetField("PossibileTags")?.GetValue(instance) == null)
+                    throw new Exception($"property \"PossibleTags\" must be set for the component generator \"{type.FullName}\"");
+                generatorList.Add(instance);
             }
 
-            if (structureLayoutInfo != null) StructureLayoutGenerators.Add((IStructureLayoutGenerator)Activator.CreateInstance(type));
+            if (structureLayoutInfo != null) {
+                if (!type.IsAssignableFrom(typeof(IStructureLayoutGenerator)))
+                    throw new Exception($"structure layout generator \"{type.FullName}\" must derive from {nameof(IStructureLayoutGenerator)}");
+                IStructureLayoutGenerator instance = (IStructureLayoutGenerator)Activator.CreateInstance(type);
+                if (type.GetField("PossibileTags")?.GetValue(instance) == null)
+                    throw new Exception($"property \"PossibleTags\" must be set for the structure layout generator \"{type.FullName}\"");
+                StructureLayoutGenerators.Add(instance);
+            }
         }
     }
 

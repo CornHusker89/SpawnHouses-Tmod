@@ -7,30 +7,25 @@ namespace SpawnHouses.AdvStructures.Generation.Components;
 
 public class GapGen {
     /// <summary>
-    ///     A gap floor, places platforms
+    ///     A gap floor, places platforms and places walls if external
     /// </summary>
     [ComponentGenerator(typeof(Gap))]
     public class FloorGapGenerator1 : VolumeComponentGenerator {
-        public override HashSet<ComponentTag> GetPossibleTags() {
-            return [
-                ComponentTag.IsFloorGap,
-                ComponentTag.Elevated,
-                ComponentTag.GroundLevel,
-                ComponentTag.UnderGround,
-                ComponentTag.External
-            ];
-        }
+        public new readonly HashSet<ComponentTag> PossibleTags = [
+            ComponentTag.IsFloorGap,
+            ComponentTag.External
+        ];
 
         public override bool Generate(VolumeComponentParams param) {
             int xStart = param.Component.Volume.BoundingBox.topLeft.X;
             int[] topY = new int[param.Component.Volume.Size.X];
             int[] bottomY = new int[param.Component.Volume.Size.X];
-            bool placeWalls = !param.Component.TagsRequired.ContainsKey(ComponentTag.External);
+            bool external = !param.Component.TagsRequired.ContainsKey(ComponentTag.External);
 
             param.Component.Volume.ExecuteInArea((x, y) => {
                 param.Tilemap[x, y].ClearTile(false);
-                if (placeWalls)
-                    param.Tilemap.PlaceWall(x, y, param.Palette.BackgroundFloorMain);
+                if (!external)
+                    param.Tilemap.PlaceWall(x, y, param.Palette.InternalFloor.PrimaryBackground);
                 StructureTile tile = param.Tilemap[x, y];
                 tile.HasTile = false;
 
@@ -46,8 +41,8 @@ public class GapGen {
             });
 
             for (int index = 0; index < topY.Length; index++) {
-                param.Tilemap.PlaceTile(xStart + index, topY[index], param.Palette.Platform);
-                param.Tilemap.PlaceTile(xStart + index, bottomY[index], param.Palette.Platform);
+                param.Tilemap.PlaceTile(xStart + index, topY[index], param.Palette.LivingRoom.Platform);
+                param.Tilemap.PlaceTile(xStart + index, bottomY[index], param.Palette.LivingRoom.Platform);
             }
 
             return true;
@@ -55,32 +50,28 @@ public class GapGen {
     }
 
     /// <summary>
-    ///     Fills a volume with random background walls
+    ///     gap wall, places door an places walls if external
     /// </summary>
     [ComponentGenerator(typeof(Gap))]
     public class WallGapGenerator1 : VolumeComponentGenerator {
-        public override HashSet<ComponentTag> GetPossibleTags() {
-            return [
-                ComponentTag.IsWallGap,
-                ComponentTag.Elevated,
-                ComponentTag.GroundLevel,
-                ComponentTag.UnderGround,
-                ComponentTag.External
-            ];
-        }
+        public new readonly HashSet<ComponentTag> PossibleTags = [
+            ComponentTag.IsWallGap,
+            ComponentTag.External
+        ];
 
         public override bool CanGenerate(VolumeComponentParams componentParams) {
-            return componentParams.Component.Volume.GetDetailedAxisSizes(false).max == 3;
+            (int min, int max, double average) = componentParams.Component.Volume.GetDetailedAxisSizes(false);
+            return min == 3 && max == 3;
         }
 
         public override bool Generate(VolumeComponentParams param) {
             if (!param.Component.TagsRequired.ContainsKey(ComponentTag.External))
                 param.Component.Volume.ExecuteInArea((x, y) => {
-                    param.Tilemap.PlaceWall(x, y, param.Palette.BackgroundWallMain);
+                    param.Tilemap.PlaceWall(x, y, param.Palette.InternalWall.PrimaryBackground);
                     param.Tilemap[x, y].ClearTile(false);
                 });
             Point16 doorPos = param.Component.Volume.BoundingBox.bottomRight;
-            Terraria.WorldGen.PlaceTile(doorPos.X, doorPos.Y, param.Palette.);
+            Terraria.WorldGen.PlaceTile(doorPos.X, doorPos.Y, param.Palette.LivingRoom.Door);
             return true;
         }
     }

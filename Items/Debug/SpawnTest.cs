@@ -54,7 +54,7 @@ public class SpawnTest : ModItem {
                         Directions.Left
                     )
                 ],
-                TilePalette.Palette1,
+                TilePalette.Medieval,
                 new Range(350, 500).Evaluate(scale),
                 true
             )

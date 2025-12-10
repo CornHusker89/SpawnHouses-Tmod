@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Helpers;
@@ -33,6 +34,7 @@ public class StructureTilemap {
         get {
             if (x < 0 || x >= Width || y < 0 || y >= Height) throw new IndexOutOfRangeException();
 
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
             return _tiles[x, y] ?? (_tiles[x, y] = new StructureTile());
         }
     }
@@ -48,7 +50,7 @@ public class StructureTilemap {
     }
 
     public bool InInterior(int x, int y) {
-        return InBounds(x, y) && _tiles[x, y].IsInside;
+        return InBounds(x, y) && _tiles[x, y]!.IsInside;
     }
 
     public bool InInterior(Point16 point) {
@@ -125,7 +127,8 @@ public class StructureTilemap {
         entryPoint.Offset = WorldTileOffset * Point16.NegativeOne;
     }
 
-    public void PlaceTile(int x, int y, TilePaintedType paintedType, BlockType blockType = BlockType.Solid) {
+    public void PlaceTile(int x, int y, TilePaintedType? paintedType, BlockType blockType = BlockType.Solid) {
+        if (paintedType == null) return;
         if (paintedType.Style != -1) throw new NotImplementedException();
 
         StructureTile tile = this[x, y];
@@ -135,7 +138,8 @@ public class StructureTilemap {
         tile.IsNullTile = false;
     }
 
-    public void PlaceTile(int x, int y, TilePaintedType paintedType, SlopingAlgorithm slopingAlgorithm, SlopeModifier slopeModifier = SlopeModifier.GlobalSloping) {
+    public void PlaceTile(int x, int y, TilePaintedType? paintedType, SlopingAlgorithm? slopingAlgorithm, SlopeModifier slopeModifier = SlopeModifier.GlobalSloping) {
+        if (paintedType == null) return;
         if (paintedType.Style != -1) throw new NotImplementedException();
 
         StructureTile tile = this[x, y];
@@ -162,6 +166,15 @@ public class StructureTilemap {
         StructureTile tile = this[x, y];
         (tile.WallType, tile.WallColor) = paintedType.Ids;
         tile.IsNullWall = false;
+    }
+
+    /// <summary>
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="nullTile">If true, when the tilemap is pasted, the original tile here will remain</param>
+    public void ClearTile(int x, int y, bool nullTile) {
+        this[x, y].ClearTile(nullTile);
     }
 
     /// <summary>

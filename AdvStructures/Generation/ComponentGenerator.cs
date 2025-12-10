@@ -5,14 +5,15 @@ using SpawnHouses.Types;
 namespace SpawnHouses.AdvStructures.Generation;
 
 public abstract class ComponentGenerator {
-    public abstract HashSet<ComponentTag> GetPossibleTags();
-
+    public readonly HashSet<ComponentTag> PossibleTags = null;
+    
     public abstract bool CanGenerate(ComponentParams componentParams);
 
     public abstract bool Generate(ComponentParams componentParams);
 }
 
 public abstract class VolumeComponentGenerator : ComponentGenerator {
+    // 2 sets of each method, to handle generic and explicit calls
     public sealed override bool CanGenerate(ComponentParams componentParams) {
         if (componentParams is VolumeComponentParams vParams)
             return CanGenerate(vParams);
@@ -37,6 +38,7 @@ public abstract class VolumeComponentGenerator : ComponentGenerator {
 }
 
 public abstract class PathComponentGenerator : ComponentGenerator {
+    // 2 sets of each method, to handle generic and explicit calls
     public sealed override bool CanGenerate(ComponentParams componentParams) {
         if (componentParams is PathComponentParams pParams)
             return CanGenerate(pParams);
