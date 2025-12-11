@@ -217,7 +217,7 @@ public static class RoofGen {
 
     [ComponentGenerator(typeof(Roof))]
     public class RoofGenerator2 : PathComponentGenerator {
-        public new readonly HashSet<ComponentTag> PossibleTags = new HashSet<ComponentTag>(
+        public override HashSet<ComponentTag> PossibleTags { get; } = new HashSet<ComponentTag>(
             [
                 ComponentTag.External,
                 ComponentTag.RoofShort,

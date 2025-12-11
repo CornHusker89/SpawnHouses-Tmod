@@ -13,7 +13,7 @@ public static class FloorGen {
     /// </summary>
     [ComponentGenerator(typeof(Floor))]
     public class FloorGenerator1 : VolumeComponentGenerator {
-        public new readonly HashSet<ComponentTag> PossibleTags = new HashSet<ComponentTag>(
+        public override HashSet<ComponentTag> PossibleTags { get; } = new HashSet<ComponentTag>(
             [
                 ComponentTag.External
             ])
@@ -79,7 +79,7 @@ public static class FloorGen {
     /// </summary>
     [ComponentGenerator(typeof(Floor))]
     public class FloorGenerator4 : VolumeComponentGenerator {
-        public new readonly HashSet<ComponentTag> PossibleTags = [
+        public override HashSet<ComponentTag> PossibleTags { get; } = [
             ComponentTag.FloorHollow
         ];
 

@@ -5,7 +5,7 @@ using SpawnHouses.Types;
 namespace SpawnHouses.AdvStructures.Generation;
 
 public abstract class ComponentGenerator {
-    public readonly HashSet<ComponentTag> PossibleTags = null;
+    public abstract HashSet<ComponentTag> PossibleTags { get; }
     
     public abstract bool CanGenerate(ComponentParams componentParams);
 

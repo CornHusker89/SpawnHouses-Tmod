@@ -1,7 +1,5 @@
-using SpawnHouses.AdvStructures.AdvStructureParts;
-using SpawnHouses.Types;
+#nullable enable
 using Terraria;
-using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -23,14 +21,9 @@ public class SpawnTest2 : ModItem {
         int x = (Main.MouseWorld / 16).ToPoint16().X;
         int y = (Main.MouseWorld / 16).ToPoint16().Y;
 
-        Path path = new([
-            new Point16(x, y),
-            new Point16(x + 10, y - 10)
-        ]);
-
-        Shape fillShape = path.FillFromBoundingBox(new PartialPoint16(0, 1), new Point16(-3, 7));
-
-        fillShape.ExecuteInArea((x, y) => { Terraria.WorldGen.PlaceTile(x, y, TileID.AmberGemspark); });
+        //Terraria.WorldGen.PlaceDoor(x, y, TileID.ClosedDoor);
+        //Terraria.WorldGen.PlaceTile(x, y, TileID.OpenDoor, true);
+        Terraria.WorldGen.PlaceObject(x, y, TileID.ClosedDoor, true, 0);
 
         return true;
     }

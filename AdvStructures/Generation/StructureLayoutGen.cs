@@ -18,18 +18,17 @@ public static class StructureLayoutGen {
     /// </summary>
     [StructureLayoutGenerator]
     public class StructureLayoutGenerator1 : IStructureLayoutGenerator {
-        public HashSet<StructureTag> GetPossibleTags() {
-            return [
-                StructureTag.HasRooms,
-                StructureTag.HasHousing,
-                StructureTag.HasOnlyRectangleRooms,
-                StructureTag.HasLargeRoom,
-                StructureTag.HasStorage,
-                StructureTag.MainFloorConnected,
-                StructureTag.AboveGround,
-                StructureTag.UnderGround
-            ];
-        }
+        public HashSet<StructureTag> PossibleTags { get; } = [
+            StructureTag.HasRooms,
+            StructureTag.HasHousing,
+            StructureTag.HasOnlyRectangleRooms,
+            StructureTag.HasSomeRectangleRooms,
+            StructureTag.HasLargeRoom,
+            StructureTag.HasStorage,
+            StructureTag.MainFloorConnected,
+            StructureTag.AboveGround,
+            StructureTag.UnderGround
+        ];
 
         public bool CanGenerate(StructureParams structureParams) {
             if (structureParams.EntryPoints.Length != 2) return false;
@@ -68,12 +67,13 @@ public static class StructureLayoutGen {
             // TODO: compensate structure volume and roofMargin for the non-square volume at the top
 
             // structure parameters that aren't dependent on tilemap position
+            bool forceFlatRoof = advStructure.Params.TagsRequired.ContainsKey(StructureTag.HasOnlyRectangleRooms);
             int entryPointVerticalDistance = Math.Abs(p.EntryPoints[0].End.Y - p.EntryPoints[1].End.Y);
-            bool hasBasement = Terraria.WorldGen.genRand.NextDouble() < 0.4 && p.Height - entryPointVerticalDistance > 12; //40% if conditions are met
+            bool hasBasement = Terraria.WorldGen.genRand.NextBool(4, 10) && p.Height - entryPointVerticalDistance > 12; //40% if conditions are met
             int externalWallThickness = roomLayoutParams.WallWidth.Max;
             int externalFloorThickness = roomLayoutParams.FloorWidth.Max;
             int verticalOffset = hasBasement ? 7 : 0;
-            bool hasHigherSide = Terraria.WorldGen.genRand.NextDouble() < 0.85;
+            bool hasHigherSide = Terraria.WorldGen.genRand.NextBool(4, 5) && !forceFlatRoof;
             bool leftRoofHigher = Terraria.WorldGen.genRand.NextBool();
 
             advStructure.Tilemap = new StructureTilemap(
@@ -113,7 +113,9 @@ public static class StructureLayoutGen {
                 new Point16(p.LeftEntryPointX + 1 - externalWallThickness, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
                 new Point16(p.RightEntryPointX - 1 + externalWallThickness, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
                 externalFloorThickness,
-                externalWallThickness
+                externalWallThickness,
+                forceFlatRoof,
+                false //hasHigherSide && Terraria.WorldGen.genRand.NextBool(2, 3)
             );
 
             exteriorFloors.Add(ExternalLayoutHelper.CreateFloor(floorTopY, p.LeftEntryPointX + 1 - (hasBasement ? 0 : externalWallThickness),
@@ -137,12 +139,11 @@ public static class StructureLayoutGen {
                 RoomLayoutHelper.GapsFromEntryPoints(p.EntryPoints, externalFloorThickness, externalWallThickness).ToList(),
                 roofs
             );
-
+            advStructure.ExternalLayout.SetComponentExternal();
             advStructure.SetTilesExternalStatus();
 
-            // finally, finish the room layout
-            advStructure.Layout = new RoomLayout([], [],
-                advStructure.ExternalLayout.Gaps,
+            // finish the room layout
+            advStructure.Layout = new RoomLayout([], [], [],
                 [
                     new Room(
                         Shape.GetStructureInterior(advStructure.Tilemap),

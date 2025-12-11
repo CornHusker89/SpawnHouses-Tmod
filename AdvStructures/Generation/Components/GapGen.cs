@@ -11,7 +11,7 @@ public class GapGen {
     /// </summary>
     [ComponentGenerator(typeof(Gap))]
     public class FloorGapGenerator1 : VolumeComponentGenerator {
-        public new readonly HashSet<ComponentTag> PossibleTags = [
+        public override HashSet<ComponentTag> PossibleTags { get; } = [
             ComponentTag.IsFloorGap,
             ComponentTag.External
         ];
@@ -54,7 +54,7 @@ public class GapGen {
     /// </summary>
     [ComponentGenerator(typeof(Gap))]
     public class WallGapGenerator1 : VolumeComponentGenerator {
-        public new readonly HashSet<ComponentTag> PossibleTags = [
+        public override HashSet<ComponentTag> PossibleTags { get; } = [
             ComponentTag.IsWallGap,
             ComponentTag.External
         ];
@@ -70,8 +70,8 @@ public class GapGen {
                     param.Tilemap.PlaceWall(x, y, param.Palette.InternalWall.PrimaryBackground);
                     param.Tilemap[x, y].ClearTile(false);
                 });
-            Point16 doorPos = param.Component.Volume.BoundingBox.bottomRight;
-            param.Tilemap.PlaceMultiTile(param.Component.Volume.BoundingBox.topLeft, new Point16(1, 3), param.Palette.LivingRoom.Door, false);
+            param.Tilemap.PlaceMultiTile(param.Component.Volume.BoundingBox.topLeft, new Point16(1, 3),
+                param.Palette.LivingRoom.Door, false, MultiTile.DoorOrigin);
             return true;
         }
     }

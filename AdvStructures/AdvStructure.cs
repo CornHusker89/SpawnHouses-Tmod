@@ -30,7 +30,6 @@ public class AdvStructure {
         if (generate) {
             ApplyLayoutMethod();
             FillComponents();
-            FillFurniture();
             PlaceTilemap();
         }
     }
@@ -45,8 +44,8 @@ public class AdvStructure {
         TagUtils.ValidateTagDataTypes(Params.TagsRequired);
         if (generator == null) {
             var validGenerators = StructureLayoutGenerators.Where(gen => gen.CanGenerate(Params)
-                                                                         && Params.TagsRequired.Keys.ToHashSet().IsSubsetOf(gen.GetPossibleTags())
-                                                                         && !Params.TagsBlocklist.Overlaps(gen.GetPossibleTags()))
+                                                                         && Params.TagsRequired.Keys.ToHashSet().IsSubsetOf(gen.PossibleTags)
+                                                                         && !Params.TagsBlocklist.Overlaps(gen.PossibleTags))
                 .ToArray();
 
             if (validGenerators.Length == 0) throw new Exception($"No structure layout generators found were compatible with the given parameters. required tags: {EnumHelper.ToString(Params.TagsRequired)}, blocklisted tags: {EnumHelper.ToString(Params.TagsBlocklist)}");
@@ -123,7 +122,8 @@ public class AdvStructure {
     ///     assigns room objects to the gaps in the external layout
     /// </summary>
     public void CompleteExternalGaps() {
-        foreach (Gap gap in ExternalLayout.Gaps) gap.LowerRoom = RoomLayoutHelper.GetClosestRoom(Layout.Rooms, gap.Volume.Center);
+        foreach (Gap gap in ExternalLayout.Gaps)
+            gap.LowerRoom = RoomLayoutHelper.GetClosestRoom(Layout.Rooms, gap.Volume.Center);
     }
 
     /// <summary>
@@ -138,10 +138,12 @@ public class AdvStructure {
         components.AddRange(ExternalLayout.Floors);
         components.AddRange(ExternalLayout.Walls);
         components.AddRange(ExternalLayout.Gaps);
-        components.AddRange(ExternalLayout.Roofs);
+        // components.AddRange(ExternalLayout.Roofs);
         components.AddRange(Layout.Floors);
         components.AddRange(Layout.Walls);
         components.AddRange(Layout.Gaps);
+
+        // fill rooms last because the furniture needs to be placed specifically
         components.AddRange(Layout.Rooms);
 
         Dictionary<Type, List<ComponentGenerator>> generatorQueue = [];
@@ -183,9 +185,6 @@ public class AdvStructure {
         Tilemap.ApplyTilemap();
     }
 
-    public void FillFurniture() {
-    }
-
     #region Generators
 
     public static readonly List<IStructureLayoutGenerator> StructureLayoutGenerators = [];
@@ -210,19 +209,13 @@ public class AdvStructure {
                     throw new Exception($"component generator \"{type.FullName}\" must derive from either {nameof(VolumeComponentGenerator)} or {nameof(PathComponentGenerator)}");
                 if (!ComponentGenerators.TryGetValue(componentInfo.ComponentType, out var generatorList))
                     ComponentGenerators[componentInfo.ComponentType] = generatorList = [];
-                ComponentGenerator instance = (ComponentGenerator)Activator.CreateInstance(type);
-                if (type.GetField("PossibileTags")?.GetValue(instance) == null)
-                    throw new Exception($"property \"PossibleTags\" must be set for the component generator \"{type.FullName}\"");
-                generatorList.Add(instance);
+                generatorList.Add((ComponentGenerator)Activator.CreateInstance(type));
             }
 
             if (structureLayoutInfo != null) {
-                if (!type.IsAssignableFrom(typeof(IStructureLayoutGenerator)))
+                if (!typeof(IStructureLayoutGenerator).IsAssignableFrom(type))
                     throw new Exception($"structure layout generator \"{type.FullName}\" must derive from {nameof(IStructureLayoutGenerator)}");
-                IStructureLayoutGenerator instance = (IStructureLayoutGenerator)Activator.CreateInstance(type);
-                if (type.GetField("PossibileTags")?.GetValue(instance) == null)
-                    throw new Exception($"property \"PossibleTags\" must be set for the structure layout generator \"{type.FullName}\"");
-                StructureLayoutGenerators.Add(instance);
+                StructureLayoutGenerators.Add((IStructureLayoutGenerator)Activator.CreateInstance(type));
             }
         }
     }

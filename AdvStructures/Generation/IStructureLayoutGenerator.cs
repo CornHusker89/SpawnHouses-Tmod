@@ -4,7 +4,7 @@ using SpawnHouses.Types;
 namespace SpawnHouses.AdvStructures.Generation;
 
 public interface IStructureLayoutGenerator {
-    public HashSet<StructureTag> GetPossibleTags();
+    public HashSet<StructureTag> PossibleTags { get; }
 
     public bool CanGenerate(StructureParams structureParams);
 

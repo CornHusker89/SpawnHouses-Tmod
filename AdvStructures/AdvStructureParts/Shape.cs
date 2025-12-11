@@ -302,24 +302,26 @@ public class Shape : PointGeometry {
     public (int min, int max, double average) GetDetailedAxisSizes(bool acrossXAxis) {
         Dictionary<int, int> minValues = [], maxValues = [];
         ExecuteInArea((x, y) => {
-            if (!minValues.TryGetValue(acrossXAxis ? y : x, out int oldMinValue)) {
-                minValues[acrossXAxis ? y : x] = x;
+            int axisVal = acrossXAxis ? x : y;
+            int oppositeAxisVal = acrossXAxis ? y : x;
+            if (!minValues.TryGetValue(oppositeAxisVal, out int oldMinValue)) {
+                minValues[oppositeAxisVal] = axisVal;
             }
             else {
-                if (x < oldMinValue) minValues[acrossXAxis ? y : x] = y;
+                if (axisVal < oldMinValue) minValues[oppositeAxisVal] = axisVal;
             }
 
-            if (!maxValues.TryGetValue(acrossXAxis ? y : x, out int oldMaxValue)) {
-                maxValues[acrossXAxis ? y : x] = x;
+            if (!maxValues.TryGetValue(oppositeAxisVal, out int oldMaxValue)) {
+                maxValues[oppositeAxisVal] = axisVal;
             }
             else {
-                if (x < oldMaxValue) maxValues[acrossXAxis ? y : x] = y;
+                if (axisVal > oldMaxValue) maxValues[oppositeAxisVal] = axisVal;
             }
         });
 
         // get the actual size for each slice using the min/max values for that slice
         List<int> sizes = [];
-        foreach (int key in minValues.Keys) sizes.Add(maxValues[key] - minValues[key]);
+        foreach (int key in minValues.Keys) sizes.Add(maxValues[key] - minValues[key] + 1);
 
         if (sizes.Count == 0) throw new Exception("shape must have a minimum area of 1");
 

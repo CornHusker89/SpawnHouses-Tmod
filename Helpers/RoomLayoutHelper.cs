@@ -216,13 +216,13 @@ public static class RoomLayoutHelper {
         if (param.RoomWidth.Max < param.WallWidth.Max + 2 * param.RoomWidth.Min)
             ModContent.GetInstance<SpawnHouses>().Logger.Warn(
                 $"a max room height of {param.RoomWidth.Max} was given, but at least {param.WallWidth.Max + 2 * param.RoomWidth.Min} is required");
-
+        
         List<Shape> floorVolumes = [], wallVolumes = [];
         var roomQueue = new Queue<Shape>([param.MainVolume]);
         List<Shape> finishedRoomVolumes = [];
         int extraCuts = 0, largeRoomCount = 0, xCutCount = 0, yCutCount = 0;
         int maxLargeRooms = (int)Math.Ceiling(param.LargeRoomChance * targetRoomCount);
-        for (int curHousing = 0; curHousing <= targetRoomCount + extraCuts; curHousing++) {
+        for (int curHousing = 0; curHousing <= targetRoomCount - 1 + extraCuts; curHousing++) { // -1 because 1 cut will result in 2 rooms
             Shape roomVolume;
             if (roomQueue.Count > 0)
                 roomVolume = roomQueue.Dequeue();
@@ -331,9 +331,9 @@ public static class RoomLayoutHelper {
     /// <param name="prioritizeSplitsOnGapFloors"></param>
     /// <returns></returns>
     public static void SubdivideRoom(RoomLayout roomLayout, Room room, RoomLayoutParams roomLayoutParams, bool prioritizeSplitsOnGapFloors = true) {
+        if (room.Volume.GetArea(true) < 92) return;
+        
         if (!roomLayout.Rooms.Remove(room)) throw new Exception("room doesn't exist in the given RoomLayout");
-        if (room.Volume.GetArea(true) < 90) return;
-
         RoomLayoutVolumes? pickedLayoutVolumes = null;
         RoomLayoutParams modifiedParams = roomLayoutParams.Clone();
         modifiedParams.MainVolume = room.Volume;

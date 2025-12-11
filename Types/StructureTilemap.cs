@@ -127,22 +127,20 @@ public class StructureTilemap {
 
     public void PlaceTile(int x, int y, TilePaintedType? paintedType, BlockType blockType = BlockType.Solid) {
         if (paintedType == null) return;
-        if (paintedType.Style != -1) throw new NotImplementedException();
 
         StructureTile tile = this[x, y];
         tile.HasTile = true;
         tile.BlockType = blockType;
-        (tile.TileType, tile.TileColor) = paintedType.Ids;
+        (tile.TileType, tile.TileColor, tile.Style) = paintedType.Ids;
         tile.IsNullTile = false;
     }
 
     public void PlaceTile(int x, int y, TilePaintedType? paintedType, SlopingAlgorithm? slopingAlgorithm, SlopeModifier slopeModifier = SlopeModifier.GlobalSloping) {
         if (paintedType == null) return;
-        if (paintedType.Style != -1) throw new NotImplementedException();
 
         StructureTile tile = this[x, y];
         tile.HasTile = true;
-        (tile.TileType, tile.TileColor) = paintedType.Ids;
+        (tile.TileType, tile.TileColor, tile.Style) = paintedType.Ids;
         tile.IsNullTile = false;
         tile.SlopingAlg = slopingAlgorithm;
         tile.SlopeModifier = slopeModifier;
@@ -176,12 +174,12 @@ public class StructureTilemap {
     /// <param name="paintedType"></param>
     public void SoftPlaceTile(int x, int y, TilePaintedType paintedType) {
         StructureTile tile = this[x, y];
-        (tile.TileType, tile.TileColor) = paintedType.Ids;
+        (tile.TileType, tile.TileColor, tile.Style) = paintedType.Ids;
     }
 
     public void PlaceWall(int x, int y, WallPaintedType paintedType) {
         StructureTile tile = this[x, y];
-        (tile.WallType, tile.WallColor) = paintedType.Ids;
+        (tile.WallType, tile.WallColor, tile.Style) = paintedType.Ids;
         tile.IsNullWall = false;
     }
 
@@ -238,11 +236,8 @@ public class StructureTilemap {
 
         // place MultiTiles
         foreach (MultiTile multiTile in MultiTiles) {
-            Point16 originPoint = multiTile.Volume.BoundingBox.topLeft + multiTile.Origin;
-            if (multiTile.FacingRight)
-                Terraria.WorldGen.PlaceTile(originPoint.X, originPoint.Y, multiTile.TileType, true, style: multiTile.Style);
-            else
-                Terraria.WorldGen.PlaceObject(originPoint.X, originPoint.Y, multiTile.TileType, true, multiTile.Style, direction: multiTile.FacingRight ? 1 : -1);
+            Point16 originPoint = ConvertToGlobal(multiTile.Volume.BoundingBox.topLeft + multiTile.Origin);
+            Terraria.WorldGen.PlaceObject(originPoint.X, originPoint.Y, multiTile.TileType, true, multiTile.Style, direction: multiTile.FacingRight ? 1 : -1);
             multiTile.Volume.ExecuteInArea((x, y) => {
                 Tile tile = Main.tile[ConvertToGlobal(x, y)];
                 tile.TileColor = multiTile.PaintType;

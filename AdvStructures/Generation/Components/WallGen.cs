@@ -12,7 +12,7 @@ public static class WallGen {
     /// </summary>
     [ComponentGenerator(typeof(Wall))]
     public class WallGenerator1 : VolumeComponentGenerator {
-        public new readonly HashSet<ComponentTag> PossibleTags = new HashSet<ComponentTag>(
+        public override HashSet<ComponentTag> PossibleTags { get; } = new HashSet<ComponentTag>(
             [
                 ComponentTag.External
             ])
@@ -31,7 +31,7 @@ public static class WallGen {
     /// </summary>
     [ComponentGenerator(typeof(Wall))]
     public class WallGenerator2 : VolumeComponentGenerator {
-        public new readonly HashSet<ComponentTag> PossibleTags = new HashSet<ComponentTag>(
+        public override HashSet<ComponentTag> PossibleTags { get; } = new HashSet<ComponentTag>(
             [
                 ComponentTag.External
             ])

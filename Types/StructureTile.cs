@@ -17,6 +17,8 @@ public class StructureTile {
 
     public SlopeModifier SlopeModifier = SlopeModifier.GlobalOnlySloping;
 
+    public int Style;
+
     public bool IsOutside;
 
     public bool IsInside;
@@ -191,8 +193,14 @@ public class StructureTile {
     public void PasteTile(int x, int y) {
         Tile tile = Main.tile[x, y];
         if (!IsNullTile && !IsFakeTile) {
-            tile.TileType = TileType;
-            tile.HasTile = HasTile;
+            if (Style == 0) {
+                tile.TileType = TileType;
+                tile.HasTile = HasTile;
+            }
+            else {
+                Terraria.WorldGen.PlaceTile(x, y, TileType, true, style: Style);
+            }
+
             tile.IsActuated = IsActuated;
             tile.HasActuator = HasActuator;
             tile.TileColor = TileColor;

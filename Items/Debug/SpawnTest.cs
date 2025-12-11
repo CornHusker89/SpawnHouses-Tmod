@@ -10,7 +10,6 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Range = SpawnHouses.Structures.Range;
 
 namespace SpawnHouses.Items.Debug;
 
@@ -34,31 +33,57 @@ public class SpawnTest : ModItem {
 
         Console.WriteLine(x + ", " + y);
 
-        float scale = Terraria.WorldGen.genRand.NextFloat();
-        Structure = new AdvStructure(
-            new StructureParams(
-                new Dictionary<StructureTag, object?>([
-                    new KeyValuePair<StructureTag, object?>(StructureTag.HasRooms, new Range(5, 7).Evaluate(scale)),
-                    new KeyValuePair<StructureTag, object?>(StructureTag.HasHousing, new Range(5, 7).Evaluate(scale))
-                ]),
-                [],
-                [
-                    new EntryPoint(
-                        new Point16(x, y - 2),
-                        3,
-                        Directions.Right
-                    ),
-                    new EntryPoint(
-                        new Point16(x + 25, y - 8),
-                        3,
-                        Directions.Left
-                    )
-                ],
-                TilePalette.Medieval,
-                new Range(350, 500).Evaluate(scale),
-                true
-            )
-        );
+        // full house
+        // float scale = Terraria.WorldGen.genRand.NextFloat();
+        // Structure = new AdvStructure(
+        //     new StructureParams(
+        //         new Dictionary<StructureTag, object?>([
+        //             new KeyValuePair<StructureTag, object?>(StructureTag.HasRooms, new Range(5, 7).Evaluate(scale)),
+        //             new KeyValuePair<StructureTag, object?>(StructureTag.HasHousing, new Range(5, 7).Evaluate(scale))
+        //         ]),
+        //         [],
+        //         [
+        //             new EntryPoint(
+        //                 new Point16(x, y - 2),
+        //                 3,
+        //                 Directions.Right
+        //             ),
+        //             new EntryPoint(
+        //                 new Point16(x + 25, y - 8),
+        //                 3,
+        //                 Directions.Left
+        //             )
+        //         ],
+        //         TilePalette.Medieval,
+        //         new Range(350, 500).Evaluate(scale),
+        //         true
+        //     )
+        // );
+
+        // 1-room house
+        AdvStructure structure = new(new StructureParams(
+            new Dictionary<StructureTag, object?>([
+                new KeyValuePair<StructureTag, object?>(StructureTag.HasRooms, 1),
+                new KeyValuePair<StructureTag, object?>(StructureTag.HasHousing, 1),
+                new KeyValuePair<StructureTag, object?>(StructureTag.HasOnlyRectangleRooms, null)
+            ]),
+            [],
+            [
+                new EntryPoint(
+                    new Point16(x, y - 2),
+                    3,
+                    Directions.Right
+                ),
+                new EntryPoint(
+                    new Point16(x + 15, y - 2),
+                    3,
+                    Directions.Left
+                )
+            ],
+            TilePalette.Medieval,
+            140,
+            false
+        ));
 
         return true;
     }

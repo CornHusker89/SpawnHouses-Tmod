@@ -172,28 +172,29 @@ public class ExternalLayoutHelper {
     /// <param name="right">X must be greater than <see cref="left" />'s X</param>
     /// <param name="floorThickness"></param>
     /// <param name="wallThickness"></param>
+    /// <param name="forceFlat">if true, the roof will have no slope of any kind</param>
+    /// <param name="splitRoof">if true, roof will attempt to be split</param>
     /// <returns></returns>
-    public static (List<Floor> floors, List<Wall> walls, List<Roof> roofs) CreateBasicRoof(Point16 left, Point16 right, int floorThickness, int wallThickness) {
+    public static (List<Floor> floors, List<Wall> walls, List<Roof> roofs) CreateBasicRoof(Point16 left, Point16 right, int floorThickness, int wallThickness,
+        bool forceFlat, bool splitRoof) {
         double[] validSplitRoofSlopes = [0.67, 1, 1.5, 2];
         double[] validSingleRoofSlopes = [1, 1.33];
         int startX = left.X + 1 - wallThickness;
         int endX = right.X - 1 + wallThickness;
         int fullLength = right.X - left.X - 2 + 2 * wallThickness;
-        bool hasHigherSide = left.Y != right.Y;
         bool leftRoofHigher = left.Y < right.Y;
         int upperRoofBottomY = int.Min(left.Y, right.Y);
         int lowerRoofBottomY = int.Max(left.Y, right.Y);
         int unevenRoofStartX = leftRoofHigher
             ? Terraria.WorldGen.genRand.Next(startX + (int)(fullLength * 0.5), endX - (int)(fullLength * 0.35))
             : Terraria.WorldGen.genRand.Next(startX + (int)(fullLength * 0.35), endX - (int)(fullLength * 0.5));
-        bool hasSplitRoof = hasHigherSide && Terraria.WorldGen.genRand.NextBool(2, 3);
-        bool hasSlopedSideRoof = Terraria.WorldGen.genRand.NextBool(3, 4);
-        bool hasRoofPeak = Terraria.WorldGen.genRand.NextBool(9, 10);
-        double peakRoofSlope = Terraria.WorldGen.genRand.NextFromList(hasSplitRoof ? validSplitRoofSlopes : validSingleRoofSlopes);
+        bool hasSlopedSideRoof = !forceFlat && Terraria.WorldGen.genRand.NextBool(3, 4);
+        bool hasRoofPeak = !forceFlat;
+        double peakRoofSlope = Terraria.WorldGen.genRand.NextFromList(splitRoof ? validSplitRoofSlopes : validSingleRoofSlopes);
         double sideRoofSlope = double.Min(peakRoofSlope, 0.5);
 
         List<Point16> path;
-        if (hasSplitRoof) {
+        if (splitRoof) {
             int lowerRoofLength = leftRoofHigher
                 ? endX - unevenRoofStartX
                 : unevenRoofStartX - startX;
@@ -227,23 +228,19 @@ public class ExternalLayoutHelper {
             }
         }
         else {
-            if (hasHigherSide) {
-                double middleX = (peakRoofSlope * (startX + endX) - (right.Y - left.Y)) / (2 * peakRoofSlope);
-                Point16 middlePoint = new((int)Math.Ceiling(middleX), (int)(left.Y - peakRoofSlope * (middleX - startX)));
-
-                path = [
-                    new Point16(startX, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
-                    middlePoint,
-                    new Point16(endX, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY)
-                ];
-            }
-            else {
+            if (hasRoofPeak) {
                 path = [
                     new Point16(startX, upperRoofBottomY),
                     new Point16(startX + fullLength / 2, upperRoofBottomY - (int)(peakRoofSlope * fullLength * 0.5)),
                     new Point16(endX, upperRoofBottomY)
                 ];
                 if (fullLength % 2 == 1) path.Insert(2, new Point16(startX + 1 + fullLength / 2, upperRoofBottomY - (int)(peakRoofSlope * fullLength * 0.5)));
+            }
+            else {
+                path = [
+                    new Point16(startX, upperRoofBottomY),
+                    new Point16(endX, upperRoofBottomY)
+                ];
             }
         }
 
@@ -265,8 +262,8 @@ public class ExternalLayoutHelper {
         }
 
         if (hasRoofPeak && Terraria.WorldGen.genRand.NextBool(3, 5)) {
-            result.roofs[!leftRoofHigher && hasSplitRoof ? 1 : 0].AddRequiredTag(ComponentTag.RoofTall);
-            if (hasSplitRoof && hasSlopedSideRoof && Terraria.WorldGen.genRand.NextBool(1, 2)) result.roofs[!leftRoofHigher ? 0 : 1].AddRequiredTag(ComponentTag.RoofTall);
+            result.roofs[!leftRoofHigher && splitRoof ? 1 : 0].AddRequiredTag(ComponentTag.RoofTall);
+            if (splitRoof && hasSlopedSideRoof && Terraria.WorldGen.genRand.NextBool(1, 2)) result.roofs[!leftRoofHigher ? 0 : 1].AddRequiredTag(ComponentTag.RoofTall);
         }
 
         return result;

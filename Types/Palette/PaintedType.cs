@@ -1,72 +1,88 @@
 using System;
-using Terraria;
 using Terraria.ID;
 
 namespace SpawnHouses.Types.Palette;
 
 public class TilePaintedType : PaintedType {
-    public TilePaintedType(ushort wallType, byte paintType = PaintID.None, short style = -1) : base(wallType, paintType, style) {
+    public TilePaintedType(ushort type, byte paintType = PaintID.None, short style = 0) : base(type, paintType, style) {
     }
 
     /// <summary>
     /// </summary>
     /// <param name="wallTypes"></param>
     /// <param name="paintTypes">must have the same length as <paramref name="wallTypes" /></param>
-    /// <param name="style"></param>
-    public TilePaintedType(ushort[] wallTypes, byte[] paintTypes = null, short style = -1) : base(wallTypes, paintTypes, style) {
+    /// <param name="styles">must have the same length as <paramref name="wallTypes" /></param>
+    public TilePaintedType(ushort[] wallTypes, byte[] paintTypes = null, int[] styles = null) : base(wallTypes, paintTypes, styles) {
     }
 }
 
 public class WallPaintedType : PaintedType {
-    public WallPaintedType(ushort wallType, byte paintType = PaintID.None, short style = -1) : base(wallType, paintType, style) {
+    public WallPaintedType(ushort type, byte paintType = PaintID.None, short style = 0) : base(type, paintType, style) {
     }
 
     /// <summary>
     /// </summary>
     /// <param name="wallTypes"></param>
     /// <param name="paintTypes">must have the same length as <paramref name="wallTypes" /></param>
-    /// <param name="style"></param>
-    public WallPaintedType(ushort[] wallTypes, byte[] paintTypes = null, short style = -1) : base(wallTypes, paintTypes, style) {
+    /// <param name="styles">must have the same length as <paramref name="wallTypes" /></param>
+    public WallPaintedType(ushort[] wallTypes, byte[] paintTypes = null, int[] styles = null) : base(wallTypes, paintTypes, styles) {
     }
 }
 
 public abstract class PaintedType {
-    private readonly ushort _wallId;
-    private readonly ushort[] _wallIds;
+    private readonly ushort _typeId;
+    private readonly ushort[] _typeIds;
 
     private readonly byte _paintId;
     private readonly byte[] _paintIds;
 
+    private readonly int _style;
+    private readonly int[] _styles;
+
     /// if the PaintedType contains multiple values
     public readonly bool IsSeries;
 
-    public readonly short Style;
-
     /// the evaluated tile and paint ids
-    public (ushort tileId, byte paintId) Ids => IsSeries ? (Terraria.WorldGen.genRand.NextFromList(_wallIds), Terraria.WorldGen.genRand.NextFromList(_paintIds)) : (_wallId, _paintId);
+    public (ushort typeId, byte paintId, int style) Ids {
+        get {
+            if (IsSeries) {
+                int index = Terraria.WorldGen.genRand.Next(_typeIds.Length);
+                return (_typeIds[index], _paintIds[index], _styles[index]);
+            }
 
-    public PaintedType(ushort wallType, byte paintType = PaintID.None, short style = -1) {
-        _wallId = wallType;
+            return (_typeId, _paintId, _style);
+        }
+    }
+
+    public PaintedType(ushort type, byte paintType = PaintID.None, int style = 0) {
+        _typeId = type;
         _paintId = paintType;
-        Style = style;
+        _style = style;
     }
 
     /// <summary>
     /// </summary>
-    /// <param name="wallTypes"></param>
-    /// <param name="paintTypes">must have the same length as <paramref name="wallTypes" /></param>
-    /// <param name="style"></param>
-    public PaintedType(ushort[] wallTypes, byte[] paintTypes = null, short style = -1) {
+    /// <param name="types"></param>
+    /// <param name="paintTypes">must have the same length as <paramref name="types" /></param>
+    /// <param name="styles">must have the same length as <paramref name="types" /></param>
+    public PaintedType(ushort[] types, byte[] paintTypes = null, int[] styles = null) {
         IsSeries = true;
-        _wallIds = wallTypes;
-        Style = style;
+        _typeIds = types;
 
         if (paintTypes == null)
             // creates array with default value, which happens to be the same as PaintID.None
-            _paintIds = new byte[_wallIds.Length];
-        else if (paintTypes.Length != _wallIds.Length)
+            _paintIds = new byte[_typeIds.Length];
+        else if (paintTypes.Length != _typeIds.Length)
             throw new ArgumentException("paintTypes and tileTypes must have the same length", nameof(paintTypes));
         else
             _paintIds = paintTypes;
+
+        if (styles == null)
+            // creates array with default value, which happens to be the same as the default style
+            _styles = new int[_typeIds.Length];
+        else if (styles.Length != _typeIds.Length)
+            throw new ArgumentException("paintTypes and tileTypes must have the same length", nameof(styles));
+        else
+            _styles = styles;
     }
 }
