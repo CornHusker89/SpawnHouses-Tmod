@@ -30,6 +30,7 @@ public class AdvStructure {
         if (generate) {
             ApplyLayoutMethod();
             FillComponents();
+            FillFurniture();
             PlaceTilemap();
         }
     }
@@ -164,7 +165,9 @@ public class AdvStructure {
                 }
             }
 
-            generatorList[generatorIndex].Generate(componentParams);
+            ComponentGenerator generator = generatorList[generatorIndex];
+            component.GeneratorId = (generator.GetType().FullName ?? generator.GetType().Name).GetHashCode();
+            generator.Generate(componentParams);
         }
 
         HasFilledComponents = true;
@@ -180,7 +183,7 @@ public class AdvStructure {
         Tilemap.ApplyTilemap();
     }
 
-    public void FinishHousing() {
+    public void FillFurniture() {
     }
 
     #region Generators

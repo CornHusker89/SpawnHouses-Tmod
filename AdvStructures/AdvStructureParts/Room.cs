@@ -6,6 +6,7 @@ namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
 public class Room : VolumeComponent {
     public List<Gap> Gaps;
+    public List<MultiTile> MultiTiles;
     public bool IsEntryRoom;
     public Room? ParentRoom;
 

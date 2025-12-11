@@ -71,7 +71,7 @@ public class GapGen {
                     param.Tilemap[x, y].ClearTile(false);
                 });
             Point16 doorPos = param.Component.Volume.BoundingBox.bottomRight;
-            Terraria.WorldGen.PlaceTile(doorPos.X, doorPos.Y, param.Palette.LivingRoom.Door);
+            param.Tilemap.PlaceMultiTile(param.Component.Volume.BoundingBox.topLeft, new Point16(1, 3), param.Palette.LivingRoom.Door, false);
             return true;
         }
     }

@@ -1,8 +1,10 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Helpers;
 using SpawnHouses.Types.Palette;
+using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 
@@ -14,11 +16,14 @@ public class StructureTilemap {
     /// <summary>the actual world tile coordinates of the top left tile in this tilemap</summary>
     public Point16 WorldTileOffset;
 
+    public List<MultiTile> MultiTiles;
+
     public StructureTilemap(ushort width, ushort height, Point16? worldTileOffset = null) {
         Width = width;
         Height = height;
         _tiles = new StructureTile[width, height];
         WorldTileOffset = worldTileOffset ?? new Point16(0, 0);
+        MultiTiles = [];
     }
 
     public ushort Width { get; }
@@ -50,21 +55,11 @@ public class StructureTilemap {
     }
 
     public bool InInterior(int x, int y) {
-        return InBounds(x, y) && _tiles[x, y]!.IsInside;
+        return InBounds(x, y) && _tiles[x, y].IsInside;
     }
 
     public bool InInterior(Point16 point) {
         return InInterior(point.X, point.Y);
-    }
-
-    /// <summary>
-    ///     tests if the coordinates have a valid, initialized tile that is in bounds
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns></returns>
-    public bool IsInitializedTile(int x, int y) {
-        return InBounds(x, y) && _tiles[x, y] != null;
     }
 
     /// <summary>
@@ -74,11 +69,14 @@ public class StructureTilemap {
     /// <param name="y"></param>
     /// <returns></returns>
     public StructureTile GetTileByGlobalPos(int x, int y) {
-        x -= WorldTileOffset.X;
-        y -= WorldTileOffset.Y;
-        return this[x, y];
+        return this[x - WorldTileOffset.X, y - WorldTileOffset.Y];
     }
 
+    /// <summary>
+    ///     gets tile from this tilemap using global world coordinates
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <returns></returns>
     public StructureTile GetTileByGlobalPos(Point16 pos) {
         return this[pos - WorldTileOffset];
     }
@@ -150,6 +148,25 @@ public class StructureTilemap {
         tile.SlopeModifier = slopeModifier;
     }
 
+    public void PlaceMultiTile(Point16 topLeftPos, Point16 size, TilePaintedType tilePaintedType, bool isFurniture,
+        Point16? origin = null, bool facingRight = true) {
+        MultiTile multiTile = new(topLeftPos, size, tilePaintedType, origin, facingRight);
+        PlaceMultiTile(multiTile, isFurniture);
+    }
+
+    public void PlaceMultiTile(MultiTile multiTile, bool isFurniture) {
+        multiTile.Volume.ExecuteInArea((x, y) => {
+            StructureTile tile = this[x, y];
+            tile.HasTile = true;
+            tile.IsNullTile = false;
+            tile.TileType = multiTile.TileType;
+            tile.TileColor = multiTile.PaintType;
+            tile.IsFurniture = isFurniture;
+            tile.IsFakeTile = true;
+        });
+        MultiTiles.Add(multiTile);
+    }
+
     /// <summary>
     ///     changes the tile at this position to be the <paramref name="paintedType"/>,
     ///     does not change <see cref="StructureTile.BlockType" />, <see cref="StructureTile.HasTile" />, or <see cref="StructureTile.IsNullTile" />
@@ -183,6 +200,8 @@ public class StructureTilemap {
     public void ApplyTilemap() {
         bool[,] globalTilemap = new bool[Width, Height];
         bool[,] globalNonLocalTilemap = new bool[Width, Height];
+
+        // place normal tiles
         for (int x = 0; x < Width; x++)
         for (int y = 0; y < Height; y++) {
             StructureTile tile = this[x, y];
@@ -191,6 +210,7 @@ public class StructureTilemap {
             globalNonLocalTilemap[x, y] = tile.HasTile && tile.SlopeModifier != SlopeModifier.LocalSloping;
         }
 
+        // slope tiles
         for (int x = 0; x < Width; x++)
         for (int y = 0; y < Height; y++) {
             StructureTile tile = this[x, y];
@@ -216,6 +236,20 @@ public class StructureTilemap {
                 tile.ApplySlopes(ConvertToGlobal(x, y));
         }
 
+        // place MultiTiles
+        foreach (MultiTile multiTile in MultiTiles) {
+            Point16 originPoint = multiTile.Volume.BoundingBox.topLeft + multiTile.Origin;
+            if (multiTile.FacingRight)
+                Terraria.WorldGen.PlaceTile(originPoint.X, originPoint.Y, multiTile.TileType, true, style: multiTile.Style);
+            else
+                Terraria.WorldGen.PlaceObject(originPoint.X, originPoint.Y, multiTile.TileType, true, multiTile.Style, direction: multiTile.FacingRight ? 1 : -1);
+            multiTile.Volume.ExecuteInArea((x, y) => {
+                Tile tile = Main.tile[ConvertToGlobal(x, y)];
+                tile.TileColor = multiTile.PaintType;
+            });
+        }
+
+        // set frames
         for (int x = 0; x < Width; x++)
         for (int y = 0; y < Height; y++)
             StructureTile.SetFrames(ConvertToGlobal(x, y));

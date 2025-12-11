@@ -1,3 +1,4 @@
+using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Helpers;
 using Terraria;
 using Terraria.DataStructures;
@@ -28,6 +29,8 @@ public class StructureTile {
 
     public bool IsGap;
 
+    public bool IsFurniture;
+
     /// <summary>
     ///     If true, when the tilemap is pasted, the original tile here will remain
     /// </summary>
@@ -37,6 +40,12 @@ public class StructureTile {
     ///     If true, when the tilemap is pasted, the original wall here will remain
     /// </summary>
     public bool IsNullWall;
+
+    /// <summary>
+    ///     if true, tile will be pasted like normal; otherwise it is considered a placeholder block, and will not be pasted.
+    ///     used to create placeholders when making <see cref="MultiTile" />s
+    /// </summary>
+    public bool IsFakeTile;
 
     #endregion
 
@@ -181,7 +190,7 @@ public class StructureTile {
     /// <remarks>does not apply tile <see cref="BlockType"/></remarks>
     public void PasteTile(int x, int y) {
         Tile tile = Main.tile[x, y];
-        if (!IsNullTile) {
+        if (!IsNullTile && !IsFakeTile) {
             tile.TileType = TileType;
             tile.HasTile = HasTile;
             tile.IsActuated = IsActuated;
