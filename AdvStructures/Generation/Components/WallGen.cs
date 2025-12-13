@@ -12,12 +12,12 @@ public static class WallGen {
     /// </summary>
     [ComponentGenerator(typeof(Wall))]
     public class WallGenerator1 : VolumeComponentGenerator {
-        public override HashSet<ComponentTag> PossibleTags { get; } = new HashSet<ComponentTag>(
+        public override HashSet<ComponentTag> PossibleTags { get; } = ComponentTagSystem.NewTagSet(
             [
                 ComponentTag.External
-            ])
-            .Concat(ComponentHelper.FillShapeTiles.PossibleTags)
-            .ToHashSet();
+            ],
+            ComponentHelper.FillShapeTiles.PossibleTags
+        );
 
         public override bool Generate(VolumeComponentParams param) {
             bool external = param.Component.TagsRequired.ContainsKey(ComponentTag.External);

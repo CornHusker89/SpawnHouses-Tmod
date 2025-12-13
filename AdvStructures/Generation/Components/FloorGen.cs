@@ -1,6 +1,5 @@
 #nullable enable
 using System.Collections.Generic;
-using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Helpers;
 using SpawnHouses.Types;
@@ -13,12 +12,12 @@ public static class FloorGen {
     /// </summary>
     [ComponentGenerator(typeof(Floor))]
     public class FloorGenerator1 : VolumeComponentGenerator {
-        public override HashSet<ComponentTag> PossibleTags { get; } = new HashSet<ComponentTag>(
+        public override HashSet<ComponentTag> PossibleTags { get; } = ComponentTagSystem.NewTagSet(
             [
                 ComponentTag.External
-            ])
-            .Concat(ComponentHelper.FillShapeTiles.PossibleTags)
-            .ToHashSet();
+            ],
+            ComponentHelper.FillShapeTiles.PossibleTags
+        );
 
         public override bool Generate(VolumeComponentParams param) {
             bool external = param.Component.TagsRequired.ContainsKey(ComponentTag.External);
@@ -79,10 +78,12 @@ public static class FloorGen {
     /// </summary>
     [ComponentGenerator(typeof(Floor))]
     public class FloorGenerator4 : VolumeComponentGenerator {
-        public override HashSet<ComponentTag> PossibleTags { get; } = [
-            ComponentTag.FloorHollow
-        ];
-
+        public override HashSet<ComponentTag> PossibleTags { get; } = ComponentTagSystem.NewTagSet(
+            [
+                ComponentTag.FloorHollow
+            ]
+        );
+        
         public override bool CanGenerate(VolumeComponentParams componentParams) {
             return componentParams.Component.Volume.GetDetailedAxisSizes(false).average >= 3;
         }

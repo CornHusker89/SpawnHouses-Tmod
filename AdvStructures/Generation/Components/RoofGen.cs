@@ -217,21 +217,22 @@ public static class RoofGen {
 
     [ComponentGenerator(typeof(Roof))]
     public class RoofGenerator2 : PathComponentGenerator {
-        public override HashSet<ComponentTag> PossibleTags { get; } = new HashSet<ComponentTag>(
+        public override HashSet<ComponentTag> PossibleTags { get; } = ComponentTagSystem.NewTagSet(
             [
                 ComponentTag.External,
                 ComponentTag.RoofShort,
                 ComponentTag.RoofTall,
-                ComponentTag.RoofHasLargeOverhang
-            ])
-            .Concat(ComponentHelper.FillShapeTiles.PossibleTags)
-            .ToHashSet();
-
+                ComponentTag.RoofHasOverhang
+            ],
+            ComponentHelper.FillShapeTiles.PossibleTags,
+            ComponentHelper.FillShapeWalls.PossibleTags
+        );
+        
         public override bool Generate(PathComponentParams param) {
             bool isPathFlat = param.Component.Line.Points.All(point => point.Y == param.Component.Line.Points[0].Y);
 
             // extend roof endcaps if necessary
-            bool bigEndCaps = param.Component.TagsRequired.ContainsKey(ComponentTag.RoofHasLargeOverhang);
+            bool bigEndCaps = false;
             if (param.Component.Line.StartExtendable) {
             }
 

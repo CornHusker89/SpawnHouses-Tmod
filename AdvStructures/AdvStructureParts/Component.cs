@@ -24,7 +24,3 @@ public abstract class VolumeComponent : Component {
 public abstract class PathComponent : Component {
     public Path Line { get; set; }
 }
-
-public interface IExternalComponent {
-    public bool IsExterior { get; set; }
-}

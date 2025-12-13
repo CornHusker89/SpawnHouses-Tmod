@@ -11,10 +11,12 @@ public class GapGen {
     /// </summary>
     [ComponentGenerator(typeof(Gap))]
     public class FloorGapGenerator1 : VolumeComponentGenerator {
-        public override HashSet<ComponentTag> PossibleTags { get; } = [
-            ComponentTag.IsFloorGap,
-            ComponentTag.External
-        ];
+        public override HashSet<ComponentTag> PossibleTags { get; } = ComponentTagSystem.NewTagSet(
+            [
+                ComponentTag.IsFloorGap,
+                ComponentTag.External
+            ]
+        );
 
         public override bool Generate(VolumeComponentParams param) {
             int xStart = param.Component.Volume.BoundingBox.topLeft.X;
@@ -50,14 +52,16 @@ public class GapGen {
     }
 
     /// <summary>
-    ///     gap wall, places door an places walls if external
+    ///     gap wall, places door and places walls if external
     /// </summary>
     [ComponentGenerator(typeof(Gap))]
     public class WallGapGenerator1 : VolumeComponentGenerator {
-        public override HashSet<ComponentTag> PossibleTags { get; } = [
-            ComponentTag.IsWallGap,
-            ComponentTag.External
-        ];
+        public override HashSet<ComponentTag> PossibleTags { get; } = ComponentTagSystem.NewTagSet(
+            [
+                ComponentTag.IsWallGap,
+                ComponentTag.External
+            ]
+        );
 
         public override bool CanGenerate(VolumeComponentParams componentParams) {
             (int min, int max, double average) = componentParams.Component.Volume.GetDetailedAxisSizes(false);

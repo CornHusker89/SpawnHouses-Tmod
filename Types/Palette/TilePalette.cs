@@ -51,7 +51,7 @@ public class TilePalette {
         VerticalDetail = new TilePaintedType(TileID.PalladiumColumn, PaintID.GrayPaint),
         NonTiling = new TilePaintedType(TileID.AccentSlab),
         Windows = new TilePaintedType(TileID.Glass, PaintID.GrayPaint),
-        PrimaryBackground = new WallPaintedType(WallID.BlueDungeonSlab, PaintID.GrayPaint)
+        PrimaryBackground = new WallPaintedType(WallID.Lava1Echo, PaintID.GrayPaint)
     };
 
     private static readonly PaintedTypeWallSet WallWoodSmooth = new() {
@@ -65,19 +65,19 @@ public class TilePalette {
     private static readonly PaintedTypeRoofSet RoofShinglesDynastyWood = new() {
         Primary = new TilePaintedType(TileID.BlueDynastyShingles, PaintID.BrownPaint),
         NonTiling = new TilePaintedType(TileID.RedDynastyShingles, PaintID.BrownPaint),
-        BottomBackgroundAccent = new WallPaintedType(WallID.BlueDungeonSlab, PaintID.GrayPaint),
+        BottomBackgroundAccent = new WallPaintedType(WallID.Lava1Echo, PaintID.GrayPaint),
         HorizontalBeamBackground = new WallPaintedType(WallID.Wood),
-        VerticalBeamBackground = new WallPaintedType(WallID.SpookyWood),
+        VerticalBeamBackground = new WallPaintedType(WallID.LargeBambooBlockWall, PaintID.BrownPaint),
         BeamTile = new TilePaintedType(TileID.WoodenBeam),
         BeamTileActuation = false,
         PrimaryBackground = new WallPaintedType(WallID.GrayBrick)
     };
 
     private static readonly PaintedTypeRoomSet RoomLivingMedieval = new() {
-        Primary = new WallPaintedType(WallID.WhiteDynasty),
-        BottomBackgroundAccent = new WallPaintedType(WallID.BlueDungeonSlab, PaintID.GrayPaint),
+        Primary = new WallPaintedType(WallID.GrinchFingerWallpaper, PaintID.WhitePaint),
+        BottomBackgroundAccent = new WallPaintedType(WallID.Lava1Echo, PaintID.GrayPaint),
         HorizontalBeamBackground = new WallPaintedType(WallID.Wood),
-        VerticalBeamBackground = new WallPaintedType(WallID.SpookyWood),
+        VerticalBeamBackground = new WallPaintedType(WallID.LargeBambooBlockWall, PaintID.BrownPaint),
         BeamTile = new TilePaintedType(TileID.WoodenBeam),
         BeamTileActuation = false,
         WindowBackground = new WallPaintedType(WallID.Glass),

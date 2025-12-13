@@ -1,13 +1,9 @@
 #nullable enable
-using System.Collections.Generic;
 using SpawnHouses.Types;
 
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
-public class Gap : VolumeComponent, IExternalComponent {
-    // IExternalComponent
-    public bool IsExterior { get; set; }
-
+public class Gap : VolumeComponent {
 
     /// <summary>This will be null if the gap leads to an exterior</summary>
     public Room? HigherRoom;
@@ -42,28 +38,19 @@ public class Gap : VolumeComponent, IExternalComponent {
     /// <param name="room2"></param>
     /// <param name="isHorizontal">Has rooms on it's left/right</param>
     public Gap(Shape volume, Room? room1, Room? room2, bool isHorizontal) {
-        TagsRequired = new Dictionary<ComponentTag, object?>();
-        if (IsExterior) AddRequiredTag(ComponentTag.External);
         AddRequiredTag(isHorizontal ? ComponentTag.IsWallGap : ComponentTag.IsFloorGap);
-
-        TagsBlocklist = [];
+        
         Volume = volume;
-        IsExterior = room2 == null;
-
         IsHorizontal = isHorizontal;
-        if (IsExterior) {
-            LowerRoom = room1;
+        if (room1?.Volume.Center.X + room1?.Volume.Center.Y >= room2?.Volume.Center.X + room2?.Volume.Center.Y) {
+            LowerRoom = room2!;
+            HigherRoom = room1;
         }
         else {
-            if (room1?.Volume.Center.X + room1?.Volume.Center.Y >= room2?.Volume.Center.X + room2?.Volume.Center.Y) {
-                LowerRoom = room2!;
-                HigherRoom = room1;
-            }
-            else {
-                LowerRoom = room1;
-                HigherRoom = room2;
-            }
+            LowerRoom = room1;
+            HigherRoom = room2;
         }
+        
 
         if (room1?.ParentRoom != null)
             ParentRoom = room1.ParentRoom;

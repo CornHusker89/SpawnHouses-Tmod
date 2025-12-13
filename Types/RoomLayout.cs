@@ -89,11 +89,11 @@ public class ExternalLayout(
     /// </summary>
     public void SetComponentExternal() {
         foreach (Floor floor in Floors)
-            floor.TagsRequired.Add(ComponentTag.External, null);
+            floor.AddRequiredTag(ComponentTag.External);
         foreach (Wall wall in Walls)
-            wall.TagsRequired.Add(ComponentTag.External, null);
+            wall.AddRequiredTag(ComponentTag.External);
         foreach (Gap gap in Gaps)
-            gap.TagsRequired.Add(ComponentTag.External, null);
+            gap.AddRequiredTag(ComponentTag.External);
         // roofs are automatically marked as external
     }
 }

@@ -18,17 +18,18 @@ public static class StructureLayoutGen {
     /// </summary>
     [StructureLayoutGenerator]
     public class StructureLayoutGenerator1 : IStructureLayoutGenerator {
-        public HashSet<StructureTag> PossibleTags { get; } = [
-            StructureTag.HasRooms,
-            StructureTag.HasHousing,
-            StructureTag.HasOnlyRectangleRooms,
-            StructureTag.HasSomeRectangleRooms,
-            StructureTag.HasLargeRoom,
-            StructureTag.HasStorage,
-            StructureTag.MainFloorConnected,
-            StructureTag.AboveGround,
-            StructureTag.UnderGround
-        ];
+        public HashSet<StructureTag> PossibleTags { get; } = StructureTagSystem.NewTagSet(
+            [
+                StructureTag.HasRooms,
+                StructureTag.HasHousing,
+                StructureTag.HasOnlyRectangleRooms,
+                StructureTag.HasSomeRectangleRooms,
+                StructureTag.HasLargeRoom,
+                StructureTag.HasStorage,
+                StructureTag.AboveGround,
+                StructureTag.UnderGround
+            ]
+        );
 
         public bool CanGenerate(StructureParams structureParams) {
             if (structureParams.EntryPoints.Length != 2) return false;
@@ -53,7 +54,6 @@ public static class StructureLayoutGen {
                 p.EntryPoints,
                 p.Palette,
                 p.TagsRequired,
-                p.TagsBlocklist,
                 new Range(4, 13),
                 new Range(7, p.Length),
                 new Range(1, 1),
@@ -153,6 +153,8 @@ public static class StructureLayoutGen {
 
             advStructure.CompleteExternalGaps();
             RoomLayoutHelper.SubdivideRoom(advStructure.Layout, advStructure.Layout.Rooms[0], roomLayoutParams);
+
+            foreach (Room room in advStructure.Layout.Rooms) room.AddRequiredTag(ComponentTag.RoomTypeLiving);
 
             return true;
         }

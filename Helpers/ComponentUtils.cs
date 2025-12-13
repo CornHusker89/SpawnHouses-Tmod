@@ -22,8 +22,6 @@ public static class ComponentUtils {
     public static void ValidateComponent(Component component) {
         var tagsRequiredSet = component.TagsRequired.Keys.ToHashSet();
         TagUtils.ValidateExclusiveTagsRequired(tagsRequiredSet);
-        TagUtils.ValidateExclusiveTagsBlocklist(component.TagsBlocklist);
-        if (tagsRequiredSet.Overlaps(component.TagsBlocklist)) throw new Exception("Component tags required and tags blocklist cannot have any common elements");
         TagUtils.ValidateTagDataTypes(component.TagsRequired);
     }
 }

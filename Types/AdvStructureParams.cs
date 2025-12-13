@@ -17,17 +17,16 @@ public class StructureParams : StructureTagSystem {
 
     public StructureParams(
         Dictionary<StructureTag, object?> tagsRequired,
-        HashSet<StructureTag> tagsBlocklist,
         EntryPoint[] entryPoints,
         TilePalette tilePalette,
         int volume,
         bool canAddEntryPoints) {
-        TagsRequired = tagsRequired;
-        TagsBlocklist = tagsBlocklist;
         EntryPoints = entryPoints;
         Palette = tilePalette;
         Volume = volume;
         CanAddEntryPoints = canAddEntryPoints;
+
+        foreach (var kvp in tagsRequired) TagsRequired[kvp.Key] = kvp.Value;
 
         if (EntryPoints.Select(entryPoint => entryPoint.Start.Y).Max() - EntryPoints.Select(entryPoint => entryPoint.Start.Y).Min() + 4 > Volume / Length)
             throw new ArgumentException($"Entry points are too far away vertically for a minimum height of {Volume / Length} (determined by min volume / length)");
@@ -39,10 +38,10 @@ public class StructureParams : StructureTagSystem {
         if (Height <= 4)
             throw new ArgumentException($"Volume ({Volume}) is too small compared to the length ({Length}) of the structure, resulting in a too-low total height of {Height}");
 
-        int? housing = GetTagDataSafe<int?>(StructureTag.HasHousing);
+        int? housing = GetTagRequiredDataSafe<int?>(StructureTag.HasHousing);
 
         if (housing != null) {
-            int? roomCount = GetTagDataSafe<int?>(StructureTag.HasRooms);
+            int? roomCount = GetTagRequiredDataSafe<int?>(StructureTag.HasRooms);
             if (roomCount == null) throw new ArgumentException("Must have rooms tag to have housing");
 
             if (Volume / housing < 60)
@@ -51,8 +50,6 @@ public class StructureParams : StructureTagSystem {
                 throw new ArgumentException($"Volume maximum of {Volume} is too small given the housing maximum of {housing}");
             if (housing < 1)
                 throw new ArgumentException("housing must be greater than 0");
-            if (TagsBlocklist.Contains(StructureTag.HasHousing))
-                throw new ArgumentException("Structure cannot have a max housing > 0 while blocklisting components with housing");
             if (roomCount > housing) throw new ArgumentException($"Room count ({roomCount}) must be greater than or equal to housing ({housing})");
         }
     }
@@ -88,7 +85,6 @@ public class RoomLayoutParams : StructureTagSystem {
         EntryPoint[] entryPoints,
         TilePalette tilePalette,
         Dictionary<StructureTag, object?> tagsRequired,
-        HashSet<StructureTag> tagsBlocklist,
         Range roomHeight,
         Range roomWidth,
         Range floorWidth,
@@ -96,9 +92,6 @@ public class RoomLayoutParams : StructureTagSystem {
         float largeRoomChance = 0.2f,
         int attempts = 5
     ) {
-        TagsRequired = tagsRequired;
-        TagsBlocklist = tagsBlocklist;
-
         MainVolume = mainVolume;
 
         Attempts = attempts;
@@ -109,6 +102,8 @@ public class RoomLayoutParams : StructureTagSystem {
         RoomWidth = roomWidth;
         TilePalette = tilePalette;
         WallWidth = wallWidth;
+
+        foreach (var kvp in tagsRequired) TagsRequired[kvp.Key] = kvp.Value;
     }
 
     /// <summary>
@@ -121,7 +116,6 @@ public class RoomLayoutParams : StructureTagSystem {
             EntryPoints,
             TilePalette,
             TagsRequired,
-            TagsBlocklist,
             RoomHeight,
             RoomWidth,
             FloorWidth,
@@ -161,7 +155,7 @@ public class VolumeComponentParams : ComponentParams {
 
     public VolumeComponentParams(VolumeComponent component, TilePalette tilePalette, StructureTilemap tilemap) {
         Component = component;
-        base.Component = component;
+        base.Component = Component;
         Tilemap = tilemap;
         Palette = tilePalette;
     }
@@ -172,7 +166,7 @@ public class PathComponentParams : ComponentParams {
 
     public PathComponentParams(PathComponent component, TilePalette tilePalette, StructureTilemap tilemap) {
         Component = component;
-        base.Component = component;
+        base.Component = Component;
         Tilemap = tilemap;
         Palette = tilePalette;
     }

@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -21,9 +22,8 @@ public class SpawnTest2 : ModItem {
         int x = (Main.MouseWorld / 16).ToPoint16().X;
         int y = (Main.MouseWorld / 16).ToPoint16().Y;
 
-        //Terraria.WorldGen.PlaceDoor(x, y, TileID.ClosedDoor);
-        //Terraria.WorldGen.PlaceTile(x, y, TileID.OpenDoor, true);
-        Terraria.WorldGen.PlaceObject(x, y, TileID.ClosedDoor, true, 0);
+        Tile tile = Main.tile[x, y];
+        Console.WriteLine(tile.WallType);
 
         return true;
     }

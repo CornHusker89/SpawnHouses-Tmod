@@ -256,7 +256,6 @@ public class ExternalLayoutHelper {
         }
 
         foreach (Roof roof in result.roofs) {
-            roof.AddRequiredTag(ComponentTag.RoofHasLargeOverhang);
             roof.AddRequiredTag(ComponentTag.ApplySloping, SlopeHelper.SmoothTop);
             roof.AddRequiredTag(ComponentTag.SlopingModifier, SlopeModifier.LocalSloping);
         }

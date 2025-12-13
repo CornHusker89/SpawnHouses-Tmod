@@ -11,11 +11,10 @@ public class Room : VolumeComponent {
     public Room? ParentRoom;
 
     public Room(Shape volume, List<Gap>? gaps = null) {
-        TagsRequired = [];
-        TagsBlocklist = [];
         Volume = volume;
 
         Gaps = gaps ?? [];
+        MultiTiles = [];
         IsEntryRoom = true;
         ParentRoom = null;
     }

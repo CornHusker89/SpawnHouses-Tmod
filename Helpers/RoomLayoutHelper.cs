@@ -222,7 +222,7 @@ public static class RoomLayoutHelper {
         List<Shape> finishedRoomVolumes = [];
         int extraCuts = 0, largeRoomCount = 0, xCutCount = 0, yCutCount = 0;
         int maxLargeRooms = (int)Math.Ceiling(param.LargeRoomChance * targetRoomCount);
-        for (int curHousing = 0; curHousing <= targetRoomCount - 1 + extraCuts; curHousing++) { // -1 because 1 cut will result in 2 rooms
+        for (int curHousing = 1; curHousing < targetRoomCount + extraCuts; curHousing++) {
             Shape roomVolume;
             if (roomQueue.Count > 0)
                 roomVolume = roomQueue.Dequeue();
@@ -343,7 +343,7 @@ public static class RoomLayoutHelper {
         foreach (PartialPoint16 corner in room.Volume.GetCorners())
             prioritySplits.AddItem(corner, 1);
 
-        int targetRoomCount = roomLayoutParams.GetTagData<int>(StructureTag.HasRooms);
+        int targetRoomCount = roomLayoutParams.GetTagRequiredData<int>(StructureTag.HasRooms);
 
         for (int attempt = 0; attempt < roomLayoutParams.Attempts; attempt++) {
             RoomLayoutVolumes volumes = SplitBsp(modifiedParams, prioritySplits, room, prioritizeSplitsOnGapFloors, targetRoomCount);

@@ -44,11 +44,10 @@ public class AdvStructure {
         TagUtils.ValidateTagDataTypes(Params.TagsRequired);
         if (generator == null) {
             var validGenerators = StructureLayoutGenerators.Where(gen => gen.CanGenerate(Params)
-                                                                         && Params.TagsRequired.Keys.ToHashSet().IsSubsetOf(gen.PossibleTags)
-                                                                         && !Params.TagsBlocklist.Overlaps(gen.PossibleTags))
+                                                                         && Params.TagsRequired.Keys.ToHashSet().IsSubsetOf(gen.PossibleTags))
                 .ToArray();
 
-            if (validGenerators.Length == 0) throw new Exception($"No structure layout generators found were compatible with the given parameters. required tags: {EnumHelper.ToString(Params.TagsRequired)}, blocklisted tags: {EnumHelper.ToString(Params.TagsBlocklist)}");
+            if (validGenerators.Length == 0) throw new Exception($"No structure layout generators found were compatible with the given parameters. required tags: {EnumHelper.ToString(Params.TagsRequired)}");
             generator = Terraria.WorldGen.genRand.NextFromList(validGenerators);
         }
 
@@ -108,12 +107,11 @@ public class AdvStructure {
 
     private ComponentGenerator GetComponentGenerator(ComponentParams componentParams, List<ComponentGenerator> generators) {
         var validGenerators = generators.Where(gen => gen.CanGenerate(componentParams)
-                                                      && componentParams.Component.TagsRequired.Keys.ToHashSet().IsSubsetOf(gen.PossibleTags)
-                                                      && !componentParams.Component.TagsBlocklist.Overlaps(gen.PossibleTags))
+                                                      && componentParams.Component.TagsRequired.Keys.ToHashSet().IsSubsetOf(gen.PossibleTags))
             .ToArray();
 
         if (validGenerators.Length == 0)
-            throw new Exception($"No component generators were found that are compatible with given parameters. type: {componentParams.Component.GetType().FullName}, required tags: {EnumHelper.ToString(componentParams.Component.TagsRequired)}, blocklisted tags: {EnumHelper.ToString(componentParams.Component.TagsBlocklist)}");
+            throw new Exception($"No component generators were found that are compatible with given parameters. type: {componentParams.Component.GetType().FullName}, required tags: {EnumHelper.ToString(componentParams.Component.TagsRequired)}");
 
         return Terraria.WorldGen.genRand.NextFromList(validGenerators);
     }

@@ -67,7 +67,6 @@ public class SpawnTest : ModItem {
                 new KeyValuePair<StructureTag, object?>(StructureTag.HasHousing, 1),
                 new KeyValuePair<StructureTag, object?>(StructureTag.HasOnlyRectangleRooms, null)
             ]),
-            [],
             [
                 new EntryPoint(
                     new Point16(x, y - 2),
@@ -75,13 +74,13 @@ public class SpawnTest : ModItem {
                     Directions.Right
                 ),
                 new EntryPoint(
-                    new Point16(x + 15, y - 2),
+                    new Point16(x + 28, y - 2),
                     3,
                     Directions.Left
                 )
             ],
             TilePalette.Medieval,
-            140,
+            200,
             false
         ));
 
