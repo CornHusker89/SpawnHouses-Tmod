@@ -56,7 +56,5 @@ public class FrameableWoodPlatformNoCollide : ModTile {
         return false;
     }
 
-    public override bool TileFrame(int i, int j, ref bool resetFrame, ref bool noBreak) {
-        return false;
-    }
+    public override bool TileFrame(int i, int j, ref bool resetFrame, ref bool noBreak) => false;
 }

@@ -59,10 +59,9 @@ public class ChainConnectPoint : ConnectPoint {
         }
     }
 
-    public new ChainConnectPoint Clone() {
-        return new ChainConnectPoint(X, Y, XOffset, YOffset, Direction, SealObj, RootPoint, GenerateChance, ChildBridge,
+    public new ChainConnectPoint Clone() =>
+        new(X, Y, XOffset, YOffset, Direction, SealObj, RootPoint, GenerateChance, ChildBridge,
             BranchLength, ChildStructure, ParentStructure, ChildConnectPoint);
-    }
 #nullable enable
 
     public CustomChainStructure? ChildStructure;

@@ -128,9 +128,7 @@ public static class StructureIDUtils {
         return structure;
     }
 
-    public static bool IsBranchingHallway(CustomChainStructure structure) {
-        return BranchingHallwayIDs.Contains(structure.ID);
-    }
+    public static bool IsBranchingHallway(CustomChainStructure structure) => BranchingHallwayIDs.Contains(structure.ID);
 }
 
 public enum BridgeID : ushort {
@@ -241,9 +239,7 @@ public static class BridgeIDUtils {
         return bridge;
     }
 
-    public static bool IsBranchingHallway(CustomChainStructure structure) {
-        return BranchingHallwayIDs.Contains(structure.ID);
-    }
+    public static bool IsBranchingHallway(CustomChainStructure structure) => BranchingHallwayIDs.Contains(structure.ID);
 }
 
 public static class Directions {
@@ -261,11 +257,11 @@ public static class Directions {
 }
 
 public class Range(int min, int max) {
-    public int Max = max;
-    public int Min = min;
+    private int _value;
 
     public bool Evaluated = false;
-    private int _value;
+    public int Max = max;
+    public int Min = min;
     public int Value => Evaluated ? _value : Evaluate();
 
     public int Evaluate(float scale = -1) {
@@ -277,9 +273,7 @@ public class Range(int min, int max) {
         return _value;
     }
 
-    public bool InRange(int value) {
-        return value >= Min && value <= Max;
-    }
+    public bool InRange(int value) => value >= Min && value <= Max;
 }
 
 public static class StructureStatus {
@@ -303,16 +297,23 @@ public static class WebClientInstance {
 }
 
 public static class EnumHelper {
-    public static string ToString<T>(IEnumerable<T> values) where T : Enum {
+    public static string ToString<T>(IEnumerable<T> values)
+        where T : notnull {
         var enumerable = values as T[] ?? values.ToArray();
         if (enumerable.Length == 0) return "(empty)";
 
         string s = "";
-        foreach (T value in enumerable) s += value + ", ";
+        foreach (T value in enumerable)
+            if (value is Enum enumVal)
+                s += enumVal + ", ";
+            else
+                s += value.ToString();
+
         return s.Remove(s.Length - 2);
     }
 
-    public static string ToString<T>(Dictionary<T, object?> values) where T : Enum {
+    public static string ToString<T>(Dictionary<T, object?> values)
+        where T : Enum {
         var enumerable = values.ToArray();
         if (enumerable.Length == 0) return "(empty)";
 

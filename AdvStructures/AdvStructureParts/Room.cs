@@ -6,14 +6,16 @@ namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
 public class Room : VolumeComponent {
     public List<Gap> Gaps;
-    public List<MultiTile> MultiTiles;
     public bool IsEntryRoom;
+    public List<MultiTile> MultiTiles;
     public Room? ParentRoom;
+    public List<Stairway> Stairways;
 
-    public Room(Shape volume, List<Gap>? gaps = null) {
+    public Room(Shape volume, List<Gap>? gaps = null, List<Stairway>? stairways = null) {
         Volume = volume;
 
         Gaps = gaps ?? [];
+        Stairways = stairways ?? [];
         MultiTiles = [];
         IsEntryRoom = true;
         ParentRoom = null;

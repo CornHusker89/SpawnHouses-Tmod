@@ -80,20 +80,20 @@ public class ExternalLayout(
     List<Roof> roofs
 ) {
     public readonly List<Floor> Floors = floors;
-    public readonly List<Wall> Walls = walls;
     public readonly List<Gap> Gaps = gaps;
     public readonly List<Roof> Roofs = roofs;
+    public readonly List<Wall> Walls = walls;
 
     /// <summary>
-    ///     adds <see cref="ComponentTag.External" /> to every component
+    ///     adds <see cref="ComponentTags.External" /> to every component
     /// </summary>
     public void SetComponentExternal() {
         foreach (Floor floor in Floors)
-            floor.AddRequiredTag(ComponentTag.External);
+            floor.AddRequiredTag(ComponentTags.External);
         foreach (Wall wall in Walls)
-            wall.AddRequiredTag(ComponentTag.External);
+            wall.AddRequiredTag(ComponentTags.External);
         foreach (Gap gap in Gaps)
-            gap.AddRequiredTag(ComponentTag.External);
+            gap.AddRequiredTag(ComponentTags.External);
         // roofs are automatically marked as external
     }
 }

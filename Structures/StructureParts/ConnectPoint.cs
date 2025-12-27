@@ -27,7 +27,5 @@ public class ConnectPoint {
         Y = (ushort)(mainStructureY + YOffset);
     }
 
-    public ConnectPoint Clone() {
-        return new ConnectPoint(X, Y, XOffset, YOffset, Direction);
-    }
+    public ConnectPoint Clone() => new(X, Y, XOffset, YOffset, Direction);
 }

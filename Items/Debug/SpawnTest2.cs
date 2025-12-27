@@ -14,9 +14,7 @@ public class SpawnTest2 : ModItem {
         Item.rare = ItemRarityID.Blue;
     }
 
-    public override bool AltFunctionUse(Player player) {
-        return true;
-    }
+    public override bool AltFunctionUse(Player player) => true;
 
     public override bool? UseItem(Player player) {
         int x = (Main.MouseWorld / 16).ToPoint16().X;

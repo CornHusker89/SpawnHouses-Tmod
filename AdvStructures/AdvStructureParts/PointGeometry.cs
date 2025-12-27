@@ -6,9 +6,14 @@ using Terraria.DataStructures;
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
 public abstract class PointGeometry {
-    public Point16[] Points;
     public (Point16 topLeft, Point16 bottomRight) BoundingBox;
+    public Point16[] Points;
     public Point16 Size;
+
+    /// <summary>
+    ///     the geometric center of the bounding box
+    /// </summary>
+    public Point16 Center => BoundingBox.topLeft + Size / new Point16(2, 2);
 
     protected abstract void Init(Point16[] points, bool optimize);
 
@@ -26,18 +31,11 @@ public abstract class PointGeometry {
     }
 
     /// <summary>
-    ///     the geometric center of the bounding box
-    /// </summary>
-    public Point16 Center => BoundingBox.topLeft + Size / new Point16(2, 2);
-
-    /// <summary>
     /// </summary>
     /// <param name="edgeIndex">edge index to retrieve</param>
     /// <returns></returns>
     /// <remarks>edge count = point count - 1. will not wrap around, beware of out-of-bounds errors</remarks>
-    public float GetSlope(int edgeIndex) {
-        return (float)(Points[edgeIndex].Y - Points[edgeIndex + 1].Y) / (Points[edgeIndex].X - Points[edgeIndex + 1].X);
-    }
+    public float GetSlope(int edgeIndex) => (float)(Points[edgeIndex].Y - Points[edgeIndex + 1].Y) / (Points[edgeIndex].X - Points[edgeIndex + 1].X);
 
     public static float GetSlope(Point16 point1, Point16 point2) {
         if (point1.X == point2.X) return float.MaxValue;
@@ -66,7 +64,7 @@ public abstract class PointGeometry {
     /// </summary>
     /// <param name="wrapAround">if true, will assume that the first and last points are connected</param>
     /// <returns></returns>
-    /// <remarks>destructive, modifies <see cref="Points"/></remarks>
+    /// <remarks>destructive, modifies <see cref="Points" /></remarks>
     public void OptimizePoints(bool wrapAround) {
         var newPoints = Points.ToList();
         for (int i = wrapAround ? 0 : 1; i < (wrapAround ? newPoints.Count : newPoints.Count - 1); i++) {
@@ -132,7 +130,7 @@ public abstract class PointGeometry {
     }
 
     /// <summary>
-    ///     removes sets of vertices that affect the angle of their lines by less than <see cref="significantAngle"/>
+    ///     removes sets of vertices that affect the angle of their lines by less than <see cref="significantAngle" />
     /// </summary>
     /// <param name="significantAngle"></param>
     /// <param name="maxSetProportion">how physically large a set of points can be within a set. prevents combining (and removing) points into too large sets</param>
@@ -219,9 +217,7 @@ public abstract class PointGeometry {
         return rayStartPoint.X <= intersectX;
     }
 
-    protected static int Cross(Point16 o, Point16 a, Point16 b) {
-        return (a.X - o.X) * (b.Y - o.Y) - (a.Y - o.Y) * (b.X - o.X);
-    }
+    protected static int Cross(Point16 o, Point16 a, Point16 b) => (a.X - o.X) * (b.Y - o.Y) - (a.Y - o.Y) * (b.X - o.X);
 
     protected static Point16 GetIntersectionPoint(Point16 segmentStart, Point16 segmentEnd, bool cutXAxis, int cutCoord) {
         int dx = segmentEnd.X - segmentStart.X;

@@ -1,5 +1,4 @@
 #nullable enable
-using System.Collections.Generic;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Helpers;
 using SpawnHouses.Types;
@@ -12,15 +11,15 @@ public static class FloorGen {
     /// </summary>
     [ComponentGenerator(typeof(Floor))]
     public class FloorGenerator1 : VolumeComponentGenerator {
-        public override HashSet<ComponentTag> PossibleTags { get; } = ComponentTagSystem.NewTagSet(
+        public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [
-                ComponentTag.External
+                ComponentTags.External
             ],
             ComponentHelper.FillShapeTiles.PossibleTags
         );
 
         public override bool Generate(VolumeComponentParams param) {
-            bool external = param.Component.TagsRequired.ContainsKey(ComponentTag.External);
+            bool external = param.Component.Required.ContainsKey(ComponentTags.External);
             ComponentHelper.FillShapeTiles.Action(param.Component.Volume, param, (_, _) => (external ? param.Palette.ExternalFloor : param.Palette.InternalFloor).Primary);
             return true;
         }
@@ -78,21 +77,19 @@ public static class FloorGen {
     /// </summary>
     [ComponentGenerator(typeof(Floor))]
     public class FloorGenerator4 : VolumeComponentGenerator {
-        public override HashSet<ComponentTag> PossibleTags { get; } = ComponentTagSystem.NewTagSet(
+        public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [
-                ComponentTag.FloorHollow
+                ComponentTags.FloorHollow
             ]
         );
-        
-        public override bool CanGenerate(VolumeComponentParams componentParams) {
-            return componentParams.Component.Volume.GetDetailedAxisSizes(false).average >= 3;
-        }
+
+        public override bool CanGenerate(VolumeComponentParams param) => param.Component.Volume.GetDetailedAxisSizes(false).average >= 3;
 
         public override bool Generate(VolumeComponentParams param) {
             int xStart = param.Component.Volume.BoundingBox.topLeft.X;
             int[] topY = new int[param.Component.Volume.Size.X];
             int[] bottomY = new int[param.Component.Volume.Size.X];
-            int supportInterval = Terraria.WorldGen.genRand.Next(3, 5);
+            int supportInterval = param.Tilemap.Structure.RandomGen.Next(3, 5);
 
             param.Component.Volume.ExecuteInArea((x, y) => {
                 if ((x - xStart - 2) % supportInterval == 0 || x == xStart ||
@@ -101,7 +98,7 @@ public static class FloorGen {
                 }
                 else {
                     param.Tilemap.PlaceWall(x, y, param.Palette.InternalFloor.PrimaryBackground);
-                    if (Terraria.WorldGen.genRand.Next(0, 3) == 0)
+                    if (param.Tilemap.Structure.RandomGen.Next(0, 3) == 0)
                         param.Tilemap.PlaceTile(x, y, param.Palette.Debris1X1);
                 }
 

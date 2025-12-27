@@ -16,9 +16,7 @@ public class SpawnFirepit : ModItem {
     public override void AddRecipes() {
     }
 
-    public override bool AltFunctionUse(Player player) {
-        return true;
-    }
+    public override bool AltFunctionUse(Player player) => true;
 
 
     public override bool? UseItem(Player player) {

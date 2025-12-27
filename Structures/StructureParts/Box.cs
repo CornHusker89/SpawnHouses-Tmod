@@ -37,9 +37,7 @@ public class Box {
         return false;
     }
 
-    public static bool IsAnyBoundingBoxesColliding(Box[] structureBoundingBoxes, List<Box> otherBoundingBoxes) {
-        return IsAnyBoundingBoxesColliding(structureBoundingBoxes, otherBoundingBoxes.ToArray());
-    }
+    public static bool IsAnyBoundingBoxesColliding(Box[] structureBoundingBoxes, List<Box> otherBoundingBoxes) => IsAnyBoundingBoxesColliding(structureBoundingBoxes, otherBoundingBoxes.ToArray());
 
     public static void Visualize(Box[] boundingBoxes, ushort tileID = TileID.Adamantite) {
         foreach (Box boundingBox in boundingBoxes)

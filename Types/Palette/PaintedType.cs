@@ -1,5 +1,6 @@
 using System;
 using Terraria.ID;
+using Terraria.Utilities;
 
 namespace SpawnHouses.Types.Palette;
 
@@ -30,29 +31,16 @@ public class WallPaintedType : PaintedType {
 }
 
 public abstract class PaintedType {
-    private readonly ushort _typeId;
-    private readonly ushort[] _typeIds;
-
     private readonly byte _paintId;
     private readonly byte[] _paintIds;
 
     private readonly int _style;
     private readonly int[] _styles;
+    private readonly ushort _typeId;
+    private readonly ushort[] _typeIds;
 
     /// if the PaintedType contains multiple values
     public readonly bool IsSeries;
-
-    /// the evaluated tile and paint ids
-    public (ushort typeId, byte paintId, int style) Ids {
-        get {
-            if (IsSeries) {
-                int index = Terraria.WorldGen.genRand.Next(_typeIds.Length);
-                return (_typeIds[index], _paintIds[index], _styles[index]);
-            }
-
-            return (_typeId, _paintId, _style);
-        }
-    }
 
     public PaintedType(ushort type, byte paintType = PaintID.None, int style = 0) {
         _typeId = type;
@@ -84,5 +72,16 @@ public abstract class PaintedType {
             throw new ArgumentException("paintTypes and tileTypes must have the same length", nameof(styles));
         else
             _styles = styles;
+    }
+
+    /// the evaluated tile and paint ids
+    public (ushort typeId, byte paintId, int style) GetIds(UnifiedRandom random = null) {
+        random ??= Terraria.WorldGen.genRand;
+        if (IsSeries) {
+            int index = random.Next(_typeIds.Length);
+            return (_typeIds[index], _paintIds[index], _styles[index]);
+        }
+
+        return (_typeId, _paintId, _style);
     }
 }

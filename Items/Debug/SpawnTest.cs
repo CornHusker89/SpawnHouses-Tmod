@@ -23,9 +23,7 @@ public class SpawnTest : ModItem {
         Item.rare = ItemRarityID.Blue;
     }
 
-    public override bool AltFunctionUse(Player player) {
-        return true;
-    }
+    public override bool AltFunctionUse(Player player) => true;
 
     public override bool? UseItem(Player player) {
         int x = (Main.MouseWorld / 16).ToPoint16().X;
@@ -61,28 +59,30 @@ public class SpawnTest : ModItem {
         // );
 
         // 1-room house
-        AdvStructure structure = new(new StructureParams(
-            new Dictionary<StructureTag, object?>([
-                new KeyValuePair<StructureTag, object?>(StructureTag.HasRooms, 1),
-                new KeyValuePair<StructureTag, object?>(StructureTag.HasHousing, 1),
-                new KeyValuePair<StructureTag, object?>(StructureTag.HasOnlyRectangleRooms, null)
-            ]),
-            [
-                new EntryPoint(
-                    new Point16(x, y - 2),
-                    3,
-                    Directions.Right
-                ),
-                new EntryPoint(
-                    new Point16(x + 28, y - 2),
-                    3,
-                    Directions.Left
-                )
-            ],
-            TilePalette.Medieval,
-            200,
-            false
-        ));
+        AdvStructure structure = new(
+            new StructureParams(
+                new StructureTagSet([
+                    new KeyValuePair<StructureTag, object?>(StructureTag.HasRooms, 1),
+                    new KeyValuePair<StructureTag, object?>(StructureTag.HasHousing, 1),
+                    new KeyValuePair<StructureTag, object?>(StructureTag.HasOnlyRectangleRooms, null)
+                ]),
+                [
+                    new EntryPoint(
+                        new Point16(x, y - 2),
+                        3,
+                        Directions.Right
+                    ),
+                    new EntryPoint(
+                        new Point16(x + 28, y - 2),
+                        3,
+                        Directions.Left
+                    )
+                ],
+                200,
+                false
+            ),
+            TilePalette.Medieval
+        );
 
         return true;
     }

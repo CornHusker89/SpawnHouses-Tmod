@@ -11,6 +11,83 @@ namespace SpawnHouses.Types;
 ///     has many of the same properties as the tML Tile, but uses direct references and has a few more properties
 /// </summary>
 public class StructureTile {
+    /// <summary>
+    ///     Resets the tile data at this position.<br />
+    ///     Sets <see cref="HasTile" /> and <see cref="IsActuated" /> to <see langword="false" /> and sets the
+    ///     <see cref="BlockType" /> to <see cref="Terraria.ID.BlockType.Solid" />.
+    /// </summary>
+    /// <param name="nullTile">If true, when the tilemap is pasted, the original tile here will remain</param>
+    /// <remarks>
+    ///     Does not reset data related to walls, wires, or anything else. For that, use <see cref="ClearEverything" />.
+    /// </remarks>
+    public void ClearTile(bool nullTile) {
+        BlockType = BlockType.Solid;
+        HasTile = false;
+        IsActuated = false;
+        IsNullTile = nullTile;
+    }
+
+    /// <summary>
+    ///     copies all of this tile's data to Main.tile at the given global position
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <remarks>does not apply tile <see cref="BlockType" /></remarks>
+    public void PasteTile(int x, int y) {
+        Tile tile = Main.tile[x, y];
+        if (!IsNullTile && !IsFakeTile) {
+            if (Style == 0) {
+                tile.TileType = TileType;
+                tile.HasTile = HasTile;
+            }
+            else {
+                Terraria.WorldGen.PlaceTile(x, y, TileType, true, style: Style);
+            }
+
+            tile.IsActuated = IsActuated;
+            tile.HasActuator = HasActuator;
+            tile.TileColor = TileColor;
+        }
+
+        if (!IsNullWall) {
+            tile.WallType = WallType;
+            tile.WallColor = WallColor;
+        }
+    }
+
+    /// <summary>
+    ///     copies all of this tile's data to Main.tile at the given global position
+    /// </summary>
+    /// <param name="point"></param>
+    /// <remarks>does not apply tile <see cref="BlockType" /></remarks>
+    public void PasteTile(Point16 point) {
+        PasteTile(point.X, point.Y);
+    }
+
+    /// <summary>
+    ///     copies <see cref="BlockType" /> of this tile to Main.tile at the given global position
+    /// </summary>
+    public void ApplySlopes(int x, int y) {
+        Tile tile = Main.tile[x, y];
+        tile.BlockType = BlockType;
+    }
+
+    /// <summary>
+    ///     copies <see cref="BlockType" /> of this tile to Main.tile at the given global position
+    /// </summary>
+    public void ApplySlopes(Point16 point) {
+        ApplySlopes(point.X, point.Y);
+    }
+
+    public static void SetFrames(int x, int y) {
+        WorldUtils.TileFrame(x, y);
+        Framing.WallFrame(x, y);
+    }
+
+    public static void SetFrames(Point16 point) {
+        SetFrames(point.X, point.Y);
+    }
+
     #region Custom Fields
 
     public SlopingAlgorithm SlopingAlg;
@@ -167,81 +244,4 @@ public class StructureTile {
     public bool RightSlope => BlockType == BlockType.SlopeDownLeft || BlockType == BlockType.SlopeUpLeft;
 
     #endregion
-
-    /// <summary>
-    ///     Resets the tile data at this position.<br />
-    ///     Sets <see cref="HasTile" /> and <see cref="IsActuated" /> to <see langword="false" /> and sets the
-    ///     <see cref="BlockType" /> to <see cref="Terraria.ID.BlockType.Solid" />.
-    /// </summary>
-    /// <param name="nullTile">If true, when the tilemap is pasted, the original tile here will remain</param>
-    /// <remarks>
-    ///     Does not reset data related to walls, wires, or anything else. For that, use <see cref="ClearEverything" />.
-    /// </remarks>
-    public void ClearTile(bool nullTile) {
-        BlockType = BlockType.Solid;
-        HasTile = false;
-        IsActuated = false;
-        IsNullTile = nullTile;
-    }
-
-    /// <summary>
-    ///     copies all of this tile's data to Main.tile at the given global position
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <remarks>does not apply tile <see cref="BlockType"/></remarks>
-    public void PasteTile(int x, int y) {
-        Tile tile = Main.tile[x, y];
-        if (!IsNullTile && !IsFakeTile) {
-            if (Style == 0) {
-                tile.TileType = TileType;
-                tile.HasTile = HasTile;
-            }
-            else {
-                Terraria.WorldGen.PlaceTile(x, y, TileType, true, style: Style);
-            }
-
-            tile.IsActuated = IsActuated;
-            tile.HasActuator = HasActuator;
-            tile.TileColor = TileColor;
-        }
-
-        if (!IsNullWall) {
-            tile.WallType = WallType;
-            tile.WallColor = WallColor;
-        }
-    }
-
-    /// <summary>
-    ///     copies all of this tile's data to Main.tile at the given global position
-    /// </summary>
-    /// <param name="point"></param>
-    /// <remarks>does not apply tile <see cref="BlockType" /></remarks>
-    public void PasteTile(Point16 point) {
-        PasteTile(point.X, point.Y);
-    }
-
-    /// <summary>
-    ///     copies <see cref="BlockType" /> of this tile to Main.tile at the given global position
-    /// </summary>
-    public void ApplySlopes(int x, int y) {
-        Tile tile = Main.tile[x, y];
-        tile.BlockType = BlockType;
-    }
-
-    /// <summary>
-    ///     copies <see cref="BlockType" /> of this tile to Main.tile at the given global position
-    /// </summary>
-    public void ApplySlopes(Point16 point) {
-        ApplySlopes(point.X, point.Y);
-    }
-
-    public static void SetFrames(int x, int y) {
-        WorldUtils.TileFrame(x, y);
-        Framing.WallFrame(x, y);
-    }
-
-    public static void SetFrames(Point16 point) {
-        SetFrames(point.X, point.Y);
-    }
 }

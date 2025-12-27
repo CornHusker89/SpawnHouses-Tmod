@@ -1,9 +1,7 @@
-using System.Collections.Generic;
-using System.Linq;
+using System;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Helpers;
 using SpawnHouses.Types;
-using Terraria;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.AdvStructures.Generation.Components;
@@ -217,17 +215,19 @@ public static class RoofGen {
 
     [ComponentGenerator(typeof(Roof))]
     public class RoofGenerator2 : PathComponentGenerator {
-        public override HashSet<ComponentTag> PossibleTags { get; } = ComponentTagSystem.NewTagSet(
+        public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [
-                ComponentTag.External,
-                ComponentTag.RoofShort,
-                ComponentTag.RoofTall,
-                ComponentTag.RoofHasOverhang
+                ComponentTags.External,
+                ComponentTags.RoofShort,
+                ComponentTags.RoofTall,
+                ComponentTags.RoofHasOverhang
             ],
             ComponentHelper.FillShapeTiles.PossibleTags,
             ComponentHelper.FillShapeWalls.PossibleTags
         );
-        
+
+        public override Shape GetBoundingShape(PathComponentParams param) => throw new NotImplementedException();
+
         public override bool Generate(PathComponentParams param) {
             bool isPathFlat = param.Component.Line.Points.All(point => point.Y == param.Component.Line.Points[0].Y);
 
@@ -246,9 +246,9 @@ public static class RoofGen {
             ComponentHelper.FillShapeTiles.Action(offsetShape, param, (_, _) => param.Palette.Roof.Primary);
 
             // add large roof parts if necessary
-            if (param.Component.TagsRequired.ContainsKey(ComponentTag.RoofTall)) {
-                bool tallLeftSide = Terraria.WorldGen.genRand.NextBool(3, 4);
-                bool tallRightSide = !tallLeftSide || Terraria.WorldGen.genRand.NextBool(3, 4);
+            if (param.Component.Required.ContainsKey(ComponentTags.RoofTall)) {
+                bool tallLeftSide = param.Tilemap.Structure.RandomGen.NextBool(3, 4);
+                bool tallRightSide = !tallLeftSide || param.Tilemap.Structure.RandomGen.NextBool(3, 4);
 
                 switch (tallLeftSide) {
                     case true when tallRightSide: {

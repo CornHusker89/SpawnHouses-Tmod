@@ -28,11 +28,7 @@ public struct PartialPoint16 {
         return base.Equals(obj);
     }
 
-    public override int GetHashCode() {
-        return HashCode.Combine(X, Y);
-    }
+    public override int GetHashCode() => HashCode.Combine(X, Y);
 
-    public override string ToString() {
-        return "(" + (HasX ? X : "_") + ", " + (HasY ? Y : "_") + ")";
-    }
+    public override string ToString() => "(" + (HasX ? X : "_") + ", " + (HasY ? Y : "_") + ")";
 }

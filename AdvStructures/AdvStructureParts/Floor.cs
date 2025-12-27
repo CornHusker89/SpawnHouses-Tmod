@@ -1,12 +1,11 @@
-#nullable enable
 using SpawnHouses.Types;
+using SpawnHouses.Types.TagTypes;
 
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
 public class Floor : VolumeComponent {
-    public Floor(Shape volume, bool isExterior = false) {
-        Volume = volume;
+    public Floor(VolumeComponentParams param, Shape volume, bool isExterior = false) : base(param, volume) {
         if (isExterior)
-            AddRequiredTag(ComponentTag.External);
+            Tags.AddRequiredTag(ComponentTags.External);
     }
 }

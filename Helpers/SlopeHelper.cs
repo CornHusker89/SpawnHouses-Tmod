@@ -45,7 +45,7 @@ public class SlopeHelper {
     };
 
     /// <summary>
-    ///     same as <see cref="SimpleSlopes"/> but slightly different to create a contrast between a smooth top
+    ///     same as <see cref="SimpleSlopes" /> but slightly different to create a contrast between a smooth top
     ///     surface and straight bottom
     /// </summary>
     /// <returns></returns>
@@ -90,7 +90,6 @@ public class SlopeHelper {
     };
 
     /// <summary>
-    ///     
     /// </summary>
     /// <returns></returns>
     public static readonly SlopingAlgorithm GothicSlopes = (x, y, tilemap) => {
@@ -131,7 +130,6 @@ public class SlopeHelper {
     };
 
     /// <summary>
-    ///     
     /// </summary>
     /// <returns></returns>
     public static readonly SlopingAlgorithm HalfSlopes = (x, y, tilemap) => {

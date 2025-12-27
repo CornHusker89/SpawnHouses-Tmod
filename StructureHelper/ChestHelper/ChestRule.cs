@@ -27,9 +27,7 @@ internal class ChestRule {
     public virtual void PlaceItems(Chest chest, ref int nextIndex) {
     }
 
-    public virtual TagCompound Serizlize() {
-        return null;
-    }
+    public virtual TagCompound Serizlize() => null;
 
     public static ChestRule Deserialize(TagCompound tag) {
         string str = tag.GetString("Type");
@@ -105,15 +103,12 @@ internal class Loot {
         return tag;
     }
 
-    public static Loot Deserialze(TagCompound tag) {
-        return new Loot(
+    public static Loot Deserialze(TagCompound tag) =>
+        new(
             tag.Get<Item>("Item"),
             tag.GetInt("Min"),
             tag.GetInt("Max"),
             tag.GetInt("Weight"));
-    }
 
-    public Loot Clone() {
-        return new Loot(givenItem.Clone(), min, max, weight);
-    }
+    public Loot Clone() => new(givenItem.Clone(), min, max, weight);
 }

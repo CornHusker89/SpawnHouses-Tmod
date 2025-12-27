@@ -261,9 +261,7 @@ public static class WorldGenHelper {
             }
         }
 
-        bool FindRight(bool force = false) {
-            return FindLeft(true, force);
-        }
+        bool FindRight(bool force = false) => FindLeft(true, force);
 
         bool dungeonIsLeftSide = Main.dungeonX < Main.maxTilesX / 2;
 

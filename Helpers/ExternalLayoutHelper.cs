@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
-using SpawnHouses.Types;
 using Terraria;
 using Terraria.DataStructures;
 
@@ -39,8 +38,8 @@ public class ExternalLayoutHelper {
     /// <param name="width"></param>
     /// <param name="isExternal"></param>
     /// <returns></returns>
-    public static Floor CreateFloor(int y, int xStart, int xEnd, bool extendHigher, int width, bool isExternal = true) {
-        return new Floor(
+    public static Floor CreateFloor(int y, int xStart, int xEnd, bool extendHigher, int width, bool isExternal = true) =>
+        new(
             new Shape(
                 true,
                 new Point16(xStart, y),
@@ -48,7 +47,6 @@ public class ExternalLayoutHelper {
             ),
             isExternal
         );
-    }
 
     /// <summary>
     ///     helper function to simplify creating flat walls
@@ -63,8 +61,8 @@ public class ExternalLayoutHelper {
     /// <param name="width"></param>
     /// <param name="isExternal"></param>
     /// <returns></returns>
-    public static Wall CreateWall(int x, int yStart, int yEnd, bool extendHigher, int width, bool isExternal = true) {
-        return new Wall(
+    public static Wall CreateWall(int x, int yStart, int yEnd, bool extendHigher, int width, bool isExternal = true) =>
+        new(
             new Shape(
                 true,
                 new Point16(x, yStart),
@@ -72,7 +70,6 @@ public class ExternalLayoutHelper {
             ),
             isExternal
         );
-    }
 
     /// <summary>
     ///     creates floor and walls as needed to fulfill the given path. intended to create structure roofs
@@ -251,20 +248,36 @@ public class ExternalLayoutHelper {
             wallThickness
         );
         foreach (Floor floor in result.floors) {
-            floor.AddRequiredTag(ComponentTag.ApplySloping, SlopeHelper.SimpleSlopes);
-            floor.AddRequiredTag(ComponentTag.SlopingModifier, SlopeModifier.GlobalOnlySloping);
+            floor.AddRequiredTag(ComponentTags.ApplySloping, SlopeHelper.SimpleSlopes);
+            floor.AddRequiredTag(ComponentTags.SlopingModifier, SlopeModifier.GlobalOnlySloping);
         }
 
         foreach (Roof roof in result.roofs) {
-            roof.AddRequiredTag(ComponentTag.ApplySloping, SlopeHelper.SmoothTop);
-            roof.AddRequiredTag(ComponentTag.SlopingModifier, SlopeModifier.LocalSloping);
+            roof.AddRequiredTag(ComponentTags.ApplySloping, SlopeHelper.SmoothTop);
+            roof.AddRequiredTag(ComponentTags.SlopingModifier, SlopeModifier.LocalSloping);
         }
 
         if (hasRoofPeak && Terraria.WorldGen.genRand.NextBool(3, 5)) {
-            result.roofs[!leftRoofHigher && splitRoof ? 1 : 0].AddRequiredTag(ComponentTag.RoofTall);
-            if (splitRoof && hasSlopedSideRoof && Terraria.WorldGen.genRand.NextBool(1, 2)) result.roofs[!leftRoofHigher ? 0 : 1].AddRequiredTag(ComponentTag.RoofTall);
+            result.roofs[!leftRoofHigher && splitRoof ? 1 : 0].AddRequiredTag(ComponentTags.RoofTall);
+            if (splitRoof && hasSlopedSideRoof && Terraria.WorldGen.genRand.NextBool(1, 2)) result.roofs[!leftRoofHigher ? 0 : 1].AddRequiredTag(ComponentTags.RoofTall);
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// </summary>
+    /// <param name="components"></param>
+    /// <typeparam name="T">must be a component type</typeparam>
+    /// <returns></returns>
+    public static int GetHighestBoundingPoint<T>(List<T> components)
+        where T : Component {
+        int topY = int.MaxValue;
+        foreach (T component in components) {
+            int pos = component.Generator.GetBoundingShape(component.Params).BoundingBox.topLeft.Y;
+            if (pos < topY) topY = pos;
+        }
+
+        return topY;
     }
 }

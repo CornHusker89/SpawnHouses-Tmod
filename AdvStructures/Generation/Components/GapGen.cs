@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Types;
 using Terraria.DataStructures;
@@ -11,10 +10,10 @@ public class GapGen {
     /// </summary>
     [ComponentGenerator(typeof(Gap))]
     public class FloorGapGenerator1 : VolumeComponentGenerator {
-        public override HashSet<ComponentTag> PossibleTags { get; } = ComponentTagSystem.NewTagSet(
+        public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [
-                ComponentTag.IsFloorGap,
-                ComponentTag.External
+                ComponentTags.IsFloorGap,
+                ComponentTags.External
             ]
         );
 
@@ -22,7 +21,7 @@ public class GapGen {
             int xStart = param.Component.Volume.BoundingBox.topLeft.X;
             int[] topY = new int[param.Component.Volume.Size.X];
             int[] bottomY = new int[param.Component.Volume.Size.X];
-            bool external = !param.Component.TagsRequired.ContainsKey(ComponentTag.External);
+            bool external = !param.Component.Required.ContainsKey(ComponentTags.External);
 
             param.Component.Volume.ExecuteInArea((x, y) => {
                 param.Tilemap[x, y].ClearTile(false);
@@ -43,8 +42,8 @@ public class GapGen {
             });
 
             for (int index = 0; index < topY.Length; index++) {
-                param.Tilemap.PlaceTile(xStart + index, topY[index], param.Palette.LivingRoom.Platform);
-                param.Tilemap.PlaceTile(xStart + index, bottomY[index], param.Palette.LivingRoom.Platform);
+                param.Tilemap.PlaceTile(xStart + index, topY[index], (external ? param.Palette.ExternalFloor : param.Palette.InternalFloor).Platform);
+                param.Tilemap.PlaceTile(xStart + index, bottomY[index], (external ? param.Palette.ExternalFloor : param.Palette.InternalFloor).Platform);
             }
 
             return true;
@@ -56,26 +55,27 @@ public class GapGen {
     /// </summary>
     [ComponentGenerator(typeof(Gap))]
     public class WallGapGenerator1 : VolumeComponentGenerator {
-        public override HashSet<ComponentTag> PossibleTags { get; } = ComponentTagSystem.NewTagSet(
+        public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [
-                ComponentTag.IsWallGap,
-                ComponentTag.External
+                ComponentTags.IsWallGap,
+                ComponentTags.External
             ]
         );
 
-        public override bool CanGenerate(VolumeComponentParams componentParams) {
-            (int min, int max, double average) = componentParams.Component.Volume.GetDetailedAxisSizes(false);
+        public override bool CanGenerate(VolumeComponentParams param) {
+            (int min, int max, double average) = param.Component.Volume.GetDetailedAxisSizes(false);
             return min == 3 && max == 3;
         }
 
         public override bool Generate(VolumeComponentParams param) {
-            if (!param.Component.TagsRequired.ContainsKey(ComponentTag.External))
+            bool external = param.Component.Required.ContainsKey(ComponentTags.External);
+            if (!external)
                 param.Component.Volume.ExecuteInArea((x, y) => {
                     param.Tilemap.PlaceWall(x, y, param.Palette.InternalWall.PrimaryBackground);
                     param.Tilemap[x, y].ClearTile(false);
                 });
             param.Tilemap.PlaceMultiTile(param.Component.Volume.BoundingBox.topLeft, new Point16(1, 3),
-                param.Palette.LivingRoom.Door, false, MultiTile.DoorOrigin);
+                (external ? param.Palette.ExternalWall : param.Palette.InternalWall).Door, false, MultiTile.DoorOrigin);
             return true;
         }
     }

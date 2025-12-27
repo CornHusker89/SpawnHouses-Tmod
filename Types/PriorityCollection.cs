@@ -10,25 +10,9 @@ namespace SpawnHouses.Types;
 ///     has a blocklist feature to exclude specific items, can include custom equality operator
 /// </summary>
 public class PriorityCollection<T> {
-    private class EqualityComparer<TEq> : IEqualityComparer<TEq> {
-        private readonly Func<TEq, TEq, bool> _func;
-
-        public EqualityComparer(Func<TEq, TEq, bool> func) {
-            _func = func;
-        }
-
-        public bool Equals(TEq? x, TEq? y) {
-            return x != null && y != null && _func(x, y);
-        }
-
-        public int GetHashCode(TEq obj) {
-            return 0;
-        }
-    }
-
     private readonly Dictionary<int, HashSet<T>> _blocklistedItems = new();
-    private readonly Dictionary<int, HashSet<T>> _sets = new();
     private readonly EqualityComparer<T>? _equalityComparison;
+    private readonly Dictionary<int, HashSet<T>> _sets = new();
 
     public PriorityCollection(Func<T, T, bool>? equalityComparison = null) {
         _equalityComparison = equalityComparison == null ? null : new EqualityComparer<T>(equalityComparison);
@@ -84,9 +68,7 @@ public class PriorityCollection<T> {
     ///     removes the hashset at the given priority
     /// </summary>
     /// <param name="priority"></param>
-    public bool RemoveHashSet(int priority) {
-        return _sets.Remove(priority);
-    }
+    public bool RemoveHashSet(int priority) => _sets.Remove(priority);
 
     /// <summary>
     ///     adds an item to the hashset at the given priority
@@ -209,5 +191,17 @@ public class PriorityCollection<T> {
         }
 
         return result;
+    }
+
+    private class EqualityComparer<TEq> : IEqualityComparer<TEq> {
+        private readonly Func<TEq, TEq, bool> _func;
+
+        public EqualityComparer(Func<TEq, TEq, bool> func) {
+            _func = func;
+        }
+
+        public bool Equals(TEq? x, TEq? y) => x != null && y != null && _func(x, y);
+
+        public int GetHashCode(TEq obj) => 0;
     }
 }

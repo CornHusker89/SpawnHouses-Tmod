@@ -136,14 +136,12 @@ internal class DictionarySerializer : TagSerializer<Dictionary<string, object>, 
         return tag;
     }
 
-    public override Dictionary<string, object> Deserialize(TagCompound tag) {
-        return tag.ToDictionary();
-    }
+    public override Dictionary<string, object> Deserialize(TagCompound tag) => tag.ToDictionary();
 }
 
 internal class MainHouseSerializer : TagSerializer<MainHouse, TagCompound> {
-    public override TagCompound Serialize(MainHouse structure) {
-        return new TagCompound {
+    public override TagCompound Serialize(MainHouse structure) =>
+        new() {
             ["X"] = structure.X,
             ["Y"] = structure.Y,
             ["Status"] = structure.Status,
@@ -152,10 +150,9 @@ internal class MainHouseSerializer : TagSerializer<MainHouse, TagCompound> {
             ["LeftType"] = structure.LeftType,
             ["RightType"] = structure.RightType
         };
-    }
 
-    public override MainHouse Deserialize(TagCompound tag) {
-        return new MainHouse(
+    public override MainHouse Deserialize(TagCompound tag) =>
+        new(
             tag.Get<ushort>("X"),
             tag.Get<ushort>("Y"),
             tag.GetByte("Status"),
@@ -166,18 +163,16 @@ internal class MainHouseSerializer : TagSerializer<MainHouse, TagCompound> {
                 : (byte)1, // if its 0 (which only happens if it's a <= v0.2.7 world) set to default (large)
             tag.GetByte("RightType") != 0 ? tag.GetByte("RightType") : (byte)1
         );
-    }
 }
 
 internal class MainBasementSerializer : TagSerializer<MainBasement, TagCompound> {
-    public override TagCompound Serialize(MainBasement chain) {
-        return new TagCompound {
+    public override TagCompound Serialize(MainBasement chain) =>
+        new() {
             ["X"] = chain.EntryPosX,
             ["Y"] = chain.EntryPosY,
             ["Status"] = chain.Status,
             ["RootStructure"] = ChainProcessor.ProcessStructure(chain.RootStructure)
         };
-    }
 
     public override MainBasement Deserialize(TagCompound tag) {
         MainBasement basement = new(
@@ -191,39 +186,35 @@ internal class MainBasementSerializer : TagSerializer<MainBasement, TagCompound>
 }
 
 internal class MineshaftSerializer : TagSerializer<Mineshaft, TagCompound> {
-    public override TagCompound Serialize(Mineshaft structure) {
-        return new TagCompound {
+    public override TagCompound Serialize(Mineshaft structure) =>
+        new() {
             ["X"] = structure.X,
             ["Y"] = structure.Y,
             ["Status"] = structure.Status
         };
-    }
 
-    public override Mineshaft Deserialize(TagCompound tag) {
-        return new Mineshaft(
+    public override Mineshaft Deserialize(TagCompound tag) =>
+        new(
             tag.Get<ushort>("X"),
             tag.Get<ushort>("Y"),
             tag.GetByte("Status")
         );
-    }
 }
 
 internal class BeachHouseSerializer : TagSerializer<BeachHouse, TagCompound> {
-    public override TagCompound Serialize(BeachHouse structure) {
-        return new TagCompound {
+    public override TagCompound Serialize(BeachHouse structure) =>
+        new() {
             ["X"] = structure.X,
             ["Y"] = structure.Y,
             ["Status"] = structure.Status,
             ["Reverse"] = structure.Reverse
         };
-    }
 
-    public override BeachHouse Deserialize(TagCompound tag) {
-        return new BeachHouse(
+    public override BeachHouse Deserialize(TagCompound tag) =>
+        new(
             tag.Get<ushort>("X"),
             tag.Get<ushort>("Y"),
             tag.GetByte("Status"),
             tag.GetBool("Reverse")
         );
-    }
 }

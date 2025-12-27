@@ -479,9 +479,7 @@ public abstract class StructureChain {
     ///     Called at the very end of Chain generation when object is created
     /// </summary>
     /// <returns>Whether the chain is complete. If returns false, will retry generation</returns>
-    protected virtual bool IsChainComplete() {
-        return true;
-    }
+    protected virtual bool IsChainComplete() => true;
 
     /// <summary>
     ///     Called before attempting to generate a connect point's children
@@ -512,9 +510,8 @@ public abstract class StructureChain {
     /// <param name="rootStructure"></param>
     /// <returns>If true, children will generate</returns>
     protected virtual bool IsConnectPointValid(ChainConnectPoint connectPoint, ChainConnectPoint targetConnectPoint,
-        CustomChainStructure targetStructure) {
-        return true;
-    }
+        CustomChainStructure targetStructure) =>
+        true;
 
     /// <summary>
     ///     Called for each CustomChainStructure right after it gets generated.

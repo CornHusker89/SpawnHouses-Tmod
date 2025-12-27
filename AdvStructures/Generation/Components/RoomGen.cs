@@ -1,5 +1,4 @@
 #nullable enable
-using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Helpers;
@@ -13,11 +12,11 @@ public static class RoomGen {
     /// </summary>
     [ComponentGenerator(typeof(Room))]
     public class RoomGenerator2 : VolumeComponentGenerator {
-        public override HashSet<ComponentTag> PossibleTags { get; } = ComponentTagSystem.NewTagSet(
+        public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [
-                ComponentTag.RoomTypeLiving,
-                ComponentTag.RoomHousingValid,
-                ComponentTag.RoomBeamsAreTiles
+                ComponentTags.RoomTypeLiving,
+                ComponentTags.RoomHousingValid,
+                ComponentTags.RoomBeamsAreTiles
             ],
             ComponentHelper.CreateBeams.PossibleTags,
             ComponentHelper.FillShapeWalls.PossibleTags
@@ -36,6 +35,12 @@ public static class RoomGen {
                 if (y == mainTopY || y == mainBottomY) return param.Palette.LivingRoom.HorizontalBeamBackground;
                 return param.Palette.LivingRoom.Primary;
             });
+
+            if (param.Component.Required.ContainsKey(ComponentTags.RoomBeamsAreTiles))
+                param.Component.Volume.ExecuteInArea((x, y) => {
+                    if (beamXPositions.Contains(x))
+                        param.Tilemap.PlaceTile(x, y, param.Palette.LivingRoom.BeamTile, actuated: param.Palette.LivingRoom.BeamTileActuation);
+                });
 
             return true;
         }

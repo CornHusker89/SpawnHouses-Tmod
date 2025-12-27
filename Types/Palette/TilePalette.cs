@@ -5,45 +5,20 @@ using Terraria.ID;
 namespace SpawnHouses.Types.Palette;
 
 public class TilePalette {
-    public StructureTag[] PossibleTags;
-
-    // ----- Sets -----
-    public required PaintedTypeFloorSet ExternalFloor;
-    public required PaintedTypeFloorSet InternalFloor;
-
-    public required PaintedTypeWallSet ExternalWall;
-    public required PaintedTypeWallSet InternalWall;
-
-    public required PaintedTypeRoofSet Roof;
-
-    public required PaintedTypeRoomSet LivingRoom;
-    public required PaintedTypeDecorSet LivingDecor;
-    public required PaintedTypeRoomSet BedroomRoom;
-    public required PaintedTypeDecorSet BedroomDecor;
-    public required PaintedTypeRoomSet StorageRoom;
-    public required PaintedTypeDecorSet StorageDecor;
-    public required PaintedTypeRoomSet WorkshopRoom;
-    public required PaintedTypeDecorSet WorkshopDecor;
-
-    // ----- One-off Tiles -----
-
-    /// <summary>
-    ///     tile, 1-wide, 1-tall that can be placed standalone to represent a junk-y, debris area
-    /// </summary>
-    public required TilePaintedType? Debris1X1;
-
-    #region Set Presets
+    #region Palettes
 
     private static readonly PaintedTypeFloorSet FloorWoodRough = new() {
         Primary = new TilePaintedType([TileID.LivingMahogany, TileID.WoodBlock], [PaintID.BrownPaint, PaintID.None]),
         Vertical = new TilePaintedType(TileID.WoodBlock),
-        PrimaryBackground = new WallPaintedType(WallID.LivingWood)
+        PrimaryBackground = new WallPaintedType(WallID.LivingWood),
+        Platform = new TilePaintedType(TileID.Platforms, PaintID.BrownPaint)
     };
 
     private static readonly PaintedTypeFloorSet FloorWoodSmooth = new() {
-        Primary = new TilePaintedType([TileID.RichMahogany, TileID.LivingWood], [PaintID.BrownPaint, PaintID.None]),
+        Primary = new TilePaintedType([TileID.DynastyWood, TileID.WoodBlock, TileID.LivingWood], [PaintID.BrownPaint, PaintID.None, PaintID.None]),
         Vertical = new TilePaintedType(TileID.WoodBlock),
-        PrimaryBackground = new WallPaintedType(WallID.LivingWood)
+        PrimaryBackground = new WallPaintedType(WallID.LivingWood),
+        Platform = new TilePaintedType(TileID.Platforms, PaintID.BrownPaint)
     };
 
     private static readonly PaintedTypeWallSet WallMixedStone = new() {
@@ -51,21 +26,23 @@ public class TilePalette {
         VerticalDetail = new TilePaintedType(TileID.PalladiumColumn, PaintID.GrayPaint),
         NonTiling = new TilePaintedType(TileID.AccentSlab),
         Windows = new TilePaintedType(TileID.Glass, PaintID.GrayPaint),
-        PrimaryBackground = new WallPaintedType(WallID.Lava1Echo, PaintID.GrayPaint)
+        PrimaryBackground = new WallPaintedType(WallID.Lava2Echo, PaintID.GrayPaint),
+        Door = new TilePaintedType(TileID.ClosedDoor)
     };
 
     private static readonly PaintedTypeWallSet WallWoodSmooth = new() {
-        Primary = new TilePaintedType([TileID.RichMahogany, TileID.LivingWood], [PaintID.BrownPaint, PaintID.None]),
+        Primary = new TilePaintedType([TileID.DynastyWood, TileID.WoodBlock, TileID.LivingWood], [PaintID.BrownPaint, PaintID.None, PaintID.None]),
         VerticalDetail = new TilePaintedType(TileID.LivingWood, PaintID.BrownPaint),
         NonTiling = new TilePaintedType(TileID.DynastyWood),
         Windows = new TilePaintedType(TileID.Glass, PaintID.GrayPaint),
-        PrimaryBackground = new WallPaintedType(WallID.LivingWood)
+        PrimaryBackground = new WallPaintedType(WallID.LivingWood),
+        Door = new TilePaintedType(TileID.ClosedDoor)
     };
 
     private static readonly PaintedTypeRoofSet RoofShinglesDynastyWood = new() {
         Primary = new TilePaintedType(TileID.BlueDynastyShingles, PaintID.BrownPaint),
         NonTiling = new TilePaintedType(TileID.RedDynastyShingles, PaintID.BrownPaint),
-        BottomBackgroundAccent = new WallPaintedType(WallID.Lava1Echo, PaintID.GrayPaint),
+        BottomBackgroundAccent = new WallPaintedType(WallID.Lava2Echo, PaintID.GrayPaint),
         HorizontalBeamBackground = new WallPaintedType(WallID.Wood),
         VerticalBeamBackground = new WallPaintedType(WallID.LargeBambooBlockWall, PaintID.BrownPaint),
         BeamTile = new TilePaintedType(TileID.WoodenBeam),
@@ -75,14 +52,12 @@ public class TilePalette {
 
     private static readonly PaintedTypeRoomSet RoomLivingMedieval = new() {
         Primary = new WallPaintedType(WallID.GrinchFingerWallpaper, PaintID.WhitePaint),
-        BottomBackgroundAccent = new WallPaintedType(WallID.Lava1Echo, PaintID.GrayPaint),
+        BottomBackgroundAccent = new WallPaintedType(WallID.Lava2Echo, PaintID.GrayPaint),
         HorizontalBeamBackground = new WallPaintedType(WallID.Wood),
         VerticalBeamBackground = new WallPaintedType(WallID.LargeBambooBlockWall, PaintID.BrownPaint),
         BeamTile = new TilePaintedType(TileID.WoodenBeam),
         BeamTileActuation = false,
-        WindowBackground = new WallPaintedType(WallID.Glass),
-        Platform = new TilePaintedType(TileID.Platforms, PaintID.BrownPaint),
-        Door = new TilePaintedType(TileID.ClosedDoor)
+        WindowBackground = new WallPaintedType(WallID.Glass)
     };
 
     private static readonly PaintedTypeDecorSet DecorLivingMedieval = new() {
@@ -108,11 +83,6 @@ public class TilePalette {
         AccentBanner = new TilePaintedType(TileID.Banners)
     };
 
-    #endregion
-
-
-    #region Palettes
-
     public static readonly TilePalette Medieval = new() {
         ExternalFloor = FloorWoodRough,
         InternalFloor = FloorWoodSmooth,
@@ -131,6 +101,37 @@ public class TilePalette {
 
         Debris1X1 = new TilePaintedType(TileID.Cobweb)
     };
+
+    #endregion
+
+    public required PaintedTypeDecorSet BedroomDecor;
+    public required PaintedTypeRoomSet BedroomRoom;
+
+    // ----- One-off Tiles -----
+
+    /// <summary>
+    ///     tile, 1-wide, 1-tall that can be placed standalone to represent a junk-y, debris area
+    /// </summary>
+    public required TilePaintedType? Debris1X1;
+
+    // ----- Sets -----
+    public required PaintedTypeFloorSet ExternalFloor;
+
+    public required PaintedTypeWallSet ExternalWall;
+    public required PaintedTypeFloorSet InternalFloor;
+    public required PaintedTypeWallSet InternalWall;
+    public required PaintedTypeDecorSet LivingDecor;
+
+    public required PaintedTypeRoomSet LivingRoom;
+    public StructureTag[] PossibleTags;
+
+    public required PaintedTypeRoofSet Roof;
+    public required PaintedTypeDecorSet StorageDecor;
+    public required PaintedTypeRoomSet StorageRoom;
+    public required PaintedTypeDecorSet WorkshopDecor;
+    public required PaintedTypeRoomSet WorkshopRoom;
+
+    #region Set Presets
 
     #endregion
 }

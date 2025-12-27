@@ -1,10 +1,7 @@
 #nullable enable
-using SpawnHouses.Types;
-
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
 public class Gap : VolumeComponent {
-
     /// <summary>This will be null if the gap leads to an exterior</summary>
     public Room? HigherRoom;
 
@@ -38,8 +35,8 @@ public class Gap : VolumeComponent {
     /// <param name="room2"></param>
     /// <param name="isHorizontal">Has rooms on it's left/right</param>
     public Gap(Shape volume, Room? room1, Room? room2, bool isHorizontal) {
-        AddRequiredTag(isHorizontal ? ComponentTag.IsWallGap : ComponentTag.IsFloorGap);
-        
+        AddRequiredTag(isHorizontal ? ComponentTags.IsWallGap : ComponentTags.IsFloorGap);
+
         Volume = volume;
         IsHorizontal = isHorizontal;
         if (room1?.Volume.Center.X + room1?.Volume.Center.Y >= room2?.Volume.Center.X + room2?.Volume.Center.Y) {
@@ -50,7 +47,7 @@ public class Gap : VolumeComponent {
             LowerRoom = room1;
             HigherRoom = room2;
         }
-        
+
 
         if (room1?.ParentRoom != null)
             ParentRoom = room1.ParentRoom;

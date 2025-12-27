@@ -144,7 +144,7 @@ public class Shape : PointGeometry {
     /// <summary>
     ///     the number of tiles this shape encloses
     /// </summary>
-    /// <param name="approximate">if an approximation algorithm is used. otherwise, area is evaluated using <see cref="ExecuteInArea(System.Action{int,int})"/></param>
+    /// <param name="approximate">if an approximation algorithm is used. otherwise, area is evaluated using <see cref="ExecuteInArea(System.Action{int,int})" /></param>
     public int GetArea(bool approximate = false) {
         if (IsBox)
             return (BoundingBox.bottomRight.X - BoundingBox.topLeft.X) *
@@ -215,17 +215,13 @@ public class Shape : PointGeometry {
     ///     gets the ratio of bounding box size to actual shape area. can indicate how box-like the shape is
     /// </summary>
     /// <returns></returns>
-    public double GetBoundingBoxEfficiency() {
-        return (double)Size.X * Size.Y / GetArea();
-    }
+    public double GetBoundingBoxEfficiency() => (double)Size.X * Size.Y / GetArea();
 
     /// <summary>
     ///     gets number of tiles that are within the bounding box but not in the shape. can indicate how box-like the shape is
     /// </summary>
     /// <returns></returns>
-    public int GetUnusedBoundingBoxArea() {
-        return Size.X * Size.Y - GetArea();
-    }
+    public int GetUnusedBoundingBoxArea() => Size.X * Size.Y - GetArea();
 
     /// <summary>
     ///     returns list of points, expanded by their outward facing normals
@@ -247,12 +243,10 @@ public class Shape : PointGeometry {
     }
 
     /// <summary>
-    ///     creates new shape, expanded by <paramref name="expansion"/> tiles
+    ///     creates new shape, expanded by <paramref name="expansion" /> tiles
     /// </summary>
     /// <returns></returns>
-    public Shape GetExpandedShape(int expansion) {
-        return new Shape(ExpandPoints(expansion));
-    }
+    public Shape GetExpandedShape(int expansion) => new(ExpandPoints(expansion));
 
     /// <summary>
     ///     find all corners of a shape (expanded out by 1 tile) based on their x and y positions, useful for ensuring beams and such make sense visually
@@ -489,7 +483,7 @@ public class Shape : PointGeometry {
             ExecuteInArea((x, y) => { action(x, y, BlockType.Solid); });
             return;
         }
-        
+
         for (int x = 0; x < Size.X; x++) {
             int xWorldCoord = x + BoundingBox.topLeft.X;
             for (int y = 0; y < Size.Y; y++) {
@@ -581,9 +575,7 @@ public class Shape : PointGeometry {
         private double Min { get; } = min;
         private double Max { get; } = max;
 
-        public bool Overlaps(Projection other) {
-            return !(Max < other.Min || other.Max < Min);
-        }
+        public bool Overlaps(Projection other) => !(Max < other.Min || other.Max < Min);
     }
 
     /// <summary>
@@ -721,9 +713,7 @@ public class Shape : PointGeometry {
     /// <param name="keepLower">if the upper or lower half is used for the area calculation</param>
     /// <param name="preciseArea">if the area-getting algorithm uses a precise (though slower) version</param>
     /// <returns></returns>
-    public Shape? CutOnce(bool splitAlongX, int cutPos, bool keepLower, bool preciseArea) {
-        return ClipPolygon(splitAlongX, cutPos, keepLower, false);
-    }
+    public Shape? CutOnce(bool splitAlongX, int cutPos, bool keepLower, bool preciseArea) => ClipPolygon(splitAlongX, cutPos, keepLower, false);
 
     #endregion
 

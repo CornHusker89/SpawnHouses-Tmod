@@ -1,6 +1,5 @@
 #nullable enable
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Helpers;
@@ -17,18 +16,17 @@ public static class StructureLayoutGen {
     ///     a square, possibly with square extrusions. can only have 2 entry points
     /// </summary>
     [StructureLayoutGenerator]
-    public class StructureLayoutGenerator1 : IStructureLayoutGenerator {
-        public HashSet<StructureTag> PossibleTags { get; } = StructureTagSystem.NewTagSet(
+    public class StructureLayoutGenerator1 : StructureLayoutGenerator {
+        public StructureTagPartialSet PossibleTags { get; } = StructureTagSystem.NewPartialTagSet(
             [
                 StructureTag.HasRooms,
                 StructureTag.HasHousing,
-                StructureTag.HasOnlyRectangleRooms,
-                StructureTag.HasSomeRectangleRooms,
-                StructureTag.HasLargeRoom,
                 StructureTag.HasStorage,
                 StructureTag.AboveGround,
                 StructureTag.UnderGround
-            ]
+            ],
+            StructureLayoutHelper.SubdivideRoom.PossibleTags,
+            StructureLayoutHelper.CreateStairways.PossibleTags
         );
 
         public bool CanGenerate(StructureParams structureParams) {
@@ -47,12 +45,11 @@ public static class StructureLayoutGen {
             return lower.Direction == Directions.Right && upper.Direction == Directions.Left;
         }
 
-        public bool Generate(AdvStructure advStructure) {
+        public StructureTagSet Generate(AdvStructure advStructure) {
             StructureParams p = advStructure.Params;
             RoomLayoutParams roomLayoutParams = new(
-                null,
+                advStructure,
                 p.EntryPoints,
-                p.Palette,
                 p.TagsRequired,
                 new Range(4, 13),
                 new Range(7, p.Length),
@@ -62,29 +59,19 @@ public static class StructureLayoutGen {
             );
 
             const int tilemapMargin = 7;
-            const int roofMargin = 35;
 
             // TODO: compensate structure volume and roofMargin for the non-square volume at the top
 
             // structure parameters that aren't dependent on tilemap position
             bool forceFlatRoof = advStructure.Params.TagsRequired.ContainsKey(StructureTag.HasOnlyRectangleRooms);
             int entryPointVerticalDistance = Math.Abs(p.EntryPoints[0].End.Y - p.EntryPoints[1].End.Y);
+            replace the normal tera world gen rand with the adv structs
             bool hasBasement = Terraria.WorldGen.genRand.NextBool(4, 10) && p.Height - entryPointVerticalDistance > 12; //40% if conditions are met
             int externalWallThickness = roomLayoutParams.WallWidth.Max;
             int externalFloorThickness = roomLayoutParams.FloorWidth.Max;
             int verticalOffset = hasBasement ? 7 : 0;
             bool hasHigherSide = Terraria.WorldGen.genRand.NextBool(4, 5) && !forceFlatRoof;
             bool leftRoofHigher = Terraria.WorldGen.genRand.NextBool();
-
-            advStructure.Tilemap = new StructureTilemap(
-                (ushort)(p.Length + 2 * (tilemapMargin + externalWallThickness)),
-                (ushort)(p.Height + 2 * (tilemapMargin + externalFloorThickness) + roofMargin),
-                new Point16(
-                    p.LeftEntryPointX - externalWallThickness - tilemapMargin,
-                    int.Max(p.EntryPoints[0].Start.Y, p.EntryPoints[1].Start.Y) + 5 + verticalOffset - p.Height - externalFloorThickness - roofMargin - tilemapMargin
-                )
-            );
-
             EntryPoint upper = p.EntryPoints[0].Center.Y < p.EntryPoints[1].Center.Y ? p.EntryPoints[1] : p.EntryPoints[0];
             EntryPoint left, right;
             if (p.EntryPoints[0].Center.X < p.EntryPoints[1].Center.X) {
@@ -96,19 +83,15 @@ public static class StructureLayoutGen {
                 right = p.EntryPoints[0];
             }
 
-            left.SetOffset(advStructure.Tilemap.WorldTileOffset * Point16.NegativeOne);
-            right.SetOffset(advStructure.Tilemap.WorldTileOffset * Point16.NegativeOne);
-
-            // structure parameters that are dependent on tilemap position
             int floorTopY = upper.End.Y + 1 + verticalOffset;
             int roofHeightModifier = (int)((p.Height / 6.3 + 2) * Terraria.WorldGen.genRand.NextFloat(1, 1.35f)); // if uneven roof, adjust each side by this much
             int upperRoofBottomY = floorTopY - p.Height + 1;
             if (hasHigherSide && upperRoofBottomY + roofHeightModifier >= (leftRoofHigher ? right.Start.Y : left.Start.Y)) // check that an uneven roof won't cause collision with entry points
                 hasHigherSide = false;
-
             int lowerRoofBottomY = upperRoofBottomY + (hasHigherSide ? roofHeightModifier : 0);
             if (hasHigherSide) upperRoofBottomY -= roofHeightModifier;
 
+            // create external components
             var (exteriorFloors, exteriorWalls, roofs) = ExternalLayoutHelper.CreateBasicRoof(
                 new Point16(p.LeftEntryPointX + 1 - externalWallThickness, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
                 new Point16(p.RightEntryPointX - 1 + externalWallThickness, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
@@ -130,8 +113,12 @@ public static class StructureLayoutGen {
                     (!leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY) + 1, true, externalWallThickness));
 
             // if the bottom of either entry point is NOT flush with the floor
-            if (left.End.Y + 1 != floorTopY) exteriorWalls.Add(ExternalLayoutHelper.CreateWall(left.Start.X, left.End.Y + 1, floorTopY - 1 + externalFloorThickness, false, externalWallThickness));
-            if (right.End.Y + 1 != floorTopY) exteriorWalls.Add(ExternalLayoutHelper.CreateWall(right.Start.X, right.End.Y + 1, floorTopY - 1 + externalFloorThickness, true, externalWallThickness));
+            if (left.End.Y + 1 != floorTopY)
+                exteriorWalls.Add(ExternalLayoutHelper.CreateWall(left.Start.X,
+                    left.End.Y + 1, floorTopY - 1 + externalFloorThickness, false, externalWallThickness));
+            if (right.End.Y + 1 != floorTopY)
+                exteriorWalls.Add(ExternalLayoutHelper.CreateWall(right.Start.X,
+                    right.End.Y + 1, floorTopY - 1 + externalFloorThickness, true, externalWallThickness));
 
             advStructure.ExternalLayout = new ExternalLayout(
                 exteriorFloors,
@@ -140,23 +127,39 @@ public static class StructureLayoutGen {
                 roofs
             );
             advStructure.ExternalLayout.SetComponentExternal();
+
+            // create the tilemap
+            int roofTopY = ExternalLayoutHelper.GetHighestBoundingPoint(roofs);
+            advStructure.Tilemap = new StructureTilemap(
+                advStructure,
+                (ushort)(p.Length + 2 * (tilemapMargin + externalWallThickness)),
+                (ushort)(int.Max(p.EntryPoints[0].Start.Y, p.EntryPoints[1].Start.Y) + 5 + verticalOffset - roofTopY),
+                new Point16(
+                    p.LeftEntryPointX - externalWallThickness - tilemapMargin,
+                    roofTopY - tilemapMargin
+                )
+            );
+            left.SetOffset(advStructure.Tilemap.WorldTileOffset * Point16.NegativeOne);
+            right.SetOffset(advStructure.Tilemap.WorldTileOffset * Point16.NegativeOne);
             advStructure.SetTilesExternalStatus();
 
             // finish the room layout
             advStructure.Layout = new RoomLayout([], [], [],
-                [
-                    new Room(
-                        Shape.GetStructureInterior(advStructure.Tilemap),
-                        advStructure.ExternalLayout.Gaps
-                    )
-                ]);
+            [
+                new Room(
+                    Shape.GetStructureInterior(advStructure.Tilemap),
+                    advStructure.ExternalLayout.Gaps
+                )
+            ]);
 
             advStructure.CompleteExternalGaps();
-            RoomLayoutHelper.SubdivideRoom(advStructure.Layout, advStructure.Layout.Rooms[0], roomLayoutParams);
+            StructureLayoutHelper.SubdivideRoom.Action(advStructure.Layout, advStructure.Layout.Rooms[0], roomLayoutParams);
+            foreach (Room room in advStructure.Layout.Rooms) {
+                StructureLayoutHelper.CreateStairways.Action(p, room);
+                room.AddRequiredTag(ComponentTags.RoomTypeLiving);
+            }
 
-            foreach (Room room in advStructure.Layout.Rooms) room.AddRequiredTag(ComponentTag.RoomTypeLiving);
-
-            return true;
+            return advStructure.Current;
         }
     }
 

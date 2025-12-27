@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Helpers;
 using SpawnHouses.Types;
@@ -12,15 +10,15 @@ public static class WallGen {
     /// </summary>
     [ComponentGenerator(typeof(Wall))]
     public class WallGenerator1 : VolumeComponentGenerator {
-        public override HashSet<ComponentTag> PossibleTags { get; } = ComponentTagSystem.NewTagSet(
+        public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [
-                ComponentTag.External
+                ComponentTags.External
             ],
             ComponentHelper.FillShapeTiles.PossibleTags
         );
 
         public override bool Generate(VolumeComponentParams param) {
-            bool external = param.Component.TagsRequired.ContainsKey(ComponentTag.External);
+            bool external = param.Component.Required.ContainsKey(ComponentTags.External);
             ComponentHelper.FillShapeTiles.Action(param.Component.Volume, param, (_, _) => (external ? param.Palette.ExternalWall : param.Palette.InternalWall).Primary);
             return true;
         }
@@ -31,15 +29,14 @@ public static class WallGen {
     /// </summary>
     [ComponentGenerator(typeof(Wall))]
     public class WallGenerator2 : VolumeComponentGenerator {
-        public override HashSet<ComponentTag> PossibleTags { get; } = new HashSet<ComponentTag>(
+        public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [
-                ComponentTag.External
-            ])
-            .Concat(ComponentHelper.FillShapeTiles.PossibleTags)
-            .ToHashSet();
+                ComponentTags.External
+            ]
+        );
 
         public override bool Generate(VolumeComponentParams param) {
-            bool external = param.Component.TagsRequired.ContainsKey(ComponentTag.External);
+            bool external = param.Component.Required.ContainsKey(ComponentTags.External);
             int yStart = param.Component.Volume.BoundingBox.topLeft.Y;
             int yEnd = param.Component.Volume.BoundingBox.bottomRight.Y;
             int[] lowX = new int[param.Component.Volume.Size.Y];
