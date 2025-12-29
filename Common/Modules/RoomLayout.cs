@@ -36,16 +36,18 @@ public class RoomLayoutVolumes(
     }
 }
 
-public class RoomLayout(
-    List<Floor> floors,
-    List<Wall> walls,
-    List<Gap> gaps,
-    List<Room> rooms
-) {
-    public readonly List<Floor> Floors = floors;
-    public readonly List<Gap> Gaps = gaps;
-    public readonly List<Room> Rooms = rooms;
-    public readonly List<Wall> Walls = walls;
+public class RoomLayout : Generatable<> {
+    public readonly List<Floor> Floors;
+    public readonly List<Gap> Gaps;
+    public readonly List<Room> Rooms;
+    public readonly List<Wall> Walls;
+
+    public RoomLayout(List<Floor> floors, List<Wall> walls, List<Gap> gaps, List<Room> rooms) {
+        Floors = floors;
+        Walls = walls;
+        Rooms = rooms;
+        Gaps = gaps;
+    }
 
     public static RoomLayout Union(params RoomLayout[] roomLayouts) {
         List<Floor> floors = [];
@@ -70,30 +72,5 @@ public class RoomLayout(
             Gaps.AddRange(roomLayout.Gaps);
             Rooms.AddRange(roomLayout.Rooms);
         }
-    }
-}
-
-public class ExternalLayout(
-    List<Floor> floors,
-    List<Wall> walls,
-    List<Gap> gaps,
-    List<Roof> roofs
-) {
-    public readonly List<Floor> Floors = floors;
-    public readonly List<Gap> Gaps = gaps;
-    public readonly List<Roof> Roofs = roofs;
-    public readonly List<Wall> Walls = walls;
-
-    /// <summary>
-    ///     adds <see cref="ComponentTags.External" /> to every component
-    /// </summary>
-    public void SetComponentExternal() {
-        foreach (Floor floor in Floors)
-            floor.AddRequiredTag(ComponentTags.External);
-        foreach (Wall wall in Walls)
-            wall.AddRequiredTag(ComponentTags.External);
-        foreach (Gap gap in Gaps)
-            gap.AddRequiredTag(ComponentTags.External);
-        // roofs are automatically marked as external
     }
 }

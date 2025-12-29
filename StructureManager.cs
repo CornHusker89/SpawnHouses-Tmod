@@ -19,6 +19,16 @@ internal class StructureManager : ModSystem {
     public static MainBasement? MainBasement;
     public static Mineshaft? Mineshaft;
     public static BeachHouse? BeachHouse;
+    public static ushort GeneratableCount { get; private set; }
+
+    /// <summary>
+    ///     returns the next component id, and advances the internal counter. begins at id 1
+    /// </summary>
+    /// <returns></returns>
+    public static ushort NextGeneratableId() {
+        GeneratableCount++;
+        return GeneratableCount;
+    }
 
     public override void Load() {
         AdvStructure.LoadGenerators();
@@ -26,6 +36,7 @@ internal class StructureManager : ModSystem {
 
     public override void SaveWorldData(TagCompound tag) {
         tag["WorldVersion"] = WorldVersion;
+        tag["GeneratableCount"] = GeneratableCount;
 
         tag["MainHouse"] = MainHouse;
         tag["MainBasement"] = MainBasement;
@@ -37,6 +48,8 @@ internal class StructureManager : ModSystem {
         WorldVersion = tag.ContainsKey("WorldVersion")
             ? new Version(tag.GetString("WorldVersion"))
             : new Version("0.3.2");
+
+        GeneratableCount = tag.ContainsKey("GeneratableCount") ? (ushort)tag.GetInt("GeneratableCount") : (ushort)0;
 
         if (WorldVersion.Major < 1) {
             // the rest are unrecoverable. mainhouse might use just 1 structure, basement uses seeds, mineshaft doesn't exist
@@ -52,6 +65,7 @@ internal class StructureManager : ModSystem {
 
     public override void ClearWorld() {
         WorldVersion = new Version(ModInstance.Mod.Version.ToString());
+        GeneratableCount = 0;
         MainHouse = null;
         MainBasement = null;
         Mineshaft = null;

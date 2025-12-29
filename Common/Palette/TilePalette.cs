@@ -1,11 +1,12 @@
 #nullable enable
 
+using SpawnHouses.Types.TagTypes;
 using Terraria.ID;
 
 namespace SpawnHouses.Types.Palette;
 
 public class TilePalette {
-    #region Palettes
+    #region Palette Presets
 
     private static readonly PaintedTypeFloorSet FloorWoodRough = new() {
         Primary = new TilePaintedType([TileID.LivingMahogany, TileID.WoodBlock], [PaintID.BrownPaint, PaintID.None]),
@@ -123,11 +124,12 @@ public class TilePalette {
     public required PaintedTypeDecorSet LivingDecor;
 
     public required PaintedTypeRoomSet LivingRoom;
-    public StructureTag[] PossibleTags;
 
     public required PaintedTypeRoofSet Roof;
     public required PaintedTypeDecorSet StorageDecor;
     public required PaintedTypeRoomSet StorageRoom;
+
+    public TagMap TagsRequired;
     public required PaintedTypeDecorSet WorkshopDecor;
     public required PaintedTypeRoomSet WorkshopRoom;
 

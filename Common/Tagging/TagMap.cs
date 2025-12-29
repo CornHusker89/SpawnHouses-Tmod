@@ -28,7 +28,7 @@ public sealed class TagMap {
     /// </summary>
     /// <param name="tag"></param>
     /// <param name="value">dummy param, not used. will always be replaced with null</param>
-    private void Set(Tag tag, object? value) => _data[tag] = null;
+    private void Add(Tag tag, object? value) => _data[tag] = null;
 
     /// <summary>
     ///     set the value for a specific tag
@@ -36,13 +36,13 @@ public sealed class TagMap {
     /// <param name="tag"></param>
     /// <param name="value"></param>
     /// <typeparam name="T"></typeparam>
-    public void Set<T>(Tag<T> tag, T? value) => _data[tag] = value!;
+    public void Add<T>(Tag<T> tag, T? value) => _data[tag] = value!;
 
     /// <summary>
     ///     sets a specific untyped tag. data value set is always null
     /// </summary>
     /// <param name="tag"></param>
-    public void Set(Tag tag) => _data[tag] = null;
+    public void Add(Tag tag) => _data[tag] = null;
 
     /// <summary>
     ///     if a tag exists in this tag map
@@ -82,12 +82,12 @@ public sealed class TagMap {
     /// <param name="tagMap"></param>
     /// <param name="throwException">if true, will throw if there is duplicate tags. otherwise, the other <paramref name="tagMap" /> will overwrite this one</param>
     /// <exception cref="Exception"></exception>
-    public void Append(TagMap tagMap, bool throwException) {
+    public void Append(TagMap tagMap, bool throwException = false) {
         var thisKeys = Keys;
         foreach (Tag tag in tagMap.Keys) {
             if (throwException && thisKeys.Contains(tag))
                 throw new Exception($"this TagMap already contains key {tag}");
-            Set(tag, tagMap._data[tag]);
+            Add(tag, tagMap._data[tag]);
         }
     }
 

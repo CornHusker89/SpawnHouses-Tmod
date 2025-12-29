@@ -4,17 +4,20 @@ using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.AdvStructures.Generation;
 using SpawnHouses.Structures;
-using SpawnHouses.Types;
 using SpawnHouses.Types.TagTypes;
-using Terraria;
 
 namespace SpawnHouses.AdvStructures;
 
 public interface IGeneratable : ITagSystem {
     /// <summary>
+    ///     unique number given to each generatable instance in the world. a value of 0 represents unassigned
+    /// </summary>
+    public ushort Id { get; }
+
+    /// <summary>
     ///     the generation parameters for this generatable object
     /// </summary>
-    public Params Params { get; }
+    public object Params { get; }
 
     /// <summary>
     ///     the executable generator for this component
@@ -33,26 +36,31 @@ public interface IGeneratable : ITagSystem {
     /// <param name="generators"></param>
     /// <returns></returns>
     public IGenerator GetGenerator(List<IGenerator> generators);
+
+    /// <summary>
+    ///     gets the hashcode of a generator's name and namespace
+    /// </summary>
+    /// <returns></returns>
+    public int GetGeneratorHash() => Generator.GetType().FullName!.GetHashCode();
 }
 
 public interface IGeneratable<TParams, TGeometry, TGenerator> : IGeneratable
-    where TParams : Params
     where TGeometry : PointGeometry
     where TGenerator : Generator<TParams, TGeometry> {
-    Params IGeneratable.Params => Params;
-
     /// <inheritdoc cref="IGeneratable.Params" />
     public new TParams Params { get; init; }
-
-    IGenerator IGeneratable.Generator => Generator;
 
     /// <inheritdoc cref="IGeneratable.Generator" />
     public new TGenerator Generator { get; init; }
 
-    PointGeometry IGeneratable.Geometry => Geometry;
-
     /// <inheritdoc cref="IGeneratable.Geometry" />
     public new TGeometry Geometry { get; init; }
+
+    object IGeneratable.Params => Params;
+
+    IGenerator IGeneratable.Generator => Generator;
+
+    PointGeometry IGeneratable.Geometry => Geometry;
 
     IGenerator IGeneratable.GetGenerator(List<IGenerator> generators) => Generator;
 
@@ -61,22 +69,28 @@ public interface IGeneratable<TParams, TGeometry, TGenerator> : IGeneratable
 }
 
 public abstract class Generatable<TParams, TGeometry, TGenerator> : IGeneratable<TParams, TGeometry, TGenerator>
-    where TParams : Params
     where TGeometry : PointGeometry
     where TGenerator : Generator<TParams, TGeometry> {
+    protected Generatable(TParams param, TagMap tagsRequired, TagMap tagsCurrent, TGeometry geometry) {
+        // from interface
+        Id = StructureManager.NextGeneratableId();
+        Params = param;
+        TagsRequired = tagsRequired;
+        TagsCurrent = tagsCurrent;
+
+        // unique to generatable
+        Geometry = geometry;
+    }
+
+    // from interface
+    public required ushort Id { get; init; }
     public required TParams Params { get; init; }
     public required TagMap TagsRequired { get; init; }
     public required TagMap TagsCurrent { get; init; }
 
+    // unique to generatable
     public required TGenerator Generator { get; init; }
     public required TGeometry Geometry { get; init; }
-
-    protected Generatable(TParams param, TagMap tagsRequired, TagMap tagsCurrent, TGeometry geometry) {
-        Params = param;
-        TagsRequired = tagsRequired;
-        TagsCurrent = tagsCurrent;
-        Geometry = geometry;
-    }
 
     public TGenerator GetGenerator(List<TGenerator> generators) {
         TagsRequired.ValidateExclusiveRequiredTags();

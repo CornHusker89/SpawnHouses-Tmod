@@ -4,6 +4,13 @@ using SpawnHouses.Helpers;
 namespace SpawnHouses.Types.TagTypes;
 
 public static class Tags {
+    #region Wall
+
+    public static Tag IsWallGap = new(22);
+
+    #endregion
+
+
     #region Structure
 
     public static Tag IsSymmetric = new(1);
@@ -68,12 +75,6 @@ public static class Tags {
     public static Tag FloorSolid = new(20);
 
     public static Tag FloorHollow = new(21);
-
-    #endregion
-
-    #region Wall
-
-    public static Tag IsWallGap = new(22);
 
     #endregion
 
