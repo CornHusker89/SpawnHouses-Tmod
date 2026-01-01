@@ -1,41 +1,37 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using SpawnHouses.AdvStructures.AdvStructureParts;
-using SpawnHouses.AdvStructures.Generation;
+using SpawnHouses.Common.Parameters;
 using SpawnHouses.Structures;
 using SpawnHouses.Types.TagTypes;
+using Terraria;
 
-namespace SpawnHouses.AdvStructures;
+namespace SpawnHouses.Common.Types;
 
-public interface IGeneratable : ITagSystem {
+public interface IGeneratable {
     /// <summary>
-    ///     unique number given to each generatable instance in the world. a value of 0 represents unassigned
+    ///     unique number given to each generatable instance in the world. automatically assigned on instance creation, 
     /// </summary>
     public ushort Id { get; }
 
     /// <summary>
-    ///     the generation parameters for this generatable object
+    ///     generation parameters for this generatable object
     /// </summary>
-    public object Params { get; }
-
+    public IParams Params { get; }
+    
     /// <summary>
-    ///     the executable generator for this component
+    ///      tags that this instance currently has
     /// </summary>
-    /// <remarks>set in <see cref="AdvStructure.ApplyLayoutMethod" /> during structure generation</remarks>
+    public TagMap TagsCurrent { get; }
+    
+    /// <summary>
+    ///     executable generator for this component. automatically assigned on instance creation
+    /// </summary>
     public IGenerator Generator { get; }
 
     /// <summary>
-    ///     the geometry that this generatable will occupy
+    ///     sets <see cref="Generator"/>
     /// </summary>
-    public PointGeometry Geometry { get; }
-
-    /// <summary>
-    ///     gets a random generator from the list of applicable generators for this generatable type
-    /// </summary>
-    /// <param name="generators"></param>
-    /// <returns></returns>
-    public IGenerator GetGenerator(List<IGenerator> generators);
+    public void SetGenerator();
 
     /// <summary>
     ///     gets the hashcode of a generator's name and namespace
@@ -44,64 +40,65 @@ public interface IGeneratable : ITagSystem {
     public int GetGeneratorHash() => Generator.GetType().FullName!.GetHashCode();
 }
 
-public interface IGeneratable<TParams, TGeometry, TGenerator> : IGeneratable
-    where TGeometry : PointGeometry
-    where TGenerator : Generator<TParams, TGeometry> {
+public interface IGeneratable<out TParams, out TGenerator> : IGeneratable
+    where TParams : IParams
+    where TGenerator : Generator<TParams> {
+    IParams IGeneratable.Params => Params;
     /// <inheritdoc cref="IGeneratable.Params" />
-    public new TParams Params { get; init; }
-
-    /// <inheritdoc cref="IGeneratable.Generator" />
-    public new TGenerator Generator { get; init; }
-
-    /// <inheritdoc cref="IGeneratable.Geometry" />
-    public new TGeometry Geometry { get; init; }
-
-    object IGeneratable.Params => Params;
+    public new TParams Params { get; }
 
     IGenerator IGeneratable.Generator => Generator;
+    /// <inheritdoc cref="IGeneratable.Generator" />
+    public new TGenerator Generator { get; }
 
-    PointGeometry IGeneratable.Geometry => Geometry;
+    void IGeneratable.SetGenerator() => SetGenerator();
 
-    IGenerator IGeneratable.GetGenerator(List<IGenerator> generators) => Generator;
-
-    /// <inheritdoc cref="IGeneratable.GetGenerator" />
-    public TGenerator GetGenerator(List<TGenerator> generators);
+    /// <inheritdoc cref="IGeneratable.SetGenerator" />
+    public new void SetGenerator();
 }
 
-public abstract class Generatable<TParams, TGeometry, TGenerator> : IGeneratable<TParams, TGeometry, TGenerator>
-    where TGeometry : PointGeometry
-    where TGenerator : Generator<TParams, TGeometry> {
-    protected Generatable(TParams param, TagMap tagsRequired, TagMap tagsCurrent, TGeometry geometry) {
-        // from interface
+public abstract class Generatable<TParams, TGenerator> : IGeneratable<TParams, TGenerator>
+    where TParams : IParams
+    where TGenerator : Generator<TParams> {
+    public ushort Id { get; init; }
+    public TParams Params { get; init; }
+    public TagMap TagsCurrent { get; init; }
+    public TGenerator Generator { get; set; }
+
+    protected Generatable(TParams param, TagMap tagsCurrent) {
         Id = StructureManager.NextGeneratableId();
         Params = param;
-        TagsRequired = tagsRequired;
         TagsCurrent = tagsCurrent;
-
-        // unique to generatable
-        Geometry = geometry;
     }
 
-    // from interface
-    public required ushort Id { get; init; }
-    public required TParams Params { get; init; }
-    public required TagMap TagsRequired { get; init; }
-    public required TagMap TagsCurrent { get; init; }
-
-    // unique to generatable
-    public required TGenerator Generator { get; init; }
-    public required TGeometry Geometry { get; init; }
-
-    public TGenerator GetGenerator(List<TGenerator> generators) {
-        TagsRequired.ValidateExclusiveRequiredTags();
+    private TGenerator FindValidGenerator(TGenerator[] generators) {
         TagsCurrent.ValidateExclusiveCurrentTags();
-        var validGenerators = generators.Where(gen => gen.CanGenerate(Params, Geometry)
-                                                      && TagsRequired.KeysSet.IsSubsetOf(gen.PossibleTags))
+        var validGenerators = generators.Where(gen => gen.CanGenerate(Params) && Params.TagsRequired.KeysSet.IsSubsetOf(gen.PossibleTags))
             .ToArray();
 
         if (validGenerators.Length == 0)
-            throw new Exception($"No component generators were found that are compatible with given parameters. type: {GetType().FullName}, required tags: {EnumHelper.ToString(TagsRequired.Keys)}");
+            throw new Exception($"No instance generators were found that are compatible with given parameters. type: {GetType().FullName}, required tags: {EnumHelper.ToString(Params.TagsRequired.Keys)}");
 
         return Params.Structure.RandomGen.NextFromList(validGenerators);
+    }
+
+    public void SetGenerator() {
+        int generatorIndex = 0;
+        Type instanceType = GetType();
+        if (!AdvStructure.InstanceGenerators.TryGetValue(instanceType, out var generators)) throw new Exception($"instance type {GetType().FullName} generators not found");
+        var typedGenerators = generators.Cast<TGenerator>().ToArray();
+
+        if (!Params.Structure.InstanceGeneratorQueue.TryGetValue(instanceType, out var generatorList)) {
+            generatorList = [FindValidGenerator(typedGenerators)];
+            Params.Structure.InstanceGeneratorQueue[instanceType] = generatorList;
+        }
+        else {
+            while (!generatorList[generatorIndex].CanGenerate(Params)) {
+                generatorIndex++;
+                if (generatorIndex >= Params.Structure.InstanceGeneratorQueue.Count) generatorList.Add(FindValidGenerator(typedGenerators));
+            }
+        }
+
+        Generator = (TGenerator)generatorList[generatorIndex];
     }
 }

@@ -4,13 +4,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SpawnHouses.AdvStructures.AdvStructureParts;
+using SpawnHouses.Common.Tiles;
 using SpawnHouses.Helpers;
 using SpawnHouses.Structures;
 using SpawnHouses.Types;
 using Terraria.DataStructures;
 using Terraria.ID;
 
-namespace SpawnHouses.AdvStructures.AdvStructureParts;
+namespace SpawnHouses.Common.Types.Geometry;
 
 /// <summary>
 ///     generic 2D shape. has support for triangles, rectangles, and n-gons.
@@ -18,7 +20,7 @@ namespace SpawnHouses.AdvStructures.AdvStructureParts;
 /// </summary>
 /// <remarks>it's assumed that the points are in clockwise order</remarks>
 public class Shape : PointGeometry {
-    public bool IsBox { get; private set; } // because many of the shapes will be boxes, introduce optimizations for boxes
+    public bool IsBox { get; private set; } // because many shapes will be boxes, introduce optimizations for boxes
 
     private bool[,]? _booleanTilemap;
 

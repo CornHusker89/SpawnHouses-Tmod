@@ -1,3 +1,5 @@
+using SpawnHouses.Common.Modules;
+
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
 public class Stairway : PathComponent {

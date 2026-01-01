@@ -1,3 +1,4 @@
+using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Types.Palette;
 using Terraria.DataStructures;
 using Terraria.Utilities;

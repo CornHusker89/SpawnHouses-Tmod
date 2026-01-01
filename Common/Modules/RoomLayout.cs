@@ -1,68 +1,27 @@
 using System.Collections.Generic;
-using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
+using SpawnHouses.Common.Modules.Components;
+using SpawnHouses.Common.Parameters;
+using SpawnHouses.Common.Types;
+using SpawnHouses.Types.TagTypes;
 using Terraria.DataStructures;
 
-namespace SpawnHouses.Types;
+namespace SpawnHouses.Common.Modules;
 
-public class RoomLayoutVolumes(
-    List<Shape> floorVolumes,
-    List<Shape> wallVolumes,
-    List<Shape> roomVolumes
-) {
-    public readonly List<Shape> FloorVolumes = floorVolumes;
-    public readonly List<Shape> RoomVolumes = roomVolumes;
-    public readonly List<Shape> WallVolumes = wallVolumes;
+public class RoomLayout : Generatable<RoomLayoutParams, RoomLayoutGenerator> {
+    public List<Floor> Floors { get; private set; }
+    public List<Wall> Walls { get; private set; }
+    public List<Gap> Gaps { get; private set; }
+    public List<Room> Rooms { get; private set; }
 
-    public bool InFloor(Point16 point) {
-        return FloorVolumes.Any(floorVolume => floorVolume.Contains(point));
+    public RoomLayout(RoomLayoutParams param) : base(param, new TagMap()) {
     }
 
-    public bool InWall(Point16 point) {
-        return WallVolumes.Any(wallVolume => wallVolume.Contains(point));
-    }
-
-    public bool InRoom(Point16 point) {
-        return RoomVolumes.Any(roomVolume => roomVolume.Contains(point));
-    }
-
-    /// <summary>
-    ///     checks if the point is contained within any volume
-    /// </summary>
-    /// <param name="point"></param>
-    /// <returns></returns>
-    public bool InStructure(Point16 point) {
-        return FloorVolumes.Any(floorVolume => floorVolume.Contains(point)) || WallVolumes.Any(floorVolume => floorVolume.Contains(point)) || RoomVolumes.Any(floorVolume => floorVolume.Contains(point));
-    }
-}
-
-public class RoomLayout : Generatable<> {
-    public readonly List<Floor> Floors;
-    public readonly List<Gap> Gaps;
-    public readonly List<Room> Rooms;
-    public readonly List<Wall> Walls;
-
-    public RoomLayout(List<Floor> floors, List<Wall> walls, List<Gap> gaps, List<Room> rooms) {
+    public void SetComponents(List<Floor> floors, List<Wall> walls, List<Gap> gaps, List<Room> rooms) {
         Floors = floors;
         Walls = walls;
-        Rooms = rooms;
         Gaps = gaps;
-    }
-
-    public static RoomLayout Union(params RoomLayout[] roomLayouts) {
-        List<Floor> floors = [];
-        List<Wall> walls = [];
-        List<Gap> gaps = [];
-        List<Room> rooms = [];
-
-        foreach (RoomLayout roomLayout in roomLayouts) {
-            floors.AddRange(roomLayout.Floors);
-            walls.AddRange(roomLayout.Walls);
-            gaps.AddRange(roomLayout.Gaps);
-            rooms.AddRange(roomLayout.Rooms);
-        }
-
-        return new RoomLayout(floors, walls, gaps, rooms);
+        Rooms = rooms;
     }
 
     public void Combine(params RoomLayout[] roomLayouts) {
@@ -72,5 +31,12 @@ public class RoomLayout : Generatable<> {
             Gaps.AddRange(roomLayout.Gaps);
             Rooms.AddRange(roomLayout.Rooms);
         }
+    }
+
+    public void Offset(Point16 offset) {
+        foreach (Floor floor in Floors) floor.Geometry.Offset(offset);
+        foreach (Wall wall in Walls) wall.Geometry.Offset(offset);
+        foreach (Gap gap in Gaps) gap.Geometry.Offset(offset);
+        foreach (Room room in Rooms) room.Geometry.Offset(offset);
     }
 }

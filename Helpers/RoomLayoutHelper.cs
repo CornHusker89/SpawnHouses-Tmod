@@ -3,8 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
+using SpawnHouses.Common.Modules;
+using SpawnHouses.Common.Modules.Components;
+using SpawnHouses.Common.Parameters;
+using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Structures;
-using SpawnHouses.Types;
 using Terraria.DataStructures;
 using Gap = SpawnHouses.AdvStructures.AdvStructureParts.Gap;
 
@@ -16,31 +19,34 @@ public static class RoomLayoutHelper {
     /// <summary>
     ///     gets closest room to the point using the perimeter of each room
     /// </summary>
-    /// <param name="rooms"></param>
+    /// <param name="roomSections"></param>
     /// <param name="point"></param>
     /// <returns></returns>
-    public static Room GetClosestRoom(List<Room> rooms, Point16 point) {
-        if (rooms.Count == 0)
-            throw new Exception("BackgroundVolumes in given room layout was empty");
-
-        int closestIndex = -1;
+    public static Room GetClosestRoom(List<RoomLayout> roomSections, Point16 point) {
+        Room? closestRoom = null;
         double closestDistance = double.MaxValue;
 
-        for (int i = 0; i < rooms.Count; i++) {
-            double closestDistanceInShape = double.MaxValue;
-            rooms[i].Volume.ExecuteOnPerimeter((x, y, _) => {
-                double distance = Math.Sqrt(Math.Pow(point.X - x, 2) + Math.Pow(point.Y - y, 2));
-                if (distance < closestDistanceInShape)
-                    closestDistanceInShape = distance;
-            });
+        foreach (RoomLayout roomLayout in roomSections) {
+            foreach (Room room in roomLayout.Rooms) {
+                closestRoom ??= room;
 
-            if (closestDistanceInShape < closestDistance) {
-                closestDistance = closestDistanceInShape;
-                closestIndex = i;
+                double closestDistanceInShape = double.MaxValue;
+                room.Geometry.ExecuteOnPerimeter((x, y, _) => {
+                    double distance = Math.Sqrt(Math.Pow(point.X - x, 2) + Math.Pow(point.Y - y, 2));
+                    if (distance < closestDistanceInShape)
+                        closestDistanceInShape = distance;
+                });
+
+                if (closestDistanceInShape < closestDistance) {
+                    closestDistance = closestDistanceInShape;
+                    closestRoom = room;
+                }
             }
         }
 
-        return rooms[closestIndex];
+        if (closestRoom == null)
+            throw new Exception("given RoomLayouts had no rooms");
+        return closestRoom;
     }
 
     /// <summary>
@@ -51,7 +57,7 @@ public static class RoomLayoutHelper {
     /// <returns></returns>
     public static List<Gap> GetAdjacentGaps(Shape volume, List<Gap> gaps) {
         Shape expandedVolume = volume.GetExpandedShape(1);
-        return gaps.FindAll(gap => expandedVolume.HasIntersection(gap.Volume));
+        return gaps.FindAll(gap => expandedVolume.HasIntersection(gap.Geometry));
     }
 
     /// <summary>

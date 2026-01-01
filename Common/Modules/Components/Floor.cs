@@ -1,11 +1,12 @@
-using SpawnHouses.Types;
+using SpawnHouses.Common.Parameters;
+using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Types.TagTypes;
 
-namespace SpawnHouses.AdvStructures.AdvStructureParts;
+namespace SpawnHouses.Common.Modules.Components;
 
 public class Floor : VolumeComponent {
-    public Floor(VolumeComponentParams param, Shape volume, bool isExterior = false) : base(param, volume,) {
+    public Floor(VolumeComponentParams param, Shape volume, bool isExterior = false) : base(param, volume) {
         if (isExterior)
-            Tags.AddRequiredTag(ComponentTags.External);
+            Params.TagsRequired.Add(Tags.External);
     }
 }

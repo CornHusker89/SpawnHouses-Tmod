@@ -1,8 +1,10 @@
 #nullable enable
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
+using SpawnHouses.Common;
+using SpawnHouses.Common.Types;
+using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Helpers;
-using SpawnHouses.Types;
 
 namespace SpawnHouses.AdvStructures.Generation.Components;
 
@@ -10,7 +12,7 @@ public static class RoomGen {
     /// <summary>
     ///     Fills in sections of 3-wide primary tiles, with accents and beams
     /// </summary>
-    [ComponentGenerator(typeof(Room))]
+    [InstanceGenerator(typeof(Room))]
     public class RoomGenerator2 : VolumeComponentGenerator {
         public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [

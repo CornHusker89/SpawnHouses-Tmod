@@ -1,6 +1,8 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using SpawnHouses.Common.Modules;
+using SpawnHouses.Common.Types.Geometry;
 
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 

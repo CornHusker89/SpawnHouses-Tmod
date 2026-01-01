@@ -1,15 +1,16 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using SpawnHouses.AdvStructures;
 using SpawnHouses.AdvStructures.AdvStructureParts;
+using SpawnHouses.Common.Modules;
 using SpawnHouses.Helpers;
+using SpawnHouses.Types;
 using SpawnHouses.Types.Palette;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 
-namespace SpawnHouses.Types;
+namespace SpawnHouses.Common.Tiles;
 
 public class StructureTilemap {
     private readonly StructureTile[,] _tiles;
@@ -85,15 +86,12 @@ public class StructureTilemap {
     public Point16 ConvertToGlobal(Point16 point) => ConvertToGlobal(point.X, point.Y);
 
     /// <summary>
-    ///     offsets given <see cref="ExternalLayout" /> by this tilemap's tile offset
+    ///     offsets given <see cref="StructureLayout" /> by this tilemap's tile offset
     /// </summary>
-    /// <param name="externalLayout"></param>
-    public void OffsetExternalLayout(ExternalLayout externalLayout) {
+    /// <param name="structureLayout"></param>
+    public void OffsetExternalLayout(StructureLayout structureLayout) {
         Point16 offset = WorldTileOffset * Point16.NegativeOne;
-        foreach (Floor floor in externalLayout.Floors) floor.Volume.Offset(offset);
-        foreach (Wall wall in externalLayout.Walls) wall.Volume.Offset(offset);
-        foreach (Gap gap in externalLayout.Gaps) gap.Volume.Offset(offset);
-        foreach (Roof roof in externalLayout.Roofs) roof.Line.Offset(offset);
+        structureLayout.Offset(offset);
     }
 
     /// <summary>

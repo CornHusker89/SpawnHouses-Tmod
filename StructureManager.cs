@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SpawnHouses.AdvStructures;
+using SpawnHouses.Common;
 using SpawnHouses.Structures;
 using SpawnHouses.Structures.Chains;
 using SpawnHouses.Structures.Structures;

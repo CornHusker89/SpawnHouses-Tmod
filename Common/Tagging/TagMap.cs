@@ -82,7 +82,7 @@ public sealed class TagMap {
     /// <param name="tagMap"></param>
     /// <param name="throwException">if true, will throw if there is duplicate tags. otherwise, the other <paramref name="tagMap" /> will overwrite this one</param>
     /// <exception cref="Exception"></exception>
-    public void Append(TagMap tagMap, bool throwException = false) {
+    public void AddRange(TagMap tagMap, bool throwException = false) {
         var thisKeys = Keys;
         foreach (Tag tag in tagMap.Keys) {
             if (throwException && thisKeys.Contains(tag))

@@ -1,4 +1,6 @@
 using SpawnHouses.AdvStructures.AdvStructureParts;
+using SpawnHouses.Common;
+using SpawnHouses.Common.Types;
 using SpawnHouses.Types;
 using Terraria.DataStructures;
 
@@ -8,7 +10,7 @@ public class GapGen {
     /// <summary>
     ///     A gap floor, places platforms and places walls if external
     /// </summary>
-    [ComponentGenerator(typeof(Gap))]
+    [InstanceGenerator(typeof(Gap))]
     public class FloorGapGenerator1 : VolumeComponentGenerator {
         public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [
@@ -53,7 +55,7 @@ public class GapGen {
     /// <summary>
     ///     gap wall, places door and places walls if external
     /// </summary>
-    [ComponentGenerator(typeof(Gap))]
+    [InstanceGenerator(typeof(Gap))]
     public class WallGapGenerator1 : VolumeComponentGenerator {
         public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [

@@ -1,8 +1,8 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using SpawnHouses.AdvStructures;
 using SpawnHouses.AdvStructures.AdvStructureParts;
+using SpawnHouses.Common;
 using SpawnHouses.Structures;
 using SpawnHouses.Types.Palette;
 using Terraria;

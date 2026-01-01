@@ -1,4 +1,6 @@
 #nullable enable
+using SpawnHouses.Common.Modules;
+
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
 public class Roof : PathComponent {

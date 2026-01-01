@@ -99,6 +99,10 @@ public abstract class PointGeometry {
         Points = same ? [newPoints[0]] : newPoints.ToArray();
     }
 
+    /// <summary>
+    ///     moves shape by the offset. ex. if offset = (3, 0) will move shape 3 to the right in world coordinates
+    /// </summary>
+    /// <param name="offset"></param>
     public void Offset(Point16 offset) {
         for (int i = 0; i < Points.Length; i++) Points[i] += offset;
         Init(Points, false);

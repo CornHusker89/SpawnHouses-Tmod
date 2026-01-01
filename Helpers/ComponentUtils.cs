@@ -1,7 +1,6 @@
 using System;
-using SpawnHouses.AdvStructures;
-using SpawnHouses.AdvStructures.AdvStructureParts;
-using SpawnHouses.Types;
+using SpawnHouses.Common;
+using SpawnHouses.Common.Modules;
 
 namespace SpawnHouses.Helpers;
 

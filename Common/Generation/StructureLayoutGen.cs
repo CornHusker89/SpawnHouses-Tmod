@@ -2,14 +2,18 @@
 using System;
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
+using SpawnHouses.Common.Modules;
+using SpawnHouses.Common.Parameters;
+using SpawnHouses.Common.Tiles;
+using SpawnHouses.Common.Types;
+using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Helpers;
 using SpawnHouses.Structures;
-using SpawnHouses.Types;
 using Terraria;
 using Terraria.DataStructures;
 using Range = SpawnHouses.Structures.Range;
 
-namespace SpawnHouses.AdvStructures.Generation;
+namespace SpawnHouses.Common.Generation;
 
 public static class StructureLayoutGen {
     /// <summary>
@@ -120,13 +124,13 @@ public static class StructureLayoutGen {
                 exteriorWalls.Add(ExternalLayoutHelper.CreateWall(right.Start.X,
                     right.End.Y + 1, floorTopY - 1 + externalFloorThickness, true, externalWallThickness));
 
-            advStructure.ExternalLayout = new ExternalLayout(
+            advStructure.StructureLayout = new ExternalLayout(
                 exteriorFloors,
                 exteriorWalls,
                 RoomLayoutHelper.GapsFromEntryPoints(p.EntryPoints, externalFloorThickness, externalWallThickness).ToList(),
                 roofs
             );
-            advStructure.ExternalLayout.SetComponentExternal();
+            advStructure.StructureLayout.SetComponentTagsExternal();
 
             // create the tilemap
             int roofTopY = ExternalLayoutHelper.GetHighestBoundingPoint(roofs);
@@ -144,17 +148,17 @@ public static class StructureLayoutGen {
             advStructure.SetTilesExternalStatus();
 
             // finish the room layout
-            advStructure.Layout = new RoomLayout([], [], [],
+            advStructure.RoomSections = new RoomLayout([], [], [],
             [
                 new Room(
                     Shape.GetStructureInterior(advStructure.Tilemap),
-                    advStructure.ExternalLayout.Gaps
+                    advStructure.StructureLayout.Gaps
                 )
             ]);
 
             advStructure.CompleteExternalGaps();
-            StructureLayoutHelper.SubdivideRoom.Action(advStructure.Layout, advStructure.Layout.Rooms[0], roomLayoutParams);
-            foreach (Room room in advStructure.Layout.Rooms) {
+            StructureLayoutHelper.SubdivideRoom.Action(advStructure.RoomSections, advStructure.RoomSections.Rooms[0], roomLayoutParams);
+            foreach (Room room in advStructure.RoomSections.Rooms) {
                 StructureLayoutHelper.CreateStairways.Action(p, room);
                 room.AddRequiredTag(ComponentTags.RoomTypeLiving);
             }

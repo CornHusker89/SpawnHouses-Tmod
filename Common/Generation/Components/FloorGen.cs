@@ -1,7 +1,8 @@
 #nullable enable
-using SpawnHouses.AdvStructures.AdvStructureParts;
+using SpawnHouses.Common;
+using SpawnHouses.Common.Modules.Components;
+using SpawnHouses.Common.Types;
 using SpawnHouses.Helpers;
-using SpawnHouses.Types;
 
 namespace SpawnHouses.AdvStructures.Generation.Components;
 
@@ -9,7 +10,7 @@ public static class FloorGen {
     /// <summary>
     ///     Fills a volume floor blocks
     /// </summary>
-    [ComponentGenerator(typeof(Floor))]
+    [InstanceGenerator(typeof(Floor))]
     public class FloorGenerator1 : VolumeComponentGenerator {
         public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [
@@ -75,7 +76,7 @@ public static class FloorGen {
     /// <summary>
     ///     Fills top and bottom of volume, adds support struts in the middle
     /// </summary>
-    [ComponentGenerator(typeof(Floor))]
+    [InstanceGenerator(typeof(Floor))]
     public class FloorGenerator4 : VolumeComponentGenerator {
         public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [

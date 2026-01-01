@@ -1,3 +1,6 @@
+using SpawnHouses.Common.Modules;
+using SpawnHouses.Common.Types.Geometry;
+
 namespace SpawnHouses.AdvStructures.AdvStructureParts;
 
 public class Wall : VolumeComponent {

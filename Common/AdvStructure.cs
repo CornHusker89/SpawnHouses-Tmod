@@ -2,50 +2,53 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using SpawnHouses.AdvStructures.AdvStructureParts;
-using SpawnHouses.AdvStructures.Generation;
+using SpawnHouses.Common.Modules;
+using SpawnHouses.Common.Parameters;
+using SpawnHouses.Common.Tiles;
+using SpawnHouses.Common.Types;
 using SpawnHouses.Helpers;
-using SpawnHouses.Types;
 using SpawnHouses.Types.Palette;
 using SpawnHouses.Types.TagTypes;
 using Terraria.Utilities;
+using IComponent = SpawnHouses.Common.Modules.IComponent;
 
-namespace SpawnHouses.AdvStructures;
+namespace SpawnHouses.Common;
 
 /// <summary>
 ///     the central object that everything for adv. structures revolve around
 /// </summary>
 public class AdvStructure {
-    public static readonly List<StructureLayoutGenerator> StructureLayoutGenerators = [];
-
     /// <summary>type corresponds to the final component's type</summary>
-    public static readonly Dictionary<Type, List<IGenerator>> ComponentGenerators = new();
+    public static readonly Dictionary<Type, List<IGenerator>> InstanceGenerators = new();
 
-    private readonly Dictionary<Type, List<IGenerator>> _componentGeneratorQueue = [];
-
+    public readonly Dictionary<Type, List<IGenerator>> InstanceGeneratorQueue = [];
     public readonly UnifiedRandom RandomGen;
     public readonly int Seed;
 
+    public StructureLayout StructureLayout;
+    public List<RoomLayout> RoomSections;
     public List<IComponent> Components;
 
-    public ExternalLayout ExternalLayout;
-    public RoomLayout Layout;
+    public StructureLayoutParams LayoutParam;
+    public TagMap TagsRequired;
     public TilePalette Palette;
     public StructureTilemap Tilemap;
 
     /// <summary>
     /// </summary>
-    /// <param name="param"></param>
+    /// <param name="layoutParam"></param>
     /// <param name="tagsRequired"></param>
-    /// <param name="geometry"></param>
     /// <param name="palette"></param>
     /// <param name="seed">if -1, will create a new random seed from the base terraria random generator</param>
     /// <param name="generate">
     ///     if true, will call <see cref="ApplyLayoutMethod" />, <see cref="FillComponents" /> and
     ///     <see cref="PlaceTilemap" />
     /// </param>
-    public AdvStructure(TagMap tagsRequired, Path geometry, TilePalette palette, int seed = -1, bool generate = true) {
+    public AdvStructure(StructureLayoutParams layoutParam, TagMap tagsRequired, TilePalette palette, int seed = -1, bool generate = true) {
         Seed = seed == -1 ? Terraria.WorldGen.genRand.Next() : seed;
         RandomGen = new UnifiedRandom(Seed);
+        LayoutParam = layoutParam;
+        TagsRequired = tagsRequired;
         Palette = palette;
         if (generate) {
             ApplyLayoutMethod();
@@ -57,61 +60,11 @@ public class AdvStructure {
     public bool HasSetComponents { get; private set; }
 
     /// <summary>
-    ///     sets the outside/exterior component/inside tile data within the tilemap, based on the current external layout
-    /// </summary>
-    public void SetTilesExternalStatus() {
-        foreach (Shape shape in ExternalLayout.Floors.Select(floor => floor.Geometry))
-            shape.ExecuteInArea((x, y) => {
-                StructureTile tile = Tilemap[x, y];
-                tile.IsExteriorComponent = true;
-                tile.IsFloor = true;
-            });
-
-        foreach (Shape shape in ExternalLayout.Walls.Select(wall => wall.Geometry))
-            shape.ExecuteInArea((x, y) => {
-                StructureTile tile = Tilemap[x, y];
-                tile.IsExteriorComponent = true;
-                tile.IsWall = true;
-            });
-
-        foreach (Shape shape in ExternalLayout.Gaps.Select(gap => gap.Geometry))
-            shape.ExecuteInArea((x, y) => {
-                StructureTile tile = Tilemap[x, y];
-                tile.IsExteriorComponent = true;
-                tile.IsGap = true;
-            });
-
-        SearchOutside(0, 0);
-        for (int x = 0; x < Tilemap.Width; x++)
-        for (int y = 0; y < Tilemap.Height; y++) {
-            StructureTile tile = Tilemap[x, y];
-            if (!tile.IsOutside && !tile.IsExteriorComponent) tile.IsInside = true;
-        }
-
-        return;
-
-        void SearchOutside(int x, int y) {
-            StructureTile thisTile = Tilemap[x, y];
-            thisTile.IsOutside = true;
-            thisTile.IsNullTile = true;
-            thisTile.IsNullWall = true;
-
-            foreach ((int dx, int dy) in ((int, int)[]) [(1, 0), (-1, 0), (0, 1), (0, -1)]) {
-                if (!Tilemap.InBounds(x + dx, y + dy)) continue;
-                StructureTile nextTile = Tilemap[x + dx, y + dy];
-                if (nextTile.IsOutside || nextTile.IsExteriorComponent) continue;
-
-                SearchOutside(x + dx, y + dy);
-            }
-        }
-    }
-
-    /// <summary>
     ///     assigns room objects to the gaps in the external layout
     /// </summary>
     public void CompleteExternalGaps() {
-        foreach (Gap gap in ExternalLayout.Gaps)
-            gap.LowerRoom = RoomLayoutHelper.GetClosestRoom(Layout.Rooms, gap.Geometry.Center);
+        foreach (Gap gap in StructureLayout.Gaps)
+            gap.LowerRoom = RoomLayoutHelper.GetClosestRoom(RoomSections, gap.Geometry.Center);
     }
 
     /// <summary>
@@ -121,65 +74,28 @@ public class AdvStructure {
     public void ApplyLayoutMethod(StructureLayoutGenerator generator = null) {
         if (HasSetComponents) throw new Exception("this AdvStructure already has a layout set");
 
-        generator ??= GetGenerator(StructureLayoutGenerators);
-        TagsCurrent.Append(generator.Generate(Params, Geometry));
+        StructureLayout = new StructureLayout(LayoutParam);
+        StructureLayout.SetGenerator();
+        StructureLayout.TagsCurrent.AddRange(StructureLayout.Generator.Generate(LayoutParam));
 
-        List<IComponent> components = [];
-        components.AddRange(ExternalLayout.Floors);
-        components.AddRange(ExternalLayout.Walls);
-        components.AddRange(ExternalLayout.Gaps);
-        // components.AddRange(ExternalLayout.Roofs);
-        components.AddRange(Layout.Floors);
-        components.AddRange(Layout.Walls);
-        components.AddRange(Layout.Gaps);
-        components.AddRange(Layout.Rooms); // fill rooms last because the furniture needs to be placed specifically
+        Components = [];
+        Components.AddRange(StructureLayout.Floors);
+        Components.AddRange(StructureLayout.Walls);
+        Components.AddRange(StructureLayout.Gaps);
+        Components.AddRange(StructureLayout.Roofs);
+        foreach (RoomLayout roomLayout in RoomSections) {
+            Components.AddRange(roomLayout.Floors);
+            Components.AddRange(roomLayout.Walls);
+            Components.AddRange(roomLayout.Gaps);
+        }
+
+        // fill rooms last because the furniture needs to be placed specifically
+        foreach (RoomLayout roomLayout in RoomSections) Components.AddRange(roomLayout.Rooms);
 
         // set component generators
-
-        for (int i = 0; i < components.Count; i++) {
-            IComponent component = components[i];
-            ComponentParams componentParams = ComponentUtils.CreateParamsForComponent(component, this);
-            Components.Add(component);
-
-            int generatorIndex = 0;
-            Type componentType = component.GetType();
-            if (!ComponentGenerators.TryGetValue(componentType, out var generators)) throw new Exception($"component type {component.GetType().FullName} generators not found");
-            if (!_componentGeneratorQueue.TryGetValue(componentType, out var generatorList)) {
-                generatorList = [component.GetGenerator(generators)];
-                _componentGeneratorQueue[componentType] = generatorList;
-            }
-            else {
-                while (!generatorList[generatorIndex].CanGenerate(componentParams, component.Geometry)) {
-                    generatorIndex++;
-                    if (generatorIndex >= _componentGeneratorQueue.Count) generatorList.Add(component.GetGenerator(generators));
-                }
-            }
-
-            component.Generator = generatorList[generatorIndex];
+        foreach (IComponent component in Components) {
+            component.SetGenerator();
         }
-
-        HasSetComponents = true;
-    }
-
-    public TGenerator GetGeneratorForComponent<TGenerator>(IComponent component) {
-        ComponentParams componentParams = ComponentUtils.CreateParamsForComponent(component, this);
-        Components.Add(component);
-
-        int generatorIndex = 0;
-        Type componentType = component.GetType();
-        if (!ComponentGenerators.TryGetValue(componentType, out var generators)) throw new Exception($"component type {component.GetType().FullName} generators not found");
-        if (!_componentGeneratorQueue.TryGetValue(componentType, out var generatorList)) {
-            generatorList = [component.GetGenerator(generators)];
-            _componentGeneratorQueue[componentType] = generatorList;
-        }
-        else {
-            while (!generatorList[generatorIndex].CanGenerate(componentParams, component.Geometry)) {
-                generatorIndex++;
-                if (generatorIndex >= _componentGeneratorQueue.Count) generatorList.Add(component.GetGenerator(generators));
-            }
-        }
-
-        return (TGenerator)generatorList[generatorIndex];
     }
 
     /// <summary>
@@ -190,12 +106,12 @@ public class AdvStructure {
         if (!HasSetComponents)
             throw new Exception("No layout has been set");
 
-        foreach (Component component in Components)
-            component.AddCurrentTags(component.Generator.Generate(component.Params));
+        foreach (IComponent component in Components)
+            component.TagsCurrent.AddRange(component.Generator.Generate(component.Params));
     }
 
     /// <summary>
-    ///     paste tiles from this tilemap into game tilemap
+    ///     paste tiles from adv structure's tilemap into game tilemap
     /// </summary>
     public void PlaceTilemap() {
         if (!HasSetComponents)
@@ -209,23 +125,12 @@ public class AdvStructure {
     public static void LoadGenerators(Assembly assembly) {
         var pluginTypes = assembly.GetTypes();
         foreach (Type type in pluginTypes) {
-            ComponentGeneratorAttribute componentInfo = type.GetCustomAttribute<ComponentGeneratorAttribute>();
-            StructureLayoutGeneratorAttribute structureLayoutInfo = type.GetCustomAttribute<StructureLayoutGeneratorAttribute>();
+            InstanceGenerator instanceInfo = type.GetCustomAttribute<InstanceGenerator>();
 
-            if (componentInfo != null && structureLayoutInfo != null) throw new Exception($"{type.FullName} has both structure layout and component generator attributes, which are mutually exclusive");
-
-            if (componentInfo != null) {
-                if (!type.IsSubclassOf(typeof(VolumeComponentGenerator)) && !type.IsSubclassOf(typeof(PathComponentGenerator)))
-                    throw new Exception($"component generator \"{type.FullName}\" must derive from either {nameof(VolumeComponentGenerator)} or {nameof(PathComponentGenerator)}");
-                if (!ComponentGenerators.TryGetValue(componentInfo.ComponentType, out var generatorList))
-                    ComponentGenerators[componentInfo.ComponentType] = generatorList = [];
-                generatorList.Add((ComponentGenerator)Activator.CreateInstance(type));
-            }
-
-            if (structureLayoutInfo != null) {
-                if (!typeof(StructureLayoutGenerator).IsAssignableFrom(type))
-                    throw new Exception($"structure layout generator \"{type.FullName}\" must derive from {nameof(StructureLayoutGenerator)}");
-                StructureLayoutGenerators.Add((StructureLayoutGenerator)Activator.CreateInstance(type));
+            if (instanceInfo != null) {
+                if (!InstanceGenerators.TryGetValue(instanceInfo.InstanceType, out var generatorList))
+                    InstanceGenerators[instanceInfo.InstanceType] = generatorList = [];
+                generatorList.Add((IGenerator)Activator.CreateInstance(type));
             }
         }
     }
@@ -238,9 +143,6 @@ public class AdvStructure {
 }
 
 [AttributeUsage(AttributeTargets.Class)]
-public class ComponentGeneratorAttribute(Type componentType) : Attribute {
-    public readonly Type ComponentType = componentType;
+public class InstanceGenerator(Type instanceType) : Attribute {
+    public readonly Type InstanceType = instanceType;
 }
-
-[AttributeUsage(AttributeTargets.Class)]
-public class StructureLayoutGeneratorAttribute : Attribute;

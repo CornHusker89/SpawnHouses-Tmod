@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Types;
 using Terraria.DataStructures;
 

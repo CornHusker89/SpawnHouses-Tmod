@@ -1,6 +1,7 @@
 using SpawnHouses.AdvStructures.AdvStructureParts;
+using SpawnHouses.Common;
+using SpawnHouses.Common.Types;
 using SpawnHouses.Helpers;
-using SpawnHouses.Types;
 
 namespace SpawnHouses.AdvStructures.Generation.Components;
 
@@ -8,7 +9,7 @@ public static class WallGen {
     /// <summary>
     ///     Fills the volume with primary walls
     /// </summary>
-    [ComponentGenerator(typeof(Wall))]
+    [InstanceGenerator(typeof(Wall))]
     public class WallGenerator1 : VolumeComponentGenerator {
         public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [
@@ -27,7 +28,7 @@ public static class WallGen {
     /// <summary>
     ///     Fills a volume with random wall blocks, with special vertical blocks at the first and last x position of every other row
     /// </summary>
-    [ComponentGenerator(typeof(Wall))]
+    [InstanceGenerator(typeof(Wall))]
     public class WallGenerator2 : VolumeComponentGenerator {
         public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [

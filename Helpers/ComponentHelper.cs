@@ -1,9 +1,8 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using SpawnHouses.AdvStructures;
-using SpawnHouses.AdvStructures.AdvStructureParts;
-using SpawnHouses.Types;
+using SpawnHouses.Common;
+using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Types.Palette;
 
 namespace SpawnHouses.Helpers;

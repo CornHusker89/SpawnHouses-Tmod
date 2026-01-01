@@ -1,5 +1,8 @@
 using System;
 using SpawnHouses.AdvStructures.AdvStructureParts;
+using SpawnHouses.Common;
+using SpawnHouses.Common.Types;
+using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Helpers;
 using SpawnHouses.Types;
 using Terraria.DataStructures;
@@ -213,7 +216,7 @@ public static class RoofGen {
     //     }
     // }
 
-    [ComponentGenerator(typeof(Roof))]
+    [InstanceGenerator(typeof(Roof))]
     public class RoofGenerator2 : PathComponentGenerator {
         public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [

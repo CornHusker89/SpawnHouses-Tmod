@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SpawnHouses.Types;
+using SpawnHouses.Common.Tiles;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
