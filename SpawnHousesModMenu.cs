@@ -27,7 +27,7 @@ public class SpawnHousesModMenu : ModMenu {
 
 public class NighttimeForestBackgroundStyle : ModSurfaceBackgroundStyle {
     private Stopwatch _stopwatch;
-    private readonly Vector2[] _mousePosHistory = new Vector2[12];
+    private readonly Vector2[] _mousePosHistory = new Vector2[11];
     private int _mousePosHistoryIndex;
 
     private Asset<Texture2D> _forestFrontTexture;
@@ -39,19 +39,39 @@ public class NighttimeForestBackgroundStyle : ModSurfaceBackgroundStyle {
 
     private readonly float _skyDetailFrameInterval = 1000f / 5;
     private readonly float _frontFrameInterval = 1000f / 7.5f;
+    private readonly float _parallaxScale = -4.1f;
 
-    private readonly float _frameZoom = 1.1f;
+    private float[] _layerParallaxFactor;
+    private float[] _layerFrameZoom;
 
-    private readonly float _parallaxScale = -3.6f;
-    private readonly float _forestFrontParallaxFactor = 1.4f;
-    private readonly float _forestBackParallaxFactor = 0.7f;
-    private readonly float _mountainFrontParallaxFactor = 0.7f;
-    private readonly float _mountainBackParallaxFactor = 0.4f;
-    private readonly float _cloudsParallaxFactor = 0.25f;
-
-    private float _transparency;
+    private Asset<Texture2D>[] GetLayerTextures() => [
+        _skyTexture,
+        _cloudsTextures[(int)Math.Round(_stopwatch.ElapsedMilliseconds / _skyDetailFrameInterval) % 55],
+        _mountainBackTexture,
+        _mountainFrontTexture,
+        _forestBackTextures[(int)Math.Round(_stopwatch.ElapsedMilliseconds / _frontFrameInterval) % 6],
+        _forestFrontTexture
+    ];
 
     public override void Load() {
+        _layerParallaxFactor = [
+            0f * _parallaxScale, // sky
+            0.24f * _parallaxScale, // clouds
+            0.43f * _parallaxScale, // mountain back
+            0.82f * _parallaxScale, // mountain front
+            0.82f * _parallaxScale, // forest back
+            1.65f * _parallaxScale // forest front
+        ];
+
+        _layerFrameZoom = [
+            1.0f, // sky
+            1.035f, // clouds
+            1.08f, // mountain back
+            1.1f, // mountain front
+            1.1f, // forest back
+            1.1f // forest front
+        ];
+        
         _stopwatch = Stopwatch.StartNew();
 
         _forestFrontTexture = ModContent.Request<Texture2D>("SpawnHouses/Assets/Menu/forest_front0050");
@@ -105,7 +125,9 @@ public class NighttimeForestBackgroundStyle : ModSurfaceBackgroundStyle {
         _mousePosHistoryIndex++;
         if (_mousePosHistoryIndex == _mousePosHistory.Length)
             _mousePosHistoryIndex = 0;
-        Vector2 thisMousePos = (Main.MouseScreen - Main.LastLoadedResolution.ToVector2() / 2f) / 100f;
+        float mousePosX = float.Min(float.Max(Main.MouseScreen.X, 0), Main.LastLoadedResolution.X) - Main.LastLoadedResolution.X;
+        float mousePosY = float.Min(float.Max(Main.MouseScreen.Y, 0), Main.LastLoadedResolution.Y) - Main.LastLoadedResolution.Y;
+        Vector2 thisMousePos = new Vector2(mousePosX, mousePosY) / 2f / 100f;
         _mousePosHistory[_mousePosHistoryIndex] = thisMousePos;
         float mousePosXRunningTotal = 0, mousePosYRunningTotal = 0;
         foreach (Vector2 pos in _mousePosHistory) {
@@ -116,66 +138,26 @@ public class NighttimeForestBackgroundStyle : ModSurfaceBackgroundStyle {
         mousePosXRunningTotal /= _mousePosHistory.Length;
         mousePosYRunningTotal /= _mousePosHistory.Length;
         Vector2 averageMousePos = new(mousePosXRunningTotal, mousePosYRunningTotal);
-            
-        
-        int frameOffsetX = (int)(Main.screenWidth * (1 - _frameZoom) / 2);
-        int frameOffsetY = (int)(Main.screenHeight * (1 - _frameZoom) / 2);
-        int frameWidth = (int)(Main.screenWidth * _frameZoom);
-        int frameHeight = (int)(Main.screenHeight * _frameZoom);
 
-        _transparency = (float)Math.Floor(Main.bgAlphaFrontLayer[Slot]);
-        
-        spriteBatch.Draw(
-            _skyTexture.Value,
-            new Rectangle(0, 0, Main.screenWidth, Main.screenHeight),
-            Color.White * _transparency
-        );
 
-        spriteBatch.Draw(
-            _cloudsTextures[(int)Math.Round(_stopwatch.ElapsedMilliseconds / _skyDetailFrameInterval) % 55].Value,
-            new Rectangle(frameOffsetX + (int)(averageMousePos.X * _cloudsParallaxFactor * _parallaxScale),
-                frameOffsetY + (int)(averageMousePos.Y * _cloudsParallaxFactor * _parallaxScale),
-                frameWidth,
-                frameHeight),
-            Color.White * _transparency
-        );
+        float transparency = (float)Math.Floor(Main.bgAlphaFrontLayer[Slot]);
+        var layerTextures = GetLayerTextures();
 
-        spriteBatch.Draw(
-            _mountainBackTexture.Value,
-            new Rectangle(frameOffsetX + (int)(averageMousePos.X * _mountainBackParallaxFactor * _parallaxScale),
-                frameOffsetY + (int)(averageMousePos.Y * _mountainBackParallaxFactor * _parallaxScale),
-                frameWidth,
-                frameHeight),
-            Color.White * _transparency
-        );
-        
-        spriteBatch.Draw(
-            _mountainFrontTexture.Value,
-            new Rectangle(frameOffsetX + (int)(averageMousePos.X * _mountainFrontParallaxFactor * _parallaxScale),
-                frameOffsetY + (int)(averageMousePos.Y * _mountainFrontParallaxFactor * _parallaxScale),
-                frameWidth,
-                frameHeight),
-            Color.White * _transparency
-        );
+        for (int layerIndex = 0; layerIndex < _layerParallaxFactor.Length; layerIndex++) {
+            int frameOffsetX = (int)(Main.screenWidth * (1 - _layerFrameZoom[layerIndex]) / 2);
+            int frameOffsetY = (int)(Main.screenHeight * (1 - _layerFrameZoom[layerIndex]) / 2);
+            int frameWidth = (int)(Main.screenWidth * _layerFrameZoom[layerIndex]);
+            int frameHeight = (int)(Main.screenHeight * _layerFrameZoom[layerIndex]);
 
-        spriteBatch.Draw(
-            _forestBackTextures[(int)Math.Round(_stopwatch.ElapsedMilliseconds / _frontFrameInterval) % 6].Value,
-            new Rectangle(frameOffsetX + (int)(averageMousePos.X * _forestBackParallaxFactor * _parallaxScale),
-                frameOffsetY + (int)(averageMousePos.Y * _forestBackParallaxFactor * _parallaxScale),
-                frameWidth,
-                frameHeight),
-            Color.White * _transparency
-        );
-
-        spriteBatch.Draw(
-            _forestFrontTexture.Value,
-            new Rectangle(frameOffsetX + (int)(averageMousePos.X * _forestFrontParallaxFactor * _parallaxScale),
-                frameOffsetY + (int)(averageMousePos.Y * _forestFrontParallaxFactor * _parallaxScale),
-                frameWidth,
-                frameHeight),
-            Color.White * _transparency
-        );
-
+            spriteBatch.Draw(
+                layerTextures[layerIndex].Value,
+                new Rectangle(frameOffsetX + (int)(averageMousePos.X * _layerParallaxFactor[layerIndex]),
+                    frameOffsetY + (int)(averageMousePos.Y * _layerParallaxFactor[layerIndex]),
+                    frameWidth,
+                    frameHeight),
+                Color.White * transparency * (layerIndex == 1 ? 0.85f : 1f)
+            );
+        }
         return true;
     }
 
@@ -184,10 +166,11 @@ public class NighttimeForestBackgroundStyle : ModSurfaceBackgroundStyle {
         
         for (int i = 0; i < fades.Length; i++) {
             if (i == Slot) {
-                fades[i] = 1;
+                // Console.WriteLine(fades[i]);
+                fades[i] += transitionSpeed * 0.1f;
             }
             else {
-                fades[i] = 0;
+                fades[i] -= transitionSpeed * 0.1f;
             }
         }
     }
