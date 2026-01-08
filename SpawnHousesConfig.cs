@@ -60,11 +60,12 @@ public class SpawnHousesConfig : ModConfig {
 
     [DefaultValue(true)] public bool SpawnPointHouseSetsSpawn { get; set; }
 
-    [DefaultValue(0.5f)]
-    [Slider]
-    [Range(0.1f, 1.0f)]
-    [Increment(0.1f)]
-    public float SpawnPointBasementShape { get; set; }
+    // [DefaultValue(0.5f)]
+    // [Slider]
+    // [Range(0.1f, 1.0f)]
+    // [Increment(0.1f)]
+    [JsonIgnore]
+    public float SpawnPointBasementShape { get; set; } = 0.5f;
 
     [Header("StructuresHeader")]
     [DefaultValue(true)]

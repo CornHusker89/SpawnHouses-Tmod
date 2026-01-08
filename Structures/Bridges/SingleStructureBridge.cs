@@ -202,16 +202,16 @@ public class SingleStructureBridge : Bridge {
     }
 
 
-    // just a 1-tile short lil mini lil feller
+    // just a 2-tile short lil mini lil feller
     public class MainBasementHallway6 : SingleStructureBridge {
         public MainBasementHallway6() : base("Assets/StructureFiles/mainBasement/mainBasement_Hallway6.shstruct",
-            1, 5, 0, -5, 1, -1, [Directions.Right, Directions.Left]) {
+            2, 5, 0, -5, 2, -1, [Directions.Right, Directions.Left]) {
         }
     }
 
     public class MainBasementHallway6AltGen : SingleStructureBridge {
         public MainBasementHallway6AltGen() : base("Assets/StructureFiles/mainBasement/mainBasement_Hallway6.shstruct",
-            1, 5, -1, -5, -1, -1, [Directions.Left, Directions.Right]) {
+            2, 5, -1, -5, -2, -1, [Directions.Left, Directions.Right]) {
         }
     }
 

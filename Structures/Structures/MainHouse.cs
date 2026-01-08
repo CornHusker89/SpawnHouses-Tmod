@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
 using SpawnHouses.Helpers;
 using SpawnHouses.Types;
 using StructureHelper.API;
@@ -19,7 +17,6 @@ public sealed class MainHouse : CustomStructure {
         "Welcome to the conveniently placed house in the middle of nowhere!",
         "FINALLY, NO MORE BOX HOTELS!!!",
         "No, we don’t care if this has an impact on official lore.",
-        "This house has been generated ~ times!"
     ];
 
     private const byte _type_not_generated = 0;
@@ -281,31 +278,7 @@ public sealed class MainHouse : CustomStructure {
         Generator.GenerateStructure(RightFilePath, new Point16(X + LeftSize, Y + 10), SpawnHousesMod.Instance);
         Generator.GenerateStructure(TopFilePath, new Point16(X + LeftSize - 14, Y), SpawnHousesMod.Instance);
 
-        string signString = "All good adventures start in a tavern...To bad this isn't a tavern :(";
-        Random rnd = new();
-        for (int i = 0; i < 25; i++) {
-            string possibleString = _signQuotes[rnd.Next(0, _signQuotes.Count)];
-            if (possibleString.Contains('~'))
-                try {
-                    var dict = SpawnHousesMod.WebClient.GetSpawnCount();
-                    if (dict is not null) {
-                        dict.TryGetValue("main_houses_extrapolated", out int value);
-                        if (value is not -1) {
-                            signString = possibleString.Replace("~", value.ToString());
-                            break;
-                        }
-                    }
-
-                    continue;
-                }
-                catch {
-                    continue;
-                }
-
-            signString = possibleString;
-            break;
-        }
-
+        string signString = _signQuotes[Terraria.WorldGen.genRand.Next(0, _signQuotes.Count)];
         int signIndex = Sign.ReadSign(SignPos.X, SignPos.Y);
         if (signIndex != -1)
             Sign.TextSign(signIndex, signString);

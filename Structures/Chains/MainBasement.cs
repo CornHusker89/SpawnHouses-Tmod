@@ -69,7 +69,7 @@ public class MainBasement : StructureChain {
                 new MainBasementEntry1(cost: 10, weight: 100)
             ],
             startingBoundingBoxes, status) {
-        _shape = ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementShape;
+        _shape = 0.5f; //ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementShape;
     }
 
 
@@ -104,7 +104,7 @@ public class MainBasement : StructureChain {
                 if (connectPoint.Y == rootY || targetConnectPoint.Y == rootY)
                     return false;
             }
-
+        
         int maxDistance = 999;
         if (_shape <= 0.41f) {
             maxDistance = 120;
@@ -119,10 +119,10 @@ public class MainBasement : StructureChain {
                 }
             }
         }
-
+        
         byte direction = connectPoint.Direction;
         if (direction == Directions.Down) direction = Directions.Left;
-
+        
         int startX = RootStructure.ConnectPoints[direction][0].X;
         if (Math.Abs(targetConnectPoint.X - startX) > maxDistance) return false;
 

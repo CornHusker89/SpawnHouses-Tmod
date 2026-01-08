@@ -67,10 +67,10 @@ public abstract class StructureChain {
 
         CalculateWeights();
 
-        ChainConnectPoint rootConnectPoint = null;
+        
         bool foundValidStructureChain = false;
         // try to find a configuration that satisfies the minCost
-        for (int attempts = 0; attempts < 20000; attempts++) {
+        for (int attempts = 0; attempts < 2500; attempts++) {
             _copiedStructureList = (CustomChainStructure[])_originalStructureList.Clone();
             for (byte i = 0; i < _originalStructureList.Length; i++)
                 _copiedStructureList[i] = _originalStructureList[i].Clone();
@@ -84,7 +84,7 @@ public abstract class StructureChain {
                 RootStructure.SetPosition(EntryPosX, EntryPosY);
             }
 
-            rootConnectPoint = RootStructure.GetRootConnectPoint();
+            ChainConnectPoint rootConnectPoint = RootStructure.GetRootConnectPoint();
             if (rootConnectPoint != null)
                 MoveConnectPointAndStructure(RootStructure, rootConnectPoint, EntryPosX, EntryPosY);
 

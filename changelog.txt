@@ -1,3 +1,8 @@
-Version 1.2.6
+Version 1.3.0
+Major Changes
+- Removed the basement shape config, it was causing more problems with generation than it benefited. This should solve all the infinite loading problems!
+- Added lighting to the basement hallways
+
 Minor Changes
-- Fixed issue related to Beach house not finding a proper placement position
+- Removed spawn count tracker, it was costly to maintain
+- Fixed the basement hallway segment that would prevent doors from opening
