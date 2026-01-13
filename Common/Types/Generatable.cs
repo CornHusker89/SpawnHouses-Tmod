@@ -1,13 +1,18 @@
 using System;
 using System.Linq;
 using SpawnHouses.Common.Parameters;
+using SpawnHouses.Common.Tagging;
 using SpawnHouses.Structures;
-using SpawnHouses.Types.TagTypes;
 using Terraria;
 
 namespace SpawnHouses.Common.Types;
 
 public interface IGeneratable {
+    /// <summary>
+    ///     if the generatable instance has had a generator run on it at least once
+    /// </summary>
+    public bool HasGenerated { get; }
+    
     /// <summary>
     ///     unique number given to each generatable instance in the world. automatically assigned on instance creation, 
     /// </summary>
@@ -24,12 +29,12 @@ public interface IGeneratable {
     public TagMap TagsCurrent { get; }
     
     /// <summary>
-    ///     executable generator for this component. automatically assigned on instance creation
+    ///     executable generator for this component. automatically assigned on instance creation by <see cref="SetGenerator"/>
     /// </summary>
     public IGenerator Generator { get; }
 
     /// <summary>
-    ///     sets <see cref="Generator"/>
+    ///     sets <see cref="Generator"/>. called on instance creation
     /// </summary>
     public void SetGenerator();
 
@@ -60,15 +65,18 @@ public interface IGeneratable<out TParams, out TGenerator> : IGeneratable
 public abstract class Generatable<TParams, TGenerator> : IGeneratable<TParams, TGenerator>
     where TParams : IParams
     where TGenerator : Generator<TParams> {
+    public bool HasGenerated { get; private set; }
     public ushort Id { get; init; }
     public TParams Params { get; init; }
     public TagMap TagsCurrent { get; init; }
-    public TGenerator Generator { get; set; }
+    public TGenerator Generator { get; private set; }
 
     protected Generatable(TParams param, TagMap tagsCurrent) {
         Id = StructureManager.NextGeneratableId();
         Params = param;
         TagsCurrent = tagsCurrent;
+        // TagsCurrent.IsLocked = true; TODO
+        SetGenerator();
     }
 
     private TGenerator FindValidGenerator(TGenerator[] generators) {
@@ -100,5 +108,11 @@ public abstract class Generatable<TParams, TGenerator> : IGeneratable<TParams, T
         }
 
         Generator = (TGenerator)generatorList[generatorIndex];
+    }
+
+    public void ExecuteGenerator() {
+        TagsCurrent.IsLocked = false;
+        Generator.Generate(Params);
+        HasGenerated = true;
     }
 }

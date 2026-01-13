@@ -1,10 +1,10 @@
 #nullable enable
 using System.Linq;
-using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Common;
+using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Common.Types.Geometry;
-using SpawnHouses.Helpers;
+using SpawnHouses.Helpers.Complex;
 
 namespace SpawnHouses.AdvStructures.Generation.Components;
 
@@ -14,11 +14,11 @@ public static class RoomGen {
     /// </summary>
     [InstanceGenerator(typeof(Room))]
     public class RoomGenerator2 : VolumeComponentGenerator {
-        public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
+        public override HashSet<Tag> PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [
-                ComponentTags.RoomTypeLiving,
-                ComponentTags.RoomHousingValid,
-                ComponentTags.RoomBeamsAreTiles
+                Tags.RoomTypeLiving,
+                Tags.RoomHousingValid,
+                Tags.RoomBeamsAreTiles
             ],
             ComponentHelper.CreateBeams.PossibleTags,
             ComponentHelper.FillShapeWalls.PossibleTags
@@ -38,7 +38,7 @@ public static class RoomGen {
                 return param.Palette.LivingRoom.Primary;
             });
 
-            if (param.Component.Required.ContainsKey(ComponentTags.RoomBeamsAreTiles))
+            if (param.Component.Required.ContainsKey(Tags.RoomBeamsAreTiles))
                 param.Component.Volume.ExecuteInArea((x, y) => {
                     if (beamXPositions.Contains(x))
                         param.Tilemap.PlaceTile(x, y, param.Palette.LivingRoom.BeamTile, actuated: param.Palette.LivingRoom.BeamTileActuation);

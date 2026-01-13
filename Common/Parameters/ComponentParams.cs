@@ -1,6 +1,6 @@
 using SpawnHouses.AdvStructures.AdvStructureParts;
+using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types.Geometry;
-using SpawnHouses.Types.TagTypes;
 
 namespace SpawnHouses.Common.Parameters;
 
@@ -24,9 +24,9 @@ public class VolumeComponentParams : IComponentParams<Shape> {
     public TagMap TagsRequired { get; init; }
     public Shape Geometry { get; init; }
 
-    public VolumeComponentParams(AdvStructure structure, TagMap tagsRequired, Shape shape) {
+    public VolumeComponentParams(AdvStructure structure, Shape shape, TagMap tagsRequired = null) {
         Structure = structure;
-        TagsRequired = tagsRequired;
+        TagsRequired = tagsRequired ?? new TagMap();
         Geometry = shape;
     }
 }
@@ -36,9 +36,9 @@ public class PathComponentParams : IComponentParams<Path> {
     public TagMap TagsRequired { get; init; }
     public Path Geometry { get; init; }
 
-    public PathComponentParams(AdvStructure structure, TagMap tagsRequired, Path path) {
+    public PathComponentParams(AdvStructure structure, Path path, TagMap tagsRequired = null) {
         Structure = structure;
-        TagsRequired = tagsRequired;
+        TagsRequired = tagsRequired ?? new TagMap();
         Geometry = path;
     }
 }

@@ -12,7 +12,7 @@ namespace SpawnHouses;
 
 #nullable enable
 
-internal class StructureManager : ModSystem {
+public class StructureManager : ModSystem {
     public static Version WorldVersion = new(ModInstance.Mod.Version.ToString());
 
     public static MainHouse? MainHouse;
@@ -22,7 +22,7 @@ internal class StructureManager : ModSystem {
     public static ushort GeneratableCount { get; private set; }
 
     /// <summary>
-    ///     returns the next component id, and advances the internal counter. begins at id 1
+    ///     returns the next component id, and advances the counter. begins at id 1
     /// </summary>
     /// <returns></returns>
     public static ushort NextGeneratableId() {

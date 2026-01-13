@@ -1,8 +1,8 @@
 #nullable enable
 using System.Collections.Generic;
 using SpawnHouses.Common.Parameters;
+using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types.Geometry;
-using SpawnHouses.Types.TagTypes;
 
 namespace SpawnHouses.Common.Types;
 
@@ -69,14 +69,6 @@ public abstract class StructureLayoutGenerator : Generator<StructureLayoutParams
     public abstract override Shape GetBoundingShape(StructureLayoutParams param);
 
     public abstract override TagMap Generate(StructureLayoutParams param);
-}
-
-public abstract class RoomLayoutGenerator : Generator<RoomLayoutParams> {
-    public abstract override bool CanGenerate(RoomLayoutParams param);
-
-    public abstract override Shape GetBoundingShape(RoomLayoutParams param);
-
-    public abstract override TagMap Generate(RoomLayoutParams param);
 }
 
 public abstract class VolumeComponentGenerator : Generator<VolumeComponentParams> {

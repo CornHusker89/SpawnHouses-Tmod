@@ -1,11 +1,11 @@
 #nullable enable
-using SpawnHouses.Common.Modules;
+using SpawnHouses.Common.Parameters;
+using SpawnHouses.Common.Tagging;
 
-namespace SpawnHouses.AdvStructures.AdvStructureParts;
+namespace SpawnHouses.Common.Modules.Components;
 
 public class Roof : PathComponent {
-    public Roof(Path line) {
-        Line = line;
-        AddRequiredTag(ComponentTags.External);
+    public Roof(PathComponentParams p) : base(p) {
+        TagsCurrent.Add(Tags.External);
     }
 }

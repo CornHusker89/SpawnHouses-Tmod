@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Common.Modules;
+using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Parameters;
+using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types;
-using SpawnHouses.Helpers;
 using SpawnHouses.Types.Palette;
-using SpawnHouses.Types.TagTypes;
 using Terraria.Utilities;
 using IComponent = SpawnHouses.Common.Modules.IComponent;
 
@@ -26,8 +25,6 @@ public class AdvStructure {
     public readonly int Seed;
 
     public StructureLayout StructureLayout;
-    public List<RoomLayout> RoomSections;
-    public List<IComponent> Components;
 
     public StructureLayoutParams LayoutParam;
     public TagMap TagsRequired;

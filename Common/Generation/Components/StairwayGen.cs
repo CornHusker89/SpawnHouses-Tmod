@@ -1,6 +1,6 @@
 using System;
-using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Common;
+using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Common.Types.Geometry;
 
@@ -11,9 +11,9 @@ public class StairwayGen {
     /// </summary>
     [InstanceGenerator(typeof(Stairway))]
     public class StairwayGenerator1 : PathComponentGenerator {
-        public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewTagSet(
+        public override HashSet<Tag> PossibleTags { get; } = ComponentTagSystem.NewTagSet(
             [
-                ComponentTags.StairwayToHorizontalGap
+                Tags.StairwayToHorizontalGap
             ]
         );
 

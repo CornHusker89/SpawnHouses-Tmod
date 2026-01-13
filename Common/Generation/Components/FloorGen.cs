@@ -2,7 +2,7 @@
 using SpawnHouses.Common;
 using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Types;
-using SpawnHouses.Helpers;
+using SpawnHouses.Helpers.Complex;
 
 namespace SpawnHouses.AdvStructures.Generation.Components;
 
@@ -12,15 +12,15 @@ public static class FloorGen {
     /// </summary>
     [InstanceGenerator(typeof(Floor))]
     public class FloorGenerator1 : VolumeComponentGenerator {
-        public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
+        public override HashSet<Tag> PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [
-                ComponentTags.External
+                Tags.External
             ],
             ComponentHelper.FillShapeTiles.PossibleTags
         );
 
         public override bool Generate(VolumeComponentParams param) {
-            bool external = param.Component.Required.ContainsKey(ComponentTags.External);
+            bool external = param.Component.Required.ContainsKey(Tags.External);
             ComponentHelper.FillShapeTiles.Action(param.Component.Volume, param, (_, _) => (external ? param.Palette.ExternalFloor : param.Palette.InternalFloor).Primary);
             return true;
         }
@@ -78,9 +78,9 @@ public static class FloorGen {
     /// </summary>
     [InstanceGenerator(typeof(Floor))]
     public class FloorGenerator4 : VolumeComponentGenerator {
-        public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
+        public override HashSet<Tag> PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [
-                ComponentTags.FloorHollow
+                Tags.FloorHollow
             ]
         );
 

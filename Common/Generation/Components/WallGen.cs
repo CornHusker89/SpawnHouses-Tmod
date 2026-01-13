@@ -1,7 +1,7 @@
-using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Common;
+using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Types;
-using SpawnHouses.Helpers;
+using SpawnHouses.Helpers.Complex;
 
 namespace SpawnHouses.AdvStructures.Generation.Components;
 
@@ -11,15 +11,15 @@ public static class WallGen {
     /// </summary>
     [InstanceGenerator(typeof(Wall))]
     public class WallGenerator1 : VolumeComponentGenerator {
-        public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
+        public override HashSet<Tag> PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [
-                ComponentTags.External
+                Tags.External
             ],
             ComponentHelper.FillShapeTiles.PossibleTags
         );
 
         public override bool Generate(VolumeComponentParams param) {
-            bool external = param.Component.Required.ContainsKey(ComponentTags.External);
+            bool external = param.Component.Required.ContainsKey(Tags.External);
             ComponentHelper.FillShapeTiles.Action(param.Component.Volume, param, (_, _) => (external ? param.Palette.ExternalWall : param.Palette.InternalWall).Primary);
             return true;
         }
@@ -30,14 +30,14 @@ public static class WallGen {
     /// </summary>
     [InstanceGenerator(typeof(Wall))]
     public class WallGenerator2 : VolumeComponentGenerator {
-        public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
+        public override HashSet<Tag> PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [
-                ComponentTags.External
+                Tags.External
             ]
         );
 
         public override bool Generate(VolumeComponentParams param) {
-            bool external = param.Component.Required.ContainsKey(ComponentTags.External);
+            bool external = param.Component.Required.ContainsKey(Tags.External);
             int yStart = param.Component.Volume.BoundingBox.topLeft.Y;
             int yEnd = param.Component.Volume.BoundingBox.bottomRight.Y;
             int[] lowX = new int[param.Component.Volume.Size.Y];

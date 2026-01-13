@@ -1,6 +1,6 @@
 #nullable enable
 
-using SpawnHouses.Types.TagTypes;
+using SpawnHouses.Common.Tagging;
 using Terraria.ID;
 
 namespace SpawnHouses.Types.Palette;

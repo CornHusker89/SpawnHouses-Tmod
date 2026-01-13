@@ -250,18 +250,18 @@ public class ExternalLayoutHelper {
             wallThickness
         );
         foreach (Floor floor in result.floors) {
-            floor.AddRequiredTag(ComponentTags.ApplySloping, SlopeHelper.SimpleSlopes);
-            floor.AddRequiredTag(ComponentTags.SlopingModifier, SlopeModifier.GlobalOnlySloping);
+            floor.AddRequiredTag(Tags.ApplySloping, SlopeHelper.SimpleSlopes);
+            floor.AddRequiredTag(Tags.SlopingModifier, SlopeModifier.GlobalOnlySloping);
         }
 
         foreach (Roof roof in result.roofs) {
-            roof.AddRequiredTag(ComponentTags.ApplySloping, SlopeHelper.SmoothTop);
-            roof.AddRequiredTag(ComponentTags.SlopingModifier, SlopeModifier.LocalSloping);
+            roof.AddRequiredTag(Tags.ApplySloping, SlopeHelper.SmoothTop);
+            roof.AddRequiredTag(Tags.SlopingModifier, SlopeModifier.LocalSloping);
         }
 
         if (hasRoofPeak && Terraria.WorldGen.genRand.NextBool(3, 5)) {
-            result.roofs[!leftRoofHigher && splitRoof ? 1 : 0].AddRequiredTag(ComponentTags.RoofTall);
-            if (splitRoof && hasSlopedSideRoof && Terraria.WorldGen.genRand.NextBool(1, 2)) result.roofs[!leftRoofHigher ? 0 : 1].AddRequiredTag(ComponentTags.RoofTall);
+            result.roofs[!leftRoofHigher && splitRoof ? 1 : 0].AddRequiredTag(Tags.RoofTall);
+            if (splitRoof && hasSlopedSideRoof && Terraria.WorldGen.genRand.NextBool(1, 2)) result.roofs[!leftRoofHigher ? 0 : 1].AddRequiredTag(Tags.RoofTall);
         }
 
         return result;

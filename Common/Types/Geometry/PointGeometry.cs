@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Terraria.DataStructures;
 
-namespace SpawnHouses.AdvStructures.AdvStructureParts;
+namespace SpawnHouses.Common.Types.Geometry;
 
 public abstract class PointGeometry {
     public (Point16 topLeft, Point16 bottomRight) BoundingBox;

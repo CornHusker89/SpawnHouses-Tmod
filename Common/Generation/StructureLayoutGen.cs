@@ -1,13 +1,17 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Common.Modules;
+using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Parameters;
+using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Helpers;
+using SpawnHouses.Helpers.Complex;
 using SpawnHouses.Structures;
 using Terraria;
 using Terraria.DataStructures;
@@ -19,21 +23,24 @@ public static class StructureLayoutGen {
     /// <summary>
     ///     a square, possibly with square extrusions. can only have 2 entry points
     /// </summary>
-    [StructureLayoutGenerator]
+    [InstanceGenerator(typeof(StructureLayout))]
     public class StructureLayoutGenerator1 : StructureLayoutGenerator {
-        public StructureTagPartialSet PossibleTags { get; } = StructureTagSystem.NewPartialTagSet(
+        public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
-                StructureTag.HasRooms,
-                StructureTag.HasHousing,
-                StructureTag.HasStorage,
-                StructureTag.AboveGround,
-                StructureTag.UnderGround
+                Tags.HasRooms,
+                Tags.HasHousing,
+                Tags.HasStorage,
+                Tags.HasRoof,
+
+                // required from room layout
+                Tags.HasOnlyRectangleRooms
             ],
-            StructureLayoutHelper.SubdivideRoom.PossibleTags,
             StructureLayoutHelper.CreateStairways.PossibleTags
         );
 
-        public bool CanGenerate(StructureParams structureParams) {
+        public override Shape GetBoundingShape(StructureLayoutParams param) => throw new Exception("i dont wanna do that");
+
+        public override bool CanGenerate(StructureLayoutParams structureParams) {
             if (structureParams.EntryPoints.Length != 2) return false;
 
             EntryPoint lower, upper;
@@ -49,30 +56,20 @@ public static class StructureLayoutGen {
             return lower.Direction == Directions.Right && upper.Direction == Directions.Left;
         }
 
-        public StructureTagSet Generate(AdvStructure advStructure) {
-            StructureParams p = advStructure.Params;
-            RoomLayoutParams roomLayoutParams = new(
-                advStructure,
-                p.EntryPoints,
-                p.TagsRequired,
-                new Range(4, 13),
-                new Range(7, p.Length),
-                new Range(1, 1),
-                new Range(1, 1),
-                0.3f
-            );
-
+        public override TagMap Generate(StructureLayoutParams p) {
             const int tilemapMargin = 7;
 
             // TODO: compensate structure volume and roofMargin for the non-square volume at the top
 
             // structure parameters that aren't dependent on tilemap position
-            bool forceFlatRoof = advStructure.Params.TagsRequired.ContainsKey(StructureTag.HasOnlyRectangleRooms);
+            bool forceFlatRoof = p.TagsRequired.HasTag(Tags.HasOnlyRectangleRooms);
             int entryPointVerticalDistance = Math.Abs(p.EntryPoints[0].End.Y - p.EntryPoints[1].End.Y);
-            replace the normal tera world gen rand with the adv structs
-            bool hasBasement = Terraria.WorldGen.genRand.NextBool(4, 10) && p.Height - entryPointVerticalDistance > 12; //40% if conditions are met
-            int externalWallThickness = roomLayoutParams.WallWidth.Max;
-            int externalFloorThickness = roomLayoutParams.FloorWidth.Max;
+            bool hasBasement = p.Structure.RandomGen.NextBool(4, 10) && p.Height - entryPointVerticalDistance > 12; //40% if conditions are met
+            Range externalFloorThicknessRange = new(1, 1);
+            Range externalWallThicknessRange = new(1, 1);
+            int externalFloorThickness = externalFloorThicknessRange.Max;
+            int externalWallThickness = externalWallThicknessRange.Max;
+            
             int verticalOffset = hasBasement ? 7 : 0;
             bool hasHigherSide = Terraria.WorldGen.genRand.NextBool(4, 5) && !forceFlatRoof;
             bool leftRoofHigher = Terraria.WorldGen.genRand.NextBool();
@@ -124,13 +121,11 @@ public static class StructureLayoutGen {
                 exteriorWalls.Add(ExternalLayoutHelper.CreateWall(right.Start.X,
                     right.End.Y + 1, floorTopY - 1 + externalFloorThickness, true, externalWallThickness));
 
-            advStructure.StructureLayout = new ExternalLayout(
-                exteriorFloors,
-                exteriorWalls,
-                RoomLayoutHelper.GapsFromEntryPoints(p.EntryPoints, externalFloorThickness, externalWallThickness).ToList(),
-                roofs
-            );
-            advStructure.StructureLayout.SetComponentTagsExternal();
+            p.Structure.StructureLayout = new StructureLayout(p);
+
+            RoomHelper.GapsFromEntryPoints(p.EntryPoints, externalFloorThickness, externalWallThickness).ToList();
+            what is happening here
+            advStructure.StructureLayout.SetTagsExternal();
 
             // create the tilemap
             int roofTopY = ExternalLayoutHelper.GetHighestBoundingPoint(roofs);
@@ -157,10 +152,25 @@ public static class StructureLayoutGen {
             ]);
 
             advStructure.CompleteExternalGaps();
+
+            RoomLayoutParams roomLayoutParams = new(
+                p.Structure,
+                [],
+                [],
+                [],
+                p.EntryPoints,
+                p.TagsRequired,
+                new Range(1, 1),
+                new Range(1, 1),
+                new Range(4, 13),
+                new Range(7, p.Length),
+                0.3f
+            );
+            
             StructureLayoutHelper.SubdivideRoom.Action(advStructure.RoomSections, advStructure.RoomSections.Rooms[0], roomLayoutParams);
             foreach (Room room in advStructure.RoomSections.Rooms) {
                 StructureLayoutHelper.CreateStairways.Action(p, room);
-                room.AddRequiredTag(ComponentTags.RoomTypeLiving);
+                room.AddRequiredTag(Tags.RoomTypeLiving);
             }
 
             return advStructure.Current;

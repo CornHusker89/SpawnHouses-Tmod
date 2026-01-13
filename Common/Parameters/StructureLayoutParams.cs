@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
-using SpawnHouses.Types.TagTypes;
+using SpawnHouses.Common.Tagging;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Common.Parameters;

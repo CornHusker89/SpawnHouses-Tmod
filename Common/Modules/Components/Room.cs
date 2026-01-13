@@ -1,31 +1,43 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using SpawnHouses.Common.Modules;
+using SpawnHouses.AdvStructures.AdvStructureParts;
+using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Types.Geometry;
 
-namespace SpawnHouses.AdvStructures.AdvStructureParts;
+namespace SpawnHouses.Common.Modules.Components;
 
 public class Room : VolumeComponent {
+    /// <summary>ranking of how "interior" this room is. 0 is unassigned and ascends from 1 as the rooms get closer to the middle</summary>
+    public ushort InteriorRank;
+    
     public List<Gap> Gaps;
-    public bool IsEntryRoom;
     public List<MultiTile> MultiTiles;
-    public Room? ParentRoom;
     public List<Stairway> Stairways;
 
-    public Room(Shape volume, List<Gap>? gaps = null, List<Stairway>? stairways = null) {
-        Volume = volume;
-
+    /// <summary>
+    ///     constructor that requires params object
+    /// </summary>
+    /// <param name="p"></param>
+    /// <param name="gaps"></param>
+    /// <param name="stairways"></param>
+    public Room(VolumeComponentParams p, List<Gap>? gaps = null, List<Stairway>? stairways = null) : base(p) {
         Gaps = gaps ?? [];
         Stairways = stairways ?? [];
         MultiTiles = [];
-        IsEntryRoom = true;
-        ParentRoom = null;
     }
 
-    public void SetParent(Room parent) {
-        IsEntryRoom = false;
-        ParentRoom = parent;
+    /// <summary>
+    ///     constructor that automatically creates a new set of params
+    /// </summary>
+    /// <param name="structure"></param>
+    /// <param name="shape"></param>
+    /// <param name="gaps"></param>
+    /// <param name="stairways"></param>
+    public Room(AdvStructure structure, Shape shape, List<Gap>? gaps = null, List<Stairway>? stairways = null) : base(new VolumeComponentParams(structure, shape)) {
+        Gaps = gaps ?? [];
+        Stairways = stairways ?? [];
+        MultiTiles = [];
     }
 
     /// <summary>
@@ -36,7 +48,7 @@ public class Room : VolumeComponent {
     public Room? TraverseGap(Gap gap) {
         if (!Gaps.Contains(gap)) throw new Exception("Gap not found in this room's gaps");
 
-        return this == gap.HigherRoom ? gap.LowerRoom : gap.HigherRoom;
+        return this == gap.InteriorRoom ? gap.ExteriorRoom : gap.InteriorRoom;
     }
 
     /// <summary>

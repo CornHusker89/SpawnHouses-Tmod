@@ -2,17 +2,19 @@
 using System;
 using System.Collections.Generic;
 using SpawnHouses.Common;
+using SpawnHouses.Common.Modules;
+using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Types.Palette;
 
-namespace SpawnHouses.Helpers;
+namespace SpawnHouses.Helpers.Complex;
 
 public delegate TilePaintedType? TilePaletteCondition(int x, int y);
 
 public delegate WallPaintedType? WallPaletteCondition(int x, int y);
 
 public interface IComponentHelper {
-    public static abstract ComponentTagPartialSet PossibleTags { get; }
+    public static abstract HashSet<Tag> PossibleTags { get; }
 }
 
 /// <summary>
@@ -23,27 +25,27 @@ public static class ComponentHelper {
     ///     fills shape with tiles of a painted type
     /// </summary>
     public abstract class FillShapeTiles : IComponentHelper {
-        public static ComponentTagPartialSet PossibleTags => [
-            ComponentTags.ApplySloping,
-            ComponentTags.SlopingModifier
+        public static HashSet<Tag> PossibleTags => [
+            Tags.ApplySloping,
+            Tags.SlopingModifier
         ];
 
         /// <summary>
         ///     fills shape with tiles of a painted type
         /// </summary>
+        /// <param name="component"></param>
         /// <param name="shape"></param>
         /// <param name="structure"></param>
-        /// <param name="param"></param>
         /// <param name="paletteCondition">
         ///     callback that returns the palette entry, if null prevents tile placement for that tile in the shape.
         ///     can also be used to execute arbitrary callback on each tile
         /// </param>
         /// <remarks>supports ApplySloping and SlopingModifier component tags</remarks>
-        public static void Action(Shape shape, AdvStructure structure, ComponentParams param, TilePaletteCondition paletteCondition) {
-            SlopingAlgorithm? sloping = param.Component.GetTagRequiredDataSafe<SlopingAlgorithm?>(ComponentTags.ApplySloping);
-            SlopeModifier slopeModifier = param.Component.GetTagRequiredDataSafe<SlopeModifier>(ComponentTags.SlopingModifier);
+        public static void Action(IComponent component, Shape shape, AdvStructure structure, TilePaletteCondition paletteCondition) {
+            bool hasSloping = component.Params.TagsRequired.GetValueSafe(Tags.ApplySloping, out SlopingAlgorithm sloping);
+            component.Params.TagsRequired.GetValueSafe(Tags.SlopingModifier, out SlopeModifier slopeModifier);
 
-            if (sloping == null) {
+            if (hasSloping) {
                 shape.ExecuteInArea((x, y) => {
                     TilePaintedType? type = paletteCondition.Invoke(x, y);
                     if (type != null)
@@ -73,7 +75,7 @@ public static class ComponentHelper {
     ///     fills shape with tiles of a painted type
     /// </summary>
     public abstract class FillShapeWalls : IComponentHelper {
-        public static ComponentTagPartialSet PossibleTags => [];
+        public static HashSet<Tag> PossibleTags => [];
 
         /// <summary>
         ///     fills shape with tiles of a painted type
@@ -97,20 +99,19 @@ public static class ComponentHelper {
     ///     create beams at a regular interval of every 4, but ensure symmetry is kept throughout the shape
     /// </summary>
     public abstract class CreateBeams : IComponentHelper {
-        public static ComponentTagPartialSet PossibleTags => [
-            ComponentTags.RoomHasArbitraryBeams,
-            ComponentTags.RoomHasSpecificBeams
+        public static HashSet<Tag> PossibleTags => [
+            Tags.RoomHasArbitraryBeams,
+            Tags.RoomHasSpecificBeams
         ];
 
         /// <summary>
         ///     create beams at a regular interval of every 4, but ensure symmetry is kept throughout the shape
         /// </summary>
         /// <param name="shape"></param>
-        /// <param name="param"></param>
+        /// <param name="component"></param>
         /// <returns>tilemap x-positions of each beam</returns>
-        public static int[] Action(Shape shape, ComponentParams param) {
-            int[]? possibleBeams = param.Component.GetTagRequiredDataSafe<int[]?>(ComponentTags.RoomHasSpecificBeams);
-            if (possibleBeams != null) return possibleBeams;
+        public static int[] Action(Shape shape, IComponent component) {
+            if (!component.Params.TagsRequired.GetValueSafe(Tags.RoomHasSpecificBeams, out int[] possibleBeams)) return possibleBeams;
 
             if (shape.Size.X <= 10) {
                 if (shape.Size.X <= 8) {

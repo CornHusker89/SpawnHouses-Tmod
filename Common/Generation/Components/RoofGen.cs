@@ -1,9 +1,10 @@
 using System;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Common;
+using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Common.Types.Geometry;
-using SpawnHouses.Helpers;
+using SpawnHouses.Helpers.Complex;
 using SpawnHouses.Types;
 using Terraria.DataStructures;
 
@@ -218,12 +219,12 @@ public static class RoofGen {
 
     [InstanceGenerator(typeof(Roof))]
     public class RoofGenerator2 : PathComponentGenerator {
-        public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
+        public override HashSet<Tag> PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [
-                ComponentTags.External,
-                ComponentTags.RoofShort,
-                ComponentTags.RoofTall,
-                ComponentTags.RoofHasOverhang
+                Tags.External,
+                Tags.RoofShort,
+                Tags.RoofTall,
+                Tags.RoofHasOverhang
             ],
             ComponentHelper.FillShapeTiles.PossibleTags,
             ComponentHelper.FillShapeWalls.PossibleTags
@@ -249,7 +250,7 @@ public static class RoofGen {
             ComponentHelper.FillShapeTiles.Action(offsetShape, param, (_, _) => param.Palette.Roof.Primary);
 
             // add large roof parts if necessary
-            if (param.Component.Required.ContainsKey(ComponentTags.RoofTall)) {
+            if (param.Component.Required.ContainsKey(Tags.RoofTall)) {
                 bool tallLeftSide = param.Tilemap.Structure.RandomGen.NextBool(3, 4);
                 bool tallRightSide = !tallLeftSide || param.Tilemap.Structure.RandomGen.NextBool(3, 4);
 

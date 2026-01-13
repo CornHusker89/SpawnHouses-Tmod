@@ -1,5 +1,6 @@
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Common;
+using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Types;
 using Terraria.DataStructures;
@@ -12,10 +13,10 @@ public class GapGen {
     /// </summary>
     [InstanceGenerator(typeof(Gap))]
     public class FloorGapGenerator1 : VolumeComponentGenerator {
-        public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
+        public override HashSet<Tag> PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [
-                ComponentTags.IsFloorGap,
-                ComponentTags.External
+                Tags.IsFloorGap,
+                Tags.External
             ]
         );
 
@@ -23,7 +24,7 @@ public class GapGen {
             int xStart = param.Component.Volume.BoundingBox.topLeft.X;
             int[] topY = new int[param.Component.Volume.Size.X];
             int[] bottomY = new int[param.Component.Volume.Size.X];
-            bool external = !param.Component.Required.ContainsKey(ComponentTags.External);
+            bool external = !param.Component.Required.ContainsKey(Tags.External);
 
             param.Component.Volume.ExecuteInArea((x, y) => {
                 param.Tilemap[x, y].ClearTile(false);
@@ -57,10 +58,10 @@ public class GapGen {
     /// </summary>
     [InstanceGenerator(typeof(Gap))]
     public class WallGapGenerator1 : VolumeComponentGenerator {
-        public override ComponentTagPartialSet PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
+        public override HashSet<Tag> PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
             [
-                ComponentTags.IsWallGap,
-                ComponentTags.External
+                Tags.IsWallGap,
+                Tags.External
             ]
         );
 
@@ -70,7 +71,7 @@ public class GapGen {
         }
 
         public override bool Generate(VolumeComponentParams param) {
-            bool external = param.Component.Required.ContainsKey(ComponentTags.External);
+            bool external = param.Component.Required.ContainsKey(Tags.External);
             if (!external)
                 param.Component.Volume.ExecuteInArea((x, y) => {
                     param.Tilemap.PlaceWall(x, y, param.Palette.InternalWall.PrimaryBackground);

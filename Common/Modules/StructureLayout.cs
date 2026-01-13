@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
-using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Parameters;
+using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Types;
-using SpawnHouses.Types.TagTypes;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Common.Modules;
@@ -48,21 +47,21 @@ public class StructureLayout : Generatable<StructureLayoutParams, StructureLayou
     /// </summary>
     public void SetTilesExternalStatus() {
         StructureTilemap tilemap = Params.Structure.Tilemap;
-        foreach (Shape shape in Floors.Select(floor => floor.Geometry))
+        foreach (Shape shape in Floors.Where(floor => floor.TagsCurrent.HasTag(Tags.External)).Select(floor => floor.Geometry))
             shape.ExecuteInArea((x, y) => {
                 StructureTile tile = tilemap[x, y];
                 tile.IsExteriorComponent = true;
                 tile.IsFloor = true;
             });
 
-        foreach (Shape shape in Walls.Select(wall => wall.Geometry))
+        foreach (Shape shape in Walls.Where(wall => wall.TagsCurrent.HasTag(Tags.External)).Select(wall => wall.Geometry))
             shape.ExecuteInArea((x, y) => {
                 StructureTile tile = tilemap[x, y];
                 tile.IsExteriorComponent = true;
                 tile.IsWall = true;
             });
 
-        foreach (Shape shape in Gaps.Select(gap => gap.Geometry))
+        foreach (Shape shape in Gaps.Where(gap => gap.TagsCurrent.HasTag(Tags.External)).Select(gap => gap.Geometry))
             shape.ExecuteInArea((x, y) => {
                 StructureTile tile = tilemap[x, y];
                 tile.IsExteriorComponent = true;
