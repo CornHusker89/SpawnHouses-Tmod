@@ -47,7 +47,7 @@ public interface IGeneratable {
 
 public interface IGeneratable<out TParams, out TGenerator> : IGeneratable
     where TParams : IParams
-    where TGenerator : Generator<TParams> {
+    where TGenerator : IGenerator<TParams, IGeneratable> {
     IParams IGeneratable.Params => Params;
     /// <inheritdoc cref="IGeneratable.Params" />
     public new TParams Params { get; }
@@ -64,7 +64,7 @@ public interface IGeneratable<out TParams, out TGenerator> : IGeneratable
 
 public abstract class Generatable<TParams, TGenerator> : IGeneratable<TParams, TGenerator>
     where TParams : IParams
-    where TGenerator : Generator<TParams> {
+    where TGenerator : IGenerator<TParams, Generatable<TParams, TGenerator>> {
     public bool HasGenerated { get; private set; }
     public ushort Id { get; init; }
     public TParams Params { get; init; }

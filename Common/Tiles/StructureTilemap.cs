@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Common.Modules;
+using SpawnHouses.Common.Types;
 using SpawnHouses.Helpers;
 using SpawnHouses.Types;
 using SpawnHouses.Types.Palette;

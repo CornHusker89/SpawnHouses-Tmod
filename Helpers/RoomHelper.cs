@@ -1,11 +1,9 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Common.Types.Geometry;
-using SpawnHouses.Structures;
 using Terraria.DataStructures;
 using Gap = SpawnHouses.Common.Modules.Components.Gap;
 
@@ -75,42 +73,4 @@ public static class RoomHelper {
 
         return null;
     }
-
-    #region Gap Methods
-
-    /// <summary>
-    /// </summary>
-    /// <param name="entryPoints"></param>
-    /// <param name="floorWidth"></param>
-    /// <param name="wallWidth"></param>
-    /// <remarks>returned gaps have both rooms set to null</remarks>
-    /// <returns></returns>
-    public static Gap[] GapsFromEntryPoints(EntryPoint[] entryPoints, int floorWidth, int wallWidth) {
-        var gaps = new Gap[entryPoints.Length];
-        for (int i = 0; i < gaps.Length; i++) {
-            EntryPoint entryPoint = entryPoints[i];
-            if (entryPoint.IsHorizontal)
-                gaps[i] = new Gap(
-                    new Shape(
-                        true,
-                        entryPoint.Start,
-                        entryPoint.End + new Point16(entryPoint.Direction is Directions.Right ? wallWidth - 1 : -wallWidth + 1, 0)
-                    ),
-                    null, null, entryPoint.Direction is Directions.Left or Directions.Right
-                );
-            else
-                gaps[i] = new Gap(
-                    new Shape(
-                        true,
-                        entryPoint.Start,
-                        entryPoint.End + new Point16(0, entryPoint.Direction is Directions.Down ? floorWidth - 1 : -floorWidth + 1)
-                    ),
-                    null, null, entryPoint.Direction is Directions.Left or Directions.Right
-                );
-        }
-
-        return gaps;
-    }
-
-    #endregion
 }

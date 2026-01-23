@@ -2,14 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.AdvStructures.AdvStructureParts;
+using SpawnHouses.Common;
 using SpawnHouses.Common.Modules.Components;
+using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types.Geometry;
 using Terraria;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Helpers;
 
-public class ExternalLayoutHelper {
+public static class ExternalLayoutHelper {
     /// <summary>
     ///     leaves original array intact
     /// </summary>
@@ -30,6 +32,7 @@ public class ExternalLayoutHelper {
     /// <summary>
     ///     helper function to simplify creating flat floors
     /// </summary>
+    /// <param name="structure"></param>
     /// <param name="y"></param>
     /// <param name="xStart"></param>
     /// <param name="xEnd"></param>
@@ -40,19 +43,24 @@ public class ExternalLayoutHelper {
     /// <param name="width"></param>
     /// <param name="isExternal"></param>
     /// <returns></returns>
-    public static Floor CreateFloor(int y, int xStart, int xEnd, bool extendHigher, int width, bool isExternal = true) =>
-        new(
+    public static Floor CreateFloor(AdvStructure structure, int y, int xStart, int xEnd, bool extendHigher, int width, bool isExternal = true) {
+        Floor floor = new(
+            structure,
             new Shape(
                 true,
                 new Point16(xStart, y),
                 new Point16(xEnd, y + (extendHigher ? width - 1 : -width + 1))
-            ),
-            isExternal
+            )
         );
+        if (isExternal)
+            floor.Params.TagsRequired.Add(Tags.External);
+        return floor;
+    }
 
     /// <summary>
     ///     helper function to simplify creating flat walls
     /// </summary>
+    /// <param name="structure"></param>
     /// <param name="x"></param>
     /// <param name="yStart"></param>
     /// <param name="yEnd"></param>
@@ -63,19 +71,24 @@ public class ExternalLayoutHelper {
     /// <param name="width"></param>
     /// <param name="isExternal"></param>
     /// <returns></returns>
-    public static Wall CreateWall(int x, int yStart, int yEnd, bool extendHigher, int width, bool isExternal = true) =>
-        new(
+    public static Wall CreateWall(AdvStructure structure, int x, int yStart, int yEnd, bool extendHigher, int width, bool isExternal = true) {
+        Wall wall = new(
+            structure,
             new Shape(
                 true,
                 new Point16(x, yStart),
                 new Point16(x + (extendHigher ? width - 1 : -width + 1), yEnd)
-            ),
-            isExternal
+            )
         );
+        if (isExternal)
+            wall.Params.TagsRequired.Add(Tags.External);
+        return wall;
+    }
 
     /// <summary>
     ///     creates floor and walls as needed to fulfill the given path. intended to create structure roofs
     /// </summary>
+    /// <param name="structure"></param>
     /// <param name="path"></param>
     /// <param name="floorWidth"></param>
     /// <param name="extendWallsHigher"></param>
@@ -83,7 +96,7 @@ public class ExternalLayoutHelper {
     /// <param name="isExternal"></param>
     /// <remarks>assumes that floors get priority over walls</remarks>
     /// <returns></returns>
-    public static (List<Floor> floors, List<Wall> walls, List<Roof> roofs) CreateTopFloorsWallsRoofs(List<Point16> path, int floorWidth, bool extendWallsHigher, int wallWidth, bool isExternal = true) {
+    public static (List<Floor> floors, List<Wall> walls, List<Roof> roofs) CreateTopFloorsWallsRoofs(AdvStructure structure, List<Point16> path, int floorWidth, bool extendWallsHigher, int wallWidth, bool isExternal = true) {
         List<Floor> floors = [];
         List<Wall> walls = [];
         List<Roof> roofs = [];
@@ -108,7 +121,7 @@ public class ExternalLayoutHelper {
                 if (lastPoint?.Y < thisPoint.Y) thisRoofStartExtendable = false;
 
                 if (thisPoint.Y == nextPoint.Y) {
-                    floors.Add(CreateFloor(thisPoint.Y, thisPoint.X - (lastComponentWasFloor ? wallWidth + 1 : 0),
+                    floors.Add(CreateFloor(structure, thisPoint.Y, thisPoint.X - (lastComponentWasFloor ? wallWidth + 1 : 0),
                         nextPoint.X + (!nextComponentIsFloor && extendWallsHigher ? wallWidth - 1 : 0), true, floorWidth, isExternal));
                 }
                 else {
@@ -129,25 +142,28 @@ public class ExternalLayoutHelper {
                     }
 
                     floorPoints.Add(thisPoint + new Point16(0, -floorWidth - 1));
-                    floors.Add(new Floor(new Shape(floorPoints), isExternal));
+                    Floor floor = new(structure, new Shape(floorPoints));
+                    if (isExternal)
+                        floor.Params.TagsRequired.Add(Tags.External);
+                    floors.Add(floor);
                 }
             }
             else {
                 // create a roof out of the last non-wall segments
                 if (roofPoints.Count != 0) {
                     if (lastComponentWasFloor) roofPoints.Add(path[pathIndex] + new Point16(nextPoint.Y < thisPoint.Y ? -1 : 0, 0));
-                    Roof roof = new(new Path(roofPoints, thisRoofStartExtendable, nextPoint.Y <= thisPoint.Y));
-                    roof.Line.Offset(new Point16(0, -floorWidth));
+                    Roof roof = new(structure, new Path(roofPoints, thisRoofStartExtendable, nextPoint.Y <= thisPoint.Y));
+                    roof.Geometry.Offset(new Point16(0, -floorWidth));
                     roofs.Add(roof);
                     roofPoints.Clear();
                     thisRoofStartExtendable = true;
                 }
 
                 if (lastComponentWasFloor)
-                    walls.Add(CreateWall(thisPoint.X, nextPoint.Y > thisPoint.Y ? thisPoint.Y + 1 : thisPoint.Y - floorWidth,
+                    walls.Add(CreateWall(structure, thisPoint.X, nextPoint.Y > thisPoint.Y ? thisPoint.Y + 1 : thisPoint.Y - floorWidth,
                         nextPoint.Y > thisPoint.Y ? nextPoint.Y - floorWidth : nextPoint.Y + 1, extendWallsHigher, wallWidth, isExternal));
                 else
-                    walls.Add(CreateWall(thisPoint.X, thisPoint.Y,
+                    walls.Add(CreateWall(structure, thisPoint.X, thisPoint.Y,
                         nextPoint.Y > thisPoint.Y ? nextPoint.Y - floorWidth : nextPoint.Y + 1, extendWallsHigher, wallWidth, isExternal));
             }
 
@@ -156,8 +172,8 @@ public class ExternalLayoutHelper {
 
         if (roofPoints.Count != 0) {
             if (lastComponentWasFloor) roofPoints.Add(path[^1]);
-            Roof roof = new(new Path(roofPoints, thisRoofStartExtendable));
-            roof.Line.Offset(new Point16(0, -floorWidth));
+            Roof roof = new(structure, new Path(roofPoints, thisRoofStartExtendable));
+            roof.Geometry.Offset(new Point16(0, -floorWidth));
             roofs.Add(roof);
         }
 
@@ -167,6 +183,7 @@ public class ExternalLayoutHelper {
     /// <summary>
     ///     creates a basic muti-segment roof, can create roof slopes and can handle different starting and ending Ys
     /// </summary>
+    /// <param name="structure"></param>
     /// <param name="left">X must be less than <see cref="right" />'s X</param>
     /// <param name="right">X must be greater than <see cref="left" />'s X</param>
     /// <param name="floorThickness"></param>
@@ -174,7 +191,7 @@ public class ExternalLayoutHelper {
     /// <param name="forceFlat">if true, the roof will have no slope of any kind</param>
     /// <param name="splitRoof">if true, roof will attempt to be split</param>
     /// <returns></returns>
-    public static (List<Floor> floors, List<Wall> walls, List<Roof> roofs) CreateBasicRoof(Point16 left, Point16 right, int floorThickness, int wallThickness,
+    public static (List<Floor> floors, List<Wall> walls, List<Roof> roofs) CreateBasicRoof(AdvStructure structure, Point16 left, Point16 right, int floorThickness, int wallThickness,
         bool forceFlat, bool splitRoof) {
         double[] validSplitRoofSlopes = [0.67, 1, 1.5, 2];
         double[] validSingleRoofSlopes = [1, 1.33];
@@ -243,25 +260,20 @@ public class ExternalLayoutHelper {
             }
         }
 
-        var result = CreateTopFloorsWallsRoofs(
-            path,
-            floorThickness,
-            true,
-            wallThickness
-        );
+        var result = CreateTopFloorsWallsRoofs(structure, path, floorThickness, true, wallThickness);
         foreach (Floor floor in result.floors) {
-            floor.AddRequiredTag(Tags.ApplySloping, SlopeHelper.SimpleSlopes);
-            floor.AddRequiredTag(Tags.SlopingModifier, SlopeModifier.GlobalOnlySloping);
+            floor.Params.TagsRequired.Add(Tags.ApplySloping, SlopeHelper.SimpleSlopes);
+            floor.Params.TagsRequired.Add(Tags.SlopingModifier, SlopeModifier.GlobalOnlySloping);
         }
 
         foreach (Roof roof in result.roofs) {
-            roof.AddRequiredTag(Tags.ApplySloping, SlopeHelper.SmoothTop);
-            roof.AddRequiredTag(Tags.SlopingModifier, SlopeModifier.LocalSloping);
+            roof.Params.TagsRequired.Add(Tags.ApplySloping, SlopeHelper.SmoothTop);
+            roof.Params.TagsRequired.Add(Tags.SlopingModifier, SlopeModifier.LocalSloping);
         }
 
         if (hasRoofPeak && Terraria.WorldGen.genRand.NextBool(3, 5)) {
-            result.roofs[!leftRoofHigher && splitRoof ? 1 : 0].AddRequiredTag(Tags.RoofTall);
-            if (splitRoof && hasSlopedSideRoof && Terraria.WorldGen.genRand.NextBool(1, 2)) result.roofs[!leftRoofHigher ? 0 : 1].AddRequiredTag(Tags.RoofTall);
+            result.roofs[!leftRoofHigher && splitRoof ? 1 : 0].Params.TagsRequired.Add(Tags.RoofTall);
+            if (splitRoof && hasSlopedSideRoof && Terraria.WorldGen.genRand.NextBool(1, 2)) result.roofs[!leftRoofHigher ? 0 : 1].Params.TagsRequired.Add(Tags.RoofTall);
         }
 
         return result;
@@ -269,14 +281,12 @@ public class ExternalLayoutHelper {
 
     /// <summary>
     /// </summary>
-    /// <param name="components"></param>
-    /// <typeparam name="T">must be a component type</typeparam>
+    /// <param name="roofs"></param>
     /// <returns></returns>
-    public static int GetHighestBoundingPoint<T>(List<T> components)
-        where T : Component {
+    public static int GetHighestRoofPoint(IEnumerable<Roof> roofs) {
         int topY = int.MaxValue;
-        foreach (T component in components) {
-            int pos = component.Generator.GetBoundingShape(component.Params).BoundingBox.topLeft.Y;
+        foreach (Roof roof in roofs) {
+            int pos = roof.Generator.GetBoundingShape(roof.Params, roof.Geometry).BoundingBox.topLeft.Y;
             if (pos < topY) topY = pos;
         }
 

@@ -24,23 +24,15 @@ public interface IComponent<out TGeometry> : IComponent
 public abstract class VolumeComponent : Generatable<VolumeComponentParams, VolumeComponentGenerator>, IComponent<Shape> {
     public Shape Geometry { get; set; }
 
-    /// <summary>
-    ///     <see cref="Geometry" /> is set in this constructor
-    /// </summary>
-    /// <param name="param"></param>
-    protected VolumeComponent(VolumeComponentParams param) : base(param, new TagMap()) {
-        Geometry = param.Geometry;
+    protected VolumeComponent(VolumeComponentParams param, Shape geometry) : base(param, new TagMap()) {
+        Geometry = geometry;
     }
 }
 
 public abstract class PathComponent : Generatable<PathComponentParams, PathComponentGenerator>, IComponent<Path> {
     public Path Geometry { get; set; }
 
-    /// <summary>
-    ///     <see cref="Geometry" /> is set in this constructor
-    /// </summary>
-    /// <param name="param"></param>
-    protected PathComponent(PathComponentParams param) : base(param, new TagMap()) {
-        Geometry = param.Geometry;
+    protected PathComponent(PathComponentParams param, Path geometry) : base(param, new TagMap()) {
+        Geometry = geometry;
     }
 }

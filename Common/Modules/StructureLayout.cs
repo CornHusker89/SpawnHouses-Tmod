@@ -12,34 +12,37 @@ using Terraria.DataStructures;
 namespace SpawnHouses.Common.Modules;
 
 public class StructureLayout : Generatable<StructureLayoutParams, StructureLayoutGenerator> {
-    public List<Floor> Floors { get; private set; }
-    public List<Wall> Walls { get; private set; }
-    public List<Gap> Gaps { get; private set; }
+    public List<Floor> ExternalFloors { get; private set; }
+    public List<Wall> ExternalWalls { get; private set; }
+    public List<Gap> ExternalGaps { get; private set; }
     public List<Roof> Roofs { get; private set; }
-    public List<RoomLayout> RoomSections { get; private set; }
+    public List<RoomLayout> RoomLayouts { get; private set; }
 
     public StructureLayout(StructureLayoutParams param) : base(param, new TagMap()) {
     }
 
-    public void SetComponents(List<Floor> floors, List<Wall> walls, List<Gap> gaps, List<Roof> roofs, List<RoomLayout> roomSections) {
-        Floors = floors;
-        Walls = walls;
-        Gaps = gaps;
-        Roofs = roofs;
-        RoomSections = roomSections;
+    public Room[] Rooms {
+        get {
+            int len = 0;
+            foreach (RoomLayout roomLayout in RoomLayouts) len += roomLayout.Rooms.Count;
+            var rooms = new Room[len];
+            int count = 0;
+            foreach (RoomLayout roomLayout in RoomLayouts) {
+                foreach (Room room in roomLayout.Rooms)
+                    rooms[count] = room;
+                count++;
+            }
+
+            return rooms;
+        }
     }
 
-    /// <summary>
-    ///     adds <see cref="Tags.External" /> to every component
-    /// </summary>
-    public void SetComponentTagsExternal() {
-        foreach (Floor floor in Floors)
-            floor.Params.TagsRequired.Add(Tags.External);
-        foreach (Wall wall in Walls)
-            wall.Params.TagsRequired.Add(Tags.External);
-        foreach (Gap gap in Gaps)
-            gap.Params.TagsRequired.Add(Tags.External);
-        // roofs are automatically marked as external
+    public void SetComponents(List<Floor> floors, List<Wall> walls, List<Gap> gaps, List<Roof> roofs, List<RoomLayout> roomLayouts) {
+        ExternalFloors = floors;
+        ExternalWalls = walls;
+        ExternalGaps = gaps;
+        Roofs = roofs;
+        RoomLayouts = roomLayouts;
     }
 
     /// <summary>
@@ -47,21 +50,21 @@ public class StructureLayout : Generatable<StructureLayoutParams, StructureLayou
     /// </summary>
     public void SetTilesExternalStatus() {
         StructureTilemap tilemap = Params.Structure.Tilemap;
-        foreach (Shape shape in Floors.Where(floor => floor.TagsCurrent.HasTag(Tags.External)).Select(floor => floor.Geometry))
+        foreach (Shape shape in ExternalFloors.Where(floor => floor.TagsCurrent.HasTag(Tags.External)).Select(floor => floor.Geometry))
             shape.ExecuteInArea((x, y) => {
                 StructureTile tile = tilemap[x, y];
                 tile.IsExteriorComponent = true;
                 tile.IsFloor = true;
             });
 
-        foreach (Shape shape in Walls.Where(wall => wall.TagsCurrent.HasTag(Tags.External)).Select(wall => wall.Geometry))
+        foreach (Shape shape in ExternalWalls.Where(wall => wall.TagsCurrent.HasTag(Tags.External)).Select(wall => wall.Geometry))
             shape.ExecuteInArea((x, y) => {
                 StructureTile tile = tilemap[x, y];
                 tile.IsExteriorComponent = true;
                 tile.IsWall = true;
             });
 
-        foreach (Shape shape in Gaps.Where(gap => gap.TagsCurrent.HasTag(Tags.External)).Select(gap => gap.Geometry))
+        foreach (Shape shape in ExternalGaps.Where(gap => gap.TagsCurrent.HasTag(Tags.External)).Select(gap => gap.Geometry))
             shape.ExecuteInArea((x, y) => {
                 StructureTile tile = tilemap[x, y];
                 tile.IsExteriorComponent = true;
@@ -98,10 +101,10 @@ public class StructureLayout : Generatable<StructureLayoutParams, StructureLayou
     /// </summary>
     /// <param name="offset"></param>
     public void Offset(Point16 offset) {
-        foreach (Floor floor in Floors) floor.Geometry.Offset(offset);
-        foreach (Wall wall in Walls) wall.Geometry.Offset(offset);
-        foreach (Gap gap in Gaps) gap.Geometry.Offset(offset);
+        foreach (Floor floor in ExternalFloors) floor.Geometry.Offset(offset);
+        foreach (Wall wall in ExternalWalls) wall.Geometry.Offset(offset);
+        foreach (Gap gap in ExternalGaps) gap.Geometry.Offset(offset);
         foreach (Roof roof in Roofs) roof.Geometry.Offset(offset);
-        foreach (RoomLayout roomSection in RoomSections) roomSection.Offset(offset);
+        foreach (RoomLayout roomSection in RoomLayouts) roomSection.Offset(offset);
     }
 }

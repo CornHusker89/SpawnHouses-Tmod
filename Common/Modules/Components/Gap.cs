@@ -18,10 +18,11 @@ public class Gap : VolumeComponent {
     ///     constructor that requires params object
     /// </summary>
     /// <param name="p"></param>
+    /// <param name="shape"></param>
     /// <param name="room1"></param>
     /// <param name="room2"></param>
     /// <param name="isHorizontal">Has rooms on it's left/right</param>
-    public Gap(VolumeComponentParams p, Room room1, Room? room2, bool isHorizontal) : base(p) {
+    public Gap(VolumeComponentParams p, Shape shape, Room room1, Room? room2, bool isHorizontal) : base(p, shape) {
         IsHorizontal = isHorizontal;
 
         bool room1IsInterior = room2 == null || room1.InteriorRank > room2.InteriorRank;
@@ -38,7 +39,7 @@ public class Gap : VolumeComponent {
     /// <param name="room1"></param>
     /// <param name="room2"></param>
     /// <param name="isHorizontal"></param>
-    public Gap(AdvStructure structure, Shape shape, Room room1, Room? room2, bool isHorizontal) : base(new VolumeComponentParams(structure, shape)) {
+    public Gap(AdvStructure structure, Shape shape, Room room1, Room? room2, bool isHorizontal) : base(new VolumeComponentParams(structure), shape) {
         IsHorizontal = isHorizontal;
 
         bool room1IsInterior = room2 == null || room1.InteriorRank > room2.InteriorRank;

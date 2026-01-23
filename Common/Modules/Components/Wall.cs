@@ -1,5 +1,4 @@
 using SpawnHouses.Common.Parameters;
-using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types.Geometry;
 
 namespace SpawnHouses.Common.Modules.Components;
@@ -9,10 +8,8 @@ public class Wall : VolumeComponent {
     ///     constructor that requires params object
     /// </summary>
     /// <param name="p"></param>
-    /// <param name="isExterior"></param>
-    public Wall(VolumeComponentParams p, bool isExterior = false) : base(p) {
-        if (isExterior)
-            TagsCurrent.Add(Tags.External);
+    /// <param name="shape"></param>
+    public Wall(VolumeComponentParams p, Shape shape) : base(p, shape) {
     }
 
     /// <summary>
@@ -20,9 +17,6 @@ public class Wall : VolumeComponent {
     /// </summary>
     /// <param name="structure"></param>
     /// <param name="shape"></param>
-    /// <param name="isExterior"></param>
-    public Wall(AdvStructure structure, Shape shape, bool isExterior = false) : base(new VolumeComponentParams(structure, shape)) {
-        if (isExterior)
-            TagsCurrent.Add(Tags.External);
+    public Wall(AdvStructure structure, Shape shape) : base(new VolumeComponentParams(structure), shape) {
     }
 }

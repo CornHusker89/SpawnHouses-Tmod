@@ -1,11 +1,12 @@
 using System;
 using SpawnHouses.Common;
 using SpawnHouses.Common.Modules;
+using SpawnHouses.Common.Parameters;
 
 namespace SpawnHouses.Helpers;
 
 public static class ComponentUtils {
-    public static ComponentParams CreateParamsForComponent(IComponent component, AdvStructure structure) {
+    public static IParams CreateParamsForComponent(IComponent component, AdvStructure structure) {
         Type componentType = component.GetType();
         if (componentType.IsSubclassOf(typeof(VolumeComponent)))
             return new VolumeComponentParams(structure);

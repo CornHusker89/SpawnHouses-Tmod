@@ -1,10 +1,9 @@
 using System;
-using SpawnHouses.Common;
 using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Common.Types.Geometry;
 
-namespace SpawnHouses.AdvStructures.Generation.Components;
+namespace SpawnHouses.Common.Generation.Components;
 
 public class StairwayGen {
     /// <summary>

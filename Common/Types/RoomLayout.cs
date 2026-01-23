@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Types.Geometry;
@@ -24,6 +23,8 @@ public class RoomLayout {
 
     public List<Floor> Floors;
     public List<Wall> Walls;
+
+    /// <summary>only includes gaps that are INSIDE this room layout; no external gaps</summary>
     public List<Gap> Gaps;
     public List<Room> Rooms;
 
@@ -173,7 +174,7 @@ public class RoomLayout {
     /// <remarks>this RoomLayout must be in non-component mode</remarks>
     private (List<Gap> gaps, List<Room> rooms) RaycastGaps() {
         AssertNonComponentMode();
-        var rooms = RoomVolumes.Select(roomVolume => new Room(new VolumeComponentParams(Structure, roomVolume), [])).ToList();
+        var rooms = RoomVolumes.Select(roomVolume => new Room(new VolumeComponentParams(Structure), roomVolume, [])).ToList();
         List<Gap> gaps = [];
 
         foreach (Room room in rooms) {
@@ -204,7 +205,7 @@ public class RoomLayout {
                 if (foundRoom == room) foundRoom = null; // invalidate casts that find its own room
 
                 if (direction != lastDirection && curGapVolumes.Count != 0) {
-                    roomGaps.Add(new Gap(new VolumeComponentParams(Structure, Shape.Union(curGapVolumes)), room, lastRoom, isHorizontal));
+                    roomGaps.Add(new Gap(new VolumeComponentParams(Structure), Shape.Union(curGapVolumes), room, lastRoom, isHorizontal));
                     curGapVolumes = [];
                 }
 
@@ -362,9 +363,9 @@ public class RoomLayout {
     public void ConvertToComponents() {
         if (ComponentMode) throw new Exception("this RoomLayout must not already be in component mode");
 
-        foreach (Shape shape in FloorVolumes) Floors.Add(new Floor(new VolumeComponentParams(Structure, shape)));
+        foreach (Shape shape in FloorVolumes) Floors.Add(new Floor(new VolumeComponentParams(Structure), shape));
 
-        foreach (Shape shape in WallVolumes) Walls.Add(new Wall(new VolumeComponentParams(Structure, shape)));
+        foreach (Shape shape in WallVolumes) Walls.Add(new Wall(new VolumeComponentParams(Structure), shape));
 
         var (allGaps, rooms) = RaycastGaps();
         // RemoveDuplicateGaps(allGaps);

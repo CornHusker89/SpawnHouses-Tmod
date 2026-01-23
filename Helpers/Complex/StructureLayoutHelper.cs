@@ -3,11 +3,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SpawnHouses.Common;
 using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
+using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Common.Types.Geometry;
+using SpawnHouses.Structures;
 using SpawnHouses.Types;
 using Terraria;
 using Terraria.DataStructures;
@@ -263,21 +266,18 @@ public static class StructureLayoutHelper {
 
             finishedRoomVolumes.AddRange(roomQueue);
             prioritySplits.ClearBlocklist();
-            return new RoomLayout(floorVolumes, wallVolumes, finishedRoomVolumes);
+            return new RoomLayout(room.Params.Structure, floorVolumes, wallVolumes, finishedRoomVolumes);
         }
 
         /// <summary>
         ///     procedural BSP algorithm to split rooms
         /// </summary>
-        /// <param name="roomLayout"></param>
         /// <param name="room">room to split, must be in the given roomLayout</param>
         /// <param name="p"></param>
         /// <param name="prioritizeSplitsOnGapFloors"></param>
         /// <returns>RoomLayout is in component mode</returns>
-        public static RoomLayout Action(RoomLayout roomLayout, Room room, RoomLayoutParams p, bool prioritizeSplitsOnGapFloors = true) {
-            if (roomLayout.ComponentMode) throw new Exception("given RoomLayout already has components set");
-            if (room.Geometry.GetArea(true) < 92) return new RoomLayout([], [], [], [room]);
-            if (!roomLayout.Rooms.Remove(room)) throw new Exception("room doesn't exist in the given RoomLayout");
+        public static RoomLayout Action(Room room, RoomLayoutParams p, bool prioritizeSplitsOnGapFloors = true) {
+            if (room.Geometry.GetArea(true) < 92) return new RoomLayout(room.Params.Structure, [], [], [], [room]);
 
             RoomLayout? pickedLayout = null;
 
@@ -309,23 +309,12 @@ public static class StructureLayoutHelper {
                     }
             }
 
-            // find the rooms that are connected with the original room's gaps
+            // connect the original external gaps to proper rooms
             pickedLayout.ConvertToComponents();
             foreach (Gap gap in room.Gaps) {
-                bool isLowerRoom = gap.LowerRoom == room;
-                Room roomToConnect = RoomLayoutHelper.GetClosestRoom(pickedLayout.Rooms, gap.Volume.Center);
-                if (isLowerRoom) {
-                    gap.LowerRoom = roomToConnect;
-                }
-                else {
-                    // extra connection checking
-                    if (gap.HigherRoom != room) throw new Exception("gap should've had this room before subdivision, but it didn't");
-
-                    gap.HigherRoom = roomToConnect;
-                }
+                if (gap.InteriorRoom == room)
+                    gap.InteriorRoom = RoomHelper.GetClosestRoom(pickedLayout.Rooms, gap.Geometry.Center);
             }
-
-            roomLayout.Combine(pickedLayout);
             return pickedLayout;
         }
     }
@@ -364,6 +353,175 @@ public static class StructureLayoutHelper {
 
             room.Stairways = stairways;
             return stairways;
+        }
+    }
+
+    /// <summary>
+    ///     creates the interior room for a structure. assumes that the structure has a single volume
+    /// </summary>
+    public abstract class InitializeStructureInterior : IStructureLayoutHelper {
+        public static HashSet<Tag> PossibleTags => [
+        ];
+
+        /// <summary>
+        /// </summary>
+        /// <param name="structure"></param>
+        /// <param name="entryPoints"></param>
+        /// <param name="floorWidth"></param>
+        /// <param name="wallWidth"></param>
+        /// <remarks>returned gaps have BOTH rooms set to null</remarks>
+        /// <returns></returns>
+        private static Gap[] GapsFromEntryPoints(AdvStructure structure, EntryPoint[] entryPoints, int floorWidth, int wallWidth) {
+            var gaps = new Gap[entryPoints.Length];
+            for (int i = 0; i < gaps.Length; i++) {
+                EntryPoint entryPoint = entryPoints[i];
+                if (entryPoint.IsHorizontal)
+                    gaps[i] = new Gap(
+                        structure,
+                        new Shape(
+                            true,
+                            entryPoint.Start,
+                            entryPoint.End + new Point16(entryPoint.Direction is Directions.Right ? wallWidth - 1 : -wallWidth + 1, 0)
+                        ),
+                        null!, null, entryPoint.Direction is Directions.Left or Directions.Right
+                    );
+                else
+                    gaps[i] = new Gap(
+                        structure,
+                        new Shape(
+                            true,
+                            entryPoint.Start,
+                            entryPoint.End + new Point16(0, entryPoint.Direction is Directions.Down ? floorWidth - 1 : -floorWidth + 1)
+                        ),
+                        null!, null, entryPoint.Direction is Directions.Left or Directions.Right
+                    );
+            }
+
+            return gaps;
+        }
+
+        /// <summary>
+        ///     converts 2x2 grid cell into a marching square index
+        /// </summary>
+        /// <param name="tilemap"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        private static int GetMarchingSquareIndex(StructureTilemap tilemap, int x, int y) {
+            int value = 0;
+            // bottom-left
+            if (tilemap.InInterior(x, y))
+                value |= 1;
+
+            // bottom-right
+            if (tilemap.InInterior(x + 1, y))
+                value |= 2;
+
+            // top-right
+            if (tilemap.InInterior(x + 1, y - 1))
+                value |= 4;
+
+            // top-left
+            if (tilemap.InInterior(x, y - 1))
+                value |= 8;
+
+            return value;
+        }
+
+        /// <summary>
+        ///     gets a shape that represents the interior of the structure, and excludes any exterior components
+        /// </summary>
+        /// <param name="tilemap"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        /// <remarks>assumes only one interior in the tilemap</remarks>
+        private static Shape GetStructureInterior(StructureTilemap tilemap) {
+            List<Point16> outline = [];
+
+            Point16? start = null;
+            for (int y = 0; y < tilemap.Height - 1 && start == null; y++)
+            for (int x = 0; x < tilemap.Width - 1; x++)
+                if (GetMarchingSquareIndex(tilemap, x, y) != 0) {
+                    start = new Point16(x, y);
+                    break;
+                }
+
+            if (start == null)
+                throw new Exception("valid shape not found from tilemap");
+
+            Point16 pos = start.Value;
+            Point16 dir = new(0, 1);
+            HashSet<Point16> visited = [];
+            int steps = 0;
+            int maxSteps = tilemap.Width * tilemap.Height * 4;
+
+            do {
+                // add previous iteration's position
+                visited.Add(pos);
+
+                int value = GetMarchingSquareIndex(tilemap, pos.X, pos.Y);
+
+                // assumes clockwise direction
+                Point16 nextDir = value switch {
+                    1 => new Point16(0, 1), // BL only: down
+                    2 => new Point16(1, 0), // BR only: right
+                    3 => new Point16(1, 0), // BL + BR: right
+                    4 => new Point16(0, -1), // TR only: up
+                    5 => dir.X == -1 ? new Point16(0, -1) : new Point16(0, 1), // BL + TR: up if we were going left, otherwise down
+                    6 => new Point16(0, -1), // BR + TR: up
+                    7 => new Point16(0, -1), // BL + BR + TR: up
+                    8 => new Point16(-1, 0), // TL only: left
+                    9 => new Point16(0, 1), // BL + TL: down
+                    10 => dir.Y == -1 ? new Point16(0, 1) : new Point16(0, -1), // BR + TL: down if we were going left, otherwise up
+                    11 => new Point16(1, 0), // BL + BR + TL: right
+                    12 => new Point16(-1, 0), // TR + TL: left
+                    13 => new Point16(0, 1), // BL + TR + TL: down
+                    14 => new Point16(-1, 0), // BR + TR + TL: left
+                    _ => new Point16(0, 0) // 0 or 15
+                };
+
+                Point16 outlineOffset = value switch {
+                    1 => new Point16(0, 0), // BL only: BL
+                    2 => new Point16(1, 0), // BR only: BR
+                    3 => new Point16(0, 0), // BL + BR: BL
+                    4 => new Point16(1, -1), // TR only: TR
+                    5 => dir.X == -1 ? new Point16(1, -1) : new Point16(0, 0), // BL + TR: TR if we were going left, otherwise BL
+                    6 => new Point16(1, 0), // BR + TR: BR
+                    7 => new Point16(1, 0), // BL + BR + TR: BR
+                    8 => new Point16(0, -1), // TL only: TL
+                    9 => new Point16(0, -1), // BL + TL: TL
+                    10 => dir.Y == -1 ? new Point16(1, 0) : new Point16(0, -1), // BR + TL: BR if we were going left, otherwise TL
+                    11 => new Point16(0, 0), // BL + BR + TL: BL
+                    12 => new Point16(1, -1), // TR + TL: TR
+                    13 => new Point16(0, -1), // BL + TR + TL: TL
+                    14 => new Point16(1, -1), // BR + TR + TL: TR
+                    _ => new Point16(0, 0) // 0 or 15
+                };
+
+                if (nextDir != dir) outline.Add(pos + outlineOffset);
+
+                pos += nextDir;
+                dir = nextDir;
+                steps++;
+            } while (pos != start.Value && !visited.Contains(pos) && steps < maxSteps);
+
+            return new Shape(outline);
+        }
+
+        /// <summary>
+        ///     creates a room
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="externalFloorThickness"></param>
+        /// <param name="externalWallThickness"></param>
+        /// <returns></returns>
+        public static Room Action(StructureLayoutParams p, int externalFloorThickness, int externalWallThickness) {
+            var externalGaps = GapsFromEntryPoints(p.Structure, p.EntryPoints, externalFloorThickness, externalWallThickness).ToList();
+            Room internalRoom = new(p.Structure, GetStructureInterior(p.Structure.Tilemap), externalGaps);
+
+            foreach (Gap gap in externalGaps)
+                gap.InteriorRoom = internalRoom;
+            return internalRoom;
         }
     }
 }
