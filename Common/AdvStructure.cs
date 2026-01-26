@@ -60,8 +60,7 @@ public class AdvStructure {
         if (StructureLayout != null) throw new Exception("this AdvStructure already has a layout set");
 
         StructureLayout = new StructureLayout(LayoutParam);
-        StructureLayout.SetGenerator();
-        StructureLayout.TagsCurrent.AddRange(StructureLayout.Generator.Generate(LayoutParam));
+        StructureLayout.ExecuteGenerator();
 
         Components = [];
         Components.AddRange(StructureLayout.ExternalFloors);

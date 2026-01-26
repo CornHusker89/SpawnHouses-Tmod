@@ -11,12 +11,14 @@ using Terraria.DataStructures;
 
 namespace SpawnHouses.Common.Modules;
 
-public class StructureLayout : Generatable<StructureLayoutParams, StructureLayoutGenerator> {
+public class StructureLayout : Generatable<StructureLayout, StructureLayoutParams, StructureLayoutGenerator> {
     public List<Floor> ExternalFloors { get; private set; }
     public List<Wall> ExternalWalls { get; private set; }
     public List<Gap> ExternalGaps { get; private set; }
     public List<Roof> Roofs { get; private set; }
     public List<RoomLayout> RoomLayouts { get; private set; }
+
+    public List<IComponent> Components { get; private set; }
 
     public StructureLayout(StructureLayoutParams param) : base(param, new TagMap()) {
     }
@@ -37,12 +39,38 @@ public class StructureLayout : Generatable<StructureLayoutParams, StructureLayou
         }
     }
 
+    /// <summary>
+    ///     sets the components of this structure layout, and calls <see cref="UpdateComponentList" />
+    /// </summary>
+    /// <param name="floors"></param>
+    /// <param name="walls"></param>
+    /// <param name="gaps"></param>
+    /// <param name="roofs"></param>
+    /// <param name="roomLayouts"></param>
     public void SetComponents(List<Floor> floors, List<Wall> walls, List<Gap> gaps, List<Roof> roofs, List<RoomLayout> roomLayouts) {
         ExternalFloors = floors;
         ExternalWalls = walls;
         ExternalGaps = gaps;
         Roofs = roofs;
         RoomLayouts = roomLayouts;
+        Components = [];
+        UpdateComponentList();
+    }
+
+    /// <summary>
+    ///     resets <see cref="Components" /> and rebuilds the list using the current lists of components
+    /// </summary>
+    public void UpdateComponentList() {
+        Components.Clear();
+        Components.AddRange(ExternalFloors);
+        Components.AddRange(ExternalWalls);
+        Components.AddRange(ExternalGaps);
+        Components.AddRange(Roofs);
+        foreach (RoomLayout roomLayout in RoomLayouts) {
+            Components.AddRange(roomLayout.Floors);
+            Components.AddRange(roomLayout.Walls);
+            Components.AddRange(roomLayout.Gaps);
+        }
     }
 
     /// <summary>

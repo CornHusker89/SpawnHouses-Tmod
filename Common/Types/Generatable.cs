@@ -45,9 +45,11 @@ public interface IGeneratable {
     public int GetGeneratorHash() => Generator.GetType().FullName!.GetHashCode();
 }
 
-public interface IGeneratable<out TParams, out TGenerator> : IGeneratable
+public interface IGeneratable<TSelf, TParams, TGenerator> : IGeneratable
+    where TSelf : IGeneratable<TSelf, TParams, TGenerator>
     where TParams : IParams
-    where TGenerator : IGenerator<TParams, IGeneratable> {
+    where TGenerator : IGenerator<TParams, TSelf> {
+    
     IParams IGeneratable.Params => Params;
     /// <inheritdoc cref="IGeneratable.Params" />
     public new TParams Params { get; }
@@ -62,9 +64,11 @@ public interface IGeneratable<out TParams, out TGenerator> : IGeneratable
     public new void SetGenerator();
 }
 
-public abstract class Generatable<TParams, TGenerator> : IGeneratable<TParams, TGenerator>
+public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSelf, TParams, TGenerator>
+    where TSelf : Generatable<TSelf, TParams, TGenerator>
     where TParams : IParams
-    where TGenerator : IGenerator<TParams, Generatable<TParams, TGenerator>> {
+    where TGenerator : IGenerator<TParams, TSelf> {
+    
     public bool HasGenerated { get; private set; }
     public ushort Id { get; init; }
     public TParams Params { get; init; }
@@ -75,13 +79,13 @@ public abstract class Generatable<TParams, TGenerator> : IGeneratable<TParams, T
         Id = StructureManager.NextGeneratableId();
         Params = param;
         TagsCurrent = tagsCurrent;
-        // TagsCurrent.IsLocked = true; TODO
+        TagsCurrent.IsLocked = true;
         SetGenerator();
     }
 
     private TGenerator FindValidGenerator(TGenerator[] generators) {
         TagsCurrent.ValidateExclusiveCurrentTags();
-        var validGenerators = generators.Where(gen => gen.CanGenerate(Params) && Params.TagsRequired.KeysSet.IsSubsetOf(gen.PossibleTags))
+        var validGenerators = generators.Where(gen => gen.CanGenerate(Params, this) && Params.TagsRequired.KeysSet.IsSubsetOf(gen.PossibleTags))
             .ToArray();
 
         if (validGenerators.Length == 0)
@@ -101,7 +105,7 @@ public abstract class Generatable<TParams, TGenerator> : IGeneratable<TParams, T
             Params.Structure.InstanceGeneratorQueue[instanceType] = generatorList;
         }
         else {
-            while (!generatorList[generatorIndex].CanGenerate(Params)) {
+            while (!generatorList[generatorIndex].CanGenerate(Params, this)) {
                 generatorIndex++;
                 if (generatorIndex >= Params.Structure.InstanceGeneratorQueue.Count) generatorList.Add(FindValidGenerator(typedGenerators));
             }
@@ -110,9 +114,12 @@ public abstract class Generatable<TParams, TGenerator> : IGeneratable<TParams, T
         Generator = (TGenerator)generatorList[generatorIndex];
     }
 
+    /// <summary>
+    ///     executes a component's generator, unlocks it's current tags, and marks the component as generated. correct way to generate modules
+    /// </summary>
     public void ExecuteGenerator() {
         TagsCurrent.IsLocked = false;
-        Generator.Generate(Params);
+        Generator.Generate(Params, this);
         HasGenerated = true;
     }
 }
