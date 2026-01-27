@@ -1,7 +1,7 @@
 using System;
 using Terraria.DataStructures;
 
-namespace SpawnHouses.Types;
+namespace SpawnHouses.Common.Types;
 
 public struct PartialPoint16 {
     public readonly bool HasX;

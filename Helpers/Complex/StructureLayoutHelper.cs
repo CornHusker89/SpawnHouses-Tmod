@@ -11,7 +11,6 @@ using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Structures;
-using SpawnHouses.Types;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
@@ -63,7 +62,7 @@ public static class StructureLayoutHelper {
                     double yWeight = Math.Pow(1.0 / (yCutCount + 1), 3);
                     double totalWeight = xWeight + yWeight;
                     // xWeight divided by totalWeight represents chance of picking x cut
-                    return (true, Terraria.WorldGen.genRand.NextDouble() < xWeight / totalWeight);
+                    return (true, param.Structure.LayoutRandom.NextDouble() < xWeight / totalWeight);
                 }
                 case false when canSplitAlongY:
                     return (true, false);
@@ -149,26 +148,26 @@ public static class StructureLayoutHelper {
         /// <summary>
         ///     uses a binary space partitioning algorithm to procedurally split a room into a <see cref="RoomLayout" />
         /// </summary>
-        /// <param name="p"></param>
+        /// <param name="param"></param>
         /// <param name="prioritySplits"></param>
         /// <param name="room"></param>
         /// <param name="prioritizeSplitsOnGapFloors"></param>
         /// <param name="targetRoomCount"></param>
         /// <returns>RoomLayout is not in component mode</returns>
         /// <remarks>fully clears blocklist before returning</remarks>
-        private static RoomLayout SplitBsp(RoomLayoutParams p, Room room, PriorityCollection<PartialPoint16> prioritySplits, bool prioritizeSplitsOnGapFloors, int targetRoomCount) {
-            if (p.RoomHeight.Max < p.FloorWidth.Max + 2 * p.RoomHeight.Min)
+        private static RoomLayout SplitBsp(RoomLayoutParams param, Room room, PriorityCollection<PartialPoint16> prioritySplits, bool prioritizeSplitsOnGapFloors, int targetRoomCount) {
+            if (param.RoomHeight.Max < param.FloorWidth.Max + 2 * param.RoomHeight.Min)
                 ModContent.GetInstance<SpawnHouses>().Logger.Warn(
-                    $"a max room height of {p.RoomHeight.Max} was given, but at least {p.FloorWidth.Max + 2 * p.RoomHeight.Min} is required");
-            if (p.RoomWidth.Max < p.WallWidth.Max + 2 * p.RoomWidth.Min)
+                    $"a max room height of {param.RoomHeight.Max} was given, but at least {param.FloorWidth.Max + 2 * param.RoomHeight.Min} is required");
+            if (param.RoomWidth.Max < param.WallWidth.Max + 2 * param.RoomWidth.Min)
                 ModContent.GetInstance<SpawnHouses>().Logger.Warn(
-                    $"a max room height of {p.RoomWidth.Max} was given, but at least {p.WallWidth.Max + 2 * p.RoomWidth.Min} is required");
+                    $"a max room height of {param.RoomWidth.Max} was given, but at least {param.WallWidth.Max + 2 * param.RoomWidth.Min} is required");
 
             List<Shape> floorVolumes = [], wallVolumes = [];
             var roomQueue = new Queue<Shape>([room.Geometry]);
             List<Shape> finishedRoomVolumes = [];
             int extraCuts = 0, largeRoomCount = 0, xCutCount = 0, yCutCount = 0;
-            int maxLargeRooms = (int)Math.Ceiling(p.LargeRoomChance * targetRoomCount);
+            int maxLargeRooms = (int)Math.Ceiling(param.LargeRoomChance * targetRoomCount);
             for (int curHousing = 1; curHousing < targetRoomCount + extraCuts; curHousing++) {
                 Shape roomVolume;
                 if (roomQueue.Count > 0)
@@ -194,10 +193,10 @@ public static class StructureLayoutHelper {
 
                 // set this iteration's parameters
                 double inverseProgressFactor = double.Max(1 - (double)curHousing / targetRoomCount, 0);
-                int iterationFloorWidth = (int)Math.Round((p.FloorWidth.Max - p.FloorWidth.Min) * inverseProgressFactor) + p.FloorWidth.Min;
-                int iterationWallWidth = (int)Math.Round((p.WallWidth.Max - p.WallWidth.Min) * inverseProgressFactor) + p.WallWidth.Min;
+                int iterationFloorWidth = (int)Math.Round((param.FloorWidth.Max - param.FloorWidth.Min) * inverseProgressFactor) + param.FloorWidth.Min;
+                int iterationWallWidth = (int)Math.Round((param.WallWidth.Max - param.WallWidth.Min) * inverseProgressFactor) + param.WallWidth.Min;
 
-                (bool valid, bool splitAlongX) = EvaluateCutOnX(p, roomVolume, iterationFloorWidth, iterationWallWidth, xCutCount, yCutCount);
+                (bool valid, bool splitAlongX) = EvaluateCutOnX(param, roomVolume, iterationFloorWidth, iterationWallWidth, xCutCount, yCutCount);
 
                 if (!valid) {
                     // if the room can't be split at all, don't add it back to the queue
@@ -207,7 +206,7 @@ public static class StructureLayoutHelper {
                 }
 
                 int iterationSplitWidth = splitAlongX ? iterationFloorWidth : iterationWallWidth;
-                int outerBoundaryWidth = splitAlongX ? p.RoomHeight.Min : p.RoomWidth.Min;
+                int outerBoundaryWidth = splitAlongX ? param.RoomHeight.Min : param.RoomWidth.Min;
                 Range validCutRange = new((splitAlongX ? roomVolume.BoundingBox.topLeft.Y : roomVolume.BoundingBox.topLeft.X) + outerBoundaryWidth,
                     (splitAlongX ? roomVolume.BoundingBox.bottomRight.Y : roomVolume.BoundingBox.bottomRight.X) - outerBoundaryWidth - iterationSplitWidth
                 );
@@ -220,7 +219,7 @@ public static class StructureLayoutHelper {
                     continue;
                 }
 
-                int splitStart = Terraria.WorldGen.genRand.NextFromCollection(validSplitStarts.ToList());
+                int splitStart = param.Structure.LayoutRandom.NextFromCollection(validSplitStarts.ToList());
                 int splitEnd = splitStart + iterationSplitWidth - 1;
 
                 (Shape? lower, Shape? middle, Shape? higher) roomSubsections = roomVolume.CutTwice(splitAlongX, splitStart, splitEnd);
@@ -233,7 +232,7 @@ public static class StructureLayoutHelper {
                 prioritySplits.AddToBlocklist(new PartialPoint16(splitStart, splitStart, !splitAlongX, splitAlongX));
 
                 if (roomSubsections.lower is not null) {
-                    if (p.IsWithinMaxSize(roomSubsections.lower) && Terraria.WorldGen.genRand.NextDouble() < (1 - Math.Pow(1 - p.LargeRoomChance, p.Attempts)) * 0.35 &&
+                    if (param.IsWithinMaxSize(roomSubsections.lower) && param.Structure.LayoutRandom.NextDouble() < (1 - Math.Pow(1 - param.LargeRoomChance, param.Attempts)) * 0.35 &&
                         largeRoomCount < maxLargeRooms && inverseProgressFactor < 0.92) {
                         largeRoomCount++;
                         finishedRoomVolumes.Add(roomSubsections.lower);
@@ -245,7 +244,7 @@ public static class StructureLayoutHelper {
                 }
 
                 if (roomSubsections.higher is not null) {
-                    if (p.IsWithinMaxSize(roomSubsections.higher) && Terraria.WorldGen.genRand.NextDouble() < (1 - Math.Pow(1 - p.LargeRoomChance, p.Attempts)) * 0.35 &&
+                    if (param.IsWithinMaxSize(roomSubsections.higher) && param.Structure.LayoutRandom.NextDouble() < (1 - Math.Pow(1 - param.LargeRoomChance, param.Attempts)) * 0.35 &&
                         largeRoomCount < maxLargeRooms && inverseProgressFactor < 0.92) {
                         largeRoomCount++;
                         finishedRoomVolumes.Add(roomSubsections.higher);
@@ -332,8 +331,7 @@ public static class StructureLayoutHelper {
         /// <param name="param"></param>
         /// <param name="gapBottom">the bottom-est point in the gap volume</param>
         /// <returns>shape that encloses the affected tiles</returns>
-        private static Stairway CreateStairwayToGap(StructureLayoutParams param, Point16 gapBottom) {
-        }
+        private static Stairway CreateStairwayToGap(StructureLayoutParams param, Point16 gapBottom) => throw new NotImplementedException();
 
         /// <summary>
         ///     creates all necessary stairways in a room
@@ -347,7 +345,8 @@ public static class StructureLayoutHelper {
                     Point16 gapBottom = gap.Geometry.BoundingBox.bottomRight;
                     if (room.Geometry.Contains(gapBottom + new Point16(1, 1)) || room.Geometry.Contains(gapBottom + new Point16(-1, 1))) {
                         CreateStairwayToGap(param, gapBottom);
-                        somehow make sure that the stair ways dont collide and take up too much space and stuff
+                        //somehow make sure that the stair ways dont collide and take up too much space and stuff
+                        throw new NotImplementedException();
                     }
                 }
 

@@ -3,9 +3,10 @@ using System;
 using System.Collections.Generic;
 using SpawnHouses.Common;
 using SpawnHouses.Common.Modules;
+using SpawnHouses.Common.Palette;
 using SpawnHouses.Common.Tagging;
+using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types.Geometry;
-using SpawnHouses.Types.Palette;
 
 namespace SpawnHouses.Helpers.Complex;
 
@@ -35,13 +36,13 @@ public static class ComponentHelper {
         /// </summary>
         /// <param name="component"></param>
         /// <param name="shape"></param>
-        /// <param name="structure"></param>
         /// <param name="paletteCondition">
         ///     callback that returns the palette entry, if null prevents tile placement for that tile in the shape.
         ///     can also be used to execute arbitrary callback on each tile
         /// </param>
         /// <remarks>supports ApplySloping and SlopingModifier component tags</remarks>
-        public static void Action(IComponent component, Shape shape, AdvStructure structure, TilePaletteCondition paletteCondition) {
+        public static void Action(IComponent component, Shape shape, TilePaletteCondition paletteCondition) {
+            StructureTilemap t = component.Params.Structure.Tilemap;
             bool hasSloping = component.Params.TagsRequired.GetValueSafe(Tags.ApplySloping, out SlopingAlgorithm sloping);
             component.Params.TagsRequired.GetValueSafe(Tags.SlopingModifier, out SlopeModifier slopeModifier);
 
@@ -49,7 +50,7 @@ public static class ComponentHelper {
                 shape.ExecuteInArea((x, y) => {
                     TilePaintedType? type = paletteCondition.Invoke(x, y);
                     if (type != null)
-                        structure.Tilemap.PlaceTile(x, y, type);
+                        t.PlaceTile(x, y, type);
                 });
                 return;
             }
@@ -58,15 +59,15 @@ public static class ComponentHelper {
                 shape.ExecuteInArea((x, y, bt) => {
                     TilePaintedType? type = paletteCondition.Invoke(x, y);
                     if (type != null) {
-                        structure.Tilemap.PlaceTile(x, y, type, bt);
-                        structure.Tilemap[x, y].SlopeModifier = SlopeModifier.LocalSloping;
+                        t.PlaceTile(x, y, type, bt);
+                        t[x, y].SlopeModifier = SlopeModifier.LocalSloping;
                     }
                 }, sloping);
             else
                 shape.ExecuteInArea((x, y) => {
                     TilePaintedType? type = paletteCondition.Invoke(x, y);
                     if (type != null)
-                        structure.Tilemap.PlaceTile(x, y, type, sloping, slopeModifier);
+                        t.PlaceTile(x, y, type, sloping, slopeModifier);
                 });
         }
     }

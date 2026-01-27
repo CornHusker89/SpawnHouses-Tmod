@@ -4,11 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Common.Tiles;
 using SpawnHouses.Helpers;
 using SpawnHouses.Structures;
-using SpawnHouses.Types;
 using Terraria.DataStructures;
 using Terraria.ID;
 

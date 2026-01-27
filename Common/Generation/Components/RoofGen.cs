@@ -1,14 +1,19 @@
-using System;
-using SpawnHouses.AdvStructures.AdvStructureParts;
-using SpawnHouses.Common;
+using System.Collections.Generic;
+using System.Linq;
+using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Modules.Components;
+using SpawnHouses.Common.Palette;
+using SpawnHouses.Common.Parameters;
+using SpawnHouses.Common.Tagging;
+using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Helpers.Complex;
-using SpawnHouses.Types;
+using Terraria;
 using Terraria.DataStructures;
+using Terraria.Utilities;
 
-namespace SpawnHouses.AdvStructures.Generation.Components;
+namespace SpawnHouses.Common.Generation.Components;
 
 public static class RoofGen {
     // public class RoofGenerator1 : IPathComponentGenerator {
@@ -39,7 +44,7 @@ public static class RoofGen {
     //         var roofBottomFlats = RaycastHelper.GetFlatTiles(roofBottom);
     //         bool isTallRoof = roofBottomFlats.flatLengths.Sum() > roofLength / 2 &&
     //                           roofLength >= 22 &&
-    //                           Terraria.WorldGen.genRand.Next(0, 4) == 0;
+    //                           change this Terraria.WorldGen.genRand.Next(0, 4) == 0;
     //
     //         bool isLeftFlushWithWall = param.Tilemap[roofStart.X - 1, roofStart.Y - 2].HasTile;
     //         bool isRightFlushWithWall = param.Tilemap[rightPosX + 1, roofBottom.pos[^1] - 2].HasTile;
@@ -161,7 +166,7 @@ public static class RoofGen {
     //
     //         // 6th pass: create endcaps
     //         bool anySideEndsWithSlope = Math.Abs(roofBottom.slope[0]) > 0.05 || Math.Abs(roofBottom.slope[^1]) > 0.05;
-    //         bool hasTallEndCaps = (anySideEndsWithSlope || Terraria.WorldGen.genRand.NextDouble() < 0.35)
+    //         bool hasTallEndCaps = (anySideEndsWithSlope || change this Terraria.WorldGen.genRand.NextDouble() < 0.35)
     //                               && !param.Component.TagsRequired.Contains(ComponentTag.RoofHasLargeOverhang);
     //
     //         // left cap
@@ -217,9 +222,9 @@ public static class RoofGen {
     //     }
     // }
 
-    [InstanceGenerator(typeof(Roof))]
+    [ModuleGenerator(typeof(Roof))]
     public class RoofGenerator2 : PathComponentGenerator {
-        public override HashSet<Tag> PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
+        public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
                 Tags.External,
                 Tags.RoofShort,
@@ -230,60 +235,63 @@ public static class RoofGen {
             ComponentHelper.FillShapeWalls.PossibleTags
         );
 
-        public override Shape GetBoundingShape(PathComponentParams param) => throw new NotImplementedException();
+        public override Shape GetBoundingShape(PathComponentParams param, Path geometry, UnifiedRandom random) {
+            bool isPathFlat = geometry.Points.All(point => point.Y == geometry.Points[0].Y);
+            return new Shape(true, geometry.BoundingBox.topLeft + new Point16(0, isPathFlat ? -2 : -3), geometry.BoundingBox.bottomRight);
+        }
 
-        public override bool Generate(PathComponentParams param) {
-            bool isPathFlat = param.Component.Line.Points.All(point => point.Y == param.Component.Line.Points[0].Y);
+        public override bool Generate(PathComponent component, PathComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
+            bool isPathFlat = component.Geometry.Points.All(point => point.Y == component.Geometry.Points[0].Y);
 
             // extend roof endcaps if necessary
             bool bigEndCaps = false;
-            if (param.Component.Line.StartExtendable) {
+            if (component.Geometry.StartExtendable) {
             }
 
-            Path upperMiddlePath = param.Component.Line.Clone();
+            Path upperMiddlePath = component.Geometry.Clone();
             upperMiddlePath.OffsetEven(new Point16(0, -1));
-            Path topPath = param.Component.Line.Clone();
+            Path topPath = component.Geometry.Clone();
             topPath.OffsetEven(new Point16(0, isPathFlat ? -2 : -3));
             topPath.Reverse();
 
             Shape offsetShape = upperMiddlePath.ToShape(topPath);
-            ComponentHelper.FillShapeTiles.Action(offsetShape, param, (_, _) => param.Palette.Roof.Primary);
+            ComponentHelper.FillShapeTiles.Action(component, offsetShape, (_, _) => palette.Roof.Primary);
 
             // add large roof parts if necessary
-            if (param.Component.Required.ContainsKey(Tags.RoofTall)) {
-                bool tallLeftSide = param.Tilemap.Structure.RandomGen.NextBool(3, 4);
-                bool tallRightSide = !tallLeftSide || param.Tilemap.Structure.RandomGen.NextBool(3, 4);
+            if (param.TagsRequired.HasTag(Tags.RoofTall)) {
+                bool tallLeftSide = random.NextBool(3, 4);
+                bool tallRightSide = !tallLeftSide || random.NextBool(3, 4);
 
                 switch (tallLeftSide) {
                     case true when tallRightSide: {
                         Shape topShape = topPath.FillFromBoundingBox(new PartialPoint16(0, 0, false), new Point16(0, -2));
-                        ComponentHelper.FillShapeWalls.Action(topShape, param,
-                            (x, y) => x > topShape.BoundingBox.topLeft.X && x < topShape.BoundingBox.bottomRight.X
-                                ? param.Palette.Roof.PrimaryBackground
+                        ComponentHelper.FillShapeWalls.Action(topShape, param.Structure,
+                            (x, _) => x > topShape.BoundingBox.topLeft.X && x < topShape.BoundingBox.bottomRight.X
+                                ? palette.Roof.PrimaryBackground
                                 : null);
                         break;
                     }
                     case true: {
                         Shape topLeftShape = topPath.FillFromCorner(new Point16(0, 0));
-                        ComponentHelper.FillShapeWalls.Action(topLeftShape, param,
-                            (x, y) => x > topLeftShape.BoundingBox.topLeft.X && x < topLeftShape.BoundingBox.bottomRight.X ? param.Palette.Roof.PrimaryBackground : null);
+                        ComponentHelper.FillShapeWalls.Action(topLeftShape, param.Structure,
+                            (x, _) => x > topLeftShape.BoundingBox.topLeft.X && x < topLeftShape.BoundingBox.bottomRight.X ? palette.Roof.PrimaryBackground : null);
                         break;
                     }
                     default: { // tall right side
                         Shape topRightShape = topPath.FillFromCorner(new Point16(1, 0));
-                        ComponentHelper.FillShapeWalls.Action(topRightShape, param,
-                            (x, y) => x > topRightShape.BoundingBox.topLeft.X && x < topRightShape.BoundingBox.bottomRight.X ? param.Palette.Roof.PrimaryBackground : null);
+                        ComponentHelper.FillShapeWalls.Action(topRightShape, param.Structure,
+                            (x, _) => x > topRightShape.BoundingBox.topLeft.X && x < topRightShape.BoundingBox.bottomRight.X ? palette.Roof.PrimaryBackground : null);
                         break;
                     }
                 }
             }
 
             // create bottom wall section
-            Shape wallsShape = upperMiddlePath.ToShape(param.Component.Line);
-            ComponentHelper.FillShapeWalls.Action(wallsShape, param,
-                (x, _) => (x > wallsShape.BoundingBox.topLeft.X || !param.Component.Line.LowerXExtendable)
-                          && (x < wallsShape.BoundingBox.bottomRight.X || !param.Component.Line.HigherXExtendable)
-                    ? param.Palette.Roof.PrimaryBackground
+            Shape wallsShape = upperMiddlePath.ToShape(component.Geometry);
+            ComponentHelper.FillShapeWalls.Action(wallsShape, param.Structure,
+                (x, _) => (x > wallsShape.BoundingBox.topLeft.X || !component.Geometry.LowerXExtendable)
+                          && (x < wallsShape.BoundingBox.bottomRight.X || !component.Geometry.HigherXExtendable)
+                    ? palette.Roof.PrimaryBackground
                     : null);
 
             return true;

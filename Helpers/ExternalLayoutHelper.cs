@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Common;
 using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Tagging;
@@ -202,11 +201,11 @@ public static class ExternalLayoutHelper {
         int upperRoofBottomY = int.Min(left.Y, right.Y);
         int lowerRoofBottomY = int.Max(left.Y, right.Y);
         int unevenRoofStartX = leftRoofHigher
-            ? Terraria.WorldGen.genRand.Next(startX + (int)(fullLength * 0.5), endX - (int)(fullLength * 0.35))
-            : Terraria.WorldGen.genRand.Next(startX + (int)(fullLength * 0.35), endX - (int)(fullLength * 0.5));
-        bool hasSlopedSideRoof = !forceFlat && Terraria.WorldGen.genRand.NextBool(3, 4);
+            ? structure.LayoutRandom.Next(startX + (int)(fullLength * 0.5), endX - (int)(fullLength * 0.35))
+            : structure.LayoutRandom.Next(startX + (int)(fullLength * 0.35), endX - (int)(fullLength * 0.5));
+        bool hasSlopedSideRoof = !forceFlat && structure.LayoutRandom.NextBool(3, 4);
         bool hasRoofPeak = !forceFlat;
-        double peakRoofSlope = Terraria.WorldGen.genRand.NextFromList(splitRoof ? validSplitRoofSlopes : validSingleRoofSlopes);
+        double peakRoofSlope = structure.LayoutRandom.NextFromList(splitRoof ? validSplitRoofSlopes : validSingleRoofSlopes);
         double sideRoofSlope = double.Min(peakRoofSlope, 0.5);
 
         List<Point16> path;
@@ -271,9 +270,9 @@ public static class ExternalLayoutHelper {
             roof.Params.TagsRequired.Add(Tags.SlopingModifier, SlopeModifier.LocalSloping);
         }
 
-        if (hasRoofPeak && Terraria.WorldGen.genRand.NextBool(3, 5)) {
+        if (hasRoofPeak && structure.LayoutRandom.NextBool(3, 5)) {
             result.roofs[!leftRoofHigher && splitRoof ? 1 : 0].Params.TagsRequired.Add(Tags.RoofTall);
-            if (splitRoof && hasSlopedSideRoof && Terraria.WorldGen.genRand.NextBool(1, 2)) result.roofs[!leftRoofHigher ? 0 : 1].Params.TagsRequired.Add(Tags.RoofTall);
+            if (splitRoof && hasSlopedSideRoof && structure.LayoutRandom.NextBool(1, 2)) result.roofs[!leftRoofHigher ? 0 : 1].Params.TagsRequired.Add(Tags.RoofTall);
         }
 
         return result;
@@ -286,7 +285,7 @@ public static class ExternalLayoutHelper {
     public static int GetHighestRoofPoint(IEnumerable<Roof> roofs) {
         int topY = int.MaxValue;
         foreach (Roof roof in roofs) {
-            int pos = roof.Generator.GetBoundingShape(roof.Params, roof.Geometry).BoundingBox.topLeft.Y;
+            int pos = roof.GetBoundingShape().BoundingBox.topLeft.Y;
             if (pos < topY) topY = pos;
         }
 

@@ -10,8 +10,6 @@ public record Tag {
 
 public sealed record Tag<TValue> : Tag;
 
-public abstract record TagNull;
-
 public sealed class TagMap {
     private static readonly HashSet<Tag>[] ExclusiveTagsRequired = [
     ];

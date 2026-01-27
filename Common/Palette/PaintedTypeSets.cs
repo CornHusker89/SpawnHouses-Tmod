@@ -1,6 +1,6 @@
 #nullable enable
 
-namespace SpawnHouses.Types.Palette;
+namespace SpawnHouses.Common.Palette;
 
 /// <summary>
 ///     <see cref="PaintedType" />s that is related to floors

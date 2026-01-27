@@ -2,7 +2,7 @@ using System;
 using Terraria.ID;
 using Terraria.Utilities;
 
-namespace SpawnHouses.Types.Palette;
+namespace SpawnHouses.Common.Palette;
 
 public class TilePaintedType : PaintedType {
     public TilePaintedType(ushort type, byte paintType = PaintID.None, short style = 0) : base(type, paintType, style) {
@@ -75,8 +75,7 @@ public abstract class PaintedType {
     }
 
     /// the evaluated tile and paint ids
-    public (ushort typeId, byte paintId, int style) GetIds(UnifiedRandom random = null) {
-        random ??= Terraria.WorldGen.genRand;
+    public (ushort typeId, byte paintId, int style) GetIds(UnifiedRandom random) {
         if (IsSeries) {
             int index = random.Next(_typeIds.Length);
             return (_typeIds[index], _paintIds[index], _styles[index]);

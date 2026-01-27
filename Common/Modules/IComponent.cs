@@ -1,8 +1,8 @@
-using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Common.Types.Geometry;
+using Terraria.Utilities;
 
 namespace SpawnHouses.Common.Modules;
 
@@ -35,4 +35,6 @@ public abstract class PathComponent : Generatable<PathComponent, PathComponentPa
     protected PathComponent(PathComponentParams param, Path geometry) : base(param, new TagMap()) {
         Geometry = geometry;
     }
+
+    public Shape GetBoundingShape() => Generator.GetBoundingShape(Params, Geometry, new UnifiedRandom(Id));
 }

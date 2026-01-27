@@ -261,7 +261,7 @@ public class RoomLayout {
     /// </summary>
     /// <param name="gaps"></param>
     /// <returns></returns>
-    private static void ResizeAndMoveGaps(List<Gap> gaps) {
+    private void ResizeAndMoveGaps(List<Gap> gaps) {
         short[] horizontalGapSizes = gaps.Where(gap => !gap.IsHorizontal).Select(gap => gap.Geometry.Size.X).ToArray();
         short maxFloorGapSize = horizontalGapSizes.Length != 0 ? horizontalGapSizes.Max() : (short)7;
 
@@ -291,7 +291,7 @@ public class RoomLayout {
                 int suggestedSize = (int)(gap.Geometry.Size.X / (float)maxFloorGapSize * 2 + 2);
                 // randomly move the gap, if there's space to do so
                 if (suggestedSize < gap.Geometry.Size.X) {
-                    int gapCenter = (int)(Terraria.WorldGen.genRand.NextDouble() * gap.Geometry.Size.X) + gap.Geometry.BoundingBox.topLeft.X;
+                    int gapCenter = (int)(Structure.LayoutRandom.NextDouble() * gap.Geometry.Size.X) + gap.Geometry.BoundingBox.topLeft.X;
                     int leftX = gapCenter - (int)Math.Floor((double)suggestedSize / 2);
                     int outOfBoundsDistance = Math.Max(0, gap.Geometry.BoundingBox.topLeft.X - leftX);
                     leftX = Math.Max(leftX, gap.Geometry.BoundingBox.topLeft.X);
@@ -322,7 +322,7 @@ public class RoomLayout {
             );
 
             // 60% chance to go for chain gaps
-            if (potentialChainGap != null && Terraria.WorldGen.genRand.NextDouble() < 0.6) {
+            if (potentialChainGap != null && Structure.LayoutRandom.NextDouble() < 0.6) {
                 var points = gap.Geometry.Points;
                 for (int pointIndex = 0; pointIndex < gap.Geometry.Points.Length; pointIndex++) {
                     if (points[pointIndex].X < potentialChainGap.Geometry.BoundingBox.topLeft.X)

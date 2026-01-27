@@ -1,9 +1,9 @@
+using SpawnHouses.Common.Palette;
 using SpawnHouses.Common.Types.Geometry;
-using SpawnHouses.Types.Palette;
 using Terraria.DataStructures;
 using Terraria.Utilities;
 
-namespace SpawnHouses.AdvStructures.AdvStructureParts;
+namespace SpawnHouses.Common.Tiles;
 
 public class MultiTile {
     public static readonly Point16 DoorOrigin = new(0, 1);

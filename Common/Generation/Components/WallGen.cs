@@ -1,26 +1,32 @@
-using SpawnHouses.Common;
+using System.Collections.Generic;
+using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Modules.Components;
+using SpawnHouses.Common.Palette;
+using SpawnHouses.Common.Parameters;
+using SpawnHouses.Common.Tagging;
+using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Helpers.Complex;
+using Terraria.Utilities;
 
-namespace SpawnHouses.AdvStructures.Generation.Components;
+namespace SpawnHouses.Common.Generation.Components;
 
 public static class WallGen {
     /// <summary>
     ///     Fills the volume with primary walls
     /// </summary>
-    [InstanceGenerator(typeof(Wall))]
+    [ModuleGenerator(typeof(Wall))]
     public class WallGenerator1 : VolumeComponentGenerator {
-        public override HashSet<Tag> PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
+        public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
                 Tags.External
             ],
             ComponentHelper.FillShapeTiles.PossibleTags
         );
 
-        public override bool Generate(VolumeComponentParams param) {
-            bool external = param.Component.Required.ContainsKey(Tags.External);
-            ComponentHelper.FillShapeTiles.Action(param.Component.Volume, param, (_, _) => (external ? param.Palette.ExternalWall : param.Palette.InternalWall).Primary);
+        public override bool Generate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
+            bool external = param.TagsRequired.HasTag(Tags.External);
+            ComponentHelper.FillShapeTiles.Action(component, component.Geometry, (_, _) => (external ? palette.ExternalWall : palette.InternalWall).Primary);
             return true;
         }
     }
@@ -28,21 +34,21 @@ public static class WallGen {
     /// <summary>
     ///     Fills a volume with random wall blocks, with special vertical blocks at the first and last x position of every other row
     /// </summary>
-    [InstanceGenerator(typeof(Wall))]
+    [ModuleGenerator(typeof(Wall))]
     public class WallGenerator2 : VolumeComponentGenerator {
-        public override HashSet<Tag> PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
+        public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
                 Tags.External
             ]
         );
 
-        public override bool Generate(VolumeComponentParams param) {
-            bool external = param.Component.Required.ContainsKey(Tags.External);
-            int yStart = param.Component.Volume.BoundingBox.topLeft.Y;
-            int yEnd = param.Component.Volume.BoundingBox.bottomRight.Y;
-            int[] lowX = new int[param.Component.Volume.Size.Y];
-            int[] highX = new int[param.Component.Volume.Size.Y];
-            param.Component.Volume.ExecuteInArea((x, y) => {
+        public override bool Generate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
+            bool external = param.TagsRequired.HasTag(Tags.External);
+            int yStart = component.Geometry.BoundingBox.topLeft.Y;
+            int yEnd = component.Geometry.BoundingBox.bottomRight.Y;
+            int[] lowX = new int[component.Geometry.Size.Y];
+            int[] highX = new int[component.Geometry.Size.Y];
+            component.Geometry.ExecuteInArea((x, y) => {
                 // replace default values
                 if (lowX[y - yStart] == 0) lowX[y - yStart] = x;
                 if (highX[y - yStart] == 0) highX[y - yStart] = x;
@@ -52,11 +58,11 @@ public static class WallGen {
                 if (x > highX[y - yStart]) highX[y - yStart] = x;
             });
 
-            ComponentHelper.FillShapeTiles.Action(param.Component.Volume, param, (x, y) =>
+            ComponentHelper.FillShapeTiles.Action(component, component.Geometry, (x, y) =>
                 // make sure that: not at very top or bottom, every other line, either highest x or lowest x
                 y != yStart && y != yEnd && y % 2 == 0 && (x == lowX[y - yStart] || x == highX[y - yStart])
-                    ? (external ? param.Palette.ExternalWall : param.Palette.InternalWall).VerticalDetail
-                    : (external ? param.Palette.ExternalWall : param.Palette.InternalWall).Primary
+                    ? (external ? palette.ExternalWall : palette.InternalWall).VerticalDetail
+                    : (external ? palette.ExternalWall : palette.InternalWall).Primary
             );
 
             return true;

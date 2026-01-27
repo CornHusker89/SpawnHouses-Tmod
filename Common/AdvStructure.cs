@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using SpawnHouses.Common.Modules;
+using SpawnHouses.Common.Palette;
 using SpawnHouses.Common.Parameters;
-using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types;
-using SpawnHouses.Types.Palette;
 using Terraria.Utilities;
 using IComponent = SpawnHouses.Common.Modules.IComponent;
 
@@ -20,13 +19,20 @@ public class AdvStructure {
     public static readonly Dictionary<Type, List<IGenerator>> InstanceGenerators = new();
 
     public readonly Dictionary<Type, List<IGenerator>> InstanceGeneratorQueue = [];
-    public readonly UnifiedRandom RandomGen;
+
+    /// <summary>
+    ///     this random generator should only be used for things that ARE related to layouts
+    /// </summary>
+    public readonly UnifiedRandom LayoutRandom;
+
+    /// <summary>
+    ///     this random generator should only be used for things that are NOT related to layouts
+    /// </summary>
+    public readonly UnifiedRandom OtherRandom;
+    
     public readonly int Seed;
-
     public StructureLayout StructureLayout;
-
     public StructureLayoutParams LayoutParam;
-    public TagMap TagsCurrent;
     public TilePalette Palette;
     public StructureTilemap Tilemap;
 
@@ -34,16 +40,16 @@ public class AdvStructure {
     /// </summary>
     /// <param name="layoutParam"></param>
     /// <param name="palette"></param>
-    /// <param name="seed">if -1, will create a new random seed from the base terraria random generator</param>
+    /// <param name="seed">if -1, creates a new random seed from the base terraria random generator</param>
     /// <param name="generate">
     ///     if true, will call <see cref="ApplyLayoutMethod" />, <see cref="FillComponents" /> and
     ///     <see cref="PlaceTilemap" />
     /// </param>
     public AdvStructure(StructureLayoutParams layoutParam, TilePalette palette, int seed = -1, bool generate = true) {
         Seed = seed == -1 ? Terraria.WorldGen.genRand.Next() : seed;
-        RandomGen = new UnifiedRandom(Seed);
+        LayoutRandom = new UnifiedRandom(Seed);
+        OtherRandom = new UnifiedRandom(Seed + 1);
         LayoutParam = layoutParam;
-        TagsCurrent = new TagMap();
         Palette = palette;
         if (generate) {
             ApplyLayoutMethod();
@@ -61,25 +67,6 @@ public class AdvStructure {
 
         StructureLayout = new StructureLayout(LayoutParam);
         StructureLayout.ExecuteGenerator();
-
-        Components = [];
-        Components.AddRange(StructureLayout.ExternalFloors);
-        Components.AddRange(StructureLayout.ExternalWalls);
-        Components.AddRange(StructureLayout.ExternalGaps);
-        Components.AddRange(StructureLayout.Roofs);
-        foreach (RoomLayout roomLayout in RoomSections) {
-            Components.AddRange(roomLayout.Floors);
-            Components.AddRange(roomLayout.Walls);
-            Components.AddRange(roomLayout.Gaps);
-        }
-
-        // fill rooms last because the furniture needs to be placed specifically
-        foreach (RoomLayout roomLayout in RoomSections) Components.AddRange(roomLayout.Rooms);
-
-        // set component generators
-        foreach (IComponent component in Components) {
-            component.SetGenerator();
-        }
     }
 
     /// <summary>
@@ -90,8 +77,8 @@ public class AdvStructure {
         if (StructureLayout == null)
             throw new Exception("No layout has been set");
 
-        foreach (IComponent component in Components)
-            component.TagsCurrent.AddRange(component.Generator.Generate(component.Params));
+        foreach (IComponent component in StructureLayout.AllComponents)
+            component.ExecuteGenerator();
     }
 
     /// <summary>
@@ -109,11 +96,11 @@ public class AdvStructure {
     public static void LoadGenerators(Assembly assembly) {
         var pluginTypes = assembly.GetTypes();
         foreach (Type type in pluginTypes) {
-            InstanceGenerator instanceInfo = type.GetCustomAttribute<InstanceGenerator>();
+            ModuleGenerator moduleInfo = type.GetCustomAttribute<ModuleGenerator>();
 
-            if (instanceInfo != null) {
-                if (!InstanceGenerators.TryGetValue(instanceInfo.InstanceType, out var generatorList))
-                    InstanceGenerators[instanceInfo.InstanceType] = generatorList = [];
+            if (moduleInfo != null) {
+                if (!InstanceGenerators.TryGetValue(moduleInfo.ModuleType, out var generatorList))
+                    InstanceGenerators[moduleInfo.ModuleType] = generatorList = [];
                 generatorList.Add((IGenerator)Activator.CreateInstance(type));
             }
         }
@@ -127,6 +114,6 @@ public class AdvStructure {
 }
 
 [AttributeUsage(AttributeTargets.Class)]
-public class InstanceGenerator(Type instanceType) : Attribute {
-    public readonly Type InstanceType = instanceType;
+public class ModuleGenerator(Type moduleType) : Attribute {
+    public readonly Type ModuleType = moduleType;
 }

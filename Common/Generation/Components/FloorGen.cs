@@ -1,27 +1,34 @@
 #nullable enable
-using SpawnHouses.Common;
+using System.Collections.Generic;
+using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Modules.Components;
+using SpawnHouses.Common.Palette;
+using SpawnHouses.Common.Parameters;
+using SpawnHouses.Common.Tagging;
+using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Helpers.Complex;
+using Terraria.Utilities;
 
-namespace SpawnHouses.AdvStructures.Generation.Components;
+namespace SpawnHouses.Common.Generation.Components;
 
 public static class FloorGen {
     /// <summary>
     ///     Fills a volume floor blocks
     /// </summary>
-    [InstanceGenerator(typeof(Floor))]
+    [ModuleGenerator(typeof(Floor))]
     public class FloorGenerator1 : VolumeComponentGenerator {
-        public override HashSet<Tag> PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
+        public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
                 Tags.External
             ],
             ComponentHelper.FillShapeTiles.PossibleTags
         );
 
-        public override bool Generate(VolumeComponentParams param) {
-            bool external = param.Component.Required.ContainsKey(Tags.External);
-            ComponentHelper.FillShapeTiles.Action(param.Component.Volume, param, (_, _) => (external ? param.Palette.ExternalFloor : param.Palette.InternalFloor).Primary);
+        public override bool Generate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
+            bool external = param.TagsRequired.HasTag(Tags.External);
+            ComponentHelper.FillShapeTiles.Action(component, component.Geometry, (_, _) =>
+                (external ? palette.ExternalFloor : palette.InternalFloor).Primary);
             return true;
         }
     }
@@ -51,10 +58,10 @@ public static class FloorGen {
     //
     //     public override bool Generate(VolumeComponentParams param) {
     //         bool elevated = param.Component.TagsRequired.ContainsKey(ComponentTag.Elevated);
-    //         int xStart = param.Component.Volume.BoundingBox.topLeft.X;
-    //         int[] topY = new int[param.Component.Volume.Size.X];
+    //         int xStart = component.Geometry.BoundingBox.topLeft.X;
+    //         int[] topY = new int[component.Geometry.Size.X];
     //
-    //         ComponentHelper.FillShapeTiles.Action(param.Component.Volume, param, elevated ? param.Palette.FloorAlt : param.Palette.FloorAltElevated,
+    //         ComponentHelper.FillShapeTiles.Action(component.Geometry, param, elevated ? param.Palette.FloorAlt : param.Palette.FloorAltElevated,
     //             (x, y) => {
     //                 if (topY[x - xStart] == 0)
     //                     topY[x - xStart] = y;
@@ -76,31 +83,31 @@ public static class FloorGen {
     /// <summary>
     ///     Fills top and bottom of volume, adds support struts in the middle
     /// </summary>
-    [InstanceGenerator(typeof(Floor))]
+    [ModuleGenerator(typeof(Floor))]
     public class FloorGenerator4 : VolumeComponentGenerator {
-        public override HashSet<Tag> PossibleTags { get; } = ComponentTagSystem.NewPartialTagSet(
+        public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
                 Tags.FloorHollow
             ]
         );
 
-        public override bool CanGenerate(VolumeComponentParams param) => param.Component.Volume.GetDetailedAxisSizes(false).average >= 3;
+        public override bool CanGenerate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random) => component.Geometry.GetDetailedAxisSizes(false).average >= 3;
 
-        public override bool Generate(VolumeComponentParams param) {
-            int xStart = param.Component.Volume.BoundingBox.topLeft.X;
-            int[] topY = new int[param.Component.Volume.Size.X];
-            int[] bottomY = new int[param.Component.Volume.Size.X];
-            int supportInterval = param.Tilemap.Structure.RandomGen.Next(3, 5);
+        public override bool Generate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
+            int xStart = component.Geometry.BoundingBox.topLeft.X;
+            int[] topY = new int[component.Geometry.Size.X];
+            int[] bottomY = new int[component.Geometry.Size.X];
+            int supportInterval = random.Next(3, 5);
 
-            param.Component.Volume.ExecuteInArea((x, y) => {
+            component.Geometry.ExecuteInArea((x, y) => {
                 if ((x - xStart - 2) % supportInterval == 0 || x == xStart ||
-                    x == param.Component.Volume.BoundingBox.bottomRight.X) {
-                    param.Tilemap.PlaceTile(x, y, param.Palette.InternalFloor.Vertical);
+                    x == component.Geometry.BoundingBox.bottomRight.X) {
+                    tilemap.PlaceTile(x, y, palette.InternalFloor.Vertical);
                 }
                 else {
-                    param.Tilemap.PlaceWall(x, y, param.Palette.InternalFloor.PrimaryBackground);
-                    if (param.Tilemap.Structure.RandomGen.Next(0, 3) == 0)
-                        param.Tilemap.PlaceTile(x, y, param.Palette.Debris1X1);
+                    tilemap.PlaceWall(x, y, palette.InternalFloor.PrimaryBackground);
+                    if (random.Next(0, 3) == 0)
+                        tilemap.PlaceTile(x, y, palette.Debris1X1);
                 }
 
                 if (topY[x - xStart] == 0)
@@ -115,8 +122,8 @@ public static class FloorGen {
             });
 
             for (int index = 0; index < topY.Length; index++) {
-                param.Tilemap.PlaceTile(xStart + index, topY[index], param.Palette.InternalFloor.Primary);
-                param.Tilemap.PlaceTile(xStart + index, bottomY[index], param.Palette.InternalFloor.Primary);
+                tilemap.PlaceTile(xStart + index, topY[index], palette.InternalFloor.Primary);
+                tilemap.PlaceTile(xStart + index, bottomY[index], palette.InternalFloor.Primary);
             }
 
             return true;

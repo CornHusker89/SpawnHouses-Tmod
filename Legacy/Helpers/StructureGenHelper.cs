@@ -2,12 +2,13 @@ using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using ReLogic.Utilities;
+using SpawnHouses.Helpers;
 using SpawnHouses.Structures.StructureParts;
 using Terraria;
 using Terraria.ID;
 using Terraria.WorldBuilding;
 
-namespace SpawnHouses.Helpers;
+namespace SpawnHouses.Legacy.Helpers;
 
 public static class StructureGenHelper {
     /// <summary>

@@ -1,12 +1,11 @@
 #nullable enable
 
-using SpawnHouses.Common.Tagging;
 using Terraria.ID;
 
-namespace SpawnHouses.Types.Palette;
+namespace SpawnHouses.Common.Palette;
 
 public class TilePalette {
-    #region Palette Presets
+    #region Set Presets
 
     private static readonly PaintedTypeFloorSet FloorWoodRough = new() {
         Primary = new TilePaintedType([TileID.LivingMahogany, TileID.WoodBlock], [PaintID.BrownPaint, PaintID.None]),
@@ -84,6 +83,10 @@ public class TilePalette {
         AccentBanner = new TilePaintedType(TileID.Banners)
     };
 
+    #endregion
+
+    #region Palette Presets
+
     public static readonly TilePalette Medieval = new() {
         ExternalFloor = FloorWoodRough,
         InternalFloor = FloorWoodSmooth,
@@ -128,12 +131,7 @@ public class TilePalette {
     public required PaintedTypeRoofSet Roof;
     public required PaintedTypeDecorSet StorageDecor;
     public required PaintedTypeRoomSet StorageRoom;
-
-    public TagMap TagsRequired;
+    
     public required PaintedTypeDecorSet WorkshopDecor;
     public required PaintedTypeRoomSet WorkshopRoom;
-
-    #region Set Presets
-
-    #endregion
 }

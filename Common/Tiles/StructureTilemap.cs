@@ -1,12 +1,10 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Common.Modules;
+using SpawnHouses.Common.Palette;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Helpers;
-using SpawnHouses.Types;
-using SpawnHouses.Types.Palette;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -109,7 +107,7 @@ public class StructureTilemap {
         StructureTile tile = this[x, y];
         tile.HasTile = true;
         tile.BlockType = blockType;
-        (tile.TileType, tile.TileColor, tile.Style) = paintedType.GetIds(Structure.RandomGen);
+        (tile.TileType, tile.TileColor, tile.Style) = paintedType.GetIds(Structure.OtherRandom);
         tile.IsNullTile = false;
         tile.IsActuated = actuated;
     }
@@ -120,7 +118,7 @@ public class StructureTilemap {
 
         StructureTile tile = this[x, y];
         tile.HasTile = true;
-        (tile.TileType, tile.TileColor, tile.Style) = paintedType.GetIds(Structure.RandomGen);
+        (tile.TileType, tile.TileColor, tile.Style) = paintedType.GetIds(Structure.OtherRandom);
         tile.IsNullTile = false;
         tile.SlopingAlg = slopingAlgorithm;
         tile.SlopeModifier = slopeModifier;
@@ -129,7 +127,7 @@ public class StructureTilemap {
 
     public void PlaceMultiTile(Point16 topLeftPos, Point16 size, TilePaintedType tilePaintedType, bool isFurniture,
         Point16? origin = null, bool facingRight = true) {
-        MultiTile multiTile = new(topLeftPos, size, tilePaintedType, Structure.RandomGen, origin, facingRight);
+        MultiTile multiTile = new(topLeftPos, size, tilePaintedType, Structure.OtherRandom, origin, facingRight);
         PlaceMultiTile(multiTile, isFurniture);
     }
 
@@ -156,12 +154,12 @@ public class StructureTilemap {
     /// <param name="paintedType"></param>
     public void SoftPlaceTile(int x, int y, TilePaintedType paintedType) {
         StructureTile tile = this[x, y];
-        (tile.TileType, tile.TileColor, tile.Style) = paintedType.GetIds(Structure.RandomGen);
+        (tile.TileType, tile.TileColor, tile.Style) = paintedType.GetIds(Structure.OtherRandom);
     }
 
     public void PlaceWall(int x, int y, WallPaintedType paintedType) {
         StructureTile tile = this[x, y];
-        (tile.WallType, tile.WallColor, tile.Style) = paintedType.GetIds(Structure.RandomGen);
+        (tile.WallType, tile.WallColor, tile.Style) = paintedType.GetIds(Structure.OtherRandom);
         tile.IsNullWall = false;
     }
 

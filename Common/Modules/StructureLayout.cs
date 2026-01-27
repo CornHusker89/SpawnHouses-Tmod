@@ -6,7 +6,6 @@ using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Common.Types.Geometry;
-using SpawnHouses.Types;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Common.Modules;
@@ -18,7 +17,12 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
     public List<Roof> Roofs { get; private set; }
     public List<RoomLayout> RoomLayouts { get; private set; }
 
-    public List<IComponent> Components { get; private set; }
+    public List<IComponent> ExternalComponents { get; private set; }
+
+    /// <summary>
+    ///     any <see cref="Room" />s are at the very end of the list
+    /// </summary>
+    public List<IComponent> AllComponents { get; private set; }
 
     public StructureLayout(StructureLayoutParams param) : base(param, new TagMap()) {
     }
@@ -42,34 +46,45 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
     /// <summary>
     ///     sets the components of this structure layout, and calls <see cref="UpdateComponentList" />
     /// </summary>
-    /// <param name="floors"></param>
-    /// <param name="walls"></param>
-    /// <param name="gaps"></param>
+    /// <param name="externalFloors"></param>
+    /// <param name="externalWalls"></param>
+    /// <param name="externalGaps"></param>
     /// <param name="roofs"></param>
     /// <param name="roomLayouts"></param>
-    public void SetComponents(List<Floor> floors, List<Wall> walls, List<Gap> gaps, List<Roof> roofs, List<RoomLayout> roomLayouts) {
-        ExternalFloors = floors;
-        ExternalWalls = walls;
-        ExternalGaps = gaps;
+    public void SetComponents(List<Floor> externalFloors, List<Wall> externalWalls, List<Gap> externalGaps, List<Roof> roofs, List<RoomLayout> roomLayouts) {
+        ExternalFloors = externalFloors;
+        ExternalWalls = externalWalls;
+        ExternalGaps = externalGaps;
         Roofs = roofs;
         RoomLayouts = roomLayouts;
-        Components = [];
+        ExternalComponents = [];
+        AllComponents = [];
+        
         UpdateComponentList();
     }
 
     /// <summary>
-    ///     resets <see cref="Components" /> and rebuilds the list using the current lists of components
+    ///     resets <see cref="AllComponents" /> and rebuilds the list using the current lists of components
     /// </summary>
     public void UpdateComponentList() {
-        Components.Clear();
-        Components.AddRange(ExternalFloors);
-        Components.AddRange(ExternalWalls);
-        Components.AddRange(ExternalGaps);
-        Components.AddRange(Roofs);
+        ExternalComponents.Clear();
+        AllComponents.Clear();
+
+        ExternalComponents.AddRange(ExternalFloors);
+        ExternalComponents.AddRange(ExternalWalls);
+        ExternalComponents.AddRange(ExternalGaps);
+        ExternalComponents.AddRange(Roofs);
+
+        AllComponents.AddRange(ExternalComponents);
         foreach (RoomLayout roomLayout in RoomLayouts) {
-            Components.AddRange(roomLayout.Floors);
-            Components.AddRange(roomLayout.Walls);
-            Components.AddRange(roomLayout.Gaps);
+            AllComponents.AddRange(roomLayout.Floors);
+            AllComponents.AddRange(roomLayout.Walls);
+            AllComponents.AddRange(roomLayout.Gaps);
+        }
+
+        // put rooms at the very end of the list
+        foreach (RoomLayout roomLayout in RoomLayouts) {
+            AllComponents.AddRange(roomLayout.Rooms);
         }
     }
 

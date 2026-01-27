@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SpawnHouses.Common.Types.Geometry;
-using SpawnHouses.Types;
 using Terraria.DataStructures;
 
-namespace SpawnHouses.AdvStructures.AdvStructureParts;
+namespace SpawnHouses.Common.Types.Geometry;
 
 public class Path : PointGeometry {
     public bool EndExtendable;

@@ -1,11 +1,10 @@
-using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Helpers;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.WorldBuilding;
 
-namespace SpawnHouses.Types;
+namespace SpawnHouses.Common.Tiles;
 
 /// <summary>
 ///     has many of the same properties as the tML Tile, but uses direct references and has a few more properties

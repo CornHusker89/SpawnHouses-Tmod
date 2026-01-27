@@ -1,6 +1,6 @@
-using SpawnHouses.AdvStructures.AdvStructureParts;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
+using SpawnHouses.Common.Types.Geometry;
 
 namespace SpawnHouses.Common.Modules.Components;
 

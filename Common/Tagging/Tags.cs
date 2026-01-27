@@ -127,7 +127,7 @@ public static class Tags {
 
     #region Roof
 
-    /// roof is tall enough that it doesn't follow the contour of the tiles it is placed on
+    /// roof is tall enough that it doesn't follow the full contour of the tiles it is placed on
     public static Tag RoofTall = new();
 
     /// roof is short enough to generally follow the contour of the path

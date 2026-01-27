@@ -1,10 +1,11 @@
 #nullable enable
 using System;
-using System.Collections.Generic;
 using SpawnHouses.Common;
+using SpawnHouses.Common.Palette;
+using SpawnHouses.Common.Parameters;
+using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Structures;
-using SpawnHouses.Types.Palette;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -58,13 +59,14 @@ public class SpawnTest : ModItem {
         // );
 
         // 1-room house
+        TagMap requiredTags = new();
+        requiredTags.Add(Tags.HasRooms, 1);
+        requiredTags.Add(Tags.HasHousing, 1);
+        requiredTags.Add(Tags.HasOnlyRectangleRooms);
+        
         AdvStructure structure = new(
-            new StructureParams(
-                new StructureTagSet([
-                    new KeyValuePair<StructureTag, object?>(StructureTag.HasRooms, 1),
-                    new KeyValuePair<StructureTag, object?>(StructureTag.HasHousing, 1),
-                    new KeyValuePair<StructureTag, object?>(StructureTag.HasOnlyRectangleRooms, null)
-                ]),
+            new StructureLayoutParams(
+                requiredTags,
                 [
                     new EntryPoint(
                         new Point16(x, y - 2),
