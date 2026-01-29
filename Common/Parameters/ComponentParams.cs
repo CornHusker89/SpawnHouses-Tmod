@@ -3,7 +3,7 @@ using SpawnHouses.Common.Tagging;
 namespace SpawnHouses.Common.Parameters;
 
 public class VolumeComponentParams : IParams {
-    public AdvStructure Structure { get; init; }
+    public AdvStructure Structure { get; set; }
     public TagMap TagsRequired { get; init; }
 
     public VolumeComponentParams(AdvStructure structure, TagMap tagsRequired = null) {
@@ -13,7 +13,7 @@ public class VolumeComponentParams : IParams {
 }
 
 public class PathComponentParams : IParams {
-    public AdvStructure Structure { get; init; }
+    public AdvStructure Structure { get; set; }
     public TagMap TagsRequired { get; init; }
 
     public PathComponentParams(AdvStructure structure, TagMap tagsRequired = null) {

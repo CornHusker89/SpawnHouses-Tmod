@@ -65,8 +65,8 @@ public static class StructureLayoutGen {
             Range externalWallThicknessRange = new(1, 1);
             int externalFloorThickness = externalFloorThicknessRange.Max;
             int externalWallThickness = externalWallThicknessRange.Max;
-            
-            int verticalOffset = hasBasement ? 7 : 0;
+
+            int basementVerticalOffset = hasBasement ? 7 : 0;
             bool hasHigherSide = random.NextBool(4, 5) && !forceFlatRoof;
             bool leftRoofHigher = random.NextBool();
             EntryPoint upper = param.EntryPoints[0].Center.Y < param.EntryPoints[1].Center.Y ? param.EntryPoints[1] : param.EntryPoints[0];
@@ -80,7 +80,8 @@ public static class StructureLayoutGen {
                 right = param.EntryPoints[0];
             }
 
-            int floorTopY = upper.End.Y + 1 + verticalOffset;
+            // create constants
+            int floorTopY = upper.End.Y + 1 + basementVerticalOffset;
             int roofHeightModifier = (int)((param.Height / 6.3 + 2) * random.NextFloat(1, 1.35f)); // if uneven roof, adjust each side by this much
             int upperRoofBottomY = floorTopY - param.Height + 1;
             if (hasHigherSide && upperRoofBottomY + roofHeightModifier >= (leftRoofHigher ? right.Start.Y : left.Start.Y)) // check that an uneven roof won't cause collision with entry points
@@ -88,7 +89,7 @@ public static class StructureLayoutGen {
             int lowerRoofBottomY = upperRoofBottomY + (hasHigherSide ? roofHeightModifier : 0);
             if (hasHigherSide) upperRoofBottomY -= roofHeightModifier;
 
-            // create external components
+            // create roof, to size the tilemap
             var (exteriorFloors, exteriorWalls, roofs) = ExternalLayoutHelper.CreateBasicRoof(
                 param.Structure,
                 new Point16(param.LeftEntryPointX + 1 - externalWallThickness, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
@@ -99,6 +100,32 @@ public static class StructureLayoutGen {
                 false //hasHigherSide && random.NextBool(2, 3)
             );
 
+            // create the tilemap
+            int roofTopY = ExternalLayoutHelper.GetHighestRoofPoint(roofs);
+            param.Structure.Tilemap = new StructureTilemap(
+                param.Structure,
+                (ushort)(param.Length + 2 * (tilemapMargin + externalWallThickness)),
+                (ushort)(int.Max(param.EntryPoints[0].Start.Y, param.EntryPoints[1].Start.Y) + 5 + basementVerticalOffset - roofTopY + 2 * tilemapMargin),
+                new Point16(
+                    param.LeftEntryPointX - externalWallThickness - tilemapMargin,
+                    roofTopY - tilemapMargin
+                )
+            );
+
+            // move entry points and roof components to be relative to the tilemap
+            left.SetOffset(param.Structure.Tilemap.WorldTileOffset * Point16.NegativeOne);
+            right.SetOffset(param.Structure.Tilemap.WorldTileOffset * Point16.NegativeOne);
+            floorTopY -= param.Structure.Tilemap.WorldTileOffset.Y;
+            upperRoofBottomY -= param.Structure.Tilemap.WorldTileOffset.Y;
+            lowerRoofBottomY -= param.Structure.Tilemap.WorldTileOffset.Y;
+            foreach (Floor floor in exteriorFloors)
+                floor.Geometry.Offset(param.Structure.Tilemap.WorldTileOffset * Point16.NegativeOne);
+            foreach (Wall wall in exteriorWalls)
+                wall.Geometry.Offset(param.Structure.Tilemap.WorldTileOffset * Point16.NegativeOne);
+            foreach (Roof roof in roofs)
+                roof.Geometry.Offset(param.Structure.Tilemap.WorldTileOffset * Point16.NegativeOne);
+
+            // create exterior components
             exteriorFloors.Add(ExternalLayoutHelper.CreateFloor(param.Structure, floorTopY, param.LeftEntryPointX + 1 - (hasBasement ? 0 : externalWallThickness),
                 param.RightEntryPointX - 1 + (hasBasement ? 0 : externalWallThickness), true, externalFloorThickness));
 
@@ -118,23 +145,7 @@ public static class StructureLayoutGen {
                 exteriorWalls.Add(ExternalLayoutHelper.CreateWall(param.Structure, right.Start.X,
                     right.End.Y + 1, floorTopY - 1 + externalFloorThickness, true, externalWallThickness));
 
-            // create the tilemap
-            int roofTopY = ExternalLayoutHelper.GetHighestRoofPoint(roofs);
-            param.Structure.Tilemap = new StructureTilemap(
-                param.Structure,
-                (ushort)(param.Length + 2 * (tilemapMargin + externalWallThickness)),
-                (ushort)(int.Max(param.EntryPoints[0].Start.Y, param.EntryPoints[1].Start.Y) + 5 + verticalOffset - roofTopY),
-                new Point16(
-                    param.LeftEntryPointX - externalWallThickness - tilemapMargin,
-                    roofTopY - tilemapMargin
-                )
-            );
-            left.SetOffset(param.Structure.Tilemap.WorldTileOffset * Point16.NegativeOne);
-            right.SetOffset(param.Structure.Tilemap.WorldTileOffset * Point16.NegativeOne);
-
-
-            // finish the room e
-            Room internalRoom = StructureLayoutHelper.InitializeStructureInterior.Action(param, externalFloorThickness, externalWallThickness);
+            Room internalRoom = StructureLayoutHelper.InitializeStructureInterior.Action(param, exteriorFloors, exteriorWalls, externalFloorThickness, externalWallThickness);
 
             RoomLayoutParams roomLayoutParams = new(
                 param.Structure,
@@ -147,12 +158,10 @@ public static class StructureLayoutGen {
             );
 
             RoomLayout roomLayout = StructureLayoutHelper.SubdivideRoom.Action(internalRoom, roomLayoutParams);
-            
             structureLayout.SetComponents(exteriorFloors, exteriorWalls, internalRoom.Gaps, roofs, [roomLayout]);
-            structureLayout.SetTilesExternalStatus();
-
+            
             foreach (Room room in param.Structure.StructureLayout.Rooms) {
-                StructureLayoutHelper.CreateStairways.Action(param, room);
+                //StructureLayoutHelper.CreateStairways.Action(param, room);
                 room.Params.TagsRequired.Add(Tags.RoomTypeLiving);
             }
 

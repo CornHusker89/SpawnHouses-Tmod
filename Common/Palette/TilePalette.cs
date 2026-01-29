@@ -47,7 +47,8 @@ public class TilePalette {
         VerticalBeamBackground = new WallPaintedType(WallID.LargeBambooBlockWall, PaintID.BrownPaint),
         BeamTile = new TilePaintedType(TileID.WoodenBeam),
         BeamTileActuation = false,
-        PrimaryBackground = new WallPaintedType(WallID.GrayBrick)
+        PrimaryRoofBackground = new WallPaintedType(WallID.CopperBrick, PaintID.BrownPaint),
+        PrimaryInteriorBackground = new WallPaintedType(WallID.GrayBrick)
     };
 
     private static readonly PaintedTypeRoomSet RoomLivingMedieval = new() {

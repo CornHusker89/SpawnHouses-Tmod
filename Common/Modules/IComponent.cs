@@ -36,5 +36,9 @@ public abstract class PathComponent : Generatable<PathComponent, PathComponentPa
         Geometry = geometry;
     }
 
-    public Shape GetBoundingShape() => Generator.GetBoundingShape(Params, Geometry, new UnifiedRandom(Id));
+    public Shape GetBoundingShape() {
+        if (Generator == null) SetGenerator();
+
+        return Generator!.GetBoundingShape(Params, Geometry, new UnifiedRandom(Id));
+    }
 }

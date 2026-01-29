@@ -50,6 +50,7 @@ public class AdvStructure {
         LayoutRandom = new UnifiedRandom(Seed);
         OtherRandom = new UnifiedRandom(Seed + 1);
         LayoutParam = layoutParam;
+        LayoutParam.Structure = this;
         Palette = palette;
         if (generate) {
             ApplyLayoutMethod();

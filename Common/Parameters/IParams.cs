@@ -6,7 +6,7 @@ public interface IParams {
     /// <summary>
     ///     the parent structure of the instance
     /// </summary>
-    public AdvStructure Structure { get; init; }
+    public AdvStructure Structure { get; set; }
 
     /// <summary>
     ///     tags that are required for this object to exist

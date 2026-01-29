@@ -7,7 +7,7 @@ using Terraria.DataStructures;
 namespace SpawnHouses.Common.Parameters;
 
 public class StructureLayoutParams : IParams {
-    public AdvStructure Structure { get; init; }
+    public AdvStructure Structure { get; set; }
     public TagMap TagsRequired { get; }
 
     public readonly bool CanAddEntryPoints;

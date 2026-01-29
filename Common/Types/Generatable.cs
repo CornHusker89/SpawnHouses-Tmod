@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
@@ -77,9 +78,16 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
     /// <exception cref="Exception"></exception>
     private IGenerator FindValidGenerator(IGenerator[] generators) {
         TagsCurrent.ValidateExclusiveCurrentTags();
-        var validGenerators = generators.Where(gen => gen.CanGenerate(this, Params, new UnifiedRandom(Id)) &&
-                                                      Params.TagsRequired.KeysSet.IsSubsetOf(gen.PossibleTags))
-            .ToArray();
+        // var validGeneratorsE = generators.Where(gen =>
+        //     gen.CanGenerate(this, Params, new UnifiedRandom(Id)) && Params.TagsRequired.KeysSet.IsSubsetOf(gen.PossibleTags));
+        // var validGenerators = validGeneratorsE.ToArray();
+
+        List<IGenerator> validGeneratorsList = [];
+        foreach (IGenerator gen in generators)
+            if (gen.CanGenerate(this, Params, new UnifiedRandom(Id)) && Params.TagsRequired.KeysSet.IsSubsetOf(gen.PossibleTags))
+                validGeneratorsList.Add(gen);
+
+        var validGenerators = validGeneratorsList.ToArray();
 
         if (validGenerators.Length == 0)
             throw new Exception($"No instance generators were found that are compatible with given parameters. type: {GetType().FullName}, required tags: {EnumHelper.ToString(Params.TagsRequired.Keys)}");
@@ -112,15 +120,11 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
     }
     
     public void ExecuteGenerator() {
-        bool success = false;
-        for (int i = 0; i < 5; i++) {
+        if (Generator == null) {
             SetGenerator();
-            success = Generator.Generate(this, Params, new UnifiedRandom(Id), Params.Structure.Palette, Params.Structure.Tilemap);
-            if (success) break;
         }
 
-        if (!success) throw new Exception($"generator execution failed with 5 attempts on module {ToString()}");
-        
+        if (!Generator!.Generate(this, Params, new UnifiedRandom(Id), Params.Structure.Palette, Params.Structure.Tilemap)) throw new Exception($"generator execution failed on module {ToString()}");
         TagsCurrent.IsLocked = false;
         HasGenerated = true;
     }

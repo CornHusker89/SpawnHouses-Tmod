@@ -38,12 +38,12 @@ public interface IGenerator {
     public bool Generate(IGeneratable generatable, IParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap);
 }
 
-public interface IGenerator<TParams, TGeneratable> : IGenerator
+public interface IGenerator<TParams, in TGeneratable> : IGenerator
     where TParams : IParams
     where TGeneratable : IGeneratable {
-    bool IGenerator.CanGenerate(IGeneratable generatable, IParams param, UnifiedRandom random) => CanGenerate(generatable, param, random);
+    bool IGenerator.CanGenerate(IGeneratable generatable, IParams param, UnifiedRandom random) => CanGenerate((TGeneratable)generatable, (TParams)param, random);
 
-    bool IGenerator.Generate(IGeneratable generatable, IParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) => Generate(generatable, param, random, palette, tilemap);
+    bool IGenerator.Generate(IGeneratable generatable, IParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) => Generate((TGeneratable)generatable, (TParams)param, random, palette, tilemap);
 
     /// <inheritdoc cref="IGenerator.CanGenerate" />
     public bool CanGenerate(TGeneratable generatable, TParams param, UnifiedRandom random);

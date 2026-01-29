@@ -97,14 +97,19 @@ public class PaintedTypeRoofSet {
     public required TilePaintedType Primary;
 
     /// <summary>
-    ///     redundant wall for <see cref="Primary" />
+    ///     redundant wall for <see cref="Primary" />, placed with the exterior-looking sections and not used for any interior-looking sections. for that, see <see cref="PrimaryInteriorBackground"/>
     /// </summary>
-    public required WallPaintedType PrimaryBackground;
+    public required WallPaintedType PrimaryRoofBackground;
 
     /// <summary>
     ///     wall that represents vertical "beams"
     /// </summary>
     public required WallPaintedType VerticalBeamBackground;
+
+    /// <summary>
+    ///     main wall placed with interior-looking sections of the roof. for walls placed on the exterior-looking sections, use <see cref="PrimaryRoofBackground" />
+    /// </summary>
+    public required WallPaintedType PrimaryInteriorBackground;
 }
 
 /// <summary>

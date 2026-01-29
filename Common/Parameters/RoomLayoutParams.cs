@@ -6,7 +6,7 @@ using Range = SpawnHouses.Structures.Range;
 namespace SpawnHouses.Common.Parameters;
 
 public class RoomLayoutParams : IParams {
-    public AdvStructure Structure { get; init; }
+    public AdvStructure Structure { get; set; }
     public TagMap TagsRequired { get; init; }
     
     public readonly Range FloorWidth;

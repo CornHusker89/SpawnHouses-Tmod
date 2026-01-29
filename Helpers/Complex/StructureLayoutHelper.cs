@@ -153,7 +153,7 @@ public static class StructureLayoutHelper {
         /// <param name="room"></param>
         /// <param name="prioritizeSplitsOnGapFloors"></param>
         /// <param name="targetRoomCount"></param>
-        /// <returns>RoomLayout is not in component mode</returns>
+        /// <returns>RoomLayout is NOT in component mode</returns>
         /// <remarks>fully clears blocklist before returning</remarks>
         private static RoomLayout SplitBsp(RoomLayoutParams param, Room room, PriorityCollection<PartialPoint16> prioritySplits, bool prioritizeSplitsOnGapFloors, int targetRoomCount) {
             if (param.RoomHeight.Max < param.FloorWidth.Max + 2 * param.RoomHeight.Min)
@@ -265,7 +265,7 @@ public static class StructureLayoutHelper {
 
             finishedRoomVolumes.AddRange(roomQueue);
             prioritySplits.ClearBlocklist();
-            return new RoomLayout(room.Params.Structure, floorVolumes, wallVolumes, finishedRoomVolumes);
+            return new RoomLayout(room.Params.Structure, floorVolumes, wallVolumes, finishedRoomVolumes, false);
         }
 
         /// <summary>
@@ -446,7 +446,7 @@ public static class StructureLayoutHelper {
                 }
 
             if (start == null)
-                throw new Exception("valid shape not found from tilemap");
+                throw new Exception("tilemap did not have any interior tiles");
 
             Point16 pos = start.Value;
             Point16 dir = new(0, 1);
@@ -508,15 +508,70 @@ public static class StructureLayoutHelper {
         }
 
         /// <summary>
+        ///     sets the outside/exterior component/inside tile data within the tilemap, based on the current external layout
+        /// </summary>
+        private static void SetTilesExternalStatus(StructureLayoutParams param, List<Floor> floors, List<Wall> walls, List<Gap> gaps) {
+            StructureTilemap tilemap = param.Structure.Tilemap;
+            foreach (Shape shape in floors.Select(floor => floor.Geometry))
+                shape.ExecuteInArea((x, y) => {
+                    StructureTile tile = tilemap[x, y];
+                    tile.IsExteriorComponent = true;
+                    tile.IsFloor = true;
+                });
+
+            foreach (Shape shape in walls.Select(wall => wall.Geometry))
+                shape.ExecuteInArea((x, y) => {
+                    StructureTile tile = tilemap[x, y];
+                    tile.IsExteriorComponent = true;
+                    tile.IsWall = true;
+                });
+
+            foreach (Shape shape in gaps.Select(gap => gap.Geometry))
+                shape.ExecuteInArea((x, y) => {
+                    StructureTile tile = tilemap[x, y];
+                    tile.IsExteriorComponent = true;
+                    tile.IsGap = true;
+                });
+
+            SearchOutside(0, 0);
+            for (int x = 0; x < tilemap.Width; x++)
+            for (int y = 0; y < tilemap.Height; y++) {
+                StructureTile tile = tilemap[x, y];
+                if (tile is { IsOutside: false, IsExteriorComponent: false }) tile.IsInside = true;
+            }
+
+            return;
+
+            void SearchOutside(int x, int y) {
+                StructureTile thisTile = tilemap[x, y];
+                thisTile.IsOutside = true;
+                thisTile.IsNullTile = true;
+                thisTile.IsNullWall = true;
+
+                foreach ((int dx, int dy) in ((int, int)[]) [(1, 0), (-1, 0), (0, 1), (0, -1)]) {
+                    if (!tilemap.InBounds(x + dx, y + dy)) continue;
+                    StructureTile nextTile = tilemap[x + dx, y + dy];
+                    if (nextTile.IsOutside || nextTile.IsExteriorComponent) continue;
+
+                    SearchOutside(x + dx, y + dy);
+                }
+            }
+        }
+
+        /// <summary>
         ///     creates a room
         /// </summary>
-        /// <param name="p"></param>
+        /// <param name="param"></param>
+        /// <param name="exteriorFloors"></param>
+        /// <param name="exteriorWalls"></param>
         /// <param name="externalFloorThickness"></param>
         /// <param name="externalWallThickness"></param>
         /// <returns></returns>
-        public static Room Action(StructureLayoutParams p, int externalFloorThickness, int externalWallThickness) {
-            var externalGaps = GapsFromEntryPoints(p.Structure, p.EntryPoints, externalFloorThickness, externalWallThickness).ToList();
-            Room internalRoom = new(p.Structure, GetStructureInterior(p.Structure.Tilemap), externalGaps);
+        public static Room Action(StructureLayoutParams param, List<Floor> exteriorFloors, List<Wall> exteriorWalls, int externalFloorThickness, int externalWallThickness) {
+            var externalGaps = GapsFromEntryPoints(param.Structure, param.EntryPoints, externalFloorThickness, externalWallThickness).ToList();
+            TagMap.AddRequiredToEach(externalGaps, Tags.External);
+            SetTilesExternalStatus(param, exteriorFloors, exteriorWalls, externalGaps);
+            Room internalRoom = new(param.Structure, GetStructureInterior(param.Structure.Tilemap), externalGaps);
 
             foreach (Gap gap in externalGaps)
                 gap.InteriorRoom = internalRoom;

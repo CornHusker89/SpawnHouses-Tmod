@@ -267,20 +267,20 @@ public static class RoofGen {
                         Shape topShape = topPath.FillFromBoundingBox(new PartialPoint16(0, 0, false), new Point16(0, -2));
                         ComponentHelper.FillShapeWalls.Action(topShape, param.Structure,
                             (x, _) => x > topShape.BoundingBox.topLeft.X && x < topShape.BoundingBox.bottomRight.X
-                                ? palette.Roof.PrimaryBackground
+                                ? palette.Roof.PrimaryRoofBackground
                                 : null);
                         break;
                     }
                     case true: {
                         Shape topLeftShape = topPath.FillFromCorner(new Point16(0, 0));
                         ComponentHelper.FillShapeWalls.Action(topLeftShape, param.Structure,
-                            (x, _) => x > topLeftShape.BoundingBox.topLeft.X && x < topLeftShape.BoundingBox.bottomRight.X ? palette.Roof.PrimaryBackground : null);
+                            (x, _) => x > topLeftShape.BoundingBox.topLeft.X && x < topLeftShape.BoundingBox.bottomRight.X ? palette.Roof.PrimaryRoofBackground : null);
                         break;
                     }
                     default: { // tall right side
                         Shape topRightShape = topPath.FillFromCorner(new Point16(1, 0));
                         ComponentHelper.FillShapeWalls.Action(topRightShape, param.Structure,
-                            (x, _) => x > topRightShape.BoundingBox.topLeft.X && x < topRightShape.BoundingBox.bottomRight.X ? palette.Roof.PrimaryBackground : null);
+                            (x, _) => x > topRightShape.BoundingBox.topLeft.X && x < topRightShape.BoundingBox.bottomRight.X ? palette.Roof.PrimaryRoofBackground : null);
                         break;
                     }
                 }
@@ -291,7 +291,7 @@ public static class RoofGen {
             ComponentHelper.FillShapeWalls.Action(wallsShape, param.Structure,
                 (x, _) => (x > wallsShape.BoundingBox.topLeft.X || !component.Geometry.LowerXExtendable)
                           && (x < wallsShape.BoundingBox.bottomRight.X || !component.Geometry.HigherXExtendable)
-                    ? palette.Roof.PrimaryBackground
+                    ? palette.Roof.PrimaryRoofBackground
                     : null);
 
             return true;

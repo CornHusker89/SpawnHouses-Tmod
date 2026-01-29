@@ -260,15 +260,10 @@ public static class ExternalLayoutHelper {
         }
 
         var result = CreateTopFloorsWallsRoofs(structure, path, floorThickness, true, wallThickness);
-        foreach (Floor floor in result.floors) {
-            floor.Params.TagsRequired.Add(Tags.ApplySloping, SlopeHelper.SimpleSlopes);
-            floor.Params.TagsRequired.Add(Tags.SlopingModifier, SlopeModifier.GlobalOnlySloping);
-        }
-
-        foreach (Roof roof in result.roofs) {
-            roof.Params.TagsRequired.Add(Tags.ApplySloping, SlopeHelper.SmoothTop);
-            roof.Params.TagsRequired.Add(Tags.SlopingModifier, SlopeModifier.LocalSloping);
-        }
+        TagMap.AddRequiredToEach(result.floors, Tags.ApplySloping, SlopeHelper.SimpleSlopes);
+        TagMap.AddRequiredToEach(result.floors, Tags.SlopingModifier, SlopeModifier.GlobalOnlySloping);
+        TagMap.AddRequiredToEach(result.roofs, Tags.ApplySloping, SlopeHelper.SmoothTop);
+        TagMap.AddRequiredToEach(result.roofs, Tags.SlopingModifier, SlopeModifier.LocalSloping);
 
         if (hasRoofPeak && structure.LayoutRandom.NextBool(3, 5)) {
             result.roofs[!leftRoofHigher && splitRoof ? 1 : 0].Params.TagsRequired.Add(Tags.RoofTall);

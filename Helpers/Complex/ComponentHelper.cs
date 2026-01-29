@@ -112,7 +112,7 @@ public static class ComponentHelper {
         /// <param name="component"></param>
         /// <returns>tilemap x-positions of each beam</returns>
         public static int[] Action(Shape shape, IComponent component) {
-            if (!component.Params.TagsRequired.GetValueSafe(Tags.RoomHasSpecificBeams, out int[] possibleBeams)) return possibleBeams;
+            if (component.Params.TagsRequired.GetValueSafe(Tags.RoomHasSpecificBeams, out int[] possibleBeams)) return possibleBeams;
 
             if (shape.Size.X <= 10) {
                 if (shape.Size.X <= 8) {

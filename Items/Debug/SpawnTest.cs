@@ -10,6 +10,7 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Range = SpawnHouses.Structures.Range;
 
 namespace SpawnHouses.Items.Debug;
 
@@ -32,39 +33,12 @@ public class SpawnTest : ModItem {
         Console.WriteLine(x + ", " + y);
 
         // full house
-        // float scale = Terraria.WorldGen.genRand.NextFloat();
-        // Structure = new AdvStructure(
-        //     new StructureParams(
-        //         new Dictionary<StructureTag, object?>([
-        //             new KeyValuePair<StructureTag, object?>(StructureTag.HasRooms, new Range(5, 7).Evaluate(scale)),
-        //             new KeyValuePair<StructureTag, object?>(StructureTag.HasHousing, new Range(5, 7).Evaluate(scale))
-        //         ]),
-        //         [],
-        //         [
-        //             new EntryPoint(
-        //                 new Point16(x, y - 2),
-        //                 3,
-        //                 Directions.Right
-        //             ),
-        //             new EntryPoint(
-        //                 new Point16(x + 25, y - 8),
-        //                 3,
-        //                 Directions.Left
-        //             )
-        //         ],
-        //         TilePalette.Medieval,
-        //         new Range(350, 500).Evaluate(scale),
-        //         true
-        //     )
-        // );
-
-        // 1-room house
+        float scale = Terraria.WorldGen.genRand.NextFloat();
         TagMap requiredTags = new();
-        requiredTags.Add(Tags.HasRooms, 1);
-        requiredTags.Add(Tags.HasHousing, 1);
-        requiredTags.Add(Tags.HasOnlyRectangleRooms);
-        
-        AdvStructure structure = new(
+        requiredTags.Add(Tags.HasRooms, new Range(5, 7).Evaluate(scale));
+        requiredTags.Add(Tags.HasHousing, new Range(5, 7).Evaluate(scale));
+        //requiredTags.Add(Tags.HasOnlyRectangleRooms);
+        Structure = new AdvStructure(
             new StructureLayoutParams(
                 requiredTags,
                 [
@@ -74,16 +48,43 @@ public class SpawnTest : ModItem {
                         Directions.Right
                     ),
                     new EntryPoint(
-                        new Point16(x + 28, y - 2),
+                        new Point16(x + 25, y - 8),
                         3,
                         Directions.Left
                     )
                 ],
-                200,
+                new Range(350, 500).Evaluate(scale),
                 false
             ),
             TilePalette.Medieval
         );
+
+        // 1-room house
+        // TagMap requiredTags = new();
+        // requiredTags.Add(Tags.HasRooms, 1);
+        // requiredTags.Add(Tags.HasHousing, 1);
+        // requiredTags.Add(Tags.HasOnlyRectangleRooms);
+        //
+        // AdvStructure structure = new(
+        //     new StructureLayoutParams(
+        //         requiredTags,
+        //         [
+        //             new EntryPoint(
+        //                 new Point16(x, y - 2),
+        //                 3,
+        //                 Directions.Right
+        //             ),
+        //             new EntryPoint(
+        //                 new Point16(x + 28, y - 2),
+        //                 3,
+        //                 Directions.Left
+        //             )
+        //         ],
+        //         200,
+        //         false
+        //     ),
+        //     TilePalette.Medieval
+        // );
 
         return true;
     }

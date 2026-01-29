@@ -33,14 +33,14 @@ public class RoomLayout {
     public List<Shape> RoomVolumes;
 
     /// <summary>
-    ///     constructor which uses volumes to represent components. <see cref="ComponentMode" /> is initialized as false
+    ///     constructor which uses volumes to represent components
     /// </summary>
     /// <param name="structure"></param>
     /// <param name="floorVolumes"></param>
     /// <param name="wallVolumes"></param>
     /// <param name="roomVolumes"></param>
     /// <param name="convertToComponents"></param>
-    public RoomLayout(AdvStructure structure, List<Shape> floorVolumes, List<Shape> wallVolumes, List<Shape> roomVolumes, bool convertToComponents = true) {
+    public RoomLayout(AdvStructure structure, List<Shape> floorVolumes, List<Shape> wallVolumes, List<Shape> roomVolumes, bool convertToComponents) {
         Structure = structure;
         FloorVolumes = floorVolumes;
         WallVolumes = wallVolumes;
@@ -172,12 +172,10 @@ public class RoomLayout {
     /// </summary>
     /// <returns></returns>
     /// <remarks>this RoomLayout must be in non-component mode</remarks>
-    private (List<Gap> gaps, List<Room> rooms) RaycastGaps() {
-        AssertNonComponentMode();
-        var rooms = RoomVolumes.Select(roomVolume => new Room(new VolumeComponentParams(Structure), roomVolume, [])).ToList();
-        List<Gap> gaps = [];
+    private void RaycastGaps() {
+        AssertComponentMode();
 
-        foreach (Room room in rooms) {
+        foreach (Room room in Rooms) {
             List<Gap> roomGaps = [];
             Room lastRoom = null!;
             List<Shape> curGapVolumes = [];
@@ -200,7 +198,7 @@ public class RoomLayout {
                 while (direction is Directions.Up or Directions.Down ? InFloors(pos) : InWalls(pos))
                     pos += step;
 
-                Room foundRoom = RoomHelper.GetRoomFromPos(rooms, pos);
+                Room foundRoom = RoomHelper.GetRoomFromPos(Rooms, pos);
                 if (foundRoom?.InteriorRank > room.InteriorRank) foundRoom = null; // invalidate casts that find a room more interior
                 if (foundRoom == room) foundRoom = null; // invalidate casts that find its own room
 
@@ -229,10 +227,8 @@ public class RoomLayout {
             });
 
             room.Gaps = roomGaps;
-            gaps.AddRange(roomGaps);
+            Gaps.AddRange(roomGaps);
         }
-
-        return (gaps, rooms);
     }
 
     // /// <summary>
@@ -259,18 +255,17 @@ public class RoomLayout {
     /// <summary>
     ///     Removes impractically small gaps, moves and shrinks large gaps
     /// </summary>
-    /// <param name="gaps"></param>
     /// <returns></returns>
-    private void ResizeAndMoveGaps(List<Gap> gaps) {
-        short[] horizontalGapSizes = gaps.Where(gap => !gap.IsHorizontal).Select(gap => gap.Geometry.Size.X).ToArray();
+    private void ResizeAndMoveGaps() {
+        short[] horizontalGapSizes = Gaps.Where(gap => !gap.IsHorizontal).Select(gap => gap.Geometry.Size.X).ToArray();
         short maxFloorGapSize = horizontalGapSizes.Length != 0 ? horizontalGapSizes.Max() : (short)7;
 
         // filter out gaps which are too small and resize gaps
-        for (int gapIndex = gaps.Count - 1; gapIndex >= 0; gapIndex--) {
-            Gap gap = gaps[gapIndex];
+        for (int gapIndex = Gaps.Count - 1; gapIndex >= 0; gapIndex--) {
+            Gap gap = Gaps[gapIndex];
             if (gap.IsHorizontal) {
                 if (gap.Geometry.Size.Y < 3) {
-                    gaps.RemoveAt(gapIndex);
+                    Gaps.RemoveAt(gapIndex);
                     continue;
                 }
 
@@ -284,7 +279,7 @@ public class RoomLayout {
             }
             else {
                 if (gap.Geometry.Size.X < 2) {
-                    gaps.RemoveAt(gapIndex);
+                    Gaps.RemoveAt(gapIndex);
                     continue;
                 }
 
@@ -309,12 +304,12 @@ public class RoomLayout {
         }
 
         // attempt to chain vertical gaps
-        for (int gapIndex = gaps.Count - 1; gapIndex >= 0; gapIndex--) {
-            Gap gap = gaps[gapIndex];
+        for (int gapIndex = Gaps.Count - 1; gapIndex >= 0; gapIndex--) {
+            Gap gap = Gaps[gapIndex];
             if (gap.IsHorizontal) continue;
 
             // randomly move the gap, but if possible align it with the gap below
-            Gap potentialChainGap = gaps.Find(potentialGap =>
+            Gap potentialChainGap = Gaps.Find(potentialGap =>
                 !potentialGap.IsHorizontal &&
                 potentialGap.InteriorRoom == gap.ExteriorRoom &&
                 gap.Geometry.BoundingBox.topLeft.X <= potentialGap.Geometry.BoundingBox.topLeft.X &&
@@ -335,7 +330,7 @@ public class RoomLayout {
                 gap.Geometry = new Shape(points);
             }
             else {
-                gaps.RemoveAt(gapIndex);
+                Gaps.RemoveAt(gapIndex);
             }
         }
     }
@@ -362,18 +357,25 @@ public class RoomLayout {
 
     public void ConvertToComponents() {
         if (ComponentMode) throw new Exception("this RoomLayout must not already be in component mode");
+        ComponentMode = true;
+
+        Floors = [];
+        Walls = [];
+        Gaps = [];
+        Rooms = [];
 
         foreach (Shape shape in FloorVolumes) Floors.Add(new Floor(new VolumeComponentParams(Structure), shape));
-
         foreach (Shape shape in WallVolumes) Walls.Add(new Wall(new VolumeComponentParams(Structure), shape));
+        foreach (Shape shape in RoomVolumes) Rooms.Add(new Room(new VolumeComponentParams(Structure), shape, []));
 
-        var (allGaps, rooms) = RaycastGaps();
+        FloorVolumes = null;
+        WallVolumes = null;
+        RoomVolumes = null;
+
+        RaycastGaps();
         // RemoveDuplicateGaps(allGaps);
-        ResizeAndMoveGaps(allGaps);
+        ResizeAndMoveGaps();
         // PruneGaps(rooms, roomLayoutParams.EntryPoints);
 
-        Rooms = rooms;
-        Gaps = allGaps;
-        ComponentMode = true;
     }
 }

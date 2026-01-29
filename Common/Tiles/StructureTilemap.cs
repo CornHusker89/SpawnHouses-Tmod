@@ -53,7 +53,7 @@ public class StructureTilemap {
 
     public bool InBounds(Point16 point) => InBounds(point.X, point.Y);
 
-    public bool InInterior(int x, int y) => InBounds(x, y) && _tiles[x, y].IsInside;
+    public bool InInterior(int x, int y) => InBounds(x, y) && this[x, y].IsInside;
 
     public bool InInterior(Point16 point) => InInterior(point.X, point.Y);
 
@@ -228,5 +228,13 @@ public class StructureTilemap {
         for (int x = 0; x < Width; x++)
         for (int y = 0; y < Height; y++)
             StructureTile.SetFrames(ConvertToGlobal(x, y));
+    }
+
+    public void VisualizeExteriorTiles() {
+        for (int x = 0; x < Width; x++)
+        for (int y = 0; y < Height; y++) {
+            StructureTile tile = this[x, y];
+            if (tile.IsExteriorComponent) _tiles[x, y] = null;
+        }
     }
 }
