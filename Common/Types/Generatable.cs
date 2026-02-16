@@ -77,11 +77,7 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
     private IGenerator FindValidGenerator(IGenerator[] generators) {
-        TagsCurrent.ValidateExclusiveCurrentTags();
-        // var validGeneratorsE = generators.Where(gen =>
-        //     gen.CanGenerate(this, Params, new UnifiedRandom(Id)) && Params.TagsRequired.KeysSet.IsSubsetOf(gen.PossibleTags));
-        // var validGenerators = validGeneratorsE.ToArray();
-
+        TagsCurrent.ValidateExclusiveRequiredTags();
         List<IGenerator> validGeneratorsList = [];
         foreach (IGenerator gen in generators)
             if (gen.CanGenerate(this, Params, new UnifiedRandom(Id)) && Params.TagsRequired.KeysSet.IsSubsetOf(gen.PossibleTags))
@@ -100,11 +96,11 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
     /// </summary>
     /// <exception cref="Exception"></exception>
     protected void SetGenerator() {
-        int generatorIndex = 0;
         Type instanceType = GetType();
         if (!AdvStructure.InstanceGenerators.TryGetValue(instanceType, out var generators)) throw new Exception($"instance type {GetType().FullName} generators not found");
         var typedGenerators = generators.Cast<IGenerator>().ToArray();
 
+        int generatorIndex = 0;
         if (!Params.Structure.InstanceGeneratorQueue.TryGetValue(instanceType, out var generatorList)) {
             generatorList = [FindValidGenerator(typedGenerators)];
             Params.Structure.InstanceGeneratorQueue[instanceType] = generatorList;
@@ -112,7 +108,8 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
         else {
             while (!generatorList[generatorIndex].CanGenerate(this, Params, new UnifiedRandom(Id))) {
                 generatorIndex++;
-                if (generatorIndex >= Params.Structure.InstanceGeneratorQueue.Count) generatorList.Add(FindValidGenerator(typedGenerators));
+                if (generatorIndex >= generatorList.Count)
+                    generatorList.Add(FindValidGenerator(typedGenerators));
             }
         }
 

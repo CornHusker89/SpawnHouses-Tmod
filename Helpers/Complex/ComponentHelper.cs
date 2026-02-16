@@ -112,49 +112,74 @@ public static class ComponentHelper {
         /// <param name="component"></param>
         /// <returns>tilemap x-positions of each beam</returns>
         public static int[] Action(Shape shape, IComponent component) {
-            if (component.Params.TagsRequired.GetValueSafe(Tags.RoomHasSpecificBeams, out int[] possibleBeams)) return possibleBeams;
+            List<int> beams = [];
+            List<(int start, int end)> beamSections;
 
-            if (shape.Size.X <= 10) {
-                if (shape.Size.X <= 8) {
-                    if (shape.Size.X <= 4) return [];
-                    return [shape.BoundingBox.topLeft.X + (int)Math.Round(shape.Size.X / 2.0)];
-                }
-
-                return [shape.BoundingBox.topLeft.X + 2, shape.BoundingBox.topLeft.X + shape.Size.X - 1 - 2];
-            }
-
-            // add by pairs on each side
-            List<int> leftBeams = [shape.BoundingBox.topLeft.X + 3];
-            List<int> rightBeams = [shape.BoundingBox.topLeft.X + shape.Size.X - 1 - 3];
-
-            // engage in one-off shenanigans to make things symmetrical
-            while (rightBeams[^1] - leftBeams[^1] >= 6) {
-                if (rightBeams[^1] - leftBeams[^1] < 8) {
-                    if (rightBeams[^1] - leftBeams[^1] >= 7) {
-                        leftBeams[^1] += 1;
-                        rightBeams[^1] -= 1;
-                    }
-                    else if (rightBeams[^1] - leftBeams[^1] == 5) {
-                        leftBeams.Add(leftBeams[^1] + 3);
-                    }
-
-                    break;
-                }
-
-                leftBeams.Add(leftBeams[^1] + 4);
-                rightBeams.Add(rightBeams[^1] - 4);
-
-                if (rightBeams[^1] - leftBeams[^1] <= 2) {
-                    leftBeams[^2] -= 1;
-                    leftBeams[^1] -= 1;
-                    rightBeams[^1] += 1;
-                    rightBeams[^2] += 1;
+            if (component.Params.TagsRequired.GetValueSafe(Tags.RoomHasSpecificBeams, out int[] forcedBeams)) {
+                beamSections = [];
+                for (int i = 0; i < forcedBeams.Length; i++) {
+                    beams.Add(forcedBeams[i]);
+                    beamSections.Add(
+                        (
+                            forcedBeams[i == 0 ? shape.BoundingBox.topLeft.X : i - 1],
+                            forcedBeams[i == forcedBeams.Length - 1 ? shape.BoundingBox.topLeft.X + shape.Size.X - 1 : i]
+                        )
+                    );
                 }
             }
+            else {
+                beamSections = [(shape.BoundingBox.topLeft.X, shape.BoundingBox.topLeft.X + shape.Size.X - 1)];
+            }
 
-            rightBeams.Reverse();
-            leftBeams.AddRange(rightBeams);
-            return leftBeams.ToArray();
+            bool hasProceduralBeams = component.Params.TagsRequired.HasTag(Tags.RoomHasArbitraryBeams);
+            if (hasProceduralBeams) {
+                foreach ((int start, int end) section in beamSections) {
+                    int size = section.end - section.start + 1;
+                    if (size <= 10) {
+                        if (size <= 8) {
+                            if (size <= 4) continue;
+                            beams.Add(section.start + (int)Math.Round(size / 2.0));
+                        }
+
+                        return [section.start + 2, section.end - 2];
+                    }
+
+                    // add by pairs on each side
+                    List<int> leftBeams = [section.start + 3];
+                    List<int> rightBeams = [section.end - 3];
+
+                    // engage in one-off shenanigans to make things symmetrical
+                    while (rightBeams[^1] - leftBeams[^1] >= 6) {
+                        if (rightBeams[^1] - leftBeams[^1] < 8) {
+                            if (rightBeams[^1] - leftBeams[^1] >= 7) {
+                                leftBeams[^1] += 1;
+                                rightBeams[^1] -= 1;
+                            }
+                            else if (rightBeams[^1] - leftBeams[^1] == 5) {
+                                leftBeams.Add(leftBeams[^1] + 3);
+                            }
+
+                            break;
+                        }
+
+                        leftBeams.Add(leftBeams[^1] + 4);
+                        rightBeams.Add(rightBeams[^1] - 4);
+
+                        if (rightBeams[^1] - leftBeams[^1] <= 2) {
+                            leftBeams[^2] -= 1;
+                            leftBeams[^1] -= 1;
+                            rightBeams[^1] += 1;
+                            rightBeams[^2] += 1;
+                        }
+                    }
+
+                    rightBeams.Reverse();
+                    leftBeams.AddRange(rightBeams);
+                }
+            }
+
+            beams.Sort();
+            return beams.ToArray();
         }
     }
 }

@@ -241,17 +241,13 @@ public static class RoofGen {
         }
 
         public override bool Generate(PathComponent component, PathComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
-            bool isPathFlat = component.Geometry.Points.All(point => point.Y == component.Geometry.Points[0].Y);
-
             // extend roof endcaps if necessary
             bool bigEndCaps = false;
             if (component.Geometry.StartExtendable) {
             }
 
-            Path upperMiddlePath = component.Geometry.Clone();
-            upperMiddlePath.OffsetEven(new Point16(0, -1));
-            Path topPath = component.Geometry.Clone();
-            topPath.OffsetEven(new Point16(0, isPathFlat ? -2 : -3));
+            Path upperMiddlePath = component.Geometry.GetOffsetEvenPath(-2);
+            Path topPath = component.Geometry.GetOffsetEvenPath(-4);
             topPath.Reverse();
 
             Shape offsetShape = upperMiddlePath.ToShape(topPath);

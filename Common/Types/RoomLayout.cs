@@ -153,16 +153,16 @@ public class RoomLayout {
     /// </summary>
     /// <param name="offset"></param>
     public void Offset(Point16 offset) {
-        foreach (Shape shape in FloorVolumes) shape.Offset(offset);
-        foreach (Shape shape in WallVolumes) shape.Offset(offset);
-        foreach (Shape shape in RoomVolumes) shape.Offset(offset);
+        foreach (Shape shape in FloorVolumes) shape.Move(offset);
+        foreach (Shape shape in WallVolumes) shape.Move(offset);
+        foreach (Shape shape in RoomVolumes) shape.Move(offset);
 
         if (!ComponentMode) return;
 
-        foreach (Floor floor in Floors) floor.Geometry.Offset(offset);
-        foreach (Wall wall in Walls) wall.Geometry.Offset(offset);
-        foreach (Gap gap in Gaps) gap.Geometry.Offset(offset);
-        foreach (Room room in Rooms) room.Geometry.Offset(offset);
+        foreach (Floor floor in Floors) floor.Geometry.Move(offset);
+        foreach (Wall wall in Walls) wall.Geometry.Move(offset);
+        foreach (Gap gap in Gaps) gap.Geometry.Move(offset);
+        foreach (Room room in Rooms) room.Geometry.Move(offset);
     }
 
     #region Gap Helpers

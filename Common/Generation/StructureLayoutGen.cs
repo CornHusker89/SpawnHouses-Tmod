@@ -33,7 +33,8 @@ public static class StructureLayoutGen {
                 Tags.HasOnlyRectangleRooms
             ],
             StructureLayoutHelper.SubdivideRoom.PossibleTags,
-            StructureLayoutHelper.CreateStairways.PossibleTags
+            StructureLayoutHelper.CreateStairways.PossibleTags,
+            StructureLayoutHelper.CreateRoof.PossibleTags
         );
 
         public override bool CanGenerate(StructureLayout structureLayout, StructureLayoutParams param, UnifiedRandom random) {
@@ -90,14 +91,12 @@ public static class StructureLayoutGen {
             if (hasHigherSide) upperRoofBottomY -= roofHeightModifier;
 
             // create roof, to size the tilemap
-            var (exteriorFloors, exteriorWalls, roofs) = ExternalLayoutHelper.CreateBasicRoof(
-                param.Structure,
+            var (exteriorFloors, exteriorWalls, roofs) = StructureLayoutHelper.CreateRoof.Action(
+                param,
                 new Point16(param.LeftEntryPointX + 1 - externalWallThickness, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
                 new Point16(param.RightEntryPointX - 1 + externalWallThickness, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
                 externalFloorThickness,
-                externalWallThickness,
-                forceFlatRoof,
-                false //hasHigherSide && random.NextBool(2, 3)
+                externalWallThickness
             );
 
             // create the tilemap
@@ -119,11 +118,11 @@ public static class StructureLayoutGen {
             upperRoofBottomY -= param.Structure.Tilemap.WorldTileOffset.Y;
             lowerRoofBottomY -= param.Structure.Tilemap.WorldTileOffset.Y;
             foreach (Floor floor in exteriorFloors)
-                floor.Geometry.Offset(param.Structure.Tilemap.WorldTileOffset * Point16.NegativeOne);
+                floor.Geometry.Move(param.Structure.Tilemap.WorldTileOffset * Point16.NegativeOne);
             foreach (Wall wall in exteriorWalls)
-                wall.Geometry.Offset(param.Structure.Tilemap.WorldTileOffset * Point16.NegativeOne);
+                wall.Geometry.Move(param.Structure.Tilemap.WorldTileOffset * Point16.NegativeOne);
             foreach (Roof roof in roofs)
-                roof.Geometry.Offset(param.Structure.Tilemap.WorldTileOffset * Point16.NegativeOne);
+                roof.Geometry.Move(param.Structure.Tilemap.WorldTileOffset * Point16.NegativeOne);
 
             // create exterior components
             exteriorFloors.Add(ExternalLayoutHelper.CreateFloor(param.Structure, floorTopY, param.LeftEntryPointX + 1 - (hasBasement ? 0 : externalWallThickness),

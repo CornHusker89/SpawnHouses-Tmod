@@ -70,14 +70,14 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
 
         ExternalComponents.AddRange(ExternalFloors);
         ExternalComponents.AddRange(ExternalWalls);
-        ExternalComponents.AddRange(ExternalGaps);
+        // ExternalComponents.AddRange(ExternalGaps);
         ExternalComponents.AddRange(Roofs);
 
         AllComponents.AddRange(ExternalComponents);
         foreach (RoomLayout roomLayout in RoomLayouts) {
-            AllComponents.AddRange(roomLayout.Floors);
-            AllComponents.AddRange(roomLayout.Walls);
-            AllComponents.AddRange(roomLayout.Gaps);
+            // AllComponents.AddRange(roomLayout.Floors);
+            // AllComponents.AddRange(roomLayout.Walls);
+            // AllComponents.AddRange(roomLayout.Gaps);
         }
 
         // put rooms at the very end of the list
@@ -91,10 +91,10 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
     /// </summary>
     /// <param name="offset"></param>
     public void Offset(Point16 offset) {
-        foreach (Floor floor in ExternalFloors) floor.Geometry.Offset(offset);
-        foreach (Wall wall in ExternalWalls) wall.Geometry.Offset(offset);
-        foreach (Gap gap in ExternalGaps) gap.Geometry.Offset(offset);
-        foreach (Roof roof in Roofs) roof.Geometry.Offset(offset);
+        foreach (Floor floor in ExternalFloors) floor.Geometry.Move(offset);
+        foreach (Wall wall in ExternalWalls) wall.Geometry.Move(offset);
+        foreach (Gap gap in ExternalGaps) gap.Geometry.Move(offset);
+        foreach (Roof roof in Roofs) roof.Geometry.Move(offset);
         foreach (RoomLayout roomSection in RoomLayouts) roomSection.Offset(offset);
     }
 }

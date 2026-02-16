@@ -5,7 +5,6 @@ using SpawnHouses.Common;
 using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types.Geometry;
-using Terraria;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Helpers;
@@ -152,7 +151,7 @@ public static class ExternalLayoutHelper {
                 if (roofPoints.Count != 0) {
                     if (lastComponentWasFloor) roofPoints.Add(path[pathIndex] + new Point16(nextPoint.Y < thisPoint.Y ? -1 : 0, 0));
                     Roof roof = new(structure, new Path(roofPoints, thisRoofStartExtendable, nextPoint.Y <= thisPoint.Y));
-                    roof.Geometry.Offset(new Point16(0, -floorWidth));
+                    roof.Geometry.Move(new Point16(0, -floorWidth));
                     roofs.Add(roof);
                     roofPoints.Clear();
                     thisRoofStartExtendable = true;
@@ -172,105 +171,11 @@ public static class ExternalLayoutHelper {
         if (roofPoints.Count != 0) {
             if (lastComponentWasFloor) roofPoints.Add(path[^1]);
             Roof roof = new(structure, new Path(roofPoints, thisRoofStartExtendable));
-            roof.Geometry.Offset(new Point16(0, -floorWidth));
+            roof.Geometry.Move(new Point16(0, -floorWidth));
             roofs.Add(roof);
         }
 
         return (floors, walls, roofs);
-    }
-
-    /// <summary>
-    ///     creates a basic muti-segment roof, can create roof slopes and can handle different starting and ending Ys
-    /// </summary>
-    /// <param name="structure"></param>
-    /// <param name="left">X must be less than <see cref="right" />'s X</param>
-    /// <param name="right">X must be greater than <see cref="left" />'s X</param>
-    /// <param name="floorThickness"></param>
-    /// <param name="wallThickness"></param>
-    /// <param name="forceFlat">if true, the roof will have no slope of any kind</param>
-    /// <param name="splitRoof">if true, roof will attempt to be split</param>
-    /// <returns></returns>
-    public static (List<Floor> floors, List<Wall> walls, List<Roof> roofs) CreateBasicRoof(AdvStructure structure, Point16 left, Point16 right, int floorThickness, int wallThickness,
-        bool forceFlat, bool splitRoof) {
-        double[] validSplitRoofSlopes = [0.67, 1, 1.5, 2];
-        double[] validSingleRoofSlopes = [1, 1.33];
-        int startX = left.X + 1 - wallThickness;
-        int endX = right.X - 1 + wallThickness;
-        int fullLength = right.X - left.X - 2 + 2 * wallThickness;
-        bool leftRoofHigher = left.Y < right.Y;
-        int upperRoofBottomY = int.Min(left.Y, right.Y);
-        int lowerRoofBottomY = int.Max(left.Y, right.Y);
-        int unevenRoofStartX = leftRoofHigher
-            ? structure.LayoutRandom.Next(startX + (int)(fullLength * 0.5), endX - (int)(fullLength * 0.35))
-            : structure.LayoutRandom.Next(startX + (int)(fullLength * 0.35), endX - (int)(fullLength * 0.5));
-        bool hasSlopedSideRoof = !forceFlat && structure.LayoutRandom.NextBool(3, 4);
-        bool hasRoofPeak = !forceFlat;
-        double peakRoofSlope = structure.LayoutRandom.NextFromList(splitRoof ? validSplitRoofSlopes : validSingleRoofSlopes);
-        double sideRoofSlope = double.Min(peakRoofSlope, 0.5);
-
-        List<Point16> path;
-        if (splitRoof) {
-            int lowerRoofLength = leftRoofHigher
-                ? endX - unevenRoofStartX
-                : unevenRoofStartX - startX;
-            if (hasSlopedSideRoof) {
-                int lowerRoofOffset = (int)(sideRoofSlope * lowerRoofLength);
-                path = [
-                    new Point16(startX, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
-                    new Point16(unevenRoofStartX, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY - lowerRoofOffset),
-                    new Point16(unevenRoofStartX, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY - lowerRoofOffset),
-                    new Point16(endX, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY)
-                ];
-            }
-            else {
-                path = [
-                    new Point16(startX, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
-                    new Point16(unevenRoofStartX, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
-                    new Point16(unevenRoofStartX, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
-                    new Point16(endX, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY)
-                ];
-            }
-
-            // add roof peak if required
-            if (hasRoofPeak) {
-                int higherRoofLength = fullLength - lowerRoofLength;
-                int roofPeakX = leftRoofHigher
-                    ? (int)Math.Ceiling(startX + higherRoofLength * 0.5)
-                    : (int)Math.Ceiling(unevenRoofStartX + higherRoofLength * 0.5);
-                int roofPeakOffset = (int)(peakRoofSlope * 0.5 * higherRoofLength);
-                path.Insert(leftRoofHigher ? 1 : 3, new Point16(roofPeakX, upperRoofBottomY - roofPeakOffset));
-                if (higherRoofLength % 2 == 1) path.Insert(leftRoofHigher ? 1 : 3, new Point16(roofPeakX - 1, upperRoofBottomY - roofPeakOffset));
-            }
-        }
-        else {
-            if (hasRoofPeak) {
-                path = [
-                    new Point16(startX, upperRoofBottomY),
-                    new Point16(startX + fullLength / 2, upperRoofBottomY - (int)(peakRoofSlope * fullLength * 0.5)),
-                    new Point16(endX, upperRoofBottomY)
-                ];
-                if (fullLength % 2 == 1) path.Insert(2, new Point16(startX + 1 + fullLength / 2, upperRoofBottomY - (int)(peakRoofSlope * fullLength * 0.5)));
-            }
-            else {
-                path = [
-                    new Point16(startX, upperRoofBottomY),
-                    new Point16(endX, upperRoofBottomY)
-                ];
-            }
-        }
-
-        var result = CreateTopFloorsWallsRoofs(structure, path, floorThickness, true, wallThickness);
-        TagMap.AddRequiredToEach(result.floors, Tags.ApplySloping, SlopeHelper.SimpleSlopes);
-        TagMap.AddRequiredToEach(result.floors, Tags.SlopingModifier, SlopeModifier.GlobalOnlySloping);
-        TagMap.AddRequiredToEach(result.roofs, Tags.ApplySloping, SlopeHelper.SmoothTop);
-        TagMap.AddRequiredToEach(result.roofs, Tags.SlopingModifier, SlopeModifier.LocalSloping);
-
-        if (hasRoofPeak && structure.LayoutRandom.NextBool(3, 5)) {
-            result.roofs[!leftRoofHigher && splitRoof ? 1 : 0].Params.TagsRequired.Add(Tags.RoofTall);
-            if (splitRoof && hasSlopedSideRoof && structure.LayoutRandom.NextBool(1, 2)) result.roofs[!leftRoofHigher ? 0 : 1].Params.TagsRequired.Add(Tags.RoofTall);
-        }
-
-        return result;
     }
 
     /// <summary>

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Xna.Framework;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Common.Types.Geometry;
@@ -30,6 +31,10 @@ public abstract class PointGeometry {
         Size = new Point16(1 + maxX - minX, 1 + maxY - minY);
     }
 
+    protected static int Cross(Point16 o, Point16 a, Point16 b) => (a.X - o.X) * (b.Y - o.Y) - (a.Y - o.Y) * (b.X - o.X);
+    protected static float Cross(Vector2 a, Vector2 b) => a.X * b.Y - a.Y * b.X;
+    protected static Vector2 Perp(Vector2 v) => new(v.Y, -v.X);
+    
     /// <summary>
     /// </summary>
     /// <param name="edgeIndex">edge index to retrieve</param>
@@ -103,7 +108,7 @@ public abstract class PointGeometry {
     ///     moves shape by the offset. ex. if offset = (3, 0) will move shape 3 to the right in world coordinates
     /// </summary>
     /// <param name="offset"></param>
-    public void Offset(Point16 offset) {
+    public void Move(Point16 offset) {
         for (int i = 0; i < Points.Length; i++) Points[i] += offset;
         Init(Points, false);
     }
@@ -174,7 +179,7 @@ public abstract class PointGeometry {
                 Point16 averagePoint = new(xSum / setSize, ySum / setSize);
 
                 // ignore the set if the angle is significant
-                Console.WriteLine($"setsize: {setSize}, index: {i}, angle: {180 - GetAngle(start, averagePoint, end)}");
+                //Console.WriteLine($"setsize: {setSize}, index: {i}, angle: {180 - GetAngle(start, averagePoint, end)}");
 
                 if (180 - GetAngle(start, averagePoint, end) >= significantAngle) continue;
 
@@ -221,8 +226,6 @@ public abstract class PointGeometry {
         return rayStartPoint.X <= intersectX;
     }
 
-    protected static int Cross(Point16 o, Point16 a, Point16 b) => (a.X - o.X) * (b.Y - o.Y) - (a.Y - o.Y) * (b.X - o.X);
-
     protected static Point16 GetIntersectionPoint(Point16 segmentStart, Point16 segmentEnd, bool cutXAxis, int cutCoord) {
         int dx = segmentEnd.X - segmentStart.X;
         int dy = segmentEnd.Y - segmentStart.Y;
@@ -239,5 +242,83 @@ public abstract class PointGeometry {
             int newY = (int)Math.Round(segmentStart.Y + t * dy);
             return new Point16(cutCoord, newY);
         }
+    }
+
+    /// <summary>
+    ///     gets the outward facing normal of an edge made of 2 points
+    /// </summary>
+    /// <param name="p1"></param>
+    /// <param name="p2"></param>
+    /// <param name="isClockwise"></param>
+    /// <returns></returns>
+    protected Vector2 GetOutwardEdgeNormal(Vector2 p1, Vector2 p2, bool isClockwise) {
+        Vector2 edge = p2 - p1;
+
+        // rotate 90° counterclockwise for outward normal
+        Vector2 normal = new(edge.Y * (isClockwise ? 1 : -1), -edge.X);
+        return Vector2.Normalize(normal);
+    }
+
+    protected Vector2 GetOutwardEdgeNormal(Point16 p1, Point16 p2, bool isClockwise) {
+        Point16 edge = p2 - p1;
+
+        // rotate 90° counterclockwise for outward normal
+        Point16 normal = new(edge.Y * (isClockwise ? 1 : -1), -edge.X);
+        return Vector2.Normalize(new Vector2(normal.X, normal.Y));
+    }
+
+    /// <summary>
+    ///     gets outward facing normals for each edge
+    /// </summary>
+    /// <param name="wrapAround">if true, assumes there is an edge between the last and first points</param>
+    /// <param name="isClockwise">if true, rotates normal to be facing outside a clockwise-shaped series of points. if false, will assume counterclockwise</param>
+    /// <returns></returns>
+    /// <remarks>edge index 0 is the edge between verts 0 and 1, with this pattern continuing and wrapping around</remarks>
+    protected Vector2[] GetOutwardEdgeNormals(bool wrapAround, bool isClockwise) {
+        int count = Points.Length;
+        var normals = new Vector2[count];
+
+        for (int i = 0; i < (wrapAround ? count : count - 1); i++) {
+            Point16 p1 = Points[i];
+            Point16 p2 = Points[(i + 1) % count];
+            normals[i] = GetOutwardEdgeNormal(p1, p2, isClockwise);
+        }
+
+        if (!wrapAround) {
+            Point16 p1 = Points[^1];
+            Point16 p2 = Points[^2]; // reverse direction from earlier so we do the *-1 a few lines down
+            normals[^1] = GetOutwardEdgeNormal(p1, p2, !isClockwise);
+        }
+
+        return normals;
+    }
+
+    /// <summary>
+    ///     gets outward facing normals for each vertex
+    /// </summary>
+    /// <param name="wrapAround">if true, assumes there is an edge between the last and first points</param>
+    /// ///
+    /// <param name="isClockwise">if true, rotates normal to be facing outside a clockwise-shaped series of points. if false, will assume counterclockwise</param>
+    /// <returns></returns>
+    /// <remarks>rounds each vector component to 0 or 1</remarks>
+    public Vector2[] GetVertexNormals(bool wrapAround, bool isClockwise) {
+        int count = Points.Length;
+        var normals = new Vector2[count];
+        var edgeNormals = GetOutwardEdgeNormals(wrapAround, isClockwise);
+
+        for (int i = wrapAround ? 0 : 1; i < count; i++) {
+            // average the normals of the two adjacent edges
+            Vector2 n1 = edgeNormals[(i - 1 + count) % count];
+            Vector2 n2 = edgeNormals[i];
+            Vector2 normal = Vector2.Normalize(new Vector2((n1.X + n2.X) / 2, (n1.Y + n2.Y) / 2));
+            normals[i] = new Vector2(normal.X, normal.Y);
+        }
+
+        if (!wrapAround) {
+            normals[0] = new Vector2(edgeNormals[0].X, edgeNormals[0].Y);
+            normals[^1] = new Vector2(edgeNormals[0].X, edgeNormals[0].Y);
+        }
+
+        return normals;
     }
 }

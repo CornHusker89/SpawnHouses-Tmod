@@ -49,7 +49,7 @@ public class StructureManager : ModSystem {
             ? new Version(tag.GetString("WorldVersion"))
             : new Version("0.3.2");
 
-        GeneratableCount = tag.ContainsKey("GeneratableCount") ? (ushort)tag.GetInt("GeneratableCount") : (ushort)0;
+        GeneratableCount = tag.ContainsKey("GeneratableCount") ? tag.Get<ushort>("GeneratableCount") : (ushort)0;
 
         if (WorldVersion.Major < 1) {
             // the rest are unrecoverable. mainhouse might use just 1 structure, basement uses seeds, mineshaft doesn't exist

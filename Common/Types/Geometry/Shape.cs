@@ -4,9 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SpawnHouses.Common.Tiles;
+using Microsoft.Xna.Framework;
 using SpawnHouses.Helpers;
 using SpawnHouses.Structures;
+using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 
@@ -103,7 +104,7 @@ public class Shape : PointGeometry {
     public Shape(IEnumerable<Point16> points, bool boxShorthand = false) {
         var pointsArray = points.ToArray();
         if (boxShorthand && pointsArray.Length == 2)
-            points = [
+            pointsArray = [
                 new Point16(pointsArray[0].X, pointsArray[0].Y),
                 new Point16(pointsArray[1].X, pointsArray[0].Y),
                 new Point16(pointsArray[1].X, pointsArray[1].Y),
@@ -125,21 +126,6 @@ public class Shape : PointGeometry {
 
 
     #region Shape Self-Geometry
-
-    /// <summary>
-    ///     normalize vector, intended to be used when getting edge/vertex normals
-    /// </summary>
-    /// <param name="normal"></param>
-    /// <param name="round"></param>
-    /// <returns></returns>
-    private static (double x, double y) Normalize((double x, double y) normal, bool round) {
-        double largestMagnitude = Math.Max(double.Abs(normal.x), double.Abs(normal.y));
-        if (largestMagnitude < 0.001f) return (0, 0);
-
-        double normalX = normal.x / largestMagnitude;
-        double normalY = normal.y / largestMagnitude;
-        return (round ? Math.Round(normalX) : normalX, round ? Math.Round(normalY) : normalY);
-    }
 
     /// <summary>
     ///     the number of tiles this shape encloses
@@ -168,50 +154,6 @@ public class Shape : PointGeometry {
     }
 
     /// <summary>
-    ///     gets outward facing normals for each edge
-    /// </summary>
-    /// <param name="round">if each normal is rounded to 0 or 1</param>
-    /// <returns></returns>
-    /// <remarks>edge index 0 is the edge between verts 0 and 1, with this pattern continuing and wrapping around</remarks>
-    public (double x, double y)[] GetEdgeNormals(bool round) {
-        int count = Points.Length;
-        (double x, double y)[] normals = new (double, double)[count];
-
-        for (int i = 0; i < count; i++) {
-            Point16 p1 = Points[i];
-            Point16 p2 = Points[(i + 1) % count];
-            Point16 edge = p2 - p1;
-
-            // rotate 90° counterclockwise for outward normal
-            Point16 normal = new(edge.Y, -edge.X);
-            normals[i] = Normalize((normal.X, normal.Y), round);
-        }
-
-        return normals;
-    }
-
-    /// <summary>
-    ///     gets outward facing normals for each vertex
-    /// </summary>
-    /// <returns></returns>
-    /// <remarks>rounds each vector component to 0 or 1</remarks>
-    public Point16[] GetVertexNormals() {
-        int count = Points.Length;
-        var normals = new Point16[count];
-        var edgeNormals = GetEdgeNormals(false);
-
-        for (int i = 0; i < count; i++) {
-            // average the normals of the two adjacent edges
-            (double x, double y) n1 = edgeNormals[(i - 1 + count) % count];
-            (double x, double y) n2 = edgeNormals[i];
-            (double x, double y) normal = Normalize(((n1.x + n2.x) / 2, (n1.y + n2.y) / 2), true);
-            normals[i] = new Point16((int)normal.x, (int)normal.y);
-        }
-
-        return normals;
-    }
-
-    /// <summary>
     ///     gets the ratio of bounding box size to actual shape area. can indicate how box-like the shape is
     /// </summary>
     /// <returns></returns>
@@ -222,31 +164,98 @@ public class Shape : PointGeometry {
     /// </summary>
     /// <returns></returns>
     public int GetUnusedBoundingBoxArea() => Size.X * Size.Y - GetArea();
-
+    
     /// <summary>
-    ///     returns list of points, expanded by their outward facing normals
+    ///     offsets a vertex on a CLOSED geometry so that the proportions of the geometry don't change
     /// </summary>
-    /// <param name="expansion">the number of tiles to expand each point by (only whole numbers)</param>
-    private Point16[] ExpandPoints(int expansion) {
-        var expandedPoints = new Point16[Points.Length];
-        var normals = GetVertexNormals();
-        for (int i = 0; i < Points.Length; i++) expandedPoints[i] = Points[i] + normals[i];
-        return expandedPoints;
+    /// <param name="prev"></param>
+    /// <param name="current"></param>
+    /// <param name="next"></param>
+    /// <param name="distance"></param>
+    /// <param name="clockwise"></param>
+    /// <param name="result"></param>
+    /// <returns></returns>
+    private static bool OffsetVertexEven(Vector2 prev, Vector2 current, Vector2 next, float distance, bool clockwise, out Vector2 result) {
+        Vector2 dir1 = Vector2.Normalize(current - prev);
+        Vector2 dir2 = Vector2.Normalize(next - current);
+
+        Vector2 n1 = Perp(dir1);
+        Vector2 n2 = Perp(dir2);
+
+        if (!clockwise) {
+            n1 = -n1;
+            n2 = -n2;
+        }
+
+        // convex or concave
+        float cross = Cross(dir1, dir2);
+        bool convex = clockwise ? cross < 0 : cross > 0;
+
+        // concave corner, skip or bevel
+        if (!convex) {
+            // simple bevel fallback
+            result = current + n1 * distance;
+            return false; // indicates bevel used
+        }
+
+        // compute miter for sharp angles
+        Vector2 miter = Vector2.Normalize(n1 + n2);
+
+        float denom = Vector2.Dot(miter, n2);
+
+        if (MathF.Abs(denom) < 0.001) {
+            result = current + n1 * distance;
+            return false;
+        }
+
+        float length = distance / denom;
+
+        // clamp to avoid spikes
+        float maxMiter = distance * 4f;
+        length = MathF.Min(length, maxMiter);
+
+        result = current + miter * length;
+        return true;
     }
 
+    /// <summary>
+    ///     returns this geometry's points with a uniform expansion
+    /// </summary>
+    /// <param name="offset"></param>
+    /// <returns></returns>
+    protected Vector2[] GetOffsetEven(float offset) {
+        var result = new Vector2[Points.Length];
+        for (int i = 0; i < Points.Length; i++) {
+            Vector2 prev = Points[(i - 1 + Points.Length) % Points.Length].ToVector2();
+            Vector2 curr = Points[i].ToVector2();
+            Vector2 next = Points[(i + 1) % Points.Length].ToVector2();
+
+            OffsetVertexEven(prev, curr, next, offset, GetClockwise(), out Vector2 newPoint);
+            result[i] = newPoint;
+        }
+
+        return result;
+    }
+    
     /// <summary>
     ///     expands shape by <see cref="expansion" /> tiles
     /// </summary>
     /// <param name="expansion">the number of tiles to expand each point by (only whole numbers)</param>
-    public void Expand(int expansion) {
-        Points = ExpandPoints(expansion);
+    public void Expand(float expansion) {
+        Init(GetOffsetEven(expansion)
+                .Select(vector => vector.ToPoint16())
+                .ToArray(),
+            false);
     }
 
     /// <summary>
     ///     creates new shape, expanded by <paramref name="expansion" /> tiles
     /// </summary>
     /// <returns></returns>
-    public Shape GetExpandedShape(int expansion) => new(ExpandPoints(expansion));
+    public Shape GetExpandedShape(int expansion) => new(GetOffsetEven(expansion)
+        .Select(vector2 => vector2.ToPoint16())
+        .ToArray()
+    );
 
     /// <summary>
     ///     find all corners of a shape (expanded out by 1 tile) based on their x and y positions, useful for ensuring beams and such make sense visually
@@ -339,6 +348,21 @@ public class Shape : PointGeometry {
         bool[,] tilemap = new bool[Size.X, Size.Y];
         ExecuteInArea((x, y) => { tilemap[x - BoundingBox.topLeft.X, y - BoundingBox.topLeft.Y] = true; });
         return tilemap;
+    }
+
+    /// <summary>
+    ///     returns true if the shape is clockwise, otherwise false
+    /// </summary>
+    /// <returns></returns>
+    public bool GetClockwise() {
+        float area = 0;
+        for (int i = 0; i < Points.Length; i++) {
+            Point16 a = Points[i];
+            Point16 b = Points[(i + 1) % Points.Length];
+            area += (b.X - a.X) * (b.Y + a.Y);
+        }
+
+        return area > 0;
     }
 
     #endregion
