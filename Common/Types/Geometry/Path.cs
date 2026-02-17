@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
 
@@ -66,104 +65,80 @@ public class Path : PointGeometry {
     }
 
     public (Point16 left, Point16 right) SortEndpoints() => Points[0].X <= Points[^1].X ? (Points[0], Points[^1]) : (Points[^1], Points[0]);
-
-    private static Vector2 SnapAlongDirection(Vector2 original, Vector2 direction) {
-        direction = Vector2.Normalize(direction);
-
-        // Search nearby integer grid points
-        int baseX = (int)MathF.Round(original.X);
-        int baseY = (int)MathF.Round(original.Y);
-
-        Vector2 best = new(baseX, baseY);
-        float bestDist = float.MaxValue;
-
-        // Check a small neighborhood (3x3 is usually enough)
-        for (int dx = -2; dx <= 2; dx++)
-        for (int dy = -2; dy <= 2; dy++) {
-            Vector2 candidate = new(baseX + dx, baseY + dy);
-
-            // Distance perpendicular to the direction
-            Vector2 diff = candidate - original;
-
-            // Remove the component along the direction
-            Vector2 perp = diff - Vector2.Dot(diff, direction) * direction;
-
-            float error = perp.LengthSquared();
-
-            if (error < bestDist) {
-                bestDist = error;
-                best = candidate;
-            }
-        }
-
-        return best;
-    }
-
-    /// <summary>
-    ///     offsets a vertex on a CLOSED geometry so that the proportions of the geometry don't change
-    /// </summary>
-    /// <param name="prev"></param>
-    /// <param name="curr"></param>
-    /// <param name="next"></param>
-    /// <param name="distance"></param>
-    /// <returns></returns>
-    private static Vector2 OffsetVertexEven(Vector2 prev, Vector2 curr, Vector2 next, float distance) {
-        Vector2 dir1 = Vector2.Normalize(curr - prev);
-        Vector2 dir2 = Vector2.Normalize(next - curr);
-
-        Vector2 n1 = new(dir1.Y, -dir1.X);
-        Vector2 n2 = new(dir2.Y, -dir2.X);
-
-        Vector2 miter = Vector2.Normalize(Vector2.Normalize(n1) + Vector2.Normalize(n2));
-
-        float denom = Vector2.Dot(miter, n2);
-
-        if (MathF.Abs(denom) < 1e-5f)
-            return curr + n1 * distance;
-
-        float length = distance / denom;
-
-        float maxLength = distance * 4f;
-        length = Math.Min(length, maxLength);
-
-        Vector2 floatResult = curr + miter * length;
-        return SnapAlongDirection(floatResult, miter);
-    }
     
     /// <summary>
-    ///     returns this geometry's points with a uniform expansion
+    /// 
     /// </summary>
-    /// <param name="offset"></param>
+    /// <param name="distance"></param>
     /// <param name="clockwise"></param>
+    /// <param name="preserveXSize"></param>
     /// <returns></returns>
-    protected Vector2[] GetOffsetEven(float offset, bool clockwise) {
-        offset *= -1;
-        var result = new Vector2[Points.Length];
+    private Point16[] GetOffsetEven(int distance, bool clockwise, bool preserveXSize) {
+        var result = new Point16[Points.Length];
+        if (Points.Length < 2)
+            return result;
 
-        // start point
-        Vector2 startNormal = GetOutwardEdgeNormal(Points[0], Points[1], clockwise);
-        result[0] = Points[0].ToVector2() + startNormal * offset;
+        // first vertex
+        Point16 dir = GetIntegerDirection(Points[1] - Points[0]);
+        Point16 normal = GetNormal(dir, clockwise);
+        normal = ScaleNormal(normal, distance);
+        Point16 offset;
+        if (preserveXSize)
+            offset = new Point16(
+                0,
+                (int)MathF.Round(normal.Y - normal.X * GetSlope(Points[0], Points[1]))
+            );
+        else
+            offset = new Point16(
+                (int)MathF.Round(normal.X),
+                (int)MathF.Round(normal.Y)
+            );
+        result[0] = Points[0] + offset;
 
-        // Interior points
+
+        // interior vertices
         for (int i = 1; i < Points.Length - 1; i++) {
-            result[i] = OffsetVertexEven(Points[i - 1].ToVector2(), Points[i].ToVector2(), Points[i + 1].ToVector2(), offset);
+            Point16 prev = Points[i - 1];
+            Point16 curr = Points[i];
+            Point16 next = Points[i + 1];
+
+            OffsetEdgeEven(prev, curr, distance, clockwise, out Point16 e1A, out Point16 e1B);
+            OffsetEdgeEven(curr, next, distance, clockwise, out Point16 e2A, out Point16 e2B);
+
+            Point16 vertex = LineIntersection(e1A, e1B, e2A, e2B);
+
+            if ((vertex - curr).ToVector2().Length() > distance * distance * 16)
+                vertex = e1B; // bevel fallback
+
+            result[i] = vertex;
         }
 
-        // End point
-        Vector2 endNormal = GetOutwardEdgeNormal(Points[^2], Points[^1], clockwise);
-        result[^1] = Points[^1].ToVector2() + endNormal * offset;
+        // last vertex
+        dir = GetIntegerDirection(Points[^1] - Points[^2]);
+        normal = GetNormal(dir, clockwise);
+        normal = ScaleNormal(normal, distance);
+        if (preserveXSize)
+            offset = new Point16(
+                0,
+                (int)MathF.Round(normal.Y - normal.X * GetSlope(Points[^2], Points[^1]))
+            );
+        else
+            offset = new Point16(
+                (int)MathF.Round(normal.X),
+                (int)MathF.Round(normal.Y)
+            );
+        result[^1] = Points[^1] + offset;
+
         return result;
     }
 
-    public void OffsetEven(float offset) {
-        Init(GetOffsetEven(offset, PathVector.X > 0)
-                .Select(point => point.ToPoint16())
+    public void OffsetEven(int offset, bool preserveXSize) {
+        Init(GetOffsetEven(offset, PathVector.X > 0, preserveXSize)
                 .ToArray(),
             false);
     }
 
-    public Path GetOffsetEvenPath(float offset) => new(GetOffsetEven(offset, PathVector.X > 0)
-            .Select(point => point.ToPoint16())
+    public Path GetOffsetEvenPath(int offset, bool preserveXSize) => new(GetOffsetEven(offset, PathVector.X > 0, preserveXSize)
             .ToArray(),
         false, StartExtendable, EndExtendable);
 

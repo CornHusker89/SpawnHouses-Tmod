@@ -24,15 +24,17 @@ public class SpawnTest2 : ModItem {
         Path original = new(
             false,
             false,
-            new Point16(x, y),
-            new Point16(x + 6, y),
-            new Point16(x + 12, y - 6),
-            new Point16(x + 21, y + 3),
-            new Point16(x + 25, y + 3)
+            new Point16(x - 15, y + 5),
+            new Point16(x - 10, y + 10),
+            new Point16(x, y - 10),
+            new Point16(x + 8, y + 8),
+            new Point16(x + 12, y + 8),
+            new Point16(x + 20, y + 8),
+            new Point16(x + 30, y - 12)
         );
 
         Shape originalShape = original.ToShape(2);
-        Path upper = original.GetOffsetEvenPath(-3);
+        Path upper = original.GetOffsetEvenPath(-3, true);
         Shape upperShape = upper.ToShape(2);
 
         originalShape.ExecuteInArea((x2, y2) => {

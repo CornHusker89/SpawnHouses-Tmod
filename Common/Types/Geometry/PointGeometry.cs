@@ -243,7 +243,7 @@ public abstract class PointGeometry {
             return new Point16(cutCoord, newY);
         }
     }
-
+    
     /// <summary>
     ///     gets the outward facing normal of an edge made of 2 points
     /// </summary>
@@ -251,14 +251,6 @@ public abstract class PointGeometry {
     /// <param name="p2"></param>
     /// <param name="isClockwise"></param>
     /// <returns></returns>
-    protected Vector2 GetOutwardEdgeNormal(Vector2 p1, Vector2 p2, bool isClockwise) {
-        Vector2 edge = p2 - p1;
-
-        // rotate 90° counterclockwise for outward normal
-        Vector2 normal = new(edge.Y * (isClockwise ? 1 : -1), -edge.X);
-        return Vector2.Normalize(normal);
-    }
-
     protected Vector2 GetOutwardEdgeNormal(Point16 p1, Point16 p2, bool isClockwise) {
         Point16 edge = p2 - p1;
 
@@ -320,5 +312,103 @@ public abstract class PointGeometry {
         }
 
         return normals;
+    }
+
+    /// <summary>
+    ///     get the greatest common denominator between 2 numbers
+    /// </summary>
+    /// <param name="a"></param>
+    /// <param name="b"></param>
+    /// <returns></returns>
+    private static int Gcd(int a, int b) {
+        while (b != 0) {
+            int t = b;
+            b = a % b;
+            a = t;
+        }
+
+        return Math.Abs(a);
+    }
+
+    /// <summary>
+    ///     get the simplest possible integer direction vector of a delta
+    /// </summary>
+    /// d
+    /// <param name="delta"></param>
+    /// <returns></returns>
+    protected static Point16 GetIntegerDirection(Point16 delta) {
+        int dx = delta.X;
+        int dy = delta.Y;
+
+        int g = Gcd(Math.Abs(dx), Math.Abs(dy));
+        if (g == 0) return new Point16(0, 0);
+
+        return new Point16(dx / g, dy / g);
+    }
+
+    /// <summary>
+    ///     get full (not normalized) normal of a delta
+    /// </summary>
+    /// <param name="delta"></param>
+    /// <param name="reverse"></param>
+    /// <returns></returns>
+    protected static Point16 GetNormal(Point16 delta, bool reverse) => reverse ? new Point16(-delta.Y, delta.X) : new Point16(delta.Y, -delta.X);
+
+    /// <summary>
+    ///     scales a normal to a distance
+    /// </summary>
+    /// <param name="normal"></param>
+    /// <param name="distance"></param>
+    /// <returns></returns>
+    protected static Point16 ScaleNormal(Point16 normal, float distance) {
+        float len = MathF.Sqrt(normal.X * normal.X + normal.Y * normal.Y);
+        if (len == 0) return new Point16(0, 0);
+
+        float fx = normal.X * distance / len;
+        float fy = normal.Y * distance / len;
+
+        int ix = (int)MathF.Round(fx);
+        int iy = (int)MathF.Round(fy);
+
+        if (ix * ix + iy * iy > distance * distance) {
+            // Pull back along the larger component
+            if (Math.Abs(ix) > Math.Abs(iy))
+                ix -= Math.Sign(ix);
+            else
+                iy -= Math.Sign(iy);
+        }
+
+        return new Point16(ix, iy);
+    }
+
+    protected static void OffsetEdgeEven(Point16 a, Point16 b, int distance, bool reverseNormal, out Point16 oa, out Point16 ob) {
+        Point16 delta = b - a;
+        Point16 dir = GetIntegerDirection(delta);
+        Point16 normal = GetNormal(dir, reverseNormal);
+        normal = ScaleNormal(normal, distance);
+        Point16 offset = new(
+            (int)MathF.Round(normal.X),
+            (int)MathF.Round(normal.Y)
+        );
+
+        oa = a + offset;
+        ob = b + offset;
+    }
+
+    protected static Point16 LineIntersection(Point16 a1, Point16 a2, Point16 b1, Point16 b2) {
+        float x1 = a1.X, y1 = a1.Y;
+        float x2 = a2.X, y2 = a2.Y;
+        float x3 = b1.X, y3 = b1.Y;
+        float x4 = b2.X, y4 = b2.Y;
+
+        float denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+
+        if (denom == 0) return a2; // parallel fallback
+
+        float numX = (x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4);
+        float numY = (x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4);
+
+        // round once
+        return new Point16((int)Math.Round(numX / denom), (int)Math.Round(numY / denom));
     }
 }

@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Xna.Framework;
 using SpawnHouses.Helpers;
 using SpawnHouses.Structures;
 using Terraria;
@@ -164,76 +163,33 @@ public class Shape : PointGeometry {
     /// </summary>
     /// <returns></returns>
     public int GetUnusedBoundingBoxArea() => Size.X * Size.Y - GetArea();
-    
-    /// <summary>
-    ///     offsets a vertex on a CLOSED geometry so that the proportions of the geometry don't change
-    /// </summary>
-    /// <param name="prev"></param>
-    /// <param name="current"></param>
-    /// <param name="next"></param>
-    /// <param name="distance"></param>
-    /// <param name="clockwise"></param>
-    /// <param name="result"></param>
-    /// <returns></returns>
-    private static bool OffsetVertexEven(Vector2 prev, Vector2 current, Vector2 next, float distance, bool clockwise, out Vector2 result) {
-        Vector2 dir1 = Vector2.Normalize(current - prev);
-        Vector2 dir2 = Vector2.Normalize(next - current);
-
-        Vector2 n1 = Perp(dir1);
-        Vector2 n2 = Perp(dir2);
-
-        if (!clockwise) {
-            n1 = -n1;
-            n2 = -n2;
-        }
-
-        // convex or concave
-        float cross = Cross(dir1, dir2);
-        bool convex = clockwise ? cross < 0 : cross > 0;
-
-        // concave corner, skip or bevel
-        if (!convex) {
-            // simple bevel fallback
-            result = current + n1 * distance;
-            return false; // indicates bevel used
-        }
-
-        // compute miter for sharp angles
-        Vector2 miter = Vector2.Normalize(n1 + n2);
-
-        float denom = Vector2.Dot(miter, n2);
-
-        if (MathF.Abs(denom) < 0.001) {
-            result = current + n1 * distance;
-            return false;
-        }
-
-        float length = distance / denom;
-
-        // clamp to avoid spikes
-        float maxMiter = distance * 4f;
-        length = MathF.Min(length, maxMiter);
-
-        result = current + miter * length;
-        return true;
-    }
 
     /// <summary>
     ///     returns this geometry's points with a uniform expansion
     /// </summary>
-    /// <param name="offset"></param>
+    /// <param name="distance"></param>
     /// <returns></returns>
-    protected Vector2[] GetOffsetEven(float offset) {
-        var result = new Vector2[Points.Length];
-        for (int i = 0; i < Points.Length; i++) {
-            Vector2 prev = Points[(i - 1 + Points.Length) % Points.Length].ToVector2();
-            Vector2 curr = Points[i].ToVector2();
-            Vector2 next = Points[(i + 1) % Points.Length].ToVector2();
+    private Point16[] GetOffsetEven(int distance) {
+        bool clockwise = IsClockwise();
+        int count = Points.Length;
+        var result = new Point16[count];
 
-            OffsetVertexEven(prev, curr, next, offset, GetClockwise(), out Vector2 newPoint);
-            result[i] = newPoint;
+        for (int i = 0; i < count; i++) {
+            Point16 prev = Points[(i - 1 + count) % count];
+            Point16 curr = Points[i];
+            Point16 next = Points[(i + 1) % count];
+
+            OffsetEdgeEven(prev, curr, distance, clockwise, out Point16 e1A, out Point16 e1B);
+            OffsetEdgeEven(curr, next, distance, clockwise, out Point16 e2A, out Point16 e2B);
+
+            Point16 vertex = LineIntersection(e1A, e1B, e2A, e2B);
+
+            if ((vertex - curr).ToVector2().Length() > distance * distance * 16)
+                vertex = e1B; // bevel fallback
+
+            result[i] = vertex;
         }
-
+    
         return result;
     }
     
@@ -241,10 +197,8 @@ public class Shape : PointGeometry {
     ///     expands shape by <see cref="expansion" /> tiles
     /// </summary>
     /// <param name="expansion">the number of tiles to expand each point by (only whole numbers)</param>
-    public void Expand(float expansion) {
-        Init(GetOffsetEven(expansion)
-                .Select(vector => vector.ToPoint16())
-                .ToArray(),
+    public void Expand(int expansion) {
+        Init(GetOffsetEven(expansion).ToArray(),
             false);
     }
 
@@ -252,9 +206,7 @@ public class Shape : PointGeometry {
     ///     creates new shape, expanded by <paramref name="expansion" /> tiles
     /// </summary>
     /// <returns></returns>
-    public Shape GetExpandedShape(int expansion) => new(GetOffsetEven(expansion)
-        .Select(vector2 => vector2.ToPoint16())
-        .ToArray()
+    public Shape GetExpandedShape(int expansion) => new(GetOffsetEven(expansion).ToArray()
     );
 
     /// <summary>
@@ -354,7 +306,7 @@ public class Shape : PointGeometry {
     ///     returns true if the shape is clockwise, otherwise false
     /// </summary>
     /// <returns></returns>
-    public bool GetClockwise() {
+    public bool IsClockwise() {
         float area = 0;
         for (int i = 0; i < Points.Length; i++) {
             Point16 a = Points[i];
@@ -475,18 +427,17 @@ public class Shape : PointGeometry {
                 }
             }
 
-            // Handle bottom horizontal edge
+            // Handle horizontal edges
             for (int i = 0; i < Points.Length; i++) {
                 Point16 p1 = Points[i];
                 Point16 p2 = Points[(i + 1) % Points.Length];
-                if (p1.Y == BoundingBox.bottomRight.Y)
-                    if (p1.Y == p2.Y) {
-                        int startX = Math.Min(p1.X, p2.X);
-                        int endX = Math.Max(p1.X, p2.X);
-                        for (int x = startX + 1; x <= endX - 1; x++)
-                            if (!Points.Contains(new Point16(x, p1.Y)))
-                                action(x, p1.Y);
-                    }
+                if (p1.Y == p2.Y) {
+                    int startX = Math.Min(p1.X, p2.X);
+                    int endX = Math.Max(p1.X, p2.X);
+                    for (int x = startX + 1; x <= endX - 1; x++)
+                        if (!Points.Contains(new Point16(x, p1.Y)))
+                            action(x, p1.Y);
+                }
             }
 
             foreach (Point16 point in Points) action(point.X, point.Y);

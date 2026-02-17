@@ -71,7 +71,7 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
         ExternalComponents.AddRange(ExternalFloors);
         ExternalComponents.AddRange(ExternalWalls);
         // ExternalComponents.AddRange(ExternalGaps);
-        ExternalComponents.AddRange(Roofs);
+        // ExternalComponents.AddRange(Roofs);
 
         AllComponents.AddRange(ExternalComponents);
         foreach (RoomLayout roomLayout in RoomLayouts) {
