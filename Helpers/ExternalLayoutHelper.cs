@@ -119,27 +119,26 @@ public static class ExternalLayoutHelper {
                 if (lastPoint?.Y < thisPoint.Y) thisRoofStartExtendable = false;
 
                 if (thisPoint.Y == nextPoint.Y) {
-                    floors.Add(CreateFloor(structure, thisPoint.Y, thisPoint.X - (lastComponentWasFloor ? wallWidth + 1 : 0),
-                        nextPoint.X + (!nextComponentIsFloor && extendWallsHigher ? wallWidth - 1 : 0), true, floorWidth, isExternal));
+                    floors.Add(CreateFloor(structure, thisPoint.Y, thisPoint.X, nextPoint.X, true, floorWidth, isExternal));
                 }
                 else {
                     List<Point16> floorPoints = [];
 
                     if (lastComponentWasFloor) {
-                        floorPoints.Add(new Point16(thisPoint.X - wallWidth + 1, thisPoint.Y - floorWidth - 1)); // make floorWidth 2 higher by not doing +1 and instead -1
+                        floorPoints.Add(new Point16(thisPoint.X - wallWidth + 1, thisPoint.Y - floorWidth));
                         floorPoints.Add(new Point16(thisPoint.X - wallWidth + 1, thisPoint.Y));
                     }
 
                     floorPoints.Add(thisPoint);
                     floorPoints.Add(nextPoint);
-                    floorPoints.Add(nextPoint + new Point16(0, -floorWidth - 1));
+                    floorPoints.Add(nextPoint + new Point16(0, -floorWidth));
 
                     if (!nextComponentIsFloor && extendWallsHigher) {
-                        floorPoints.Add(new Point16(thisPoint.X + wallWidth - 1, thisPoint.Y - floorWidth - 1));
+                        floorPoints.Add(new Point16(thisPoint.X + wallWidth - 1, thisPoint.Y - floorWidth));
                         floorPoints.Add(new Point16(thisPoint.X + wallWidth - 1, thisPoint.Y));
                     }
 
-                    floorPoints.Add(thisPoint + new Point16(0, -floorWidth - 1));
+                    floorPoints.Add(thisPoint + new Point16(0, -floorWidth));
                     Floor floor = new(structure, new Shape(floorPoints));
                     if (isExternal)
                         floor.Params.TagsRequired.Add(Tags.External);

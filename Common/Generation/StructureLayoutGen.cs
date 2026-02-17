@@ -83,7 +83,7 @@ public static class StructureLayoutGen {
 
             // create constants
             int floorTopY = upper.End.Y + 1 + basementVerticalOffset;
-            int roofHeightModifier = (int)((param.Height / 6.3 + 2) * random.NextFloat(1, 1.35f)); // if uneven roof, adjust each side by this much
+            int roofHeightModifier = (int)(param.Length / 6.0 * random.NextFloat(1, 1.35f)); // if uneven roof, adjust each side by this much
             int upperRoofBottomY = floorTopY - param.Height + 1;
             if (hasHigherSide && upperRoofBottomY + roofHeightModifier >= (leftRoofHigher ? right.Start.Y : left.Start.Y)) // check that an uneven roof won't cause collision with entry points
                 hasHigherSide = false;

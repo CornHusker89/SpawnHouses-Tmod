@@ -246,8 +246,8 @@ public static class RoofGen {
             if (component.Geometry.StartExtendable) {
             }
 
-            Path upperMiddlePath = component.Geometry.GetOffsetEvenPath(-2, true);
-            Path topPath = component.Geometry.GetOffsetEvenPath(-4, true);
+            Path upperMiddlePath = component.Geometry.GetOffsetEvenPath(-1, true);
+            Path topPath = component.Geometry.GetOffsetEvenPath(-3, true);
             topPath.Reverse();
 
             Shape offsetShape = upperMiddlePath.ToShape(topPath);

@@ -21,12 +21,17 @@ public static class WallGen {
             [
                 Tags.External
             ],
-            ComponentHelper.FillShapeTiles.PossibleTags
+            ComponentHelper.FillShapeTiles.PossibleTags,
+            ComponentHelper.FillShapeWalls.PossibleTags
         );
 
         public override bool Generate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
             bool external = param.TagsRequired.HasTag(Tags.External);
             ComponentHelper.FillShapeTiles.Action(component, component.Geometry, (_, _) => (external ? palette.ExternalWall : palette.InternalWall).Primary);
+
+            if (!param.TagsRequired.HasTag(Tags.External))
+                ComponentHelper.FillShapeWalls.Action(component.Geometry, param.Structure, (_, _) => palette.InternalWall.PrimaryBackground);
+            
             return true;
         }
     }
@@ -39,7 +44,9 @@ public static class WallGen {
         public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
                 Tags.External
-            ]
+            ],
+            ComponentHelper.FillShapeTiles.PossibleTags,
+            ComponentHelper.FillShapeWalls.PossibleTags
         );
 
         public override bool Generate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
@@ -64,6 +71,9 @@ public static class WallGen {
                     ? (external ? palette.ExternalWall : palette.InternalWall).VerticalDetail
                     : (external ? palette.ExternalWall : palette.InternalWall).Primary
             );
+
+            if (!param.TagsRequired.HasTag(Tags.External))
+                ComponentHelper.FillShapeWalls.Action(component.Geometry, param.Structure, (_, _) => palette.InternalWall.PrimaryBackground);
 
             return true;
         }

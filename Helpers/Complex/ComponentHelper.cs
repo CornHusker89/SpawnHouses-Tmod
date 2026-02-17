@@ -43,10 +43,10 @@ public static class ComponentHelper {
         /// <remarks>supports ApplySloping and SlopingModifier component tags</remarks>
         public static void Action(IComponent component, Shape shape, TilePaletteCondition paletteCondition) {
             StructureTilemap t = component.Params.Structure.Tilemap;
-            bool hasSloping = component.Params.TagsRequired.GetValueSafe(Tags.ApplySloping, out SlopingAlgorithm sloping);
+            bool hasSloping = component.Params.TagsRequired.GetValueSafe(Tags.ApplySloping, out SlopingAlgorithm slopingAlgorithm);
             component.Params.TagsRequired.GetValueSafe(Tags.SlopingModifier, out SlopeModifier slopeModifier);
 
-            if (hasSloping) {
+            if (!hasSloping) {
                 shape.ExecuteInArea((x, y) => {
                     TilePaintedType? type = paletteCondition.Invoke(x, y);
                     if (type != null)
@@ -55,20 +55,22 @@ public static class ComponentHelper {
                 return;
             }
 
-            if (slopeModifier == SlopeModifier.LocalSloping)
+            if (slopeModifier == SlopeModifier.LocalSloping) {
                 shape.ExecuteInArea((x, y, bt) => {
                     TilePaintedType? type = paletteCondition.Invoke(x, y);
                     if (type != null) {
                         t.PlaceTile(x, y, type, bt);
                         t[x, y].SlopeModifier = SlopeModifier.LocalSloping;
                     }
-                }, sloping);
-            else
+                }, slopingAlgorithm);
+            }
+            else {
                 shape.ExecuteInArea((x, y) => {
                     TilePaintedType? type = paletteCondition.Invoke(x, y);
                     if (type != null)
-                        t.PlaceTile(x, y, type, sloping, slopeModifier);
+                        t.PlaceTile(x, y, type, slopingAlgorithm, slopeModifier);
                 });
+            }
         }
     }
 
@@ -87,7 +89,7 @@ public static class ComponentHelper {
         ///     callback that returns the palette entry, if null prevents wall placement for that wall in the shape.
         ///     can also be used to execute arbitrary callback on each wall
         /// </param>
-        public static void Action(Shape shape, AdvStructure structure, WallPaletteCondition? fillCondition) {
+        public static void Action(Shape shape, AdvStructure structure, WallPaletteCondition fillCondition) {
             shape.ExecuteInArea((x, y) => {
                 WallPaintedType? type = fillCondition?.Invoke(x, y);
                 if (type != null)

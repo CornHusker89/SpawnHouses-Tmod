@@ -631,9 +631,9 @@ public static class StructureLayoutHelper {
         /// <returns></returns>
         private static List<Point16> SinglePeakPathWithFlats(AdvStructure structure, Point16 left, Point16 right, int wallThickness) {
             float peakRoofSlope = structure.LayoutRandom.NextFromList(0.67f, 1f);
-            int peakSectionLength = (int)((right.X - left.X) * structure.LayoutRandom.NextFloat(0.55f, 0.65f));
-            int offsetRange = right.X - left.X - peakSectionLength;
-            float[] possibleOffsetProportions = left.Y == right.Y ? [0f, 0.33f, 0.66f, 1f] : [0.33f, 0.5f, 0.66f];
+            int peakSectionLength = (int)((right.X - left.X) * structure.LayoutRandom.NextFloat(0.48f, 0.62f));
+            int offsetRange = (right.X - left.X - peakSectionLength) / 2;
+            float[] possibleOffsetProportions = left.Y == right.Y ? [0f, 0.33f, 0.66f, 1f] : [0.4f, 0.5f, 0.6f];
             int offset = (int)(offsetRange * structure.LayoutRandom.NextFromList(possibleOffsetProportions));
 
             var path = SinglePeakOnly(structure, left + new Point16(offset, 0), new Point16(left.X + peakSectionLength + offset, right.Y), wallThickness, peakRoofSlope);

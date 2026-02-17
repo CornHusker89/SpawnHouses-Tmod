@@ -70,14 +70,14 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
 
         ExternalComponents.AddRange(ExternalFloors);
         ExternalComponents.AddRange(ExternalWalls);
-        // ExternalComponents.AddRange(ExternalGaps);
-        // ExternalComponents.AddRange(Roofs);
+        ExternalComponents.AddRange(ExternalGaps);
+        ExternalComponents.AddRange(Roofs);
 
         AllComponents.AddRange(ExternalComponents);
         foreach (RoomLayout roomLayout in RoomLayouts) {
-            // AllComponents.AddRange(roomLayout.Floors);
-            // AllComponents.AddRange(roomLayout.Walls);
-            // AllComponents.AddRange(roomLayout.Gaps);
+            AllComponents.AddRange(roomLayout.Floors);
+            AllComponents.AddRange(roomLayout.Walls);
+            AllComponents.AddRange(roomLayout.Gaps);
         }
 
         // put rooms at the very end of the list
