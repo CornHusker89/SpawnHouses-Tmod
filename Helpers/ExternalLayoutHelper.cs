@@ -119,26 +119,28 @@ public static class ExternalLayoutHelper {
                 if (lastPoint?.Y < thisPoint.Y) thisRoofStartExtendable = false;
 
                 if (thisPoint.Y == nextPoint.Y) {
-                    floors.Add(CreateFloor(structure, thisPoint.Y, thisPoint.X, nextPoint.X, true, floorWidth, isExternal));
+                    floors.Add(CreateFloor(structure, thisPoint.Y, thisPoint.X, nextPoint.X, false, floorWidth, isExternal));
                 }
                 else {
                     List<Point16> floorPoints = [];
 
+                    floorPoints.Add(thisPoint + new Point16(0, -floorWidth));
+                    
                     if (lastComponentWasFloor) {
                         floorPoints.Add(new Point16(thisPoint.X - wallWidth + 1, thisPoint.Y - floorWidth));
                         floorPoints.Add(new Point16(thisPoint.X - wallWidth + 1, thisPoint.Y));
                     }
-
+                    
                     floorPoints.Add(thisPoint);
                     floorPoints.Add(nextPoint);
-                    floorPoints.Add(nextPoint + new Point16(0, -floorWidth));
 
                     if (!nextComponentIsFloor && extendWallsHigher) {
                         floorPoints.Add(new Point16(thisPoint.X + wallWidth - 1, thisPoint.Y - floorWidth));
                         floorPoints.Add(new Point16(thisPoint.X + wallWidth - 1, thisPoint.Y));
                     }
 
-                    floorPoints.Add(thisPoint + new Point16(0, -floorWidth));
+                    floorPoints.Add(nextPoint + new Point16(0, -floorWidth));
+                    
                     Floor floor = new(structure, new Shape(floorPoints));
                     if (isExternal)
                         floor.Params.TagsRequired.Add(Tags.External);
@@ -149,7 +151,7 @@ public static class ExternalLayoutHelper {
                 // create a roof out of the last non-wall segments
                 if (roofPoints.Count != 0) {
                     if (lastComponentWasFloor) roofPoints.Add(path[pathIndex] + new Point16(nextPoint.Y < thisPoint.Y ? -1 : 0, 0));
-                    Roof roof = new(structure, new Path(roofPoints, thisRoofStartExtendable, nextPoint.Y <= thisPoint.Y));
+                    Roof roof = new(structure, new Path(roofPoints), thisRoofStartExtendable, nextPoint.Y <= thisPoint.Y);
                     roof.Geometry.Move(new Point16(0, -floorWidth));
                     roofs.Add(roof);
                     roofPoints.Clear();
@@ -169,7 +171,7 @@ public static class ExternalLayoutHelper {
 
         if (roofPoints.Count != 0) {
             if (lastComponentWasFloor) roofPoints.Add(path[^1]);
-            Roof roof = new(structure, new Path(roofPoints, thisRoofStartExtendable));
+            Roof roof = new(structure, new Path(roofPoints), thisRoofStartExtendable, true);
             roof.Geometry.Move(new Point16(0, -floorWidth));
             roofs.Add(roof);
         }

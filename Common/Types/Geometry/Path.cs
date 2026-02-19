@@ -7,47 +7,18 @@ using Terraria.DataStructures;
 namespace SpawnHouses.Common.Types.Geometry;
 
 public class Path : PointGeometry {
-    public bool EndExtendable;
-    public bool StartExtendable;
-
-    public Path(bool startExtendable, bool endExtendable, params Point16[] points) {
-        StartExtendable = startExtendable;
-        EndExtendable = endExtendable;
+    public Path(params Point16[] points) {
         Init(points, true);
     }
 
-    public Path(IEnumerable<Point16> points, bool startExtendable = true, bool endExtendable = true) {
-        StartExtendable = startExtendable;
-        EndExtendable = endExtendable;
+    public Path(IEnumerable<Point16> points) {
         var pointsArray = points.ToArray();
         Init(pointsArray, true);
     }
 
-    private Path(IEnumerable<Point16> points, bool optimize, bool startExtendable = true, bool endExtendable = true) {
-        StartExtendable = startExtendable;
-        EndExtendable = endExtendable;
+    private Path(IEnumerable<Point16> points, bool optimize) {
         var pointsArray = points.ToArray();
         Init(pointsArray, optimize);
-    }
-
-    public bool LowerXExtendable {
-        get => Points[0].X <= Points[^1].X ? StartExtendable : EndExtendable;
-        set {
-            if (Points[0].X <= Points[^1].X)
-                StartExtendable = value;
-            else
-                EndExtendable = value;
-        }
-    }
-
-    public bool HigherXExtendable {
-        get => Points[0].X <= Points[^1].X ? EndExtendable : StartExtendable;
-        set {
-            if (Points[0].X <= Points[^1].X)
-                EndExtendable = value;
-            else
-                StartExtendable = value;
-        }
     }
 
     /// <summary>
@@ -63,8 +34,6 @@ public class Path : PointGeometry {
 
         SetBoundingBoxAndSize();
     }
-
-    public (Point16 left, Point16 right) SortEndpoints() => Points[0].X <= Points[^1].X ? (Points[0], Points[^1]) : (Points[^1], Points[0]);
     
     /// <summary>
     /// 
@@ -73,20 +42,22 @@ public class Path : PointGeometry {
     /// <param name="clockwise"></param>
     /// <param name="preserveXSize"></param>
     /// <returns></returns>
-    private Point16[] GetOffsetEven(int distance, bool clockwise, bool preserveXSize) {
+    private Point16[] GetOffsetEven(int distance, bool clockwise, bool preserveXSize, bool scaleDiagonals) {
         var result = new Point16[Points.Length];
         if (Points.Length < 2)
             return result;
 
         // first vertex
         Point16 dir = GetIntegerDirection(Points[1] - Points[0]);
+        float slope = GetSlope(Points[0], Points[1]);
+        float slopeDistanceModifier = scaleDiagonals ? 1.3f + Math.Abs(slope) / 4 : 1;
         Point16 normal = GetNormal(dir, clockwise);
-        normal = ScaleNormal(normal, distance);
+        normal = ScaleNormal(normal, distance * slopeDistanceModifier);
         Point16 offset;
         if (preserveXSize)
             offset = new Point16(
                 0,
-                (int)MathF.Round(normal.Y - normal.X * GetSlope(Points[0], Points[1]))
+                (int)MathF.Round(normal.Y - normal.X * slope)
             );
         else
             offset = new Point16(
@@ -102,8 +73,11 @@ public class Path : PointGeometry {
             Point16 curr = Points[i];
             Point16 next = Points[i + 1];
 
-            OffsetEdgeEven(prev, curr, distance, clockwise, out Point16 e1A, out Point16 e1B);
-            OffsetEdgeEven(curr, next, distance, clockwise, out Point16 e2A, out Point16 e2B);
+            float firstSlopeDistanceModifier = scaleDiagonals ? 1.3f + Math.Abs(GetSlope(prev, curr)) / 4 : 1;
+            float nextSlopeDistanceModifier = scaleDiagonals ? 1.3f + Math.Abs(GetSlope(curr, next)) / 4 : 1;
+
+            OffsetEdgeEven(prev, curr, distance * firstSlopeDistanceModifier, clockwise, out Point16 e1A, out Point16 e1B);
+            OffsetEdgeEven(curr, next, distance * nextSlopeDistanceModifier, clockwise, out Point16 e2A, out Point16 e2B);
 
             Point16 vertex = LineIntersection(e1A, e1B, e2A, e2B);
 
@@ -115,12 +89,14 @@ public class Path : PointGeometry {
 
         // last vertex
         dir = GetIntegerDirection(Points[^1] - Points[^2]);
+        slope = GetSlope(Points[^2], Points[^1]);
+        slopeDistanceModifier = scaleDiagonals ? 1.3f + Math.Abs(slope) / 4 : 1;
         normal = GetNormal(dir, clockwise);
         normal = ScaleNormal(normal, distance);
         if (preserveXSize)
             offset = new Point16(
                 0,
-                (int)MathF.Round(normal.Y - normal.X * GetSlope(Points[^2], Points[^1]))
+                (int)MathF.Round(normal.Y - normal.X * slopeDistanceModifier)
             );
         else
             offset = new Point16(
@@ -132,21 +108,17 @@ public class Path : PointGeometry {
         return result;
     }
 
-    public void OffsetEven(int offset, bool preserveXSize) {
-        Init(GetOffsetEven(offset, PathVector.X > 0, preserveXSize)
-                .ToArray(),
-            false);
+    public void OffsetEven(int offset, bool preserveXSize, bool scaleDiagonals) {
+        Init(GetOffsetEven(offset, PathVector.X > 0, preserveXSize, scaleDiagonals).ToArray(), false);
     }
 
-    public Path GetOffsetEvenPath(int offset, bool preserveXSize) => new(GetOffsetEven(offset, PathVector.X > 0, preserveXSize)
-            .ToArray(),
-        false, StartExtendable, EndExtendable);
+    public Path GetOffsetEvenPath(int offset, bool preserveXSize, bool scaleDiagonals) =>
+        new(GetOffsetEven(offset, PathVector.X > 0, preserveXSize, scaleDiagonals).ToArray(), false);
 
     /// <summary>
     ///     Reverses order of the path
     /// </summary>
     public void Reverse() {
-        (StartExtendable, EndExtendable) = (EndExtendable, StartExtendable);
         Points = Points.Reverse().ToArray();
     }
 
@@ -192,17 +164,15 @@ public class Path : PointGeometry {
     /// </summary>
     /// <param name="start"></param>
     /// <param name="end"></param>
-    /// <param name="startExtendable"></param>
-    /// <param name="endExtendable"></param>
     /// <returns></returns>
-    public Path Slice(int start, int end = -1, bool startExtendable = true, bool endExtendable = true) {
+    public Path Slice(int start, int end = -1) {
         if (end == -1) end = Points.Length;
         var newPoints = new Point16[end - start];
         if (end - start <= 0) throw new Exception("end must be greater than start");
 
         for (int i = start; i < end; i++) newPoints[i - start] = Points[i];
 
-        return new Path(newPoints, false, startExtendable, endExtendable);
+        return new Path(newPoints, false);
     }
 
     /// <summary>

@@ -30,9 +30,7 @@ public static class FloorGen {
             ComponentHelper.FillShapeTiles.Action(component, component.Geometry, (_, _) =>
                 (external ? palette.ExternalFloor : palette.InternalFloor).Primary);
 
-            if (!param.TagsRequired.HasTag(Tags.External))
-                ComponentHelper.FillShapeWalls.Action(component.Geometry, param.Structure, (_, _) => palette.InternalFloor.PrimaryBackground);
-            
+            ComponentHelper.FillShapeRedundantWalls.Action(component.Geometry, param.Structure, palette.InternalFloor.PrimaryBackground);
             return true;
         }
     }
@@ -130,8 +128,7 @@ public static class FloorGen {
                 tilemap.PlaceTile(xStart + index, bottomY[index], palette.InternalFloor.Primary);
             }
 
-            if (!param.TagsRequired.HasTag(Tags.External))
-                ComponentHelper.FillShapeWalls.Action(component.Geometry, param.Structure, (_, _) => palette.InternalFloor.PrimaryBackground);
+            ComponentHelper.FillShapeRedundantWalls.Action(component.Geometry, param.Structure, palette.InternalFloor.PrimaryBackground);
 
             return true;
         }

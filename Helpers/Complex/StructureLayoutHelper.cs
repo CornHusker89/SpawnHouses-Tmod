@@ -14,6 +14,7 @@ using SpawnHouses.Structures;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
+using Terraria.Utilities.Terraria.Utilities;
 using Range = SpawnHouses.Structures.Range;
 
 namespace SpawnHouses.Helpers.Complex;
@@ -630,13 +631,22 @@ public static class StructureLayoutHelper {
         /// </summary>
         /// <returns></returns>
         private static List<Point16> SinglePeakPathWithFlats(AdvStructure structure, Point16 left, Point16 right, int wallThickness) {
-            float peakRoofSlope = structure.LayoutRandom.NextFromList(0.67f, 1f);
-            int peakSectionLength = (int)((right.X - left.X) * structure.LayoutRandom.NextFloat(0.48f, 0.62f));
-            int offsetRange = (right.X - left.X - peakSectionLength) / 2;
-            float[] possibleOffsetProportions = left.Y == right.Y ? [0f, 0.33f, 0.66f, 1f] : [0.4f, 0.5f, 0.6f];
+            FloatRange possiblePeakLengths = left.Y == right.Y ? new FloatRange(0.6f, 0.7f) : new FloatRange(0.48f, 0.62f);
+            int peakSectionLength = (int)((right.X - left.X) * structure.LayoutRandom.NextFloat(possiblePeakLengths));
+            int offsetRange = right.X - left.X - peakSectionLength;
+            float[] possibleOffsetProportions = left.Y == right.Y ? [0f, 0.33f, 0.66f, 1f] : [0.5f];
             int offset = (int)(offsetRange * structure.LayoutRandom.NextFromList(possibleOffsetProportions));
+            float peakRoofSlope = structure.LayoutRandom.NextFromList(0.67f, 1f, 1.33f);
+            int heightDelta = Math.Abs(left.Y - right.Y);
 
-            var path = SinglePeakOnly(structure, left + new Point16(offset, 0), new Point16(left.X + peakSectionLength + offset, right.Y), wallThickness, peakRoofSlope);
+            while (peakRoofSlope * peakSectionLength - heightDelta < (left.X - right.X) / 3.0) peakRoofSlope += 0.33f;
+
+            Console.WriteLine(peakSectionLength);
+            Console.WriteLine(offsetRange);
+            Console.WriteLine(possibleOffsetProportions[0]);
+            Console.WriteLine(offset);
+
+            var path = SinglePeakOnly(structure, left + new Point16(offset, 0), new Point16(left.X + peakSectionLength - 1 + offset, right.Y), wallThickness, peakRoofSlope);
             path.Insert(0, new Point16(left.X, left.Y));
             path.Add(new Point16(right.X, right.Y));
 

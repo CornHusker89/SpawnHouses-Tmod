@@ -22,8 +22,6 @@ public class SpawnTest2 : ModItem {
         int y = (Main.MouseWorld / 16).ToPoint16().Y;
 
         Path original = new(
-            false,
-            false,
             new Point16(x - 15, y + 5),
             new Point16(x - 10, y + 10),
             new Point16(x, y - 10),
@@ -34,7 +32,7 @@ public class SpawnTest2 : ModItem {
         );
 
         Shape originalShape = original.ToShape(2);
-        Path upper = original.GetOffsetEvenPath(-3, true);
+        Path upper = original.GetOffsetEvenPath(-3, true, true);
         Shape upperShape = upper.ToShape(2);
 
         originalShape.ExecuteInArea((x2, y2) => {

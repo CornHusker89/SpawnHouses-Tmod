@@ -29,9 +29,7 @@ public static class WallGen {
             bool external = param.TagsRequired.HasTag(Tags.External);
             ComponentHelper.FillShapeTiles.Action(component, component.Geometry, (_, _) => (external ? palette.ExternalWall : palette.InternalWall).Primary);
 
-            if (!param.TagsRequired.HasTag(Tags.External))
-                ComponentHelper.FillShapeWalls.Action(component.Geometry, param.Structure, (_, _) => palette.InternalWall.PrimaryBackground);
-            
+            ComponentHelper.FillShapeRedundantWalls.Action(component.Geometry, param.Structure, palette.InternalWall.PrimaryBackground);
             return true;
         }
     }
@@ -72,9 +70,7 @@ public static class WallGen {
                     : (external ? palette.ExternalWall : palette.InternalWall).Primary
             );
 
-            if (!param.TagsRequired.HasTag(Tags.External))
-                ComponentHelper.FillShapeWalls.Action(component.Geometry, param.Structure, (_, _) => palette.InternalWall.PrimaryBackground);
-
+            ComponentHelper.FillShapeRedundantWalls.Action(component.Geometry, param.Structure, palette.InternalWall.PrimaryBackground);
             return true;
         }
     }

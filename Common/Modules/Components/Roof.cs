@@ -9,12 +9,45 @@ namespace SpawnHouses.Common.Modules.Components;
 ///     all roofs' required tags has Tags.External in it on object init
 /// </summary>
 public class Roof : PathComponent {
+    public bool StartExtendable;
+    public bool EndExtendable;
+
+    /// <summary>
+    ///     if the endpoint with the lower X is extendable, linked to <see cref="StartExtendable" /> and <see cref="EndExtendable" />
+    /// </summary>
+    public bool LowerXExtendable {
+        get => Geometry.Points[0].X <= Geometry.Points[^1].X ? StartExtendable : EndExtendable;
+        set {
+            if (Geometry.Points[0].X <= Geometry.Points[^1].X)
+                StartExtendable = value;
+            else
+                EndExtendable = value;
+        }
+    }
+
+    /// <summary>
+    ///     if the endpoint with the larger X is extendable, linked to <see cref="StartExtendable" /> and <see cref="EndExtendable" />
+    /// </summary>
+    public bool HigherXExtendable {
+        get => Geometry.Points[0].X > Geometry.Points[^1].X ? StartExtendable : EndExtendable;
+        set {
+            if (Geometry.Points[0].X > Geometry.Points[^1].X)
+                StartExtendable = value;
+            else
+                EndExtendable = value;
+        }
+    }
+    
     /// <summary>
     ///     constructor that requires params object
     /// </summary>
     /// <param name="p"></param>
     /// <param name="path"></param>
-    public Roof(PathComponentParams p, Path path) : base(p, path) {
+    /// <param name="startExtendable"></param>
+    /// <param name="endExtendable"></param>
+    public Roof(PathComponentParams p, Path path, bool startExtendable, bool endExtendable) : base(p, path) {
+        StartExtendable = startExtendable;
+        EndExtendable = endExtendable;
         p.TagsRequired.Add(Tags.External);
     }
 
@@ -23,7 +56,11 @@ public class Roof : PathComponent {
     /// </summary>
     /// <param name="structure"></param>
     /// <param name="path"></param>
-    public Roof(AdvStructure structure, Path path) : base(new PathComponentParams(structure), path) {
+    /// <param name="startExtendable"></param>
+    /// <param name="endExtendable"></param>
+    public Roof(AdvStructure structure, Path path, bool startExtendable, bool endExtendable) : base(new PathComponentParams(structure), path) {
+        StartExtendable = startExtendable;
+        EndExtendable = endExtendable;
         Params.TagsRequired.Add(Tags.External);
     }
 }

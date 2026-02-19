@@ -62,8 +62,8 @@ public static class StructureLayoutGen {
             bool forceFlatRoof = param.TagsRequired.HasTag(Tags.HasOnlyRectangleRooms);
             int entryPointVerticalDistance = Math.Abs(param.EntryPoints[0].End.Y - param.EntryPoints[1].End.Y);
             bool hasBasement = param.Structure.OtherRandom.NextBool(3, 10) && param.Height - entryPointVerticalDistance > 12; //40% if conditions are met
-            Range externalFloorThicknessRange = new(1, 1);
-            Range externalWallThicknessRange = new(1, 1);
+            Range externalFloorThicknessRange = new(1, 2);
+            Range externalWallThicknessRange = new(1, 2);
             int externalFloorThickness = externalFloorThicknessRange.Max;
             int externalWallThickness = externalWallThicknessRange.Max;
 
@@ -83,7 +83,7 @@ public static class StructureLayoutGen {
 
             // create constants
             int floorTopY = upper.End.Y + 1 + basementVerticalOffset;
-            int roofHeightModifier = (int)(param.Length / 6.0 * random.NextFloat(1, 1.35f)); // if uneven roof, adjust each side by this much
+            int roofHeightModifier = (int)((param.Height / 9.0 + param.Length / 9.0 - 3) * random.NextFloat(1, 1.35f)); // if uneven roof, adjust each side by this much
             int upperRoofBottomY = floorTopY - param.Height + 1;
             if (hasHigherSide && upperRoofBottomY + roofHeightModifier >= (leftRoofHigher ? right.Start.Y : left.Start.Y)) // check that an uneven roof won't cause collision with entry points
                 hasHigherSide = false;

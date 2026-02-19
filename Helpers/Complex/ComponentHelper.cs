@@ -75,13 +75,13 @@ public static class ComponentHelper {
     }
 
     /// <summary>
-    ///     fills shape with tiles of a painted type
+    ///     fills shape with walls of a painted type
     /// </summary>
     public abstract class FillShapeWalls : IComponentHelper {
         public static HashSet<Tag> PossibleTags => [];
 
         /// <summary>
-        ///     fills shape with tiles of a painted type
+        ///     fills shape with walls of a painted type
         /// </summary>
         /// <param name="shape"></param>
         /// <param name="structure"></param>
@@ -91,9 +91,36 @@ public static class ComponentHelper {
         /// </param>
         public static void Action(Shape shape, AdvStructure structure, WallPaletteCondition fillCondition) {
             shape.ExecuteInArea((x, y) => {
-                WallPaintedType? type = fillCondition?.Invoke(x, y);
+                WallPaintedType? type = fillCondition.Invoke(x, y);
                 if (type != null)
                     structure.Tilemap.PlaceWall(x, y, type);
+            });
+        }
+    }
+
+    /// <summary>
+    ///     fills shape with walls, but only where they won't be seen externally. intended to be called on wall and floor components
+    /// </summary>
+    public abstract class FillShapeRedundantWalls : IComponentHelper {
+        public static HashSet<Tag> PossibleTags => FillShapeWalls.PossibleTags;
+
+        /// <summary>
+        ///     fills shape with walls, but only where they won't be seen externally. intended to be called on wall and floor components
+        /// </summary>
+        /// <param name="shape"></param>
+        /// <param name="structure"></param>
+        /// <param name="wallType"></param>
+        public static void Action(Shape shape, AdvStructure structure, WallPaintedType wallType) {
+            FillShapeWalls.Action(shape, structure, (x, y) => {
+                bool isTouchingExternal = false;
+                for (int dx = -1; dx <= 1; dx++)
+                for (int dy = -1; dy <= 1; dy++)
+                    if (structure.Tilemap[x + dx, y + dy].IsOutside) {
+                        isTouchingExternal = true;
+                        break;
+                    }
+
+                return isTouchingExternal ? null : wallType;
             });
         }
     }

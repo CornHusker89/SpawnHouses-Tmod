@@ -56,7 +56,7 @@ public class SpawnTest : ModItem {
                 new Range(350, 500).Evaluate(scale),
                 false
             ),
-            TilePalette.Medieval
+            PalettePresets.Medieval
         );
 
         // 1-room house

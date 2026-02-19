@@ -381,7 +381,7 @@ public abstract class PointGeometry {
         return new Point16(ix, iy);
     }
 
-    protected static void OffsetEdgeEven(Point16 a, Point16 b, int distance, bool reverseNormal, out Point16 oa, out Point16 ob) {
+    protected static void OffsetEdgeEven(Point16 a, Point16 b, float distance, bool reverseNormal, out Point16 oa, out Point16 ob) {
         Point16 delta = b - a;
         Point16 dir = GetIntegerDirection(delta);
         Point16 normal = GetNormal(dir, reverseNormal);
