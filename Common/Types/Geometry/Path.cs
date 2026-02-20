@@ -41,6 +41,7 @@ public class Path : PointGeometry {
     /// <param name="distance"></param>
     /// <param name="clockwise"></param>
     /// <param name="preserveXSize"></param>
+    /// <param name="scaleDiagonals"></param>
     /// <returns></returns>
     private Point16[] GetOffsetEven(int distance, bool clockwise, bool preserveXSize, bool scaleDiagonals) {
         var result = new Point16[Points.Length];

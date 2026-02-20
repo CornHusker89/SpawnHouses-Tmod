@@ -5,6 +5,7 @@ using SpawnHouses.Common.Palette;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types;
+using SpawnHouses.Helpers.Complex;
 using SpawnHouses.Structures;
 using Terraria;
 using Terraria.DataStructures;
@@ -37,7 +38,6 @@ public class SpawnTest : ModItem {
         TagMap requiredTags = new();
         requiredTags.Add(Tags.HasRooms, new Range(5, 7).Evaluate(scale));
         requiredTags.Add(Tags.HasHousing, new Range(5, 7).Evaluate(scale));
-        //requiredTags.Add(Tags.HasOnlyRectangleRooms);
         Structure = new AdvStructure(
             new StructureLayoutParams(
                 requiredTags,
@@ -56,8 +56,18 @@ public class SpawnTest : ModItem {
                 new Range(350, 500).Evaluate(scale),
                 false
             ),
-            PalettePresets.Medieval
+            PalettePresets.Medieval,
+            generate: false
         );
+
+        Point16 left = new(x, y - 15);
+        Point16 right = new(x + 25, y - 15);
+        var path = StructureLayoutHelper.CreateRoof.WavyPeak(Structure, left, right, 2);
+        foreach (Point16 point in path) {
+            Tile tile = Main.tile[point.X, point.Y];
+            tile.HasTile = true;
+            tile.TileType = TileID.EmeraldGemspark;
+        }
 
         // 1-room house
         // TagMap requiredTags = new();

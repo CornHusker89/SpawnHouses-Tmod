@@ -6,7 +6,7 @@ namespace SpawnHouses.Common.Tagging;
 #pragma warning disable CA2211
 
 /// <summary>
-///     Tag saving/loading is based on the tag's name, so don't change them once implemented
+///     Tag saving/loading is based on the tag's identifier, so don't change them once implemented
 /// </summary>
 public static class Tags {
     
@@ -62,11 +62,13 @@ public static class Tags {
 
     public static Tag External = new();
 
-    /// use sloping algorithm when filling volumes
-    public static Tag<SlopingAlgorithm> ApplySloping = new();
+    /// use a specific predetermined sloping algorithm when filling volumes
+    public static readonly Tag<SlopingAlgorithm> SlopingAlgorithm = new();
 
-    /// apply sloping algorithm with different contexts
-    public static Tag<SlopeModifier> SlopingModifier = new();
+    /// apply sloping algorithm with different specific predetermined contexts
+    public static readonly Tag<SlopeGrouping> SlopeGrouping = new();
+
+    public static readonly Tag HasCustomSloping = new();
 
     public static Tag HasDebris = new();
 
@@ -75,9 +77,9 @@ public static class Tags {
     #region Floor
 
     /// floor is not hollow
-    public static Tag FloorSolid = new();
+    public static readonly Tag FloorSolid = new();
 
-    public static Tag FloorHollow = new();
+    public static readonly Tag FloorHollow = new();
 
     #endregion
 
@@ -87,89 +89,89 @@ public static class Tags {
 
     #region Room
 
-    public static Tag RoomTypeStorage = new();
+    public static readonly Tag RoomTypeStorage = new();
 
-    public static Tag RoomTypeLiving = new();
+    public static readonly Tag RoomTypeLiving = new();
 
-    public static Tag RoomTypeBedroom = new();
+    public static readonly Tag RoomTypeBedroom = new();
 
-    public static Tag RoomTypeWorkshop = new();
+    public static readonly Tag RoomTypeWorkshop = new();
 
-    public static Tag RoomHasWindow = new();
+    public static readonly Tag RoomHasWindow = new();
 
-    public static Tag RoomHousingNotValid = new();
+    public static readonly Tag RoomHousingNotValid = new();
 
-    public static Tag RoomHousingValid = new();
+    public static readonly Tag RoomHousingValid = new();
 
-    public static Tag RoomHasArbitraryBeams = new();
+    public static readonly Tag RoomHasArbitraryBeams = new();
 
-    public static Tag<int[]> RoomHasSpecificBeams = new();
+    public static readonly Tag<int[]> RoomHasSpecificBeams = new();
 
-    public static Tag RoomBeamsAreTiles = new();
+    public static readonly Tag RoomBeamsAreTiles = new();
 
     #endregion
 
     #region Stairway
 
-    public static Tag StairwayTilesLowerX = new();
+    public static readonly Tag StairwayTilesLowerX = new();
 
-    public static Tag StairwayTilesHigherX = new();
+    public static readonly Tag StairwayTilesHigherX = new();
 
-    public static Tag StairwayRequiresJumping = new();
+    public static readonly Tag StairwayRequiresJumping = new();
 
-    public static Tag StairwayNotRequiresJumping = new();
+    public static readonly Tag StairwayNotRequiresJumping = new();
 
-    public static Tag StairwayToHorizontalGap = new();
+    public static readonly Tag StairwayToHorizontalGap = new();
 
-    public static Tag StairwayToVerticalGap = new();
+    public static readonly Tag StairwayToVerticalGap = new();
 
     #endregion
 
     #region Roof
 
     /// roof is tall enough that it doesn't follow the full contour of the tiles it is placed on
-    public static Tag RoofTall = new();
+    public static readonly Tag RoofTall = new();
 
     /// roof is short enough to generally follow the contour of the path
-    public static Tag RoofShort = new();
+    public static readonly Tag RoofShort = new();
 
-    public static Tag<int[]> RoofHasChimney = new();
+    public static readonly Tag<int[]> RoofHasChimney = new();
 
-    public static Tag<(int, int)> RoofHasOverhang = new();
+    public static readonly Tag<(int, int)> RoofHasOverhang = new();
 
     #endregion
 
     #region Gap
 
-    /// door of a horizontal gap is on the "outside" side of the gap. typically defaults to the middle of the gap, only affects wide gaps
-    public static Tag GapDoorOutside = new();
+    /// door of a horizontal gap is on the "outside" side of the gap. typically defaults to the middle of the gap, only affects wider gaps
+    public static readonly Tag GapDoorOutside = new();
 
-    /// door of a horizontal gap is on the "inside" side of the gap. typically defaults to the middle of the gap, only affects wide gaps
-    public static Tag GapDoorInside = new();
+    /// door of a horizontal gap is on the "inside" side of the gap. typically defaults to the middle of the gap, only affects wider gaps
+    public static readonly Tag GapDoorInside = new();
 
     #endregion
 
     #region Palette
 
-    public static Tag PaletteWood = new();
+    public static readonly Tag PaletteWood = new();
 
-    public static Tag PaletteStone = new();
+    public static readonly Tag PaletteStone = new();
 
-    public static Tag PaletteDarkGrey = new();
+    public static readonly Tag PaletteDarkGrey = new();
 
-    public static Tag PaletteLightGrey = new();
+    public static readonly Tag PaletteLightGrey = new();
 
-    public static Tag PaletteMediumGrey = new();
+    public static readonly Tag PaletteMediumGrey = new();
 
-    public static Tag PaletteDarkBrown = new();
+    public static readonly Tag PaletteDarkBrown = new();
 
-    public static Tag PaletteLightBrown = new();
+    public static readonly Tag PaletteLightBrown = new();
 
-    public static Tag PaletteMediumBrown = new();
+    public static readonly Tag PaletteMediumBrown = new();
 
-    public static Tag PaletteRed = new();
+    public static readonly Tag PaletteRed = new();
 
-    public static Tag PaletteTurquoise = new();
+    public static readonly Tag PaletteTurquoise = new();
 
     #endregion
 }

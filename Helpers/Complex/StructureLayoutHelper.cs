@@ -657,7 +657,7 @@ public static class StructureLayoutHelper {
         ///     creates a roof path with a peak towards either the left or right end, a flat section in the middle, and finishing with a slope on the low side
         /// </summary>
         /// <returns></returns>
-        private static List<Point16> WavyPeak(AdvStructure structure, Point16 left, Point16 right, int wallThickness) {
+        public static List<Point16> WavyPeak(AdvStructure structure, Point16 left, Point16 right, int wallThickness) {
             bool offsetLeftUp = false, offsetRightUp = false;
             int verticalSideOffset = (int)((right.X - left.X) * structure.LayoutRandom.NextFloat(0.15f, 0.35f)); // will only be used if the sides are even
             if (left.Y == right.Y) {
@@ -676,13 +676,13 @@ public static class StructureLayoutHelper {
             List<Point16> path;
             if (left.Y < right.Y) {
                 path = SinglePeakOnly(structure, left, left + new Point16((int)((right.X - left.X) * 0.33f), 0), wallThickness, roofSlope);
-                path.Add(new Point16((int)(right.X - (left.Y - right.Y) / roofSlope), left.Y));
+                path.Add(new Point16((int)(right.X - (right.Y - left.Y) / roofSlope), left.Y));
                 path.Add(right);
             }
             else {
                 path = [
                     left,
-                    new Point16((int)(left.X + (right.Y - left.Y) / roofSlope), right.Y)
+                    new Point16((int)(left.X + (left.Y - right.Y) / roofSlope), right.Y)
                 ];
                 path.AddRange(SinglePeakOnly(structure, right - new Point16((int)((right.X - left.X) * 0.33f), 0), right, wallThickness, roofSlope));
             }
@@ -763,7 +763,7 @@ public static class StructureLayoutHelper {
 
             // make a switch; split roof can also be when rectangle rooms are forced
             List<Point16> path;
-            path = SinglePeakPathWithFlats(param.Structure, left, right, wallThickness);
+            path = WavyPeak(param.Structure, left, right, fullLength);
             // if (forceFlat)
             //     path = FlatRoof(left, right);
             // else {
@@ -778,11 +778,9 @@ public static class StructureLayoutHelper {
             // }
 
             var result = ExternalLayoutHelper.CreateTopFloorsWallsRoofs(param.Structure, path, floorThickness, true, wallThickness);
-            TagMap.AddRequiredToEach(result.floors, Tags.ApplySloping, SlopeHelper.SimpleSlopes);
-            TagMap.AddRequiredToEach(result.floors, Tags.SlopingModifier, SlopeModifier.GlobalOnlySloping);
-            TagMap.AddRequiredToEach(result.roofs, Tags.ApplySloping, SlopeHelper.SmoothTop);
-            TagMap.AddRequiredToEach(result.roofs, Tags.SlopingModifier, SlopeModifier.LocalSloping);
-
+            TagMap.AddRequiredToEach(result.floors, Tags.SlopingAlgorithm, SlopeHelper.SimpleSlopes);
+            TagMap.AddRequiredToEach(result.floors, Tags.SlopeGrouping, SlopeGrouping.GlobalOnlySloping);
+            TagMap.AddRequiredToEach(result.roofs, Tags.HasCustomSloping);
             return result;
         }
     }

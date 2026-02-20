@@ -27,8 +27,8 @@ public static class ComponentHelper {
     /// </summary>
     public abstract class FillShapeTiles : IComponentHelper {
         public static HashSet<Tag> PossibleTags => [
-            Tags.ApplySloping,
-            Tags.SlopingModifier
+            Tags.SlopingAlgorithm,
+            Tags.SlopeGrouping
         ];
 
         /// <summary>
@@ -43,8 +43,8 @@ public static class ComponentHelper {
         /// <remarks>supports ApplySloping and SlopingModifier component tags</remarks>
         public static void Action(IComponent component, Shape shape, TilePaletteCondition paletteCondition) {
             StructureTilemap t = component.Params.Structure.Tilemap;
-            bool hasSloping = component.Params.TagsRequired.GetValueSafe(Tags.ApplySloping, out SlopingAlgorithm slopingAlgorithm);
-            component.Params.TagsRequired.GetValueSafe(Tags.SlopingModifier, out SlopeModifier slopeModifier);
+            bool hasSloping = component.Params.TagsRequired.GetValueSafe(Tags.SlopingAlgorithm, out SlopingAlgorithm slopingAlgorithm);
+            component.Params.TagsRequired.GetValueSafe(Tags.SlopeGrouping, out SlopeGrouping slopeModifier);
 
             if (!hasSloping) {
                 shape.ExecuteInArea((x, y) => {
@@ -55,12 +55,12 @@ public static class ComponentHelper {
                 return;
             }
 
-            if (slopeModifier == SlopeModifier.LocalSloping) {
+            if (slopeModifier == SlopeGrouping.LocalSloping) {
                 shape.ExecuteInArea((x, y, bt) => {
                     TilePaintedType? type = paletteCondition.Invoke(x, y);
                     if (type != null) {
                         t.PlaceTile(x, y, type, bt);
-                        t[x, y].SlopeModifier = SlopeModifier.LocalSloping;
+                        t[x, y].SlopeGrouping = SlopeGrouping.LocalSloping;
                     }
                 }, slopingAlgorithm);
             }

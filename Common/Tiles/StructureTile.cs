@@ -91,7 +91,7 @@ public class StructureTile {
 
     public SlopingAlgorithm SlopingAlg;
 
-    public SlopeModifier SlopeModifier = SlopeModifier.GlobalOnlySloping;
+    public SlopeGrouping SlopeGrouping = SlopeGrouping.GlobalOnlySloping;
 
     public int Style;
 

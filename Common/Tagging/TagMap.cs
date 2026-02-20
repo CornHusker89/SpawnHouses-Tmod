@@ -13,6 +13,8 @@ public sealed record Tag<TValue> : Tag;
 
 public sealed class TagMap {
     private static readonly HashSet<Tag>[] ExclusiveTagsRequired = [
+        [Tags.HasCustomSloping, Tags.SlopingAlgorithm],
+        [Tags.HasCustomSloping, Tags.SlopeGrouping]
     ];
 
     private static readonly HashSet<Tag>[] ExclusiveTagsCurrent = [
@@ -20,6 +22,14 @@ public sealed class TagMap {
 
     public static HashSet<Tag> NewTagSet(HashSet<Tag> tagSet, params HashSet<Tag>[] otherTagSets) {
         foreach (var otherTagSet in otherTagSets) tagSet.UnionWith(otherTagSet);
+        return tagSet;
+    }
+
+    public static HashSet<Tag> NewTagSet(HashSet<Tag> tagSet, HashSet<Tag>[] excludedSets, params HashSet<Tag>[] otherTagSets) {
+        foreach (var otherTagSet in otherTagSets) tagSet.UnionWith(otherTagSet);
+        foreach (var excludedSet in excludedSets)
+        foreach (Tag excludedTag in excludedSet)
+            tagSet.Remove(excludedTag);
         return tagSet;
     }
 

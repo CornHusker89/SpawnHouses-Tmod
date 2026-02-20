@@ -113,7 +113,7 @@ public class StructureTilemap {
     }
 
     public void PlaceTile(int x, int y, TilePaintedType? paintedType,
-        SlopingAlgorithm? slopingAlgorithm, SlopeModifier slopeModifier = SlopeModifier.GlobalSloping, bool actuated = false) {
+        SlopingAlgorithm? slopingAlgorithm, SlopeGrouping slopeGrouping = SlopeGrouping.GlobalSloping, bool actuated = false) {
         if (paintedType == null) return;
 
         StructureTile tile = this[x, y];
@@ -121,7 +121,7 @@ public class StructureTilemap {
         (tile.TileType, tile.TileColor, tile.Style) = paintedType.GetIds(Structure.OtherRandom);
         tile.IsNullTile = false;
         tile.SlopingAlg = slopingAlgorithm;
-        tile.SlopeModifier = slopeModifier;
+        tile.SlopeGrouping = slopeGrouping;
         tile.IsActuated = actuated;
     }
 
@@ -185,7 +185,7 @@ public class StructureTilemap {
             StructureTile tile = this[x, y];
             tile.PasteTile(ConvertToGlobal(x, y));
             globalTilemap[x, y] = tile.HasTile;
-            globalNonLocalTilemap[x, y] = tile.HasTile && tile.SlopeModifier != SlopeModifier.LocalSloping;
+            globalNonLocalTilemap[x, y] = tile.HasTile && tile.SlopeGrouping != SlopeGrouping.LocalSloping;
         }
 
         // slope tiles
@@ -194,19 +194,19 @@ public class StructureTilemap {
             StructureTile tile = this[x, y];
             if (tile.SlopingAlg != null) {
                 bool[,] tilemap;
-                switch (tile.SlopeModifier) {
-                    case SlopeModifier.GlobalSloping:
+                switch (tile.SlopeGrouping) {
+                    case SlopeGrouping.GlobalSloping:
                         tilemap = globalTilemap;
                         tile.BlockType = tile.SlopingAlg(x, y, tilemap);
                         break;
-                    case SlopeModifier.GlobalOnlySloping:
+                    case SlopeGrouping.GlobalOnlySloping:
                         tilemap = globalNonLocalTilemap;
                         tile.BlockType = tile.SlopingAlg(x, y, tilemap);
                         break;
-                    case SlopeModifier.LocalSloping:
+                    case SlopeGrouping.LocalSloping:
                         break;
                     default:
-                        throw new Exception($"tile has unsupported slope modifier {tile.SlopeModifier} for standalone placement");
+                        throw new Exception($"tile has unsupported slope modifier {tile.SlopeGrouping} for standalone placement");
                 }
             }
 
