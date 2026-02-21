@@ -129,6 +129,8 @@ public static class Tags {
 
     #region Roof
 
+    public static readonly Tag RoofFlat = new();
+    
     /// roof is tall enough that it doesn't follow the full contour of the tiles it is placed on
     public static readonly Tag RoofTall = new();
 

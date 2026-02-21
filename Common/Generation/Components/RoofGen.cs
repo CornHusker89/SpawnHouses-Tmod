@@ -17,7 +17,7 @@ namespace SpawnHouses.Common.Generation.Components;
 
 public static class RoofGen {
     /// <summary>
-    ///     Intended to be a taller, gothic, dramatic roof type. Has custom roof sloping
+    ///     generic, simple roof with optional gap on the bottom
     /// </summary>
     [ModuleGenerator(typeof(Roof))]
     public class RoofGenerator2 : PathComponentGenerator {
@@ -27,16 +27,13 @@ public static class RoofGen {
                 Tags.RoofShort,
                 Tags.RoofTall,
                 Tags.RoofHasOverhang,
-                Tags.HasCustomSloping
-            ],
-            [
-                [Tags.SlopingAlgorithm, Tags.SlopeGrouping]
             ],
             ComponentHelper.FillShapeTiles.PossibleTags,
             ComponentHelper.FillShapeWalls.PossibleTags
         );
 
-        public override Shape GetBoundingShape(PathComponentParams param, Path geometry, UnifiedRandom random) => new(true, geometry.BoundingBox.topLeft + new Point16(0, -2), geometry.BoundingBox.bottomRight);
+        public override Shape GetBoundingShape(PathComponentParams param, Path geometry, UnifiedRandom random) =>
+            new(true, geometry.BoundingBox.topLeft + new Point16(0, -4), geometry.BoundingBox.bottomRight);
 
         public override bool Generate(PathComponent component, PathComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
             bool bigEndCaps = param.Structure.LayoutRandom.NextBool();
@@ -82,9 +79,12 @@ public static class RoofGen {
                         break;
                     }
                 }
+
+                // TODO: add the little window things when filling
             }
 
             // create endcaps
+            // TODO: make endcaps work
             if (!roofComponent.LowerXExtendable) {
             }
             
@@ -100,5 +100,27 @@ public static class RoofGen {
 
             return true;
         }
+    }
+
+    /// <summary>
+    ///     simple short roof, separated into many small sections with independent sloping
+    /// </summary>
+    public class RoofGenerator3 : PathComponentGenerator {
+        public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
+            [
+                Tags.External,
+                Tags.RoofShort,
+                Tags.RoofHasOverhang,
+                Tags.HasCustomSloping
+            ],
+            [
+                [Tags.SlopingAlgorithm, Tags.SlopeGrouping]
+            ],
+            ComponentHelper.FillShapeTiles.PossibleTags
+        );
+
+        public override Shape GetBoundingShape(PathComponentParams param, Path geometry, UnifiedRandom random) => new(true, geometry.BoundingBox.topLeft + new Point16(0, -4), geometry.BoundingBox.bottomRight);
+
+        public override bool Generate(PathComponent component, PathComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) => true;
     }
 }

@@ -5,6 +5,7 @@ using SpawnHouses.Common.Palette;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types;
+using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Helpers.Complex;
 using SpawnHouses.Structures;
 using Terraria;
@@ -57,13 +58,20 @@ public class SpawnTest : ModItem {
                 false
             ),
             PalettePresets.Medieval,
-            generate: false
+            generate: true
         );
 
         Point16 left = new(x, y - 15);
         Point16 right = new(x + 25, y - 15);
-        var path = StructureLayoutHelper.CreateRoof.WavyPeak(Structure, left, right, 2);
-        foreach (Point16 point in path) {
+        var points = StructureLayoutHelper.CreateRoof.WavyPeak(Structure, left, right);
+        Path path = new(points);
+        Shape shape = path.ToShape(1);
+        shape.ExecuteInArea((x2, y2) => {
+            Tile tile = Main.tile[x2, y2];
+            tile.HasTile = true;
+            tile.TileType = TileID.AmberGemspark;
+        });
+        foreach (Point16 point in points) {
             Tile tile = Main.tile[point.X, point.Y];
             tile.HasTile = true;
             tile.TileType = TileID.EmeraldGemspark;
