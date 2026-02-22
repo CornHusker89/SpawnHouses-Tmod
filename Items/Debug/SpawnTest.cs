@@ -66,16 +66,16 @@ public class SpawnTest : ModItem {
         var points = StructureLayoutHelper.CreateRoof.WavyPeak(Structure, left, right);
         Path path = new(points);
         Shape shape = path.ToShape(1);
-        shape.ExecuteInArea((x2, y2) => {
-            Tile tile = Main.tile[x2, y2];
-            tile.HasTile = true;
-            tile.TileType = TileID.AmberGemspark;
-        });
-        foreach (Point16 point in points) {
-            Tile tile = Main.tile[point.X, point.Y];
-            tile.HasTile = true;
-            tile.TileType = TileID.EmeraldGemspark;
-        }
+        // shape.ExecuteInArea((x2, y2) => {
+        //     Tile tile = Main.tile[x2, y2];
+        //     tile.HasTile = true;
+        //     tile.TileType = TileID.AmberGemspark;
+        // });
+        // foreach (Point16 point in points) {
+        //     Tile tile = Main.tile[point.X, point.Y];
+        //     tile.HasTile = true;
+        //     tile.TileType = TileID.EmeraldGemspark;
+        // }
 
         // 1-room house
         // TagMap requiredTags = new();

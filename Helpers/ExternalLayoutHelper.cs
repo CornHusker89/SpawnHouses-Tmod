@@ -161,6 +161,9 @@ public static class ExternalLayoutHelper {
                 if (lastComponentWasFloor)
                     walls.Add(CreateWall(structure, thisPoint.X, nextPoint.Y > thisPoint.Y ? thisPoint.Y + 1 : thisPoint.Y - floorWidth,
                         nextPoint.Y > thisPoint.Y ? nextPoint.Y - floorWidth : nextPoint.Y + 1, extendWallsHigher, wallWidth, isExternal));
+                else if (roofPoints.Count == 0)
+                    walls.Add(CreateWall(structure, thisPoint.X, thisPoint.Y,
+                        nextPoint.Y > thisPoint.Y ? nextPoint.Y : nextPoint.Y + 1, extendWallsHigher, wallWidth, isExternal));
                 else
                     walls.Add(CreateWall(structure, thisPoint.X, thisPoint.Y,
                         nextPoint.Y > thisPoint.Y ? nextPoint.Y - floorWidth : nextPoint.Y + 1, extendWallsHigher, wallWidth, isExternal));

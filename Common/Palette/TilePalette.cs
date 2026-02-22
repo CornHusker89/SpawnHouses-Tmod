@@ -1,13 +1,8 @@
 #nullable enable
 
-using Terraria.ID;
-
 namespace SpawnHouses.Common.Palette;
 
 public class TilePalette {
-    public required PaintedTypeDecorSet BedroomDecor;
-    public required PaintedTypeRoomSet BedroomRoom;
-
     // ----- One-off Tiles -----
 
     /// <summary>
@@ -17,15 +12,19 @@ public class TilePalette {
 
     // ----- Sets -----
     public required PaintedTypeFloorSet ExternalFloor;
-
     public required PaintedTypeWallSet ExternalWall;
+    
     public required PaintedTypeFloorSet InternalFloor;
     public required PaintedTypeWallSet InternalWall;
-    public required PaintedTypeDecorSet LivingDecor;
-
-    public required PaintedTypeRoomSet LivingRoom;
 
     public required PaintedTypeRoofSet Roof;
+    
+    public required PaintedTypeDecorSet LivingDecor;
+    public required PaintedTypeRoomSet LivingRoom;
+
+    public required PaintedTypeDecorSet BedroomDecor;
+    public required PaintedTypeRoomSet BedroomRoom;
+    
     public required PaintedTypeDecorSet StorageDecor;
     public required PaintedTypeRoomSet StorageRoom;
     

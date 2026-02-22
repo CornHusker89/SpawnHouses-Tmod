@@ -234,7 +234,7 @@ public class StructureTilemap {
         for (int x = 0; x < Width; x++)
         for (int y = 0; y < Height; y++) {
             StructureTile tile = this[x, y];
-            if (tile.IsExteriorComponent) _tiles[x, y] = null;
+            if (!tile.IsExteriorComponent) _tiles[x, y] = null;
         }
     }
 }

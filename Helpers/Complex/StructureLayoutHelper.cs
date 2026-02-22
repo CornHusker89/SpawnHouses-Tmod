@@ -380,8 +380,8 @@ public static class StructureLayoutHelper {
                         structure,
                         new Shape(
                             true,
-                            entryPoint.Start,
-                            entryPoint.End + new Point16(entryPoint.Direction is Directions.Right ? wallWidth - 1 : -wallWidth + 1, 0)
+                            entryPoint.Start + new Point16(entryPoint.Direction is Directions.Right ? -wallWidth + 1 : wallWidth - 1, 0),
+                            entryPoint.End + new Point16(entryPoint.Direction is Directions.Right ? -wallWidth + 1 : wallWidth - 1, 0)
                         ),
                         null!, null, entryPoint.Direction is Directions.Left or Directions.Right
                     );
@@ -661,12 +661,18 @@ public static class StructureLayoutHelper {
             int length = right.X - left.X;
             int verticalSideOffset = (int)(length * structure.LayoutRandom.NextFloat(0.15f, 0.35f)); // will only be used if the sides are even
             float roofSlope = structure.LayoutRandom.NextFromList(0.67f, 1f, 1.33f);
+
+            // move one side up if they're the same y level
+            bool offsetLeftUp = false, offsetRightUp = false;
             if (left.Y == right.Y) {
                 if (structure.LayoutRandom.NextBool()) {
                     left += new Point16(0, -verticalSideOffset);
+                    offsetLeftUp = true;
                 }
-                else
+                else {
                     right += new Point16(0, -verticalSideOffset);
+                    offsetRightUp = true;
+                }
             }
 
             // create higher section
@@ -699,6 +705,10 @@ public static class StructureLayoutHelper {
                 path[^(2 + checkIndexOffset)] = new Point16(path[^(3 + checkIndexOffset)].X + requiredOffsetDistance, path[^(2 + checkIndexOffset)].Y);
             else if (path[1 + checkIndexOffset].X > path[2 + checkIndexOffset].X - requiredOffsetDistance)
                 path[1 + checkIndexOffset] = new Point16(path[2 + checkIndexOffset].X - requiredOffsetDistance, path[1 + checkIndexOffset].Y);
+
+            // add extra wall to make sure roof seals with the structure
+            if (offsetLeftUp) path.Insert(0, new Point16(left.X, left.Y + verticalSideOffset));
+            if (offsetRightUp) path.Add(new Point16(right.X, right.Y + verticalSideOffset));
 
             return path;
         }
