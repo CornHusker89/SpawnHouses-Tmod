@@ -154,7 +154,7 @@ public sealed class TagMap {
     /// </summary>
     /// <param name="exclusiveSets"></param>
     /// <exception cref="Exception"></exception>
-    private void ValidateExclusiveTags(HashSet<Tag>[] exclusiveSets) {
+    private void ValidateTagSet(HashSet<Tag>[] exclusiveSets) {
         foreach (var exclusiveSet in exclusiveSets) {
             if (!exclusiveSet.IsSubsetOf(KeysSet)) continue;
 
@@ -168,13 +168,13 @@ public sealed class TagMap {
     ///     throws error if any tags are mutually exclusive in the TagsRequired category
     /// </summary>
     public void ValidateExclusiveRequiredTags() {
-        ValidateExclusiveTags(ExclusiveTagsRequired);
+        ValidateTagSet(ExclusiveTagsRequired);
     }
 
     /// <summary>
     ///     throws error if any tags are mutually exclusive in the TagsCurrent category
     /// </summary>
     public void ValidateExclusiveCurrentTags() {
-        ValidateExclusiveTags(ExclusiveTagsCurrent);
+        ValidateTagSet(ExclusiveTagsCurrent);
     }
 }

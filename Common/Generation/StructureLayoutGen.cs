@@ -161,7 +161,7 @@ public static class StructureLayoutGen {
             
             foreach (Room room in param.Structure.StructureLayout.Rooms) {
                 //StructureLayoutHelper.CreateStairways.Action(param, room);
-                room.Params.TagsRequired.Add(Tags.RoomTypeLiving);
+                room.Params.TagsRequired.Add(param.Structure.LayoutRandom.NextBool() ? Tags.RoomTypeLiving : Tags.RoomTypeBedroom);
             }
 
             return true;

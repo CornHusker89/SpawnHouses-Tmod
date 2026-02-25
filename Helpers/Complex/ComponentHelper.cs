@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using SpawnHouses.Common;
 using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Palette;
@@ -13,6 +14,8 @@ namespace SpawnHouses.Helpers.Complex;
 public delegate TilePaintedType? TilePaletteCondition(int x, int y);
 
 public delegate WallPaintedType? WallPaletteCondition(int x, int y);
+
+public delegate bool PlacementCondition(int x, int y);
 
 public interface IComponentHelper {
     public static abstract HashSet<Tag> PossibleTags { get; }
@@ -128,87 +131,85 @@ public static class ComponentHelper {
     /// <summary>
     ///     create beams at a regular interval of every 4, but ensure symmetry is kept throughout the shape
     /// </summary>
-    public abstract class CreateBeams : IComponentHelper {
-        public static HashSet<Tag> PossibleTags => [
-            Tags.RoomHasArbitraryBeams,
-            Tags.RoomHasSpecificBeams
-        ];
+    public abstract class PlaceBeams : IComponentHelper {
+        public static HashSet<Tag> PossibleTags => TagMap.NewTagSet(
+            [
+                Tags.RoomHasBeams,
+                Tags.RoomHasSpecificBeams,
+                Tags.RoomBeamsAreTiles,
+                Tags.RoomBeamsAreWalls
+            ],
+            FillShapeWalls.PossibleTags
+        );
 
         /// <summary>
-        ///     create beams at a regular interval of every 4, but ensure symmetry is kept throughout the shape
+        ///     
         /// </summary>
         /// <param name="shape"></param>
         /// <param name="component"></param>
-        /// <returns>tilemap x-positions of each beam</returns>
-        public static int[] Action(Shape shape, IComponent component) {
-            List<int> beams = [];
-            List<(int start, int end)> beamSections;
+        /// <param name="targetDistance">the target distance between each beam</param>
+        /// <param name="roomPaletteSet"></param>
+        /// <param name="fillCondition"></param>
+        public static void Action(Shape shape, IComponent component, int targetDistance, PaintedTypeRoomSet roomPaletteSet, PlacementCondition? fillCondition = null) {
+            bool placeTiles = component.Params.TagsRequired.HasTag(Tags.RoomBeamsAreTiles);
+            bool placeWalls = component.Params.TagsRequired.HasTag(Tags.RoomBeamsAreWalls);
+            if (!placeTiles && !placeWalls)
+                throw new Exception("PlaceBeams was called but tags don't contain either \"RoomBeamsAreTiles\" or \"RoomBeamsAreWalls\"");
 
-            if (component.Params.TagsRequired.GetValueSafe(Tags.RoomHasSpecificBeams, out int[] forcedBeams)) {
-                beamSections = [];
-                for (int i = 0; i < forcedBeams.Length; i++) {
-                    beams.Add(forcedBeams[i]);
-                    beamSections.Add(
-                        (
-                            forcedBeams[i == 0 ? shape.BoundingBox.topLeft.X : i - 1],
-                            forcedBeams[i == forcedBeams.Length - 1 ? shape.BoundingBox.topLeft.X + shape.Size.X - 1 : i]
-                        )
-                    );
+            StructureTilemap tilemap = component.Params.Structure.Tilemap;
+
+            HashSet<int> beams;
+            if (component.Params.TagsRequired.GetValueSafe(Tags.RoomHasSpecificBeams, out int[] requiredBeams))
+                beams = requiredBeams.ToHashSet();
+            else
+                beams = shape.GetEvenSplits(true, targetDistance, 1);
+
+            shape.ExecuteInArea((x, y) => {
+                if (beams.Contains(x) && (fillCondition == null || fillCondition.Invoke(x, y))) {
+                    if (placeTiles)
+                        tilemap.PlaceTile(x, y, roomPaletteSet.BeamTile, actuated: roomPaletteSet.BeamTileActuation);
+                    if (placeWalls)
+                        tilemap.PlaceWall(x, y, roomPaletteSet.VerticalBeamBackground);
                 }
-            }
+            });
+        }
+    }
+
+    /// <summary>
+    ///     executes a <see cref="WallPaletteCondition" /> on every tile where a window should be
+    /// </summary>
+    public abstract class PlaceWindowAreas : IComponentHelper {
+        public static HashSet<Tag> PossibleTags => [
+            Tags.RoomHasWindows,
+            Tags.RoomHasSpecificWindows
+        ];
+
+        public static void Action(Shape shape, IComponent component, int windowLength, int windowSpacing, int roomEdgeSpacing, WallPaletteCondition fillCondition) {
+            List<Shape> windowVolumes;
+            if (component.Params.TagsRequired.GetValueSafe(Tags.RoomHasSpecificWindows, out var requiredWindowVolumes))
+                windowVolumes = requiredWindowVolumes.ToList();
             else {
-                beamSections = [(shape.BoundingBox.topLeft.X, shape.BoundingBox.topLeft.X + shape.Size.X - 1)];
-            }
+                Shape baseWindowShape = shape.GetExpandedShape(-roomEdgeSpacing);
+                var splits = baseWindowShape.GetEvenSplits(true, windowLength, windowSpacing);
+                windowVolumes = [];
 
-            bool hasProceduralBeams = component.Params.TagsRequired.HasTag(Tags.RoomHasArbitraryBeams);
-            if (hasProceduralBeams) {
-                foreach ((int start, int end) section in beamSections) {
-                    int size = section.end - section.start + 1;
-                    if (size <= 10) {
-                        if (size <= 8) {
-                            if (size <= 4) continue;
-                            beams.Add(section.start + (int)Math.Round(size / 2.0));
-                        }
-
-                        return [section.start + 2, section.end - 2];
-                    }
-
-                    // add by pairs on each side
-                    List<int> leftBeams = [section.start + 3];
-                    List<int> rightBeams = [section.end - 3];
-
-                    // engage in one-off shenanigans to make things symmetrical
-                    while (rightBeams[^1] - leftBeams[^1] >= 6) {
-                        if (rightBeams[^1] - leftBeams[^1] < 8) {
-                            if (rightBeams[^1] - leftBeams[^1] >= 7) {
-                                leftBeams[^1] += 1;
-                                rightBeams[^1] -= 1;
-                            }
-                            else if (rightBeams[^1] - leftBeams[^1] == 5) {
-                                leftBeams.Add(leftBeams[^1] + 3);
-                            }
-
-                            break;
-                        }
-
-                        leftBeams.Add(leftBeams[^1] + 4);
-                        rightBeams.Add(rightBeams[^1] - 4);
-
-                        if (rightBeams[^1] - leftBeams[^1] <= 2) {
-                            leftBeams[^2] -= 1;
-                            leftBeams[^1] -= 1;
-                            rightBeams[^1] += 1;
-                            rightBeams[^2] += 1;
-                        }
-                    }
-
-                    rightBeams.Reverse();
-                    leftBeams.AddRange(rightBeams);
+                foreach (int split in splits) {
+                    Shape? thisWindowSubsection = baseWindowShape.SplitOnce(false, split, true, false);
+                    Shape? remainingWindowVolume = baseWindowShape.SplitOnce(false, split + windowLength - 1, false, false);
+                    if (thisWindowSubsection == null || remainingWindowVolume == null)
+                        throw new Exception("splitting for window resulted in a nonexistent shape");
+                    windowVolumes.Add(thisWindowSubsection);
+                    baseWindowShape = remainingWindowVolume;
                 }
             }
 
-            beams.Sort();
-            return beams.ToArray();
+            foreach (Shape windowVolume in windowVolumes) {
+                windowVolume.ExecuteInArea((x, y) => {
+                    WallPaintedType? type = fillCondition.Invoke(x, y);
+                    if (type != null)
+                        component.Params.Structure.Tilemap.PlaceWall(x, y, type);
+                });
+            }
         }
     }
 }

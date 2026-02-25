@@ -132,6 +132,12 @@ public static class ExternalLayoutHelper {
                     }
                     
                     floorPoints.Add(thisPoint);
+
+                    // make sure start is flat, so it's flush with anything below
+                    if (pathIndex == 0) floorPoints.Add(thisPoint + new Point16(wallWidth - 1, 0));
+
+                    if (pathIndex == path.Count - 2) floorPoints.Add(nextPoint + new Point16(-wallWidth + 1, 0));
+
                     floorPoints.Add(nextPoint);
 
                     if (!nextComponentIsFloor && extendWallsHigher) {

@@ -1,4 +1,5 @@
 #nullable enable
+using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Helpers;
 
 namespace SpawnHouses.Common.Tagging;
@@ -95,19 +96,31 @@ public static class Tags {
 
     public static readonly Tag RoomTypeBedroom = new();
 
+    public static readonly Tag RoomTypeBathroom = new();
+
+    public static readonly Tag RoomTypeStudy = new();
+
     public static readonly Tag RoomTypeWorkshop = new();
 
-    public static readonly Tag RoomHasWindow = new();
+    /// if a room has windows that are spaced out by that room's own geometry
+    public static readonly Tag RoomHasWindows = new();
+
+    /// the required window positions in a room
+    public static readonly Tag<Shape[]> RoomHasSpecificWindows = new();
 
     public static readonly Tag RoomHousingNotValid = new();
 
     public static readonly Tag RoomHousingValid = new();
 
-    public static readonly Tag RoomHasArbitraryBeams = new();
+    /// if a room has beams
+    public static readonly Tag RoomHasBeams = new();
 
+    /// the required beam positions in a room
     public static readonly Tag<int[]> RoomHasSpecificBeams = new();
 
     public static readonly Tag RoomBeamsAreTiles = new();
+
+    public static readonly Tag RoomBeamsAreWalls = new();
 
     #endregion
 
@@ -139,7 +152,7 @@ public static class Tags {
 
     public static readonly Tag<int[]> RoofHasChimney = new();
 
-    public static readonly Tag<(int, int)> RoofHasOverhang = new();
+    public static readonly Tag<(int leftOverhang, int rightOverhang)> RoofHasOverhang = new();
 
     #endregion
 

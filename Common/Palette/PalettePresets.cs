@@ -49,9 +49,19 @@ public class PalettePresets {
         PrimaryInteriorBackground = new WallPaintedType(WallID.GrayBrick)
     };
 
-    private static readonly PaintedTypeRoomSet RoomLivingMedieval = new() {
+    private static readonly PaintedTypeRoomSet RoomBedroomMedievalWhite = new() {
         Primary = new WallPaintedType(WallID.GrinchFingerWallpaper, PaintID.WhitePaint),
         BottomBackgroundAccent = new WallPaintedType(WallID.Lava2Echo, PaintID.GrayPaint),
+        HorizontalBeamBackground = new WallPaintedType(WallID.Wood),
+        VerticalBeamBackground = new WallPaintedType(WallID.LargeBambooBlockWall, PaintID.BrownPaint),
+        BeamTile = new TilePaintedType(TileID.WoodenBeam),
+        BeamTileActuation = false,
+        WindowBackground = new WallPaintedType(WallID.Glass)
+    };
+
+    private static readonly PaintedTypeRoomSet RoomLivingMedieval = new() {
+        Primary = new WallPaintedType(WallID.GrinchFingerWallpaper, PaintID.WhitePaint),
+        BottomBackgroundAccent = new WallPaintedType([WallID.Lava2Echo, WallID.GrayBrick, WallID.Stone, WallID.StoneSlab], [PaintID.GrayPaint, PaintID.None, PaintID.None, PaintID.None]),
         HorizontalBeamBackground = new WallPaintedType(WallID.Wood),
         VerticalBeamBackground = new WallPaintedType(WallID.LargeBambooBlockWall, PaintID.BrownPaint),
         BeamTile = new TilePaintedType(TileID.WoodenBeam),
@@ -93,13 +103,13 @@ public class PalettePresets {
         InternalWall = WallWoodSmooth,
         Roof = RoofShinglesDynastyWood,
 
-        LivingRoom = RoomLivingMedieval,
+        LivingRoom = RoomBedroomMedievalWhite,
         LivingDecor = DecorLivingMedieval,
-        BedroomRoom = RoomLivingMedieval,
+        BedroomRoom = RoomBedroomMedievalWhite,
         BedroomDecor = DecorLivingMedieval,
-        StorageRoom = RoomLivingMedieval,
+        StorageRoom = RoomBedroomMedievalWhite,
         StorageDecor = DecorLivingMedieval,
-        WorkshopRoom = RoomLivingMedieval,
+        WorkshopRoom = RoomBedroomMedievalWhite,
         WorkshopDecor = DecorLivingMedieval,
 
         Debris1X1 = new TilePaintedType(TileID.Cobweb)

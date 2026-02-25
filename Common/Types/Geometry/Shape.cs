@@ -169,7 +169,10 @@ public class Shape : PointGeometry {
     /// </summary>
     /// <param name="distance"></param>
     /// <returns></returns>
-    private Point16[] GetOffsetEven(int distance) {
+    private Point16[] GetExpansionEven(int distance) {
+        if (distance < 0 && (-distance > Size.X / 2 || -distance > Size.Y / 2))
+            throw new Exception("negative shape expansion amount is larger than an axis size, at risk of turning shape inside-out");
+        
         bool clockwise = IsClockwise();
         int count = Points.Length;
         var result = new Point16[count];
@@ -198,7 +201,7 @@ public class Shape : PointGeometry {
     /// </summary>
     /// <param name="expansion">the number of tiles to expand each point by (only whole numbers)</param>
     public void Expand(int expansion) {
-        Init(GetOffsetEven(expansion).ToArray(),
+        Init(GetExpansionEven(expansion).ToArray(),
             false);
     }
 
@@ -206,7 +209,7 @@ public class Shape : PointGeometry {
     ///     creates new shape, expanded by <paramref name="expansion" /> tiles
     /// </summary>
     /// <returns></returns>
-    public Shape GetExpandedShape(int expansion) => new(GetOffsetEven(expansion).ToArray()
+    public Shape GetExpandedShape(int expansion) => new(GetExpansionEven(expansion).ToArray()
     );
 
     /// <summary>
@@ -303,7 +306,7 @@ public class Shape : PointGeometry {
     }
 
     /// <summary>
-    ///     returns true if the shape is clockwise, otherwise false
+    ///     returns true if the shape's points are in clockwise order, otherwise false
     /// </summary>
     /// <returns></returns>
     public bool IsClockwise() {
@@ -605,26 +608,35 @@ public class Shape : PointGeometry {
 
     #region Slicing Shape
 
-    public (Shape? lower, Shape? middle, Shape? higher) CutTwice(bool cutXAxis, int cutPos1, int cutPos2) {
+    public (Shape? lower, Shape? middle, Shape? higher) SplitTwice(bool cutXAxis, int cutPos1, int cutPos2) {
         if (cutPos2 < cutPos1)
             (cutPos1, cutPos2) = (cutPos2, cutPos1);
 
         // upper left piece
-        Shape? shapeA = ClipPolygon(cutXAxis, cutPos1, true, false);
+        Shape? shapeA = SplitOnce(cutXAxis, cutPos1, true, false);
 
         // remainder after the first cut
-        Shape? remainder = ClipPolygon(cutXAxis, cutPos1, false, true);
+        Shape? remainder = SplitOnce(cutXAxis, cutPos1, false, true);
 
         // middle piece (clip remainder again)
-        Shape? shapeB = remainder?.ClipPolygon(cutXAxis, cutPos2, true, true);
+        Shape? shapeB = remainder?.SplitOnce(cutXAxis, cutPos2, true, true);
 
         // lower right piece
-        Shape? shapeC = remainder?.ClipPolygon(cutXAxis, cutPos2, false, false);
+        Shape? shapeC = remainder?.SplitOnce(cutXAxis, cutPos2, false, false);
 
         return (shapeA, shapeB, shapeC);
     }
 
-    private Shape? ClipPolygon(bool splitAlongX, int cutPos, bool keepLower, bool includeCut) {
+
+    /// <summary>
+    ///     efficient way of getting the area of a shape after cutting along an axis. excludes area along cut
+    /// </summary>
+    /// <param name="splitAlongX"></param>
+    /// <param name="cutPos"></param>
+    /// <param name="keepLower">if the upper or lower half is used for the area calculation</param>
+    /// <param name="includeCut">if the cut space itself is included in the cut</param>
+    /// <returns></returns>
+    public Shape? SplitOnce(bool splitAlongX, int cutPos, bool keepLower, bool includeCut) {
         var outputList = new List<Point16>();
 
         for (int i = 0; i < Points.Length; i++) {
@@ -679,16 +691,87 @@ public class Shape : PointGeometry {
             return keepLower ? point.Y < cutCoord : point.Y > cutCoord;
         return keepLower ? point.X < cutCoord : point.X > cutCoord;
     }
-
+    
     /// <summary>
-    ///     efficient way of getting the area of a shape after cutting along an axis. excludes area along cut
+    ///     split the shape along an axis such that each section has the same width, and return the get split coordinates 
     /// </summary>
-    /// <param name="splitAlongX"></param>
-    /// <param name="cutPos"></param>
-    /// <param name="keepLower">if the upper or lower half is used for the area calculation</param>
-    /// <param name="preciseArea">if the area-getting algorithm uses a precise (though slower) version</param>
-    /// <returns></returns>
-    public Shape? CutOnce(bool splitAlongX, int cutPos, bool keepLower, bool preciseArea) => ClipPolygon(splitAlongX, cutPos, keepLower, false);
+    /// <param name="alongXAxis"></param>
+    /// <param name="targetSectionWidth"></param>
+    /// <param name="splitWidth"></param>
+    /// <param name="minSectionWidth"> defaults to 2/3 of the target section width, rounded</param>
+    /// <returns>the lower coordinate of each split</returns>
+    public HashSet<int> GetEvenSplits(bool alongXAxis, int targetSectionWidth, int splitWidth, int minSectionWidth = -1) {
+        if (minSectionWidth == -1)
+            minSectionWidth = (int)Math.Round(targetSectionWidth * 0.67);
+        if (splitWidth <= 0)
+            throw new ArgumentException("split width must be greater than zero");
+
+        int bestSectionCount = 1;
+        double bestError = double.MaxValue;
+
+        int maxSections = ((alongXAxis ? Size.X : Size.Y) + splitWidth) / (minSectionWidth + splitWidth);
+
+        for (int n = 1; n <= maxSections; n++) {
+            int usable = (alongXAxis ? Size.X : Size.Y) - (n - 1) * splitWidth;
+
+            if (usable < n * minSectionWidth)
+                continue;
+
+            double avg = (double)usable / n;
+            double error = Math.Abs(avg - targetSectionWidth);
+
+            if (error < bestError) {
+                bestError = error;
+                bestSectionCount = n;
+            }
+        }
+
+        int sectionCount = bestSectionCount;
+        int usableWidth = (alongXAxis ? Size.X : Size.Y) - (sectionCount - 1) * splitWidth;
+
+        int baseWidth = usableWidth / sectionCount;
+        int remainder = usableWidth % sectionCount;
+
+        // initialize all sections
+        int[] sections = new int[sectionCount];
+        for (int i = 0; i < sectionCount; i++)
+            sections[i] = baseWidth;
+
+        // distribute remainder symmetrically from center outward
+        int left = (sectionCount - 1) / 2;
+        int right = sectionCount / 2;
+
+        while (remainder > 0) {
+            if (left == right) {
+                sections[left]++;
+                remainder--;
+            }
+            else {
+                sections[left]++;
+                remainder--;
+
+                if (remainder > 0) {
+                    sections[right]++;
+                    remainder--;
+                }
+            }
+
+            left--;
+            right++;
+        }
+
+        // compute split positions
+        var splits = new List<int>();
+        int currentSplitCoordinate = 0;
+
+        for (int i = 0; i < sectionCount - 1; i++) {
+            currentSplitCoordinate += sections[i];
+            splits.Add(currentSplitCoordinate);
+            currentSplitCoordinate += splitWidth;
+        }
+
+        return splits.ToHashSet();
+    }
 
     #endregion
 }

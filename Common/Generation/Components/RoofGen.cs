@@ -42,8 +42,7 @@ public static class RoofGen {
             if (roofComponent.StartExtendable) {
             }
 
-            Path interiorWallPath = roofComponent.Geometry.GetOffsetEvenPath(-1, true, false);
-            Path roofLowerPath = extrudeRoof ? interiorWallPath : roofComponent.Geometry;
+            Path roofLowerPath = extrudeRoof ? roofComponent.Geometry.GetOffsetEvenPath(-1, true, false) : roofComponent.Geometry;
             Path roofTopPath = roofComponent.Geometry.GetOffsetEvenPath(extrudeRoof ? -2 : -1, true, true);
             roofTopPath.Reverse(); // so that it can form a shape with the other path
 
@@ -89,6 +88,7 @@ public static class RoofGen {
             }
 
             // create bottom bg wall section
+            Path interiorWallPath = new(roofComponent.Geometry.Points);
             interiorWallPath.Reverse();
             Shape wallsShape = interiorWallPath.ToShape(roofComponent.Geometry);
             ComponentHelper.FillShapeWalls.Action(wallsShape, param.Structure,

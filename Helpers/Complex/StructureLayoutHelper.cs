@@ -83,7 +83,7 @@ public static class StructureLayoutHelper {
         /// <param name="iterationSplitWidth"></param>
         private static void PruneInvalidSplits(HashSet<int> splitStarts, Shape shape, bool splitAlongX, int iterationSplitWidth) {
             foreach (int splitStartPos in splitStarts) {
-                Shape? cutShape = shape.CutOnce(splitAlongX, splitStartPos + iterationSplitWidth - 1, true, true);
+                Shape? cutShape = shape.SplitOnce(splitAlongX, splitStartPos + iterationSplitWidth - 1, true, false);
                 if (cutShape == null || !RoomHelper.IsValidHousingSize(cutShape))
                     splitStarts.Remove(splitStartPos);
             }
@@ -223,7 +223,7 @@ public static class StructureLayoutHelper {
                 int splitStart = param.Structure.LayoutRandom.NextFromCollection(validSplitStarts.ToList());
                 int splitEnd = splitStart + iterationSplitWidth - 1;
 
-                (Shape? lower, Shape? middle, Shape? higher) roomSubsections = roomVolume.CutTwice(splitAlongX, splitStart, splitEnd);
+                (Shape? lower, Shape? middle, Shape? higher) roomSubsections = roomVolume.SplitTwice(splitAlongX, splitStart, splitEnd);
 
                 if (splitAlongX)
                     xCutCount++;
