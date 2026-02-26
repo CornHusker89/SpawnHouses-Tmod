@@ -13,7 +13,6 @@ public class RoomLayoutParams : IParams {
     public readonly Range WallWidth;
     public readonly Range RoomHeight;
     public readonly Range RoomWidth;
-    public readonly float LargeRoomChance;
     public readonly int Attempts;
 
     public RoomLayoutParams(AdvStructure structure, Range floorWidth,
@@ -24,7 +23,6 @@ public class RoomLayoutParams : IParams {
         RoomHeight = roomHeight;
         RoomWidth = roomWidth;
         TagsRequired = tagsRequired ?? new TagMap();
-        LargeRoomChance = largeRoomChance;
         Attempts = attempts;
     }
     

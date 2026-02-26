@@ -167,8 +167,10 @@ public static class StructureLayoutHelper {
             List<Shape> floorVolumes = [], wallVolumes = [];
             var roomQueue = new Queue<Shape>([room.Geometry]);
             List<Shape> finishedRoomVolumes = [];
-            int extraCuts = 0, largeRoomCount = 0, xCutCount = 0, yCutCount = 0;
-            int maxLargeRooms = (int)Math.Ceiling(param.LargeRoomChance * targetRoomCount);
+            int extraCuts = 0, curLargeRoomCount = 0, xCutCount = 0, yCutCount = 0;
+            bool hasLargeRooms = param.TagsRequired.GetValueSafe(Tags.HasLargeRoom, out int targetLargeRoomCount);
+            float largeRoomChance = hasLargeRooms ? (float)targetLargeRoomCount / targetRoomCount : 0;
+            int maxLargeRooms = (int)Math.Ceiling(largeRoomChance * targetRoomCount);
             for (int curHousing = 1; curHousing < targetRoomCount + extraCuts; curHousing++) {
                 Shape roomVolume;
                 if (roomQueue.Count > 0)
@@ -233,9 +235,9 @@ public static class StructureLayoutHelper {
                 prioritySplits.AddToBlocklist(new PartialPoint16(splitStart, splitStart, !splitAlongX, splitAlongX));
 
                 if (roomSubsections.lower is not null) {
-                    if (param.IsWithinMaxSize(roomSubsections.lower) && param.Structure.LayoutRandom.NextDouble() < (1 - Math.Pow(1 - param.LargeRoomChance, param.Attempts)) * 0.35 &&
-                        largeRoomCount < maxLargeRooms && inverseProgressFactor < 0.92) {
-                        largeRoomCount++;
+                    if (param.IsWithinMaxSize(roomSubsections.lower) && param.Structure.LayoutRandom.NextDouble() < (1 - Math.Pow(1 - largeRoomChance, param.Attempts)) * 0.35 &&
+                        curLargeRoomCount < maxLargeRooms && inverseProgressFactor < 0.92) {
+                        curLargeRoomCount++;
                         finishedRoomVolumes.Add(roomSubsections.lower);
                         extraCuts++;
                     }
@@ -245,9 +247,9 @@ public static class StructureLayoutHelper {
                 }
 
                 if (roomSubsections.higher is not null) {
-                    if (param.IsWithinMaxSize(roomSubsections.higher) && param.Structure.LayoutRandom.NextDouble() < (1 - Math.Pow(1 - param.LargeRoomChance, param.Attempts)) * 0.35 &&
-                        largeRoomCount < maxLargeRooms && inverseProgressFactor < 0.92) {
-                        largeRoomCount++;
+                    if (param.IsWithinMaxSize(roomSubsections.higher) && param.Structure.LayoutRandom.NextDouble() < (1 - Math.Pow(1 - largeRoomChance, param.Attempts)) * 0.35 &&
+                        curLargeRoomCount < maxLargeRooms && inverseProgressFactor < 0.92) {
+                        curLargeRoomCount++;
                         finishedRoomVolumes.Add(roomSubsections.higher);
                         extraCuts++;
                     }
@@ -315,6 +317,11 @@ public static class StructureLayoutHelper {
                 if (gap.InteriorRoom == room)
                     gap.InteriorRoom = RoomHelper.GetClosestRoom(pickedLayout.Rooms, gap.Geometry.Center);
             }
+
+            room.TagsCurrent.Add(room.Geometry.IsBox ? Tags.HasOnlyRectangleRooms : Tags.HasSomeRectangleRooms);
+            if (p.TagsRequired.HasTag(Tags.HasLargeRoom))
+                room.TagsCurrent.Add(Tags.HasLargeRoom);
+            
             return pickedLayout;
         }
     }

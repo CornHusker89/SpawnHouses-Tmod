@@ -47,7 +47,7 @@ public static class ComponentHelper {
         public static void Action(IComponent component, Shape shape, TilePaletteCondition paletteCondition) {
             StructureTilemap t = component.Params.Structure.Tilemap;
             bool hasSloping = component.Params.TagsRequired.GetValueSafe(Tags.SlopingAlgorithm, out SlopingAlgorithm slopingAlgorithm);
-            component.Params.TagsRequired.GetValueSafe(Tags.SlopeGrouping, out SlopeGrouping slopeModifier);
+            component.Params.TagsRequired.GetValueSafe(Tags.SlopeGrouping, out SlopeGrouping slopeGrouping);
 
             if (!hasSloping) {
                 shape.ExecuteInArea((x, y) => {
@@ -58,7 +58,7 @@ public static class ComponentHelper {
                 return;
             }
 
-            if (slopeModifier == SlopeGrouping.LocalSloping) {
+            if (slopeGrouping == SlopeGrouping.LocalSloping) {
                 shape.ExecuteInArea((x, y, bt) => {
                     TilePaintedType? type = paletteCondition.Invoke(x, y);
                     if (type != null) {
@@ -71,9 +71,12 @@ public static class ComponentHelper {
                 shape.ExecuteInArea((x, y) => {
                     TilePaintedType? type = paletteCondition.Invoke(x, y);
                     if (type != null)
-                        t.PlaceTile(x, y, type, slopingAlgorithm, slopeModifier);
+                        t.PlaceTile(x, y, type, slopingAlgorithm, slopeGrouping);
                 });
             }
+
+            component.TagsCurrent.Add(Tags.SlopingAlgorithm, slopingAlgorithm);
+            component.TagsCurrent.Add(Tags.SlopeGrouping, slopeGrouping);
         }
     }
 
@@ -153,13 +156,14 @@ public static class ComponentHelper {
         public static void Action(Shape shape, IComponent component, int targetDistance, PaintedTypeRoomSet roomPaletteSet, PlacementCondition? fillCondition = null) {
             bool placeTiles = component.Params.TagsRequired.HasTag(Tags.RoomBeamsAreTiles);
             bool placeWalls = component.Params.TagsRequired.HasTag(Tags.RoomBeamsAreWalls);
+            bool hasSpecificBeams = component.Params.TagsRequired.GetValueSafe(Tags.RoomHasSpecificBeams, out int[] requiredBeams);
             if (!placeTiles && !placeWalls)
                 throw new Exception("PlaceBeams was called but tags don't contain either \"RoomBeamsAreTiles\" or \"RoomBeamsAreWalls\"");
 
             StructureTilemap tilemap = component.Params.Structure.Tilemap;
 
             HashSet<int> beams;
-            if (component.Params.TagsRequired.GetValueSafe(Tags.RoomHasSpecificBeams, out int[] requiredBeams))
+            if (hasSpecificBeams)
                 beams = requiredBeams.ToHashSet();
             else
                 beams = shape.GetEvenSplits(true, targetDistance, 1);
@@ -172,6 +176,15 @@ public static class ComponentHelper {
                         tilemap.PlaceWall(x, y, roomPaletteSet.VerticalBeamBackground);
                 }
             });
+
+            int[] beamsArray = beams.ToArray();
+            component.TagsCurrent.Add(Tags.RoomHasBeams, beamsArray);
+            if (hasSpecificBeams)
+                component.TagsCurrent.Add(Tags.RoomHasSpecificBeams, beamsArray);
+            if (placeTiles)
+                component.TagsCurrent.Add(Tags.RoomBeamsAreTiles);
+            if (placeWalls)
+                component.TagsCurrent.Add(Tags.RoomBeamsAreWalls);
         }
     }
 
@@ -184,9 +197,20 @@ public static class ComponentHelper {
             Tags.RoomHasSpecificWindows
         ];
 
+        /// <summary>
+        ///     executes the <see cref="fillCondition" /> on every tile where a window should be
+        /// </summary>
+        /// <param name="shape"></param>
+        /// <param name="component"></param>
+        /// <param name="windowLength"></param>
+        /// <param name="windowSpacing"></param>
+        /// <param name="roomEdgeSpacing"></param>
+        /// <param name="fillCondition"></param>
+        /// <exception cref="Exception"></exception>
         public static void Action(Shape shape, IComponent component, int windowLength, int windowSpacing, int roomEdgeSpacing, WallPaletteCondition fillCondition) {
             List<Shape> windowVolumes;
-            if (component.Params.TagsRequired.GetValueSafe(Tags.RoomHasSpecificWindows, out var requiredWindowVolumes))
+            bool hasSpecificWindows = component.Params.TagsRequired.GetValueSafe(Tags.RoomHasSpecificWindows, out var requiredWindowVolumes);
+            if (hasSpecificWindows)
                 windowVolumes = requiredWindowVolumes.ToList();
             else {
                 Shape baseWindowShape = shape.GetExpandedShape(-roomEdgeSpacing);
@@ -201,6 +225,8 @@ public static class ComponentHelper {
                     windowVolumes.Add(thisWindowSubsection);
                     baseWindowShape = remainingWindowVolume;
                 }
+
+                windowVolumes.Add(baseWindowShape);
             }
 
             foreach (Shape windowVolume in windowVolumes) {
@@ -210,6 +236,11 @@ public static class ComponentHelper {
                         component.Params.Structure.Tilemap.PlaceWall(x, y, type);
                 });
             }
+
+            var windowVolumesArray = windowVolumes.ToArray();
+            component.TagsCurrent.Add(Tags.RoomHasWindows, windowVolumesArray);
+            if (hasSpecificWindows)
+                component.TagsCurrent.Add(Tags.RoomHasSpecificWindows, windowVolumesArray);
         }
     }
 }

@@ -26,8 +26,8 @@ public static class Tags {
     /// has both rectangular and non-uniform rooms
     public static Tag HasSomeRectangleRooms = new();
 
-    /// there is a convenient large room intended for general use
-    public static Tag HasLargeRoom = new();
+    /// there are a number of convenient large rooms intended for general use
+    public static Tag<int> HasLargeRoom = new();
 
     /// there is a convenient large room intended for storage
     public static Tag HasStorage = new();
@@ -102,20 +102,20 @@ public static class Tags {
 
     public static readonly Tag RoomTypeWorkshop = new();
 
-    /// if a room has windows that are spaced out by that room's own geometry
-    public static readonly Tag RoomHasWindows = new();
+    /// if a room has windows that are spaced out by that room's own geometry, and the shapes that make them up
+    public static readonly Tag<Shape[]> RoomHasWindows = new();
 
-    /// the required window positions in a room
+    /// if exact placement is required, the required window volumes in a room
     public static readonly Tag<Shape[]> RoomHasSpecificWindows = new();
 
     public static readonly Tag RoomHousingNotValid = new();
 
     public static readonly Tag RoomHousingValid = new();
 
-    /// if a room has beams
-    public static readonly Tag RoomHasBeams = new();
+    /// if a room has beams, what x-positions they are
+    public static readonly Tag<int[]> RoomHasBeams = new();
 
-    /// the required beam positions in a room
+    /// if exact placement is required, these are those beam x-positions in a room
     public static readonly Tag<int[]> RoomHasSpecificBeams = new();
 
     public static readonly Tag RoomBeamsAreTiles = new();

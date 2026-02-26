@@ -77,7 +77,7 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
     private IGenerator FindValidGenerator(IGenerator[] generators) {
-        TagsCurrent.ValidateExclusiveRequiredTags();
+        TagsCurrent.ValidateRequiredTags();
         List<IGenerator> validGeneratorsList = [];
         foreach (IGenerator gen in generators)
             if (gen.CanGenerate(this, Params, new UnifiedRandom(Id)) && Params.TagsRequired.KeysSet.IsSubsetOf(gen.PossibleTags))
@@ -89,6 +89,15 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
             throw new Exception($"No instance generators were found that are compatible with given parameters. type: {GetType().FullName}, required tags: {EnumHelper.ToString(Params.TagsRequired.Keys)}");
 
         return Params.Structure.LayoutRandom.NextFromList(validGenerators);
+    }
+
+    /// <summary>
+    ///     ensures that all the param's required tags are in <see cref="TagsCurrent" />
+    /// </summary>
+    private void ValidateTagGeneration() {
+        foreach (Tag tag in Params.TagsRequired.Keys)
+            if (!TagsCurrent.HasTag(tag))
+                throw new Exception($"missing generatable current tag \"{tag}\" which was required in params");
     }
 
     /// <summary>
@@ -121,8 +130,12 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
             SetGenerator();
         }
 
-        if (!Generator!.Generate(this, Params, new UnifiedRandom(Id), Params.Structure.Palette, Params.Structure.Tilemap)) throw new Exception($"generator execution failed on module {ToString()}");
         TagsCurrent.IsLocked = false;
+        if (!Generator!.Generate(this, Params, new UnifiedRandom(Id), Params.Structure.Palette, Params.Structure.Tilemap))
+            throw new Exception($"generator execution failed on module {ToString()}");
+        ValidateTagGeneration();
+        TagsCurrent.ValidateCurrentTags();
+        TagsCurrent.IsLocked = true;
         HasGenerated = true;
     }
 

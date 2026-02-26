@@ -167,14 +167,14 @@ public sealed class TagMap {
     /// <summary>
     ///     throws error if any tags are mutually exclusive in the TagsRequired category
     /// </summary>
-    public void ValidateExclusiveRequiredTags() {
+    public void ValidateRequiredTags() {
         ValidateTagSet(ExclusiveTagsRequired);
     }
 
     /// <summary>
     ///     throws error if any tags are mutually exclusive in the TagsCurrent category
     /// </summary>
-    public void ValidateExclusiveCurrentTags() {
+    public void ValidateCurrentTags() {
         ValidateTagSet(ExclusiveTagsCurrent);
     }
 }
