@@ -8,10 +8,10 @@ using Terraria.IO;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
-using static SpawnHouses.WorldGen.WorldGenHelper;
+using static SpawnHouses.Legacy.WorldGen.WorldGenHelper;
 
 
-namespace SpawnHouses.WorldGen;
+namespace SpawnHouses.Legacy.WorldGen;
 
 public class WorldGenPasses : ModSystem {
     // 3. These lines setup the localization for the message shown during world generation. Update your localization files after building and reloading the mod to provide values for this.
@@ -49,13 +49,13 @@ public class WorldGenPasses : ModSystem {
 
     public override void PostWorldGen() {
         // move guide into the main house (if it's there)
-        if (StructureManager.MainHouse is not null)
+        if (LegacyStructureManager.MainHouse is not null)
             foreach (NPC npc in Main.npc)
                 // 688 is magic storage's automaton
                 if (npc.type is NPCID.Guide or NPCID.TaxCollector or 688) {
-                    npc.position.X = (StructureManager.MainHouse.X + StructureManager.MainHouse.LeftSize - 1 +
+                    npc.position.X = (LegacyStructureManager.MainHouse.X + LegacyStructureManager.MainHouse.LeftSize - 1 +
                                       Terraria.WorldGen.genRand.Next(-8, 9)) * 16; // tiles to pixels
-                    npc.position.Y = (StructureManager.MainHouse.Y + 13) * 16;
+                    npc.position.Y = (LegacyStructureManager.MainHouse.Y + 13) * 16;
                 }
 
         if (Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "").Replace("'", "") == "dontdigup" ||
@@ -68,10 +68,10 @@ public class WorldGenPasses : ModSystem {
             GenerateMainBasement();
 
         WebClientInstance.WebClient.AddSpawnCount(
-            StructureManager.MainHouse is not null,
-            StructureManager.MainBasement is not null,
-            StructureManager.BeachHouse is not null,
-            StructureManager.Mineshaft is not null
+            LegacyStructureManager.MainHouse is not null,
+            LegacyStructureManager.MainBasement is not null,
+            LegacyStructureManager.BeachHouse is not null,
+            LegacyStructureManager.Mineshaft is not null
         );
     }
 }

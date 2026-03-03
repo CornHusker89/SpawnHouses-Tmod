@@ -10,7 +10,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
 
-namespace SpawnHouses.WorldGen;
+namespace SpawnHouses.Legacy.WorldGen;
 
 public static class WorldGenHelper {
     private static byte _mainHouseOffsetDirection = Directions.None;
@@ -103,7 +103,7 @@ public static class WorldGenHelper {
                 hasBasement: ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement,
                 inUnderworld: spawnUnderworld);
             house.Generate();
-            StructureManager.MainHouse = house;
+            LegacyStructureManager.MainHouse = house;
 
             // move the spawn point to the upper floor of the house
             if (ModContent.GetInstance<SpawnHousesConfig>().SpawnPointHouseSetsSpawn) {
@@ -138,8 +138,8 @@ public static class WorldGenHelper {
         int x, y;
         try {
             bool FindValidLocation(bool left = true) {
-                if (StructureManager.MainHouse != null) {
-                    int centerHouse = StructureManager.MainHouse.X + StructureManager.MainHouse.StructureXSize / 2;
+                if (LegacyStructureManager.MainHouse != null) {
+                    int centerHouse = LegacyStructureManager.MainHouse.X + LegacyStructureManager.MainHouse.StructureXSize / 2;
                     if (left)
                         x = centerHouse - Terraria.WorldGen.genRand.Next(18, 38) - 35;
                     else
@@ -168,7 +168,7 @@ public static class WorldGenHelper {
             if (FindValidLocation(startLeftSide) || FindValidLocation(!startLeftSide)) {
                 Mineshaft mineshaft = new((ushort)(x - 13), (ushort)(y - 13));
                 mineshaft.Generate();
-                StructureManager.Mineshaft = mineshaft;
+                LegacyStructureManager.Mineshaft = mineshaft;
             }
         }
         catch (Exception e) {
@@ -179,17 +179,17 @@ public static class WorldGenHelper {
 
     public static void GenerateMainBasement() {
         Box[] mineshaftBoundingBox = [];
-        if (StructureManager.Mineshaft is not null) {
-            Mineshaft structure = StructureManager.Mineshaft;
+        if (LegacyStructureManager.Mineshaft is not null) {
+            Mineshaft structure = LegacyStructureManager.Mineshaft;
             Box structureBox = new(structure.X - 8, structure.Y,
                 structure.X + structure.StructureXSize + 8, structure.Y + 200);
             mineshaftBoundingBox = [structureBox];
         }
 
         MainBasement chain;
-        if (StructureManager.MainHouse is not null)
-            chain = new MainBasement((ushort)StructureManager.MainHouse.BasementEntryPos.X,
-                (ushort)StructureManager.MainHouse.BasementEntryPos.Y,
+        if (LegacyStructureManager.MainHouse is not null)
+            chain = new MainBasement((ushort)LegacyStructureManager.MainHouse.BasementEntryPos.X,
+                (ushort)LegacyStructureManager.MainHouse.BasementEntryPos.Y,
                 startingBoundingBoxes: mineshaftBoundingBox);
         else
             chain = new MainBasement((ushort)Main.spawnTileX, (ushort)Main.spawnTileY,
@@ -199,7 +199,7 @@ public static class WorldGenHelper {
             try {
                 chain.CalculateChain();
                 chain.Generate();
-                StructureManager.MainBasement = chain;
+                LegacyStructureManager.MainBasement = chain;
             }
             catch (Exception e) {
                 ModContent.GetInstance<SpawnHouses>().Logger.Error($"Main basement failed to generate:\n{e}");
@@ -291,7 +291,7 @@ public static class WorldGenHelper {
                     ? new BeachHouse((ushort)(tileX - 9), (ushort)(tileY - 32))
                     : new BeachHouse((ushort)(tileX - 23), (ushort)(tileY - 32), reverse: true);
                 beachHouse.Generate();
-                StructureManager.BeachHouse = beachHouse;
+                LegacyStructureManager.BeachHouse = beachHouse;
 
                 // firepit generation
                 if (Terraria.WorldGen.genRand.Next(0, 2) == 0) // 1/2 chance

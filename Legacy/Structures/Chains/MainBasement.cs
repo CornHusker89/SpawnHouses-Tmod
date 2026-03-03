@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Legacy;
 using SpawnHouses.Legacy.Helpers;
 using SpawnHouses.Structures.Bridges;
 using SpawnHouses.Structures.StructureParts;
@@ -144,7 +145,7 @@ public class MainBasement : StructureChain {
         bool closeToMaxBranchLength, int structureWeightSum, CustomChainStructure[] usableStructureList) {
         CustomChainStructure chosenStructure = null;
         for (int i = 0; i < 50; i++) {
-            double randomValue = Terraria.WorldGen.genRand.NextDouble() * structureWeightSum;
+            double randomValue = WorldGen.genRand.NextDouble() * structureWeightSum;
             CustomChainStructure structure =
                 usableStructureList.Last(curStructure => curStructure.Weight <= randomValue).Clone();
 
@@ -240,7 +241,7 @@ public class MainBasement : StructureChain {
         if (!base.Generate()) return false;
 
         // clear the extra walls on top, if the basement generates directly on the surface
-        if (StructureManager.MainHouse is null)
+        if (LegacyStructureManager.MainHouse is null)
             for (int i = -6; i <= 6; i++)
                 WorldUtils.ClearWall(EntryPosX + i, EntryPosY);
 

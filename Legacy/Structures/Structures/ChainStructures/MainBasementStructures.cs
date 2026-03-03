@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using SpawnHouses.Legacy;
 using SpawnHouses.Legacy.Helpers;
 using SpawnHouses.Structures.StructureParts;
 using Terraria;
@@ -379,32 +380,32 @@ public class MainBasement_Room5 : CustomChainStructure {
     public override void OnFound() {
         if (ModHelper.IsMSEnabled &&
             FilePath == "Structures/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage") {
-            Terraria.WorldGen.PlaceTile(X + 11, Y + 7, ModHelper.RemoteAccessTileID);
+            WorldGen.PlaceTile(X + 11, Y + 7, ModHelper.RemoteAccessTileID);
             TileEntity.PlaceEntityNet(X + 10, Y + 6, ModHelper.RemoteAccessTileEntityID);
 
-            if (StructureManager.MainHouse is not null &&
-                StructureManager.MainHouse.Status != StructureStatus.NotGenerated)
+            if (LegacyStructureManager.MainHouse is not null &&
+                LegacyStructureManager.MainHouse.Status != StructureStatus.NotGenerated)
                 ModHelper.LinkRemoteStorage(
                     new Point16(X + 10, Y + 6),
-                    StructureManager.MainHouse.StorageHeartPos
+                    LegacyStructureManager.MainHouse.StorageHeartPos
                 );
 
-            Terraria.WorldGen.PlaceTile(X + 9, Y + 4, ModHelper.StorageUnitTileID);
+            WorldGen.PlaceTile(X + 9, Y + 4, ModHelper.StorageUnitTileID);
             TileEntity.PlaceEntityNet(X + 8, Y + 3, ModHelper.StorageUnitTileEntityID);
 
-            Terraria.WorldGen.PlaceTile(X + 13, Y + 4, ModHelper.StorageUnitTileID);
+            WorldGen.PlaceTile(X + 13, Y + 4, ModHelper.StorageUnitTileID);
             TileEntity.PlaceEntityNet(X + 12, Y + 3, ModHelper.StorageUnitTileEntityID);
 
-            Terraria.WorldGen.PlaceTile(X + 15, Y + 4, ModHelper.StorageUnitTileID);
+            WorldGen.PlaceTile(X + 15, Y + 4, ModHelper.StorageUnitTileID);
             TileEntity.PlaceEntityNet(X + 14, Y + 3, ModHelper.StorageUnitTileEntityID);
 
-            Terraria.WorldGen.PlaceTile(X + 7, Y + 7, ModHelper.StorageUnitTileID);
+            WorldGen.PlaceTile(X + 7, Y + 7, ModHelper.StorageUnitTileID);
             TileEntity.PlaceEntityNet(X + 6, Y + 6, ModHelper.StorageUnitTileEntityID);
 
-            Terraria.WorldGen.PlaceTile(X + 9, Y + 7, ModHelper.StorageUnitTileID);
+            WorldGen.PlaceTile(X + 9, Y + 7, ModHelper.StorageUnitTileID);
             TileEntity.PlaceEntityNet(X + 8, Y + 6, ModHelper.StorageUnitTileEntityID);
 
-            Terraria.WorldGen.PlaceTile(X + 13, Y + 7, ModHelper.StorageUnitTileID);
+            WorldGen.PlaceTile(X + 13, Y + 7, ModHelper.StorageUnitTileID);
             TileEntity.PlaceEntityNet(X + 12, Y + 6, ModHelper.StorageUnitTileEntityID);
 
             StructureGenHelper.GenerateCobwebs(new Point(X, Y), StructureXSize, StructureYSize);

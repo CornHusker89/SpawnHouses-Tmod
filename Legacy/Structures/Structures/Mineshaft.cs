@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using SpawnHouses.Legacy;
 using SpawnHouses.Legacy.Helpers;
 using SpawnHouses.Structures.StructureParts;
 using Terraria;
@@ -36,7 +37,7 @@ public sealed class Mineshaft : CustomStructure {
     public Mineshaft(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated) :
         base(_filePath, _structureXSize, _structureYSize,
             CopyConnectPoints(_connectPoints), status, x, y) {
-        if (StructureManager.MainHouse is not null && StructureManager.MainHouse.X > X)
+        if (LegacyStructureManager.MainHouse is not null && LegacyStructureManager.MainHouse.X > X)
             IsLeftSide = true;
     }
 
@@ -46,7 +47,7 @@ public sealed class Mineshaft : CustomStructure {
 
         _GenerateStructure();
 
-        int tunnelSteps = Terraria.WorldGen.genRand.Next(7, 11);
+        int tunnelSteps = WorldGen.genRand.Next(7, 11);
         WorldUtils.Gen(new Point(X + 9, Y + 13), // make sure rope can fully generate
             new Shapes.Rectangle(2, 10 + tunnelSteps * 15),
             new Actions.ClearTile(true)
@@ -57,7 +58,7 @@ public sealed class Mineshaft : CustomStructure {
         for (int i = 5; i < 300; i++) {
             Tile tile = Main.tile[X + 10, Y + i];
 
-            if (Terraria.WorldGen.SolidTile(X + 10, Y + i + 3)) break;
+            if (WorldGen.SolidTile(X + 10, Y + i + 3)) break;
 
             tile.HasTile = true;
             tile.Slope = SlopeType.Solid;
@@ -65,15 +66,15 @@ public sealed class Mineshaft : CustomStructure {
             tile.TileType = TileID.Rope;
         }
 
-        int leftBushX = X - Terraria.WorldGen.genRand.Next(-2, 2);
+        int leftBushX = X - WorldGen.genRand.Next(-2, 2);
         int surfaceY = Y + 5;
-        while (!Terraria.WorldGen.SolidTile(leftBushX, surfaceY))
+        while (!WorldGen.SolidTile(leftBushX, surfaceY))
             surfaceY++;
         StructureGenHelper.PlaceBush(new Point(leftBushX, surfaceY - 1));
 
-        int rightBushX = X + _structureXSize + Terraria.WorldGen.genRand.Next(-2, 2);
+        int rightBushX = X + _structureXSize + WorldGen.genRand.Next(-2, 2);
         surfaceY = Y + 5;
-        while (!Terraria.WorldGen.SolidTile(rightBushX, surfaceY))
+        while (!WorldGen.SolidTile(rightBushX, surfaceY))
             surfaceY++;
         StructureGenHelper.PlaceBush(new Point(rightBushX, surfaceY - 1));
         FrameTiles(X + 10, Y + 160, 180);
