@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using SpawnHouses.Legacy;
 using SpawnHouses.Structures;
 using SpawnHouses.Structures.Structures;
 using Terraria;
@@ -23,20 +24,20 @@ public class SpawnHousesPlayer : ModPlayer {
             int x = (int)Player.Center.X / 16;
             int y = (int)Player.Center.Y / 16;
 
-            if (StructureManager.MainBasement is not null &&
-                StructureManager.MainBasement.Status == StructureStatus.GeneratedButNotFound)
+            if (LegacyStructureManager.MainBasement is not null &&
+                LegacyStructureManager.MainBasement.Status == StructureStatus.GeneratedButNotFound)
                 if (
-                    x > StructureManager.MainBasement.EntryPosX - 7
-                    && x < StructureManager.MainBasement.EntryPosX + 7
-                    && y > StructureManager.MainBasement.EntryPosY + 6
-                    && y < StructureManager.MainBasement.EntryPosY + 20
+                    x > LegacyStructureManager.MainBasement.EntryPosX - 7
+                    && x < LegacyStructureManager.MainBasement.EntryPosX + 7
+                    && y > LegacyStructureManager.MainBasement.EntryPosY + 6
+                    && y < LegacyStructureManager.MainBasement.EntryPosY + 20
                 )
-                    StructureManager.MainBasement.OnFound();
+                    LegacyStructureManager.MainBasement.OnFound();
 
-            if (StructureManager.BeachHouse is not null &&
-                StructureManager.BeachHouse.Status == StructureStatus.GeneratedButNotFound) {
-                int houseCenterX = StructureManager.BeachHouse.X + BeachHouse._structureXSize / 2;
-                int houseCenterY = StructureManager.BeachHouse.Y + BeachHouse._structureYSize / 2;
+            if (LegacyStructureManager.BeachHouse is not null &&
+                LegacyStructureManager.BeachHouse.Status == StructureStatus.GeneratedButNotFound) {
+                int houseCenterX = LegacyStructureManager.BeachHouse.X + BeachHouse._structureXSize / 2;
+                int houseCenterY = LegacyStructureManager.BeachHouse.Y + BeachHouse._structureYSize / 2;
 
                 if (
                     x > houseCenterX - 70
@@ -44,7 +45,7 @@ public class SpawnHousesPlayer : ModPlayer {
                     && y > houseCenterY - 44
                     && y < houseCenterY + 44
                 )
-                    StructureManager.BeachHouse.OnFound();
+                    LegacyStructureManager.BeachHouse.OnFound();
             }
         }
     }
