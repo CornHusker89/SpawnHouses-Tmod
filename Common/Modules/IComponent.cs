@@ -27,6 +27,19 @@ public abstract class VolumeComponent : Generatable<VolumeComponent, VolumeCompo
     protected VolumeComponent(VolumeComponentParams param, Shape geometry) : base(param, new TagMap()) {
         Geometry = geometry;
     }
+
+    public override void DrawDebugInfo() {
+        // Color color = DrawHelper.GetColor(this);
+        //
+        // if (DebugInfoVisibility.HasHitboxes) {
+        //     Point16 tilemapOffsetWorldCoords = Params.Structure.Tilemap.globalTileOffset * new Point16(16);
+        //     var path = new Point16[Geometry.ExteriorDrawPath.Length];
+        //     for (int i = 0; i < path.Length; i++) {
+        //         path[i] = Geometry.ExteriorDrawPath[i] + tilemapOffsetWorldCoords;
+        //     }
+        //     DrawHelper.DrawPath(path, color, 3);
+        // }
+    }
 }
 
 public abstract class PathComponent : Generatable<PathComponent, PathComponentParams, PathComponentGenerator>, IComponent<Path> {

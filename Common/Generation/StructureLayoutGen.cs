@@ -112,17 +112,17 @@ public static class StructureLayoutGen {
             );
 
             // move entry points and roof components to be relative to the tilemap
-            left.SetOffset(param.Structure.Tilemap.WorldTileOffset * Point16.NegativeOne);
-            right.SetOffset(param.Structure.Tilemap.WorldTileOffset * Point16.NegativeOne);
-            floorTopY -= param.Structure.Tilemap.WorldTileOffset.Y;
-            upperRoofBottomY -= param.Structure.Tilemap.WorldTileOffset.Y;
-            lowerRoofBottomY -= param.Structure.Tilemap.WorldTileOffset.Y;
+            left.SetOffset(param.Structure.Tilemap.globalTileOffset * Point16.NegativeOne);
+            right.SetOffset(param.Structure.Tilemap.globalTileOffset * Point16.NegativeOne);
+            floorTopY -= param.Structure.Tilemap.globalTileOffset.Y;
+            upperRoofBottomY -= param.Structure.Tilemap.globalTileOffset.Y;
+            lowerRoofBottomY -= param.Structure.Tilemap.globalTileOffset.Y;
             foreach (Floor floor in exteriorFloors)
-                floor.Geometry.Move(param.Structure.Tilemap.WorldTileOffset * Point16.NegativeOne);
+                floor.Geometry.Move(param.Structure.Tilemap.globalTileOffset * Point16.NegativeOne);
             foreach (Wall wall in exteriorWalls)
-                wall.Geometry.Move(param.Structure.Tilemap.WorldTileOffset * Point16.NegativeOne);
+                wall.Geometry.Move(param.Structure.Tilemap.globalTileOffset * Point16.NegativeOne);
             foreach (Roof roof in roofs)
-                roof.Geometry.Move(param.Structure.Tilemap.WorldTileOffset * Point16.NegativeOne);
+                roof.Geometry.Move(param.Structure.Tilemap.globalTileOffset * Point16.NegativeOne);
 
             // create exterior components
             exteriorFloors.Add(ExternalLayoutHelper.CreateFloor(param.Structure, floorTopY, param.LeftEntryPointX + 1 - (hasBasement ? 0 : externalWallThickness),

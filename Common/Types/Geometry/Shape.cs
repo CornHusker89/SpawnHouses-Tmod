@@ -29,6 +29,17 @@ public class Shape : PointGeometry {
         get { return _booleanTilemap ??= GetBooleanTilemap(); }
     }
 
+
+    private Point16[]? _exteriorPath;
+
+    /// <summary>
+    ///     path of points to draw the exterior of the shape, in world coordinates (not tile)
+    /// </summary>
+    /// <returns></returns>
+    public Point16[] ExteriorDrawPath {
+        get { return _exteriorPath ??= GetExteriorDrawPath(); }
+    }
+
     protected sealed override void Init(Point16[] points, bool optimize) {
         Points = points;
 
@@ -56,6 +67,9 @@ public class Shape : PointGeometry {
             }
         }
 
+
+        _booleanTilemap = null;
+        _exteriorPath = null;
         SetBoundingBoxAndSize();
     }
 
@@ -306,6 +320,86 @@ public class Shape : PointGeometry {
     }
 
     /// <summary>
+    ///     gets a path the shape, in world coordinates (not tile)
+    /// </summary>
+    /// <returns></returns>
+    private Point16[] GetExteriorDrawPath() {
+        Point16 topLeftOffset = new(0, 0);
+        Point16 topRightOffset = new(15, 0);
+        Point16 bottomLeftOffset = new(0, 15);
+        Point16 bottomRightOffset = new(15, 15);
+
+        List<Point16> path = [];
+        Point16 pos = Points[0];
+        Point16 directionPoint16 = new(0, 1);
+        (int X, int Y) dir = (0, 1);
+        int travelCount = 0;
+        int maxTravelCount = Size.X * Size.Y;
+
+        do {
+            int index = GeometryHelper.GetMarchingSquareIndex((x, y) => BooleanTilemap[x, y], pos.X, pos.Y);
+            directionPoint16 = GeometryHelper.GetDirectionFromSquareIndex(index, directionPoint16);
+
+            // before the new position is calculated
+            Point16 worldCoordPos = pos * new Point16(16);
+            (int X, int Y) lastDir = dir;
+            dir = (directionPoint16.X, directionPoint16.Y);
+            switch (dir) {
+                // right
+                case (1, 0):
+                    if (lastDir == (1, 0))
+                        path.Add(worldCoordPos + topLeftOffset);
+                    if (lastDir == (0, -1)) {
+                        path.Add(worldCoordPos + bottomRightOffset);
+                        path.Add(worldCoordPos + topLeftOffset);
+                    }
+
+                    path.Add(worldCoordPos + topRightOffset);
+                    break;
+
+                // left
+                case (-1, 0):
+                    if (lastDir == (-1, 0))
+                        path.Add(worldCoordPos + bottomRightOffset);
+                    if (lastDir == (0, 1)) {
+                        path.Add(worldCoordPos + topRightOffset);
+                        path.Add(worldCoordPos + bottomRightOffset);
+                    }
+
+                    path.Add(worldCoordPos + bottomLeftOffset);
+                    break;
+
+                // down
+                case (0, 1):
+                    if (lastDir == (0, 1))
+                        path.Add(worldCoordPos + topRightOffset);
+                    if (lastDir == (1, 0)) {
+                        path.Add(worldCoordPos + topRightOffset);
+                        path.Add(worldCoordPos + topLeftOffset);
+                    }
+
+                    path.Add(worldCoordPos + bottomRightOffset);
+                    break;
+
+                // up
+                case (0, -1):
+                    if (lastDir == (0, -1))
+                        path.Add(worldCoordPos + bottomLeftOffset);
+                    if (lastDir == (-1, 0))
+                        path.Add(worldCoordPos + bottomLeftOffset);
+                    path.Add(worldCoordPos + bottomRightOffset);
+                    path.Add(worldCoordPos + topLeftOffset);
+                    break;
+            }
+
+            pos += directionPoint16;
+            travelCount++;
+        } while (pos != Points[0] && travelCount < maxTravelCount);
+
+        return path.ToArray();
+    }
+
+    /// <summary>
     ///     returns true if the shape's points are in clockwise order, otherwise false
     /// </summary>
     /// <returns></returns>
@@ -331,14 +425,14 @@ public class Shape : PointGeometry {
         if (IsBox) {
             // go line-by-line
             for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
-                action(x, BoundingBox.topLeft.Y, Directions.Up);
+                action.Invoke(x, BoundingBox.topLeft.Y, Directions.Up);
             if (completeLoop)
                 for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
-                    action(x, BoundingBox.bottomRight.Y, Directions.Down);
+                    action.Invoke(x, BoundingBox.bottomRight.Y, Directions.Down);
             for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
-                action(BoundingBox.topLeft.X, y, Directions.Left);
+                action.Invoke(BoundingBox.topLeft.X, y, Directions.Left);
             for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
-                action(BoundingBox.bottomRight.X, y, Directions.Right);
+                action.Invoke(BoundingBox.bottomRight.X, y, Directions.Right);
         }
         else {
             for (int pointNum = 0; pointNum < Points.Length - 1; pointNum++)
@@ -347,7 +441,7 @@ public class Shape : PointGeometry {
                     int lowerY = Math.Min(Points[pointNum].Y, Points[pointNum + 1].Y);
                     int higherY = Math.Max(Points[pointNum].Y, Points[pointNum + 1].Y);
                     for (int y = lowerY; y < higherY; y++)
-                        action(Points[pointNum].X, y,
+                        action.Invoke(Points[pointNum].X, y,
                             Points[pointNum].X > Center.X ? Directions.Right : Directions.Left);
                 }
                 else {
@@ -367,9 +461,9 @@ public class Shape : PointGeometry {
                             // round towards the middle
                             double x = startingX + slope * (y - lowerY);
                             if (x < Center.X)
-                                action((int)Math.Floor(x), y, Directions.Left);
+                                action.Invoke((int)Math.Floor(x), y, Directions.Left);
                             else
-                                action((int)Math.Ceiling(x), y, Directions.Right);
+                                action.Invoke((int)Math.Ceiling(x), y, Directions.Right);
                         }
                     }
                     else {
@@ -382,9 +476,9 @@ public class Shape : PointGeometry {
                         for (int x = lowerX; x < higherX; x++) {
                             double y = startingY + slope * (x - lowerX);
                             if (y < Center.Y)
-                                action(x, (int)Math.Floor(y), Directions.Up);
+                                action.Invoke(x, (int)Math.Floor(y), Directions.Up);
                             else
-                                action(x, (int)Math.Ceiling(y), Directions.Down);
+                                action.Invoke(x, (int)Math.Ceiling(y), Directions.Down);
                         }
                     }
                 }
@@ -399,7 +493,7 @@ public class Shape : PointGeometry {
         if (IsBox) {
             for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
             for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
-                action(x, y);
+                action.Invoke(x, y);
         }
         else {
             for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++) {
@@ -426,7 +520,7 @@ public class Shape : PointGeometry {
 
                     for (int x = startX; x <= endX; x++)
                         if (!Points.Contains(new Point16(x, y)))
-                            action(x, y);
+                            action.Invoke(x, y);
                 }
             }
 

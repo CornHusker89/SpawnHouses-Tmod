@@ -408,34 +408,6 @@ public static class StructureLayoutHelper {
         }
 
         /// <summary>
-        ///     converts 2x2 grid cell into a marching square index
-        /// </summary>
-        /// <param name="tilemap"></param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
-        private static int GetMarchingSquareIndex(StructureTilemap tilemap, int x, int y) {
-            int value = 0;
-            // bottom-left
-            if (tilemap.InInterior(x, y))
-                value |= 1;
-
-            // bottom-right
-            if (tilemap.InInterior(x + 1, y))
-                value |= 2;
-
-            // top-right
-            if (tilemap.InInterior(x + 1, y - 1))
-                value |= 4;
-
-            // top-left
-            if (tilemap.InInterior(x, y - 1))
-                value |= 8;
-
-            return value;
-        }
-
-        /// <summary>
         ///     gets a shape that represents the interior of the structure, and excludes any exterior components
         /// </summary>
         /// <param name="tilemap"></param>
@@ -448,7 +420,7 @@ public static class StructureLayoutHelper {
             Point16? start = null;
             for (int y = 0; y < tilemap.Height - 1 && start == null; y++)
             for (int x = 0; x < tilemap.Width - 1; x++)
-                if (GetMarchingSquareIndex(tilemap, x, y) != 0) {
+                if (GeometryHelper.GetMarchingSquareIndex(tilemap.InInterior, x, y) != 0) {
                     start = new Point16(x, y);
                     break;
                 }
@@ -466,28 +438,10 @@ public static class StructureLayoutHelper {
                 // add previous iteration's position
                 visited.Add(pos);
 
-                int value = GetMarchingSquareIndex(tilemap, pos.X, pos.Y);
+                int squareIndex = GeometryHelper.GetMarchingSquareIndex(tilemap.InInterior, pos.X, pos.Y);
+                Point16 nextDir = GeometryHelper.GetDirectionFromSquareIndex(squareIndex, dir);
 
-                // assumes clockwise direction
-                Point16 nextDir = value switch {
-                    1 => new Point16(0, 1), // BL only: down
-                    2 => new Point16(1, 0), // BR only: right
-                    3 => new Point16(1, 0), // BL + BR: right
-                    4 => new Point16(0, -1), // TR only: up
-                    5 => dir.X == -1 ? new Point16(0, -1) : new Point16(0, 1), // BL + TR: up if we were going left, otherwise down
-                    6 => new Point16(0, -1), // BR + TR: up
-                    7 => new Point16(0, -1), // BL + BR + TR: up
-                    8 => new Point16(-1, 0), // TL only: left
-                    9 => new Point16(0, 1), // BL + TL: down
-                    10 => dir.Y == -1 ? new Point16(0, 1) : new Point16(0, -1), // BR + TL: down if we were going left, otherwise up
-                    11 => new Point16(1, 0), // BL + BR + TL: right
-                    12 => new Point16(-1, 0), // TR + TL: left
-                    13 => new Point16(0, 1), // BL + TR + TL: down
-                    14 => new Point16(-1, 0), // BR + TR + TL: left
-                    _ => new Point16(0, 0) // 0 or 15
-                };
-
-                Point16 outlineOffset = value switch {
+                Point16 outlineOffset = squareIndex switch {
                     1 => new Point16(0, 0), // BL only: BL
                     2 => new Point16(1, 0), // BR only: BR
                     3 => new Point16(0, 0), // BL + BR: BL
@@ -590,7 +544,7 @@ public static class StructureLayoutHelper {
     public abstract class CreateRoof : IStructureLayoutHelper {
         public static HashSet<Tag> PossibleTags => [
         ];
-
+        
         /// <summary>
         ///     simple flat roof path
         /// </summary>
@@ -609,7 +563,7 @@ public static class StructureLayoutHelper {
             int length = right.X - left.X;
             int upperRoofBottomY = leftRoofHigher ? left.Y : right.Y;
             int lowerRoofBottomY = leftRoofHigher ? right.Y : left.Y;
-
+            
             List<Point16> path;
             if (hasHigherSide) {
                 double middleX = (roofSlope * (left.X + right.X) - (right.Y - left.Y)) / (2 * roofSlope);

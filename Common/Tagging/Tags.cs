@@ -88,6 +88,16 @@ public static class Tags {
 
     #endregion
 
+    #region Gap
+
+    /// door of a horizontal gap is on the "outside" side of the gap. typically defaults to the middle of the gap, only affects wider gaps
+    public static readonly Tag GapDoorOutside = new();
+
+    /// door of a horizontal gap is on the "inside" side of the gap. typically defaults to the middle of the gap, only affects wider gaps
+    public static readonly Tag GapDoorInside = new();
+
+    #endregion
+
     #region Room
 
     public static readonly Tag RoomTypeStorage = new();
@@ -153,16 +163,6 @@ public static class Tags {
     public static readonly Tag<int[]> RoofHasChimney = new();
 
     public static readonly Tag<(int leftOverhang, int rightOverhang)> RoofHasOverhang = new();
-
-    #endregion
-
-    #region Gap
-
-    /// door of a horizontal gap is on the "outside" side of the gap. typically defaults to the middle of the gap, only affects wider gaps
-    public static readonly Tag GapDoorOutside = new();
-
-    /// door of a horizontal gap is on the "inside" side of the gap. typically defaults to the middle of the gap, only affects wider gaps
-    public static readonly Tag GapDoorInside = new();
 
     #endregion
 

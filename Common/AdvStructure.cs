@@ -6,6 +6,7 @@ using SpawnHouses.Common.Palette;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types;
+using Terraria;
 using Terraria.Utilities;
 using IComponent = SpawnHouses.Common.Modules.IComponent;
 
@@ -46,19 +47,20 @@ public class AdvStructure {
     ///     <see cref="PlaceTilemap" />
     /// </param>
     public AdvStructure(StructureLayoutParams layoutParam, TilePalette palette, int seed = -1, bool generate = true) {
-        Seed = seed == -1 ? Terraria.WorldGen.genRand.Next() : seed;
+        Seed = seed == -1 ? WorldGen.genRand.Next() : seed;
         LayoutRandom = new UnifiedRandom(Seed);
         OtherRandom = new UnifiedRandom(Seed + 1);
         LayoutParam = layoutParam;
         LayoutParam.Structure = this;
         Palette = palette;
+        StructureManager.StructureList.Add(this);
         if (generate) {
             ApplyLayoutMethod();
             FillComponents();
             PlaceTilemap();
         }
     }
-
+    
     /// <summary>
     ///     calculates a structure's layout but does not apply component generators
     /// </summary>

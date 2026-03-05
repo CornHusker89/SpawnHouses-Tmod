@@ -15,7 +15,7 @@ public delegate TilePaintedType? TilePaletteCondition(int x, int y);
 
 public delegate WallPaintedType? WallPaletteCondition(int x, int y);
 
-public delegate bool PlacementCondition(int x, int y);
+public delegate bool Condition2D(int x, int y);
 
 public interface IComponentHelper {
     public static abstract HashSet<Tag> PossibleTags { get; }
@@ -153,7 +153,7 @@ public static class ComponentHelper {
         /// <param name="targetDistance">the target distance between each beam</param>
         /// <param name="roomPaletteSet"></param>
         /// <param name="fillCondition"></param>
-        public static void Action(Shape shape, IComponent component, int targetDistance, PaintedTypeRoomSet roomPaletteSet, PlacementCondition? fillCondition = null) {
+        public static void Action(Shape shape, IComponent component, int targetDistance, PaintedTypeRoomSet roomPaletteSet, Condition2D? fillCondition = null) {
             bool placeTiles = component.Params.TagsRequired.HasTag(Tags.RoomBeamsAreTiles);
             bool placeWalls = component.Params.TagsRequired.HasTag(Tags.RoomBeamsAreWalls);
             bool hasSpecificBeams = component.Params.TagsRequired.GetValueSafe(Tags.RoomHasSpecificBeams, out int[] requiredBeams);

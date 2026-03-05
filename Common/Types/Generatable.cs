@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Structures;
@@ -30,6 +31,10 @@ public interface IGeneratable {
     /// </summary>
     public TagMap TagsCurrent { get; }
 
+    public DebugComponentType DebugComponentType { get; }
+    public DebugInfoLevel DebugInfoVisibility { get; }
+    public string Name { get; }
+
     /// <summary>
     ///     creates and executes a component's generator, unlocks it's current tags, and marks the component as generated. correct way to generate modules
     /// </summary>
@@ -40,6 +45,11 @@ public interface IGeneratable {
     /// </summary>
     /// <returns></returns>
     public int GetGeneratorHash();
+
+    /// <summary>
+    ///     draws this generatable's debug information, using <see cref="DebugComponentType" />, <see cref="DebugInfoVisibility" />, and <see cref="Name" />
+    /// </summary>
+    public void DrawDebugInfo();
 }
 
 public interface IGeneratable<TSelf, TParams, TGenerator> : IGeneratable
@@ -60,6 +70,10 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
     public ushort Id { get; }
     public TParams Params { get; }
     public TagMap TagsCurrent { get; }
+
+    public DebugComponentType DebugComponentType { get; }
+    public DebugInfoLevel DebugInfoVisibility { get; }
+    public string Name { get; }
 
     protected TGenerator Generator;
 
@@ -140,4 +154,6 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
     }
 
     public int GetGeneratorHash() => Generator.GetType().FullName!.GetHashCode();
+
+    public abstract void DrawDebugInfo();
 }

@@ -17,15 +17,15 @@ public class StructureTilemap {
 
     public List<MultiTile> MultiTiles;
 
-    /// <summary>the actual world tile coordinates of the top left tile in this tilemap</summary>
-    public Point16 WorldTileOffset;
+    /// <summary>the actual global tile coordinates of the top left tile in this tilemap</summary>
+    public Point16 globalTileOffset;
 
-    public StructureTilemap(AdvStructure structure, ushort width, ushort height, Point16? worldTileOffset = null) {
+    public StructureTilemap(AdvStructure structure, ushort width, ushort height, Point16? globalTileOffset = null) {
         Structure = structure;
         Width = width;
         Height = height;
         _tiles = new StructureTile[width, height];
-        WorldTileOffset = worldTileOffset ?? new Point16(0, 0);
+        this.globalTileOffset = globalTileOffset ?? new Point16(0, 0);
         MultiTiles = [];
     }
 
@@ -58,29 +58,29 @@ public class StructureTilemap {
     public bool InInterior(Point16 point) => InInterior(point.X, point.Y);
 
     /// <summary>
-    ///     gets tile from this tilemap using global world coordinates
+    ///     gets tile from this tilemap using global tile coordinates
     /// </summary>
     /// <param name="x"></param>
     /// <param name="y"></param>
     /// <returns></returns>
-    public StructureTile GetTileByGlobalPos(int x, int y) => this[x - WorldTileOffset.X, y - WorldTileOffset.Y];
+    public StructureTile GetTileByGlobalPos(int x, int y) => this[x - globalTileOffset.X, y - globalTileOffset.Y];
 
     /// <summary>
-    ///     gets tile from this tilemap using global world coordinates
+    ///     gets tile from this tilemap using global tile coordinates
     /// </summary>
     /// <param name="pos"></param>
     /// <returns></returns>
-    public StructureTile GetTileByGlobalPos(Point16 pos) => this[pos - WorldTileOffset];
+    public StructureTile GetTileByGlobalPos(Point16 pos) => this[pos - globalTileOffset];
 
-    public int ConvertToRelative(int coordinate, bool isX) => coordinate - (isX ? WorldTileOffset.X : WorldTileOffset.Y);
+    public int ConvertToRelative(int coordinate, bool isX) => coordinate - (isX ? globalTileOffset.X : globalTileOffset.Y);
 
-    public Point16 ConvertToRelative(int x, int y) => new(x - WorldTileOffset.X, y - WorldTileOffset.Y);
+    public Point16 ConvertToRelative(int x, int y) => new(x - globalTileOffset.X, y - globalTileOffset.Y);
 
     public Point16 ConvertToRelative(Point16 point) => ConvertToRelative(point.X, point.Y);
 
-    public int ConvertToGlobal(int coordinate, bool isX) => coordinate + (isX ? WorldTileOffset.X : WorldTileOffset.Y);
+    public int ConvertToGlobal(int coordinate, bool isX) => coordinate + (isX ? globalTileOffset.X : globalTileOffset.Y);
 
-    public Point16 ConvertToGlobal(int x, int y) => new(x + WorldTileOffset.X, y + WorldTileOffset.Y);
+    public Point16 ConvertToGlobal(int x, int y) => new(x + globalTileOffset.X, y + globalTileOffset.Y);
 
     public Point16 ConvertToGlobal(Point16 point) => ConvertToGlobal(point.X, point.Y);
 
@@ -89,7 +89,7 @@ public class StructureTilemap {
     /// </summary>
     /// <param name="structureLayout"></param>
     public void OffsetExternalLayout(StructureLayout structureLayout) {
-        Point16 offset = WorldTileOffset * Point16.NegativeOne;
+        Point16 offset = globalTileOffset * Point16.NegativeOne;
         structureLayout.Offset(offset);
     }
 
@@ -98,7 +98,7 @@ public class StructureTilemap {
     /// </summary>
     /// <param name="entryPoint"></param>
     public void OffsetEntryPoint(EntryPoint entryPoint) {
-        entryPoint.Offset = WorldTileOffset * Point16.NegativeOne;
+        entryPoint.Offset = globalTileOffset * Point16.NegativeOne;
     }
 
     public void PlaceTile(int x, int y, TilePaintedType? paintedType, BlockType blockType = BlockType.Solid, bool actuated = false) {
@@ -150,7 +150,6 @@ public class StructureTilemap {
     /// </summary>
     /// <param name="x"></param>
     /// <param name="y"></param>
-    /// <param name="random"></param>
     /// <param name="paintedType"></param>
     public void SoftPlaceTile(int x, int y, TilePaintedType paintedType) {
         StructureTile tile = this[x, y];
@@ -217,7 +216,7 @@ public class StructureTilemap {
         // place MultiTiles
         foreach (MultiTile multiTile in MultiTiles) {
             Point16 originPoint = ConvertToGlobal(multiTile.Volume.BoundingBox.topLeft + multiTile.Origin);
-            Terraria.WorldGen.PlaceObject(originPoint.X, originPoint.Y, multiTile.TileType, true, multiTile.Style, direction: multiTile.FacingRight ? 1 : -1);
+            WorldGen.PlaceObject(originPoint.X, originPoint.Y, multiTile.TileType, true, multiTile.Style, direction: multiTile.FacingRight ? 1 : -1);
             multiTile.Volume.ExecuteInArea((x, y) => {
                 Tile tile = Main.tile[ConvertToGlobal(x, y)];
                 tile.TileColor = multiTile.PaintType;

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using SpawnHouses.Common;
 using SpawnHouses.Structures;
 using Terraria.ModLoader;
@@ -12,6 +13,8 @@ public class StructureManager : ModSystem {
     public static Version WorldVersion = new(ModInstance.Mod.Version.ToString());
     
     public static ushort GeneratableCount { get; private set; }
+
+    public static List<AdvStructure> StructureList { get; private set; } = [];
 
     /// <summary>
     ///     returns the next component id, and advances the counter. begins at id 1
