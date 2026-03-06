@@ -35,11 +35,12 @@ public class SpawnTest : ModItem {
         Console.WriteLine(x + ", " + y);
 
         // full house
-        float scale = Terraria.WorldGen.genRand.NextFloat();
+        float scale = WorldGen.genRand.NextFloat();
         TagMap requiredTags = new();
         requiredTags.Add(Tags.HasRooms, new Range(5, 7).Evaluate(scale));
         requiredTags.Add(Tags.HasHousing, new Range(5, 7).Evaluate(scale));
         Structure = new AdvStructure(
+            "test",
             new StructureLayoutParams(
                 requiredTags,
                 [

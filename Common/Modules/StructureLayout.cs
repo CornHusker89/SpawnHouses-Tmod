@@ -1,13 +1,19 @@
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
+using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types;
+using SpawnHouses.Helpers;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Common.Modules;
 
 public class StructureLayout : Generatable<StructureLayout, StructureLayoutParams, StructureLayoutGenerator> {
+    public DebugInfoLevel DebugInfoVisibility { get; set; }
+    public string Name { get; private set; }
+    
     public List<Floor> ExternalFloors { get; private set; }
     public List<Wall> ExternalWalls { get; private set; }
     public List<Gap> ExternalGaps { get; private set; }
@@ -15,15 +21,13 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
     public List<RoomLayout> RoomLayouts { get; private set; }
 
     public List<IComponent> ExternalComponents { get; private set; }
+    public (Point16 topLeft, Point16 bottomRight) BoundingBox { get; private set; }
 
     /// <summary>
     ///     any <see cref="Room" />s are at the very end of the list
     /// </summary>
     public List<IComponent> AllComponents { get; private set; }
-
-    public StructureLayout(StructureLayoutParams param) : base(param, new TagMap()) {
-    }
-
+    
     public Room[] Rooms {
         get {
             int len = 0;
@@ -39,6 +43,31 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
 
             return rooms;
         }
+    }
+
+    public StructureLayout(StructureLayoutParams param) : base(param, new TagMap()) {
+    }
+
+    public override void DrawDebugInfo() {
+        Color color = DrawHelper.GetColor(Id);
+
+        if (DebugInfoVisibility.DisplayBounds) {
+            Point16 topLeftWorldPos = BoundingBox.topLeft * new Point16(16);
+            DrawHelper.DrawRectangle(
+                new Rectangle(
+                    topLeftWorldPos.X,
+                    topLeftWorldPos.Y,
+                    (BoundingBox.bottomRight.X - BoundingBox.topLeft.X) * 16,
+                    (BoundingBox.bottomRight.Y - BoundingBox.topLeft.Y) * 16
+                ),
+                color,
+                DrawHelper.DebugDrawWidth
+            );
+        }
+
+        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawText(Name, BoundingBox.topLeft * new Point16(16) - new Point16(16, 16), color);
+
+        foreach (IComponent component in AllComponents) component.DrawDebugInfo();
     }
 
     /// <summary>
@@ -62,7 +91,8 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
     }
 
     /// <summary>
-    ///     resets <see cref="AllComponents" /> and rebuilds the list using the current lists of components
+    ///     resets <see cref="AllComponents" /> and rebuilds the list using the current lists of components.
+    ///     also updates the bounds
     /// </summary>
     public void UpdateComponentList() {
         ExternalComponents.Clear();
@@ -84,6 +114,16 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
         foreach (RoomLayout roomLayout in RoomLayouts) {
             AllComponents.AddRange(roomLayout.Rooms);
         }
+
+        int minX = int.MaxValue, minY = int.MaxValue, maxX = 0, maxY = 0;
+        foreach (IComponent component in AllComponents) {
+            if (component.Geometry.BoundingBox.topLeft.X < minX) minX = component.Geometry.BoundingBox.topLeft.X;
+            if (component.Geometry.BoundingBox.topLeft.Y < minY) minY = component.Geometry.BoundingBox.topLeft.Y;
+            if (component.Geometry.BoundingBox.bottomRight.X > maxX) maxX = component.Geometry.BoundingBox.bottomRight.X;
+            if (component.Geometry.BoundingBox.bottomRight.Y > maxY) maxY = component.Geometry.BoundingBox.bottomRight.Y;
+        }
+
+        BoundingBox = (new Point16(minX, minY), new Point16(maxX, maxY));
     }
 
     /// <summary>

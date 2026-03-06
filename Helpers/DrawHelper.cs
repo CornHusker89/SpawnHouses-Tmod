@@ -13,6 +13,8 @@ namespace SpawnHouses.Helpers;
 public static class DrawHelper {
     private static readonly Asset<Texture2D> PixelTexture = ModContent.Request<Texture2D>("SpawnHouses/Common/Assets/Pixel");
 
+    public static readonly int DebugDrawWidth = 3;
+
     /// <summary>
     ///     array of general colors
     /// </summary>
@@ -196,9 +198,9 @@ public static class DrawHelper {
     /// <param name="position"></param>
     /// <param name="color"></param>
     /// <remarks>assumes world relative sprite batch has already begun</remarks>
-    public static void DrawText(string text, Vector2 position, Color color) {
+    public static void DrawText(string text, Point16 position, Color color) {
         //Main.spriteBatch.DrawString();
-        Utils.DrawBorderString(Main.spriteBatch, text, position, color);
+        Utils.DrawBorderString(Main.spriteBatch, text, position.ToVector2(), color);
     }
 
     public static Color GetColor(ushort id) => AllColors[id % AllColors.Length];

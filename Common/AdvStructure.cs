@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Palette;
 using SpawnHouses.Common.Parameters;
@@ -15,9 +16,12 @@ namespace SpawnHouses.Common;
 /// <summary>
 ///     the central object that everything for adv. structures revolve around
 /// </summary>
-public class AdvStructure {
+public class AdvStructure : IDebugDraw {
     /// <summary>type corresponds to the final component's type</summary>
     public static readonly Dictionary<Type, List<IGenerator>> InstanceGenerators = new();
+
+    public DebugInfoLevel DebugInfoVisibility { get; set; }
+    public string Name { get; init; }
 
     public readonly Dictionary<Type, List<IGenerator>> InstanceGeneratorQueue = [];
 
@@ -39,6 +43,7 @@ public class AdvStructure {
 
     /// <summary>
     /// </summary>
+    /// <param name="name"></param>
     /// <param name="layoutParam"></param>
     /// <param name="palette"></param>
     /// <param name="seed">if -1, creates a new random seed from the base terraria random generator</param>
@@ -46,19 +51,27 @@ public class AdvStructure {
     ///     if true, will call <see cref="ApplyLayoutMethod" />, <see cref="FillComponents" /> and
     ///     <see cref="PlaceTilemap" />
     /// </param>
-    public AdvStructure(StructureLayoutParams layoutParam, TilePalette palette, int seed = -1, bool generate = true) {
+    public AdvStructure(string name, StructureLayoutParams layoutParam, TilePalette palette, int seed = -1, bool generate = true) {
+        Name = name;
+        
         Seed = seed == -1 ? WorldGen.genRand.Next() : seed;
         LayoutRandom = new UnifiedRandom(Seed);
         OtherRandom = new UnifiedRandom(Seed + 1);
         LayoutParam = layoutParam;
         LayoutParam.Structure = this;
         Palette = palette;
+        
         StructureManager.StructureList.Add(this);
         if (generate) {
             ApplyLayoutMethod();
             FillComponents();
             PlaceTilemap();
         }
+    }
+
+    public void DrawDebugInfo() {
+        Tilemap.DrawDebugInfo();
+        StructureLayout.DrawDebugInfo();
     }
     
     /// <summary>

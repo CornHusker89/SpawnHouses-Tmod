@@ -10,7 +10,7 @@ using Terraria.Utilities;
 
 namespace SpawnHouses.Common.Types;
 
-public interface IGeneratable {
+public interface IGeneratable : IDebugDraw {
     /// <summary>
     ///     if the generatable instance has had a generator run on it at least once
     /// </summary>
@@ -31,10 +31,6 @@ public interface IGeneratable {
     /// </summary>
     public TagMap TagsCurrent { get; }
 
-    public DebugComponentType DebugComponentType { get; }
-    public DebugInfoLevel DebugInfoVisibility { get; }
-    public string Name { get; }
-
     /// <summary>
     ///     creates and executes a component's generator, unlocks it's current tags, and marks the component as generated. correct way to generate modules
     /// </summary>
@@ -45,11 +41,6 @@ public interface IGeneratable {
     /// </summary>
     /// <returns></returns>
     public int GetGeneratorHash();
-
-    /// <summary>
-    ///     draws this generatable's debug information, using <see cref="DebugComponentType" />, <see cref="DebugInfoVisibility" />, and <see cref="Name" />
-    /// </summary>
-    public void DrawDebugInfo();
 }
 
 public interface IGeneratable<TSelf, TParams, TGenerator> : IGeneratable
@@ -70,8 +61,7 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
     public ushort Id { get; }
     public TParams Params { get; }
     public TagMap TagsCurrent { get; }
-
-    public DebugComponentType DebugComponentType { get; }
+    
     public DebugInfoLevel DebugInfoVisibility { get; }
     public string Name { get; }
 
@@ -83,6 +73,8 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
         TagsCurrent = tagsCurrent;
         TagsCurrent.IsLocked = true;
     }
+
+    public abstract void DrawDebugInfo();
 
     /// <summary>
     ///     gets a generator for this module
@@ -154,6 +146,4 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
     }
 
     public int GetGeneratorHash() => Generator.GetType().FullName!.GetHashCode();
-
-    public abstract void DrawDebugInfo();
 }

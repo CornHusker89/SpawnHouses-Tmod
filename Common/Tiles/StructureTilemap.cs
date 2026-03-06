@@ -1,6 +1,8 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
+using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Palette;
 using SpawnHouses.Common.Types;
@@ -11,16 +13,23 @@ using Terraria.ID;
 
 namespace SpawnHouses.Common.Tiles;
 
-public class StructureTilemap {
+public class StructureTilemap : IDebugDraw {
+    public DebugInfoLevel DebugInfoVisibility { get; set; }
+    public string Name => Structure.Name + " Tilemap";
+
     private readonly StructureTile[,] _tiles;
     public readonly AdvStructure Structure;
-
     public List<MultiTile> MultiTiles;
-
+    
     /// <summary>the actual global tile coordinates of the top left tile in this tilemap</summary>
     public Point16 globalTileOffset;
 
+    public ushort Width { get; }
+    public ushort Height { get; }
+
     public StructureTilemap(AdvStructure structure, ushort width, ushort height, Point16? globalTileOffset = null) {
+        DebugInfoVisibility = new DebugInfoLevel();
+        
         Structure = structure;
         Width = width;
         Height = height;
@@ -29,8 +38,28 @@ public class StructureTilemap {
         MultiTiles = [];
     }
 
-    public ushort Width { get; }
-    public ushort Height { get; }
+    /// <summary>
+    ///     can only draw the bounding box
+    /// </summary>
+    /// <remarks>assumes that a world-relative batch has begun in <see cref="Main.spriteBatch" />. does not end sprite batch</remarks>
+    public void DrawDebugInfo() {
+        Point16 worldTileOffset = globalTileOffset * new Point16(16);
+        Color color = DrawHelper.GetColor(Structure.StructureLayout.Id);
+
+        if (DebugInfoVisibility.DisplayBounds)
+            DrawHelper.DrawRectangle(
+                new Rectangle(
+                    worldTileOffset.X,
+                    worldTileOffset.Y,
+                    Width * 16,
+                    Height * 16
+                ),
+                color,
+                DrawHelper.DebugDrawWidth
+            );
+
+        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawText(Name, worldTileOffset - new Point16(16, 16), color);
+    }
 
     /// <summary>
     ///     uses coordinates relative to this tilemap
