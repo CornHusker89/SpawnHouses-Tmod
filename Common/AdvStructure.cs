@@ -73,6 +73,21 @@ public class AdvStructure : IDebugDraw {
         Tilemap.DrawDebugInfo();
         StructureLayout.DrawDebugInfo();
     }
+
+    /// <summary>
+    ///     recursively sets this <see cref="DebugInfoLevel" /> for everything in this structure
+    /// </summary>
+    /// <param name="infoLevel"></param>
+    public void SetDebugVisibility(DebugInfoLevel infoLevel) {
+        Tilemap.DebugInfoVisibility = infoLevel;
+        StructureLayout.DebugInfoVisibility = infoLevel;
+        foreach (IComponent component in StructureLayout.AllComponents) component.DebugInfoVisibility = infoLevel;
+    }
+
+    /// <summary>
+    ///     recursively sets this <see cref="DebugInfoLevel" /> for everything in this structure to this <see cref="AdvStructure" />'s <see cref="DebugInfoVisibility" />
+    /// </summary>
+    public void SetDebugVisibility() => SetDebugVisibility(DebugInfoVisibility);
     
     /// <summary>
     ///     calculates a structure's layout but does not apply component generators

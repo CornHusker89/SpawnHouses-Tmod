@@ -1,0 +1,86 @@
+#nullable enable
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Xna.Framework;
+using SpawnHouses.Common;
+using Terraria;
+using Terraria.DataStructures;
+using Terraria.ID;
+using Terraria.ModLoader;
+
+namespace SpawnHouses.Items.Debug;
+
+public class DebugWand : ModItem {
+    private static Dictionary<int, string> _itemModes = new([
+        new KeyValuePair<int, string>(0, "StructureSelectMode"),
+        new KeyValuePair<int, string>(1, "CycleStructureDebugInfoMode")
+    ]);
+
+    private static int _itemMode;
+
+    public static AdvStructure? SelectedStructure;
+
+    public override void SetDefaults() {
+        Item.useStyle = ItemUseStyleID.Swing;
+        Item.useTime = 20;
+        Item.useAnimation = 20;
+        Item.rare = ItemRarityID.Blue;
+    }
+
+    public override bool AltFunctionUse(Player player) {
+        _itemMode += 1;
+        if (_itemMode > _itemModes.Count)
+            _itemMode = 0;
+
+        Main.NewText("mode changed to " + _itemModes[_itemMode], Color.Yellow);
+
+        return true;
+    }
+
+    public override bool? UseItem(Player player) {
+        // structure select mode
+        if (_itemMode == 0) {
+            Point16 worldMousePos = (Main.MouseWorld / 16).ToPoint16();
+
+            // if multiple structures are within bounds, select the next structure index after the current one
+            List<int> selectedStructureIndexes = [];
+            int curSelectedStructureIndex = -1;
+            for (int i = 0; i < StructureManager.StructureList.Count; i++) {
+                AdvStructure structure = StructureManager.StructureList[i];
+                if (structure == SelectedStructure)
+                    curSelectedStructureIndex = i;
+
+                if (structure.Tilemap.InBounds(structure.Tilemap.ConvertToRelative(worldMousePos)))
+                    selectedStructureIndexes.Add(i);
+            }
+
+            if (selectedStructureIndexes.Count == 0) {
+                SelectedStructure = null;
+                Main.NewText("no structure found on cursor", Color.Yellow);
+            }
+            else if (curSelectedStructureIndex == -1) {
+                SelectedStructure = StructureManager.StructureList[selectedStructureIndexes[0]];
+            }
+            else {
+                // if the last selected structure was at/past the end of the selection candidates, wrap around to the front
+                if (curSelectedStructureIndex >= selectedStructureIndexes[^1])
+                    SelectedStructure = StructureManager.StructureList[0];
+                else
+                    SelectedStructure = StructureManager.StructureList[selectedStructureIndexes.First(index => index > curSelectedStructureIndex)];
+            }
+        }
+
+        // cycle structure debug info mode
+        else if (_itemMode == 1) {
+            if (SelectedStructure == null) {
+                Main.NewText("no structure selected", Color.Yellow);
+                return true;
+            }
+
+            SelectedStructure.DebugInfoVisibility.Cycle();
+            SelectedStructure.SetDebugVisibility();
+        }
+
+        return true;
+    }
+}

@@ -19,6 +19,7 @@ public static class DrawHelper {
     ///     array of general colors
     /// </summary>
     private static readonly Color[] AllColors = [
+        Color.Black,
         Color.Red,
         Color.Green,
         Color.Orange,
@@ -28,7 +29,6 @@ public static class DrawHelper {
         Color.Pink,
         Color.Brown,
         Color.Yellow,
-        Color.Black,
         Color.White,
         Color.Gray,
         Color.SkyBlue
@@ -106,6 +106,9 @@ public static class DrawHelper {
         Color.SaddleBrown
     ];
 
+    /// <summary>
+    ///     starts <see cref="Main.spriteBatch" /> in a world-relative state, useful for overlaying on tiles
+    /// </summary>
     public static void BeginWorldSpriteBatch() => Main.spriteBatch.Begin(default, null, null, null, null, null, Main.GameViewMatrix.TransformationMatrix);
 
     /// <summary>

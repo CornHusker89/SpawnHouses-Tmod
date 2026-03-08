@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using SpawnHouses.Common;
+using SpawnHouses.Helpers;
+using SpawnHouses.Items.Debug;
 using SpawnHouses.Structures;
+using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
@@ -45,5 +48,16 @@ public class StructureManager : ModSystem {
     public override void ClearWorld() {
         WorldVersion = new Version(ModInstance.Mod.Version.ToString());
         GeneratableCount = 0;
+
+        DebugWand.SelectedStructure = null;
+    }
+
+    public override void PostDrawTiles() {
+        DrawHelper.BeginWorldSpriteBatch();
+
+        foreach (AdvStructure structure in StructureList)
+            structure.DrawDebugInfo();
+
+        Main.spriteBatch.End();
     }
 }

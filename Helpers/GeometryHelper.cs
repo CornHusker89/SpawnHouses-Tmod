@@ -28,7 +28,7 @@ public static class GeometryHelper {
         // top-left
         if (isInside.Invoke(x, y - 1))
             value |= 8;
-
+        
         return value;
     }
 
@@ -57,4 +57,6 @@ public static class GeometryHelper {
             _ => new Point16(0, 0) // 0 or 15
         };
     }
+
+    public static bool InBoundingBox(Point16 point, (Point16 topLeft, Point16 bottomRight) boundingBox) => point.X >= boundingBox.topLeft.X && point.X <= boundingBox.bottomRight.X && point.Y >= boundingBox.topLeft.Y && point.Y <= boundingBox.bottomRight.Y;
 }

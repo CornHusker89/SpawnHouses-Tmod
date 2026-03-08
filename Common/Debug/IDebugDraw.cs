@@ -4,7 +4,7 @@ namespace SpawnHouses.Common.Debug;
 
 public interface IDebugDraw {
     public string Name { get; }
-    public DebugInfoLevel DebugInfoVisibility { get; }
+    public DebugInfoLevel DebugInfoVisibility { get; set; }
 
     /// <summary>
     ///     draws debug information, using <see cref="DebugInfoVisibility" /> and <see cref="Name" />, recursively to all drawable objects contained

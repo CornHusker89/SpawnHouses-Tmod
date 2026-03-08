@@ -61,8 +61,8 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
     public ushort Id { get; }
     public TParams Params { get; }
     public TagMap TagsCurrent { get; }
-    
-    public DebugInfoLevel DebugInfoVisibility { get; }
+
+    public DebugInfoLevel DebugInfoVisibility { get; set; }
     public string Name { get; }
 
     protected TGenerator Generator;
