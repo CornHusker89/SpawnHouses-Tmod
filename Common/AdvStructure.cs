@@ -40,6 +40,7 @@ public class AdvStructure : IDebugDraw {
     public StructureLayoutParams LayoutParam;
     public TilePalette Palette;
     public StructureTilemap Tilemap;
+    public bool FailedLayoutGeneration;
 
     /// <summary>
     /// </summary>
@@ -70,6 +71,8 @@ public class AdvStructure : IDebugDraw {
     }
 
     public void DrawDebugInfo() {
+        if (FailedLayoutGeneration)
+            return;
         Tilemap.DrawDebugInfo();
         StructureLayout.DrawDebugInfo();
     }
@@ -98,6 +101,8 @@ public class AdvStructure : IDebugDraw {
 
         StructureLayout = new StructureLayout(LayoutParam);
         StructureLayout.ExecuteGenerator();
+        if (StructureLayout == null || Tilemap == null)
+            FailedLayoutGeneration = true;
     }
 
     /// <summary>
@@ -106,7 +111,9 @@ public class AdvStructure : IDebugDraw {
     /// <exception cref="Exception">Throws when no layout has been set</exception>
     public void FillComponents() {
         if (StructureLayout == null)
-            throw new Exception("No layout has been set");
+            throw new Exception("no layout has been set");
+        if (FailedLayoutGeneration)
+            throw new Exception("layout generation was called but failed, aborting filling components");
 
         foreach (IComponent component in StructureLayout.AllComponents)
             component.ExecuteGenerator();
@@ -118,6 +125,8 @@ public class AdvStructure : IDebugDraw {
     public void PlaceTilemap() {
         if (StructureLayout == null)
             throw new Exception("No layout has been set");
+        if (FailedLayoutGeneration)
+            throw new Exception("layout generation was called but failed, aborting placing tilemap");
 
         Tilemap.ApplyTilemap();
     }

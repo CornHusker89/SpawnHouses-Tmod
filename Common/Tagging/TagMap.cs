@@ -6,10 +6,13 @@ using SpawnHouses.Common.Types;
 
 namespace SpawnHouses.Common.Tagging;
 
-public record Tag {
+public record Tag(string? Name = null) {
+    public string? Name { get; set; } = Name;
+
+    public override string ToString() => "Tag " + Name;
 }
 
-public sealed record Tag<TValue> : Tag;
+public sealed record Tag<TValue>(string? Name = null) : Tag(Name);
 
 public sealed class TagMap {
     private static readonly HashSet<Tag>[] ExclusiveTagsRequired = [

@@ -1,4 +1,5 @@
 #nullable enable
+using System.Reflection;
 using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Helpers;
 
@@ -189,4 +190,8 @@ public static class Tags {
     public static readonly Tag PaletteTurquoise = new();
 
     #endregion
+
+    public static void SetInternalTagNames() {
+        foreach (FieldInfo fieldInfo in typeof(Tags).GetFields(BindingFlags.Static | BindingFlags.Public)) ((Tag)fieldInfo.GetValue(null)!).Name = fieldInfo.Name;
+    }
 }

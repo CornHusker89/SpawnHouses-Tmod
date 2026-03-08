@@ -32,7 +32,7 @@ public class DebugWand : ModItem {
         if (_itemMode > _itemModes.Count)
             _itemMode = 0;
 
-        Main.NewText("mode changed to " + _itemModes[_itemMode], Color.Yellow);
+        Main.NewText($"mode changed to {_itemModes[_itemMode]}", Color.Yellow);
 
         return true;
     }
@@ -57,8 +57,10 @@ public class DebugWand : ModItem {
             if (selectedStructureIndexes.Count == 0) {
                 SelectedStructure = null;
                 Main.NewText("no structure found on cursor", Color.Yellow);
+                return true;
             }
-            else if (curSelectedStructureIndex == -1) {
+
+            if (curSelectedStructureIndex == -1) {
                 SelectedStructure = StructureManager.StructureList[selectedStructureIndexes[0]];
             }
             else {
@@ -68,6 +70,8 @@ public class DebugWand : ModItem {
                 else
                     SelectedStructure = StructureManager.StructureList[selectedStructureIndexes.First(index => index > curSelectedStructureIndex)];
             }
+
+            Main.NewText($"selected structure (layout) id {SelectedStructure.StructureLayout.Id}, name: {SelectedStructure.Name}", Color.Yellow);
         }
 
         // cycle structure debug info mode
@@ -79,6 +83,7 @@ public class DebugWand : ModItem {
 
             SelectedStructure.DebugInfoVisibility.Cycle();
             SelectedStructure.SetDebugVisibility();
+            Main.NewText($"set structure (layout) id {SelectedStructure.StructureLayout.Id}'s DebugInfoVisibility to {SelectedStructure.DebugInfoVisibility.GetDetailedString()}", Color.Yellow);
         }
 
         return true;

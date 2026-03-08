@@ -103,7 +103,7 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
     private void ValidateTagGeneration() {
         foreach (Tag tag in Params.TagsRequired.Keys)
             if (!TagsCurrent.HasTag(tag))
-                throw new Exception($"missing generatable current tag \"{tag}\" which was required in params");
+                throw new Exception($"missing generatable {this} current tag \"{tag}\" which was required in params");
     }
 
     /// <summary>

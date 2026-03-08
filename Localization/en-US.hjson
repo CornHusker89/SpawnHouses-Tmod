@@ -77,6 +77,11 @@ Mods: {
 				DisplayName: Spawn Test2
 				Tooltip: ""
 			}
+
+			DebugWand: {
+				DisplayName: Debug Wand
+				Tooltip: ""
+			}
 		}
 
 		Configs: {

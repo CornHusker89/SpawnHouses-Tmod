@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using SpawnHouses.Common;
+using SpawnHouses.Common.Tagging;
 using SpawnHouses.Helpers;
 using SpawnHouses.Items.Debug;
 using SpawnHouses.Structures;
@@ -29,6 +30,7 @@ public class StructureManager : ModSystem {
     }
 
     public override void Load() {
+        Tags.SetInternalTagNames();
         AdvStructure.LoadGenerators();
     }
 

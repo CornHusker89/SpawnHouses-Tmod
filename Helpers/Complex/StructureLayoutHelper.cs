@@ -318,9 +318,9 @@ public static class StructureLayoutHelper {
                     gap.InteriorRoom = RoomHelper.GetClosestRoom(pickedLayout.Rooms, gap.Geometry.Center);
             }
 
-            room.TagsCurrent.Add(room.Geometry.IsBox ? Tags.HasOnlyRectangleRooms : Tags.HasSomeRectangleRooms);
+            room.Params.TagsRequired.Add(room.Geometry.IsBox ? Tags.HasOnlyRectangleRooms : Tags.HasSomeRectangleRooms);
             if (p.TagsRequired.HasTag(Tags.HasLargeRoom))
-                room.TagsCurrent.Add(Tags.HasLargeRoom);
+                room.Params.TagsRequired.Add(Tags.HasLargeRoom);
             
             return pickedLayout;
         }
@@ -761,7 +761,6 @@ public static class StructureLayoutHelper {
             var result = ExternalLayoutHelper.CreateTopFloorsWallsRoofs(param.Structure, path, floorThickness, true, wallThickness);
             TagMap.AddRequiredToEach(result.floors, Tags.SlopingAlgorithm, SlopeHelper.SimpleSlopes);
             TagMap.AddRequiredToEach(result.floors, Tags.SlopeGrouping, SlopeGrouping.GlobalOnlySloping);
-            TagMap.AddRequiredToEach(result.roofs, Tags.HasCustomSloping);
             return result;
         }
     }

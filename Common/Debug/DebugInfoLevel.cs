@@ -15,6 +15,9 @@ public class DebugInfoLevel {
     public bool DisplayPoints => (_value & 2) == 2;
     public bool DisplayName => (_value & 4) == 4;
 
+    public override string ToString() => _value.ToString();
+    public string GetDetailedString() => $"value: {_value}, Bounds: {DisplayBounds}, Points: {DisplayPoints}, DisplayName: {DisplayName}";
+
     /// <summary>
     ///     progresses through the options (adds 1 to internal value)
     /// </summary>
