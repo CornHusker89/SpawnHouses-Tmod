@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.Common;
 using SpawnHouses.Common.Modules;
+using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Palette;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Tiles;
@@ -241,6 +242,16 @@ public static class ComponentHelper {
             component.TagsCurrent.Add(Tags.RoomHasWindows, windowVolumesArray);
             if (hasSpecificWindows)
                 component.TagsCurrent.Add(Tags.RoomHasSpecificWindows, windowVolumesArray);
+        }
+    }
+
+    public abstract class FurnishRooms : IComponentHelper {
+        public static HashSet<Tag> PossibleTags => [
+            Tags.HasHousing
+        ];
+
+        public static void Action(Room component) {
+            component.TagsCurrent.Add(Tags.RoomHousingValid);
         }
     }
 }

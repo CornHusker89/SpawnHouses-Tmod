@@ -26,10 +26,13 @@ public class DebugWand : ModItem {
         Item.useAnimation = 20;
         Item.rare = ItemRarityID.Blue;
     }
-
+    
     public override bool AltFunctionUse(Player player) {
+        if (Main.dedServ)
+            return true;
+        
         _itemMode += 1;
-        if (_itemMode > _itemModes.Count)
+        if (_itemMode >= _itemModes.Count)
             _itemMode = 0;
 
         Main.NewText($"mode changed to {_itemModes[_itemMode]}", Color.Yellow);
@@ -38,6 +41,9 @@ public class DebugWand : ModItem {
     }
 
     public override bool? UseItem(Player player) {
+        if (Main.mouseRight || Main.dedServ)
+            return true;
+        
         // structure select mode
         if (_itemMode == 0) {
             Point16 worldMousePos = (Main.MouseWorld / 16).ToPoint16();

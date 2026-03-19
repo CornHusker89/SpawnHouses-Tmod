@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
@@ -11,9 +10,6 @@ using Terraria.DataStructures;
 namespace SpawnHouses.Common.Modules;
 
 public class StructureLayout : Generatable<StructureLayout, StructureLayoutParams, StructureLayoutGenerator> {
-    public DebugInfoLevel DebugInfoVisibility { get; set; }
-    public string Name { get; private set; }
-    
     public List<Floor> ExternalFloors { get; private set; }
     public List<Wall> ExternalWalls { get; private set; }
     public List<Gap> ExternalGaps { get; private set; }
@@ -67,7 +63,9 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
 
         if (DebugInfoVisibility.DisplayName) DrawHelper.DrawText(Name, BoundingBox.topLeft * new Point16(16) - new Point16(16, 16), color);
 
-        foreach (IComponent component in AllComponents) component.DrawDebugInfo();
+        if (AllComponents != null)
+            foreach (IComponent component in AllComponents)
+                component?.DrawDebugInfo();
     }
 
     /// <summary>

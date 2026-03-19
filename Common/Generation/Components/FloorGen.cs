@@ -30,6 +30,8 @@ public static class FloorGen {
             ComponentHelper.FillShapeTiles.Action(component, component.Geometry, (_, _) =>
                 (external ? palette.ExternalFloor : palette.InternalFloor).Primary);
 
+            if (external)
+                component.TagsCurrent.Add(Tags.External);
             ComponentHelper.FillShapeRedundantWalls.Action(component.Geometry, param.Structure, palette.InternalFloor.PrimaryBackground);
             return true;
         }
@@ -93,7 +95,7 @@ public static class FloorGen {
             ]
         );
 
-        public override bool CanGenerate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random) => component.Geometry.GetDetailedAxisSizes(false).average >= 3;
+        public override bool CanGenerate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random) => component.Geometry.GetDetailedAxisSizes(false).average >= 3 && param.TagsRequired.HasTag(Tags.FloorHollow);
 
         public override bool Generate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
             int xStart = component.Geometry.BoundingBox.topLeft.X;
@@ -128,6 +130,8 @@ public static class FloorGen {
                 tilemap.PlaceTile(xStart + index, bottomY[index], palette.InternalFloor.Primary);
             }
 
+            component.TagsCurrent.Add(Tags.FloorHollow);
+            
             ComponentHelper.FillShapeRedundantWalls.Action(component.Geometry, param.Structure, palette.InternalFloor.PrimaryBackground);
 
             return true;

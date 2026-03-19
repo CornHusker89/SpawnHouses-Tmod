@@ -54,6 +54,8 @@ public class GapGen {
                 tilemap.PlaceTile(xStart + index, bottomY[index], (external ? palette.ExternalFloor : palette.InternalFloor).Platform);
             }
 
+            if (external)
+                component.TagsCurrent.Add(Tags.External);
             return true;
         }
     }
@@ -83,6 +85,9 @@ public class GapGen {
                 });
             tilemap.PlaceMultiTile(component.Geometry.BoundingBox.topLeft, new Point16(1, 3),
                 (external ? palette.ExternalWall : palette.InternalWall).Door, false, MultiTile.DoorOrigin);
+
+            if (external)
+                component.TagsCurrent.Add(Tags.External);
             return true;
         }
     }

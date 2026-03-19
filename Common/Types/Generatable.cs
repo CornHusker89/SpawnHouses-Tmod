@@ -57,21 +57,23 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
     where TSelf : Generatable<TSelf, TParams, TGenerator>
     where TParams : IParams
     where TGenerator : IGenerator<TParams, TSelf> {
+    public DebugInfoLevel DebugInfoVisibility { get; set; }
+    public string Name { get; }
+    
     public bool HasGenerated { get; set; }
     public ushort Id { get; }
     public TParams Params { get; }
     public TagMap TagsCurrent { get; }
 
-    public DebugInfoLevel DebugInfoVisibility { get; set; }
-    public string Name { get; }
-
     protected TGenerator Generator;
 
-    protected Generatable(TParams param, TagMap tagsCurrent) {
+    protected Generatable(TParams param, TagMap tagsCurrent, string name = "") {
         Id = StructureManager.NextGeneratableId();
         Params = param;
         TagsCurrent = tagsCurrent;
         TagsCurrent.IsLocked = true;
+        DebugInfoVisibility = new DebugInfoLevel();
+        Name = name;
     }
 
     public abstract void DrawDebugInfo();

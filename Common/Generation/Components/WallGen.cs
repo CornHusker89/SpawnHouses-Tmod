@@ -27,8 +27,9 @@ public static class WallGen {
 
         public override bool Generate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
             bool external = param.TagsRequired.HasTag(Tags.External);
+            if (external)
+                component.TagsCurrent.Add(Tags.External);
             ComponentHelper.FillShapeTiles.Action(component, component.Geometry, (_, _) => (external ? palette.ExternalWall : palette.InternalWall).Primary);
-
             ComponentHelper.FillShapeRedundantWalls.Action(component.Geometry, param.Structure, palette.InternalWall.PrimaryBackground);
             return true;
         }
@@ -63,6 +64,9 @@ public static class WallGen {
                 if (x > highX[y - yStart]) highX[y - yStart] = x;
             });
 
+            if (external)
+                component.TagsCurrent.Add(Tags.External);
+            
             ComponentHelper.FillShapeTiles.Action(component, component.Geometry, (x, y) =>
                 // make sure that: not at very top or bottom, every other line, either highest x or lowest x
                 y != yStart && y != yEnd && y % 2 == 0 && (x == lowX[y - yStart] || x == highX[y - yStart])

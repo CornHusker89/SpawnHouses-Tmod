@@ -79,11 +79,17 @@ public static class RoofGen {
                     }
                 }
 
+                component.TagsCurrent.Add(Tags.RoofTall);
+
                 // TODO: add the little window things when filling
             }
+            else if (param.TagsRequired.HasTag(Tags.RoofShort))
+                component.TagsCurrent.Add(Tags.RoofShort);
 
             // create endcaps
             // TODO: make endcaps work
+            if (param.TagsRequired.HasTag(Tags.RoofHasOverhang))
+                component.TagsCurrent.Add(Tags.RoofHasOverhang);
             if (!roofComponent.LowerXExtendable) {
             }
 
@@ -96,6 +102,8 @@ public static class RoofGen {
                           && (x < wallsShape.BoundingBox.bottomRight.X || !roofComponent.HigherXExtendable)
                     ? palette.Roof.PrimaryInteriorBackground
                     : null);
+
+            component.TagsCurrent.Add(Tags.External);
             
             return true;
         }

@@ -7,26 +7,26 @@ public static class GeometryHelper {
     /// <summary>
     ///     converts 2x2 grid cell into a marching square index
     /// </summary>
-    /// <param name="isInside"></param>
+    /// <param name="isInside">does not </param>
     /// <param name="x"></param>
     /// <param name="y"></param>
     /// <returns></returns>
-    public static int GetMarchingSquareIndex(Condition2D isInside, int x, int y) {
+    public static int GetMarchingSquareIndex(Condition2D isInside, int x, int y, Point16 size) {
         int value = 0;
         // bottom-left
         if (isInside.Invoke(x, y))
             value |= 1;
 
         // bottom-right
-        if (isInside.Invoke(x + 1, y))
+        if (isInside.Invoke(x + 1, y) && size.X < x + 1)
             value |= 2;
 
         // top-right
-        if (isInside.Invoke(x + 1, y - 1))
+        if (isInside.Invoke(x + 1, y - 1) && size.X < x + 1 && y - 1 >= 0)
             value |= 4;
 
         // top-left
-        if (isInside.Invoke(x, y - 1))
+        if (isInside.Invoke(x, y - 1) && y - 1 >= 0)
             value |= 8;
         
         return value;

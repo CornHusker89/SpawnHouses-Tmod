@@ -337,7 +337,7 @@ public class Shape : PointGeometry {
         int maxTravelCount = Size.X * Size.Y;
 
         do {
-            int index = GeometryHelper.GetMarchingSquareIndex((x, y) => BooleanTilemap[x, y], pos.X, pos.Y);
+            int index = GeometryHelper.GetMarchingSquareIndex((x, y) => BooleanTilemap[x - Size.X, y - Size.Y], pos.X, pos.Y, Size);
             directionPoint16 = GeometryHelper.GetDirectionFromSquareIndex(index, directionPoint16);
 
             // before the new position is calculated

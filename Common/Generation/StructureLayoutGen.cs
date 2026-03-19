@@ -157,6 +157,9 @@ public static class StructureLayoutGen {
             );
 
             RoomLayout roomLayout = StructureLayoutHelper.SubdivideRoom.Action(internalRoom, roomLayoutParams);
+            param.TagsRequired.GetValueSafe(Tags.HasHousing, out int housingCount);
+            structureLayout.TagsCurrent.Add(Tags.HasHousing, housingCount);
+            structureLayout.TagsCurrent.Add(Tags.HasRooms, roomLayout.Rooms.Count);
             structureLayout.SetComponents(exteriorFloors, exteriorWalls, internalRoom.Gaps, roofs, [roomLayout]);
             
             foreach (Room room in param.Structure.StructureLayout.Rooms) {

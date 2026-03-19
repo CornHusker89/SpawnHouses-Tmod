@@ -29,6 +29,7 @@ public static class StructureLayoutHelper {
     /// </summary>
     public abstract class SubdivideRoom : IStructureLayoutHelper {
         public static HashSet<Tag> PossibleTags => [
+            Tags.HasRooms,
             Tags.HasOnlyRectangleRooms,
             Tags.HasSomeRectangleRooms,
             Tags.HasLargeRoom
@@ -318,9 +319,10 @@ public static class StructureLayoutHelper {
                     gap.InteriorRoom = RoomHelper.GetClosestRoom(pickedLayout.Rooms, gap.Geometry.Center);
             }
 
-            room.Params.TagsRequired.Add(room.Geometry.IsBox ? Tags.HasOnlyRectangleRooms : Tags.HasSomeRectangleRooms);
+            p.Structure.StructureLayout.TagsCurrent.Add(Tags.HasRooms, pickedLayout.Rooms.Count);
+            p.Structure.StructureLayout.TagsCurrent.Add(room.Geometry.IsBox ? Tags.HasOnlyRectangleRooms : Tags.HasSomeRectangleRooms);
             if (p.TagsRequired.HasTag(Tags.HasLargeRoom))
-                room.Params.TagsRequired.Add(Tags.HasLargeRoom);
+                p.Structure.StructureLayout.TagsCurrent.Add(Tags.HasLargeRoom);
             
             return pickedLayout;
         }
@@ -418,9 +420,11 @@ public static class StructureLayoutHelper {
             List<Point16> outline = [];
 
             Point16? start = null;
+            Point16 tilemapSize = new(tilemap.Width, tilemap.Height);
             for (int y = 0; y < tilemap.Height - 1 && start == null; y++)
             for (int x = 0; x < tilemap.Width - 1; x++)
-                if (GeometryHelper.GetMarchingSquareIndex(tilemap.InInterior, x, y) != 0) {
+                if (GeometryHelper.GetMarchingSquareIndex((tilemapX, tilemapY) => tilemap.InInterior(tilemapX - tilemapSize.X, tilemapY - tilemapSize.Y),
+                        x, y, tilemapSize) != 0) {
                     start = new Point16(x, y);
                     break;
                 }
@@ -438,7 +442,8 @@ public static class StructureLayoutHelper {
                 // add previous iteration's position
                 visited.Add(pos);
 
-                int squareIndex = GeometryHelper.GetMarchingSquareIndex(tilemap.InInterior, pos.X, pos.Y);
+                int squareIndex = GeometryHelper.GetMarchingSquareIndex((tilemapX, tilemapY) => tilemap.InInterior(tilemapX - tilemapSize.X, tilemapY - tilemapSize.Y),
+                    pos.X, pos.Y, tilemapSize);
                 Point16 nextDir = GeometryHelper.GetDirectionFromSquareIndex(squareIndex, dir);
 
                 Point16 outlineOffset = squareIndex switch {

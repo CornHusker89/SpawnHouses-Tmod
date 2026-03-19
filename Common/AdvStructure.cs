@@ -53,6 +53,7 @@ public class AdvStructure : IDebugDraw {
     ///     <see cref="PlaceTilemap" />
     /// </param>
     public AdvStructure(string name, StructureLayoutParams layoutParam, TilePalette palette, int seed = -1, bool generate = true) {
+        DebugInfoVisibility = new DebugInfoLevel();
         Name = name;
         
         Seed = seed == -1 ? WorldGen.genRand.Next() : seed;
@@ -73,8 +74,8 @@ public class AdvStructure : IDebugDraw {
     public void DrawDebugInfo() {
         if (FailedLayoutGeneration)
             return;
-        Tilemap.DrawDebugInfo();
-        StructureLayout.DrawDebugInfo();
+        Tilemap?.DrawDebugInfo();
+        StructureLayout?.DrawDebugInfo();
     }
 
     /// <summary>
