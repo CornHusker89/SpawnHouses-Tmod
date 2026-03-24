@@ -58,6 +58,8 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
     where TParams : IParams
     where TGenerator : IGenerator<TParams, TSelf> {
     public DebugInfoLevel DebugInfoVisibility { get; set; }
+
+    /// (ideally) a unique identifier. during assignment, any #'s get replaced with generatable's id
     public string Name { get; }
     
     public bool HasGenerated { get; set; }
@@ -67,13 +69,13 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
 
     protected TGenerator Generator;
 
-    protected Generatable(TParams param, TagMap tagsCurrent, string name = "") {
+    protected Generatable(TParams param, TagMap tagsCurrent, string name) {
         Id = StructureManager.NextGeneratableId();
         Params = param;
         TagsCurrent = tagsCurrent;
         TagsCurrent.IsLocked = true;
         DebugInfoVisibility = new DebugInfoLevel();
-        Name = name;
+        Name = name.Replace("#", Id.ToString());
     }
 
     public abstract void DrawDebugInfo();

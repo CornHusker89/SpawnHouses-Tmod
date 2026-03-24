@@ -13,7 +13,16 @@ namespace SpawnHouses.Helpers;
 public static class DrawHelper {
     private static readonly Asset<Texture2D> PixelTexture = ModContent.Request<Texture2D>("SpawnHouses/Common/Assets/Pixel");
 
-    public static readonly int DebugDrawWidth = 3;
+    public static int DebugDrawWidth { get; private set; } = 3;
+
+    public static void IncreaseDebugDrawWidth() {
+        DebugDrawWidth++;
+        if (DebugDrawWidth <= 0) DebugDrawWidth = 1;
+    }
+
+    public static void DecreaseDebugDrawWidth() {
+        DebugDrawWidth--;
+    }
 
     /// <summary>
     ///     array of general colors

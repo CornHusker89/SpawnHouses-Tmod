@@ -41,7 +41,7 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
         }
     }
 
-    public StructureLayout(StructureLayoutParams param) : base(param, new TagMap()) {
+    public StructureLayout(StructureLayoutParams param, string name) : base(param, new TagMap(), name) {
     }
 
     public override void DrawDebugInfo() {

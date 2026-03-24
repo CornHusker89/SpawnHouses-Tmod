@@ -27,7 +27,7 @@ public interface IComponent<out TGeometry> : IComponent
 public abstract class VolumeComponent : Generatable<VolumeComponent, VolumeComponentParams, VolumeComponentGenerator>, IComponent<Shape> {
     public Shape Geometry { get; set; }
 
-    protected VolumeComponent(VolumeComponentParams param, Shape geometry) : base(param, new TagMap()) {
+    protected VolumeComponent(VolumeComponentParams param, Shape geometry, string name) : base(param, new TagMap(), name) {
         Geometry = geometry;
     }
 
@@ -54,7 +54,7 @@ public abstract class VolumeComponent : Generatable<VolumeComponent, VolumeCompo
 public abstract class PathComponent : Generatable<PathComponent, PathComponentParams, PathComponentGenerator>, IComponent<Path> {
     public Path Geometry { get; set; }
 
-    protected PathComponent(PathComponentParams param, Path geometry) : base(param, new TagMap()) {
+    protected PathComponent(PathComponentParams param, Path geometry, string name) : base(param, new TagMap(), name) {
         Geometry = geometry;
     }
 

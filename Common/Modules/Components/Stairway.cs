@@ -11,7 +11,8 @@ public class Stairway : PathComponent {
     /// <param name="p"></param>
     /// <param name="path"></param>
     /// <param name="placeTilesLowerX"></param>
-    public Stairway(PathComponentParams p, Path path, bool placeTilesLowerX) : base(p, path) {
+    /// <param name="name"></param>
+    public Stairway(PathComponentParams p, Path path, bool placeTilesLowerX, string name) : base(p, path, name) {
         p.TagsRequired.Add(placeTilesLowerX ? Tags.StairwayTilesLowerX : Tags.StairwayTilesHigherX);
     }
 
@@ -21,7 +22,8 @@ public class Stairway : PathComponent {
     /// <param name="structure"></param>
     /// <param name="path"></param>
     /// <param name="placeTilesLowerX"></param>
-    public Stairway(AdvStructure structure, Path path, bool placeTilesLowerX) : base(new PathComponentParams(structure), path) {
+    /// <param name="name"></param>
+    public Stairway(AdvStructure structure, Path path, bool placeTilesLowerX, string name) : base(new PathComponentParams(structure), path, name) {
         Params.TagsRequired.Add(placeTilesLowerX ? Tags.StairwayTilesLowerX : Tags.StairwayTilesHigherX);
     }
 }

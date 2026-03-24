@@ -20,9 +20,10 @@ public class Room : VolumeComponent {
     /// </summary>
     /// <param name="p"></param>
     /// <param name="shape"></param>
+    /// <param name="name"></param>
     /// <param name="gaps"></param>
     /// <param name="stairways"></param>
-    public Room(VolumeComponentParams p, Shape shape, List<Gap>? gaps = null, List<Stairway>? stairways = null) : base(p, shape) {
+    public Room(VolumeComponentParams p, Shape shape, string name, List<Gap>? gaps = null, List<Stairway>? stairways = null) : base(p, shape, name) {
         Gaps = gaps ?? [];
         Stairways = stairways ?? [];
         MultiTiles = [];
@@ -33,9 +34,10 @@ public class Room : VolumeComponent {
     /// </summary>
     /// <param name="structure"></param>
     /// <param name="shape"></param>
+    /// <param name="name"></param>
     /// <param name="gaps"></param>
     /// <param name="stairways"></param>
-    public Room(AdvStructure structure, Shape shape, List<Gap>? gaps = null, List<Stairway>? stairways = null) : base(new VolumeComponentParams(structure), shape) {
+    public Room(AdvStructure structure, Shape shape, string name, List<Gap>? gaps = null, List<Stairway>? stairways = null) : base(new VolumeComponentParams(structure), shape, name) {
         Gaps = gaps ?? [];
         Stairways = stairways ?? [];
         MultiTiles = [];

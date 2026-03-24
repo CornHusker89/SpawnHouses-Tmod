@@ -165,9 +165,8 @@ public static class StructureLayoutHelper {
                 ModContent.GetInstance<SpawnHouses>().Logger.Warn(
                     $"a max room height of {param.RoomWidth.Max} was given, but at least {param.WallWidth.Max + 2 * param.RoomWidth.Min} is required");
 
-            List<Shape> floorVolumes = [], wallVolumes = [];
+            List<(Shape volume, string name)> floorVolumes = [], wallVolumes = [], finishedRoomVolumes = [];
             var roomQueue = new Queue<Shape>([room.Geometry]);
-            List<Shape> finishedRoomVolumes = [];
             int extraCuts = 0, curLargeRoomCount = 0, xCutCount = 0, yCutCount = 0;
             bool hasLargeRooms = param.TagsRequired.GetValueSafe(Tags.HasLargeRoom, out int targetLargeRoomCount);
             float largeRoomChance = hasLargeRooms ? (float)targetLargeRoomCount / targetRoomCount : 0;
@@ -204,7 +203,7 @@ public static class StructureLayoutHelper {
 
                 if (!valid) {
                     // if the room can't be split at all, don't add it back to the queue
-                    finishedRoomVolumes.Add(roomVolume);
+                    finishedRoomVolumes.Add((roomVolume, $"R_BSP_GenOrder{finishedRoomVolumes.Count}"));
                     extraCuts++;
                     continue;
                 }
@@ -218,7 +217,7 @@ public static class StructureLayoutHelper {
                 var validSplitStarts = GetValidSplits(roomVolume, prioritySplits, splitAlongX, iterationSplitWidth, iterationVerticalGapXs, iterationHorizontalGapYs, validCutRange);
 
                 if (validSplitStarts.Count == 0) {
-                    finishedRoomVolumes.Add(roomVolume);
+                    finishedRoomVolumes.Add((roomVolume, $"R_BSP_GenOrder{finishedRoomVolumes.Count}"));
                     extraCuts++;
                     continue;
                 }
@@ -239,7 +238,7 @@ public static class StructureLayoutHelper {
                     if (param.IsWithinMaxSize(roomSubsections.lower) && param.Structure.LayoutRandom.NextDouble() < (1 - Math.Pow(1 - largeRoomChance, param.Attempts)) * 0.35 &&
                         curLargeRoomCount < maxLargeRooms && inverseProgressFactor < 0.92) {
                         curLargeRoomCount++;
-                        finishedRoomVolumes.Add(roomSubsections.lower);
+                        finishedRoomVolumes.Add((roomSubsections.lower, $"R_BSP_GenOrder{finishedRoomVolumes.Count}"));
                         extraCuts++;
                     }
                     else {
@@ -251,7 +250,7 @@ public static class StructureLayoutHelper {
                     if (param.IsWithinMaxSize(roomSubsections.higher) && param.Structure.LayoutRandom.NextDouble() < (1 - Math.Pow(1 - largeRoomChance, param.Attempts)) * 0.35 &&
                         curLargeRoomCount < maxLargeRooms && inverseProgressFactor < 0.92) {
                         curLargeRoomCount++;
-                        finishedRoomVolumes.Add(roomSubsections.higher);
+                        finishedRoomVolumes.Add((roomSubsections.higher, $"R_BSP_GenOrder{finishedRoomVolumes.Count}"));
                         extraCuts++;
                     }
                     else {
@@ -261,13 +260,16 @@ public static class StructureLayoutHelper {
 
                 if (roomSubsections.middle is not null) {
                     if (splitAlongX)
-                        floorVolumes.Add(roomSubsections.middle);
+                        floorVolumes.Add((roomSubsections.middle, $"F_BSPInterior_GenOrder{floorVolumes.Count}"));
                     else
-                        wallVolumes.Add(roomSubsections.middle);
+                        wallVolumes.Add((roomSubsections.middle, $"W_BSPInterior_GenOrder{finishedRoomVolumes.Count}"));
                 }
             }
 
-            finishedRoomVolumes.AddRange(roomQueue);
+            // finalize any rooms left over after we have the target housing
+            List<(Shape Shape, string name)> namedRoomQueue = roomQueue.Select(r => (r, $"R_BSPLeftover_GenOrder{finishedRoomVolumes.Count}")).ToList();
+            finishedRoomVolumes.AddRange(namedRoomQueue);
+            
             prioritySplits.ClearBlocklist();
             return new RoomLayout(room.Params.Structure, floorVolumes, wallVolumes, finishedRoomVolumes, false);
         }
@@ -392,7 +394,10 @@ public static class StructureLayoutHelper {
                             entryPoint.Start + new Point16(entryPoint.Direction is Directions.Right ? -wallWidth + 1 : wallWidth - 1, 0),
                             entryPoint.End + new Point16(entryPoint.Direction is Directions.Right ? -wallWidth + 1 : wallWidth - 1, 0)
                         ),
-                        null!, null, entryPoint.Direction is Directions.Left or Directions.Right
+                        null!,
+                        null,
+                        true,
+                        entryPoint.Direction is Directions.Left ? $"EntryPoint_Left_GenOrder{i}" : $"EntryPoint_Right_GenOrder{i}"
                     );
                 else
                     gaps[i] = new Gap(
@@ -402,7 +407,10 @@ public static class StructureLayoutHelper {
                             entryPoint.Start,
                             entryPoint.End + new Point16(0, entryPoint.Direction is Directions.Down ? floorWidth - 1 : -floorWidth + 1)
                         ),
-                        null!, null, entryPoint.Direction is Directions.Left or Directions.Right
+                        null!,
+                        null,
+                        false,
+                        entryPoint.Direction is Directions.Up ? $"EntryPoint_Up_GenOrder{i}" : $"EntryPoint_Down_GenOrder{i}"
                     );
             }
 
@@ -538,7 +546,7 @@ public static class StructureLayoutHelper {
             var externalGaps = GapsFromEntryPoints(param.Structure, param.EntryPoints, externalFloorThickness, externalWallThickness).ToList();
             TagMap.AddRequiredToEach(externalGaps, Tags.External);
             SetTilesExternalStatus(param, exteriorFloors, exteriorWalls, externalGaps);
-            Room internalRoom = new(param.Structure, GetStructureInterior(param.Structure.Tilemap), externalGaps);
+            Room internalRoom = new(param.Structure, GetStructureInterior(param.Structure.Tilemap), "R_InteriorBase", externalGaps);
 
             foreach (Gap gap in externalGaps)
                 gap.InteriorRoom = internalRoom;
@@ -560,7 +568,7 @@ public static class StructureLayoutHelper {
         ///     creates a roof path with a single peak, no flat sections on the sides. start and end can be at different heights
         /// </summary>
         /// <returns></returns>
-        private static List<Point16> SinglePeakOnly(AdvStructure structure, Point16 left, Point16 right, float roofSlope = -1) {
+        private static List<AnnotatedPoint16> SinglePeakOnly(AdvStructure structure, Point16 left, Point16 right, float roofSlope = -1) {
             if (Math.Abs(roofSlope - -1) < 0.001f)
                 roofSlope = structure.LayoutRandom.NextFromList(1f, 1.33f, 1.67f);
             bool hasHigherSide = left.Y != right.Y;
@@ -568,28 +576,28 @@ public static class StructureLayoutHelper {
             int length = right.X - left.X;
             int upperRoofBottomY = leftRoofHigher ? left.Y : right.Y;
             int lowerRoofBottomY = leftRoofHigher ? right.Y : left.Y;
-            
-            List<Point16> path;
+
+            List<AnnotatedPoint16> path;
             if (hasHigherSide) {
                 double middleX = (roofSlope * (left.X + right.X) - (right.Y - left.Y)) / (2 * roofSlope);
-                Point16 middlePoint = new((int)Math.Ceiling(middleX), (int)(left.Y - roofSlope * (middleX - left.X)));
+                AnnotatedPoint16 middlePoint = new((int)Math.Ceiling(middleX), (int)(left.Y - roofSlope * (middleX - left.X)), "Left_MainSlope");
 
                 path = [
-                    new Point16(left.X, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
+                    new AnnotatedPoint16(left.X, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY, ""),
                     middlePoint,
-                    new Point16(right.X, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY)
+                    new AnnotatedPoint16(right.X, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY, "Right_MainSlope")
                 ];
                 if (length % 2 == 1)
-                    path.Insert(2, new Point16(left.X + 1 + length / 2, upperRoofBottomY - (int)(roofSlope * length * 0.5)));
+                    path.Insert(2, new AnnotatedPoint16(left.X + 1 + length / 2, upperRoofBottomY - (int)(roofSlope * length * 0.5), "Middle_SideEvening"));
             }
             else {
                 path = [
-                    new Point16(left.X, upperRoofBottomY),
-                    new Point16(left.X + length / 2, upperRoofBottomY - (int)(roofSlope * length * 0.5)),
-                    new Point16(right.X, upperRoofBottomY)
+                    new AnnotatedPoint16(left.X, upperRoofBottomY, ""),
+                    new AnnotatedPoint16(left.X + length / 2, upperRoofBottomY - (int)(roofSlope * length * 0.5), "Left_MainSlope"),
+                    new AnnotatedPoint16(right.X, upperRoofBottomY, "Right_MainSlope")
                 ];
                 if (length % 2 == 1)
-                    path.Insert(2, new Point16(left.X + 1 + length / 2, upperRoofBottomY - (int)(roofSlope * length * 0.5)));
+                    path.Insert(2, new AnnotatedPoint16(left.X + 1 + length / 2, upperRoofBottomY - (int)(roofSlope * length * 0.5), "Middle_SideEvening"));
             }
 
             return path;
@@ -599,7 +607,7 @@ public static class StructureLayoutHelper {
         ///     creates a roof path with a single peak with flat sections on the side. start and end can be at different heights
         /// </summary>
         /// <returns></returns>
-        private static List<Point16> SinglePeakPathWithFlats(AdvStructure structure, Point16 left, Point16 right) {
+        private static List<AnnotatedPoint16> SinglePeakPathWithFlats(AdvStructure structure, Point16 left, Point16 right) {
             FloatRange possiblePeakLengths = left.Y == right.Y ? new FloatRange(0.6f, 0.7f) : new FloatRange(0.48f, 0.62f);
             int peakSectionLength = (int)((right.X - left.X) * structure.LayoutRandom.NextFloat(possiblePeakLengths));
             int offsetRange = right.X - left.X - peakSectionLength;
@@ -611,8 +619,8 @@ public static class StructureLayoutHelper {
             while (peakRoofSlope * peakSectionLength - heightDelta < (left.X - right.X) / 3.0) peakRoofSlope += 0.33f;
 
             var path = SinglePeakOnly(structure, left + new Point16(offset, 0), new Point16(left.X + peakSectionLength - 1 + offset, right.Y), peakRoofSlope);
-            path.Insert(0, new Point16(left.X, left.Y));
-            path.Add(new Point16(right.X, right.Y));
+            path.Insert(0, new AnnotatedPoint16(left.X, left.Y, "Left_Base"));
+            path.Add(new AnnotatedPoint16(right.X, right.Y, "Right_Base"));
 
             return path;
         }
@@ -622,7 +630,7 @@ public static class StructureLayoutHelper {
         ///     and finishing with either a slope or another flat section on the low side
         /// </summary>
         /// <returns></returns>
-        public static List<Point16> WavyPeak(AdvStructure structure, Point16 left, Point16 right) {
+        public static List<AnnotatedPoint16> WavyPeak(AdvStructure structure, Point16 left, Point16 right) {
             bool finishWithFlat = structure.LayoutRandom.NextBool();
             int length = right.X - left.X;
             int verticalSideOffset = (int)(length * structure.LayoutRandom.NextFloat(0.15f, 0.35f)); // will only be used if the sides are even
@@ -642,16 +650,16 @@ public static class StructureLayoutHelper {
             }
 
             // create higher section
-            List<Point16> path;
+            List<AnnotatedPoint16> path;
             if (left.Y < right.Y) {
                 path = SinglePeakOnly(structure, left, left + new Point16((int)(length * 0.4f), 0), roofSlope);
-                path.Add(new Point16((int)(right.X - (right.Y - left.Y) / roofSlope - (finishWithFlat ? length * 0.23f : 0)), left.Y));
-                path.Add(finishWithFlat ? right - new Point16((int)(length * 0.23f), 0) : right);
+                path.Add(new AnnotatedPoint16((int)(right.X - (right.Y - left.Y) / roofSlope - (finishWithFlat ? length * 0.23f : 0)), left.Y, "Middle_Flat"));
+                path.Add(new AnnotatedPoint16(finishWithFlat ? right - new Point16((int)(length * 0.23f), 0) : right, finishWithFlat ? "Right_SlopeToEdgeFlat" : "Right_EdgeSlope"));
             }
             else {
                 path = [
-                    finishWithFlat ? left + new Point16((int)(length * 0.23f), 0) : left,
-                    new Point16((int)(left.X + (left.Y - right.Y) / roofSlope + (finishWithFlat ? length * 0.23f : 0)), right.Y)
+                    new AnnotatedPoint16(finishWithFlat ? left + new Point16((int)(length * 0.23f), 0) : left, ""),
+                    new AnnotatedPoint16((int)(left.X + (left.Y - right.Y) / roofSlope + (finishWithFlat ? length * 0.23f : 0)), right.Y, finishWithFlat ? "Left_SlopeToEdgeFlat" : "Left_EdgeSlope")
                 ];
                 path.AddRange(SinglePeakOnly(structure, right - new Point16((int)(length * 0.4f), 0), right, roofSlope));
             }
@@ -659,22 +667,24 @@ public static class StructureLayoutHelper {
             // and add lower flat if required
             if (finishWithFlat) {
                 if (left.Y < right.Y)
-                    path.Add(right);
+                    path.Add(new AnnotatedPoint16(right, "Right_EdgeFlat"));
                 else
-                    path.Insert(0, left);
+                    path.Insert(0, new AnnotatedPoint16(left, "Left_EdgeFlat"));
             }
 
             // make sure roof path doesn't overlap
             int requiredOffsetDistance = (int)(length * 0.12f);
             int checkIndexOffset = finishWithFlat ? 1 : 0;
-            if (left.Y < right.Y && path[^(2 + checkIndexOffset)].X < path[^(3 + checkIndexOffset)].X + requiredOffsetDistance)
-                path[^(2 + checkIndexOffset)] = new Point16(path[^(3 + checkIndexOffset)].X + requiredOffsetDistance, path[^(2 + checkIndexOffset)].Y);
-            else if (path[1 + checkIndexOffset].X > path[2 + checkIndexOffset].X - requiredOffsetDistance)
-                path[1 + checkIndexOffset] = new Point16(path[2 + checkIndexOffset].X - requiredOffsetDistance, path[1 + checkIndexOffset].Y);
+            AnnotatedPoint16 oldCheckPoint1 = path[^(2 + checkIndexOffset)];
+            AnnotatedPoint16 oldCheckPoint2 = path[1 + checkIndexOffset];
+            if (left.Y < right.Y && oldCheckPoint1.Point.X < path[^(3 + checkIndexOffset)].Point.X + requiredOffsetDistance)
+                path[^(2 + checkIndexOffset)] = new AnnotatedPoint16(path[^(3 + checkIndexOffset)].Point.X + requiredOffsetDistance, oldCheckPoint1.Point.Y, oldCheckPoint1.Name);
+            else if (path[1 + checkIndexOffset].Point.X > path[2 + checkIndexOffset].Point.X - requiredOffsetDistance) path[1 + checkIndexOffset] = new AnnotatedPoint16(path[2 + checkIndexOffset].Point.X - requiredOffsetDistance, oldCheckPoint2.Point.Y, oldCheckPoint2.Name);
+
 
             // add extra wall to make sure roof seals with the structure
-            if (offsetLeftUp) path.Insert(0, new Point16(left.X, left.Y + verticalSideOffset));
-            if (offsetRightUp) path.Add(new Point16(right.X, right.Y + verticalSideOffset));
+            if (offsetLeftUp) path.Insert(0, new AnnotatedPoint16(left.X, left.Y + verticalSideOffset, "Left_RoofSeal"));
+            if (offsetRightUp) path.Add(new AnnotatedPoint16(right.X, right.Y + verticalSideOffset, "Right_RoofSeal"));
 
             return path;
         }
@@ -684,7 +694,7 @@ public static class StructureLayoutHelper {
         ///     the upper end can have various slopes, and the lower end can have a slope that compliments the higher end
         /// </summary>
         /// <returns></returns>
-        private static List<Point16> SplitRoof(AdvStructure structure, Point16 left, Point16 right) {
+        private static List<AnnotatedPoint16> SplitRoof(AdvStructure structure, Point16 left, Point16 right) {
             bool leftRoofHigher = left.Y < right.Y;
             int length = right.X - left.X;
             int upperRoofBottomY = leftRoofHigher ? left.Y : right.Y;
@@ -700,22 +710,22 @@ public static class StructureLayoutHelper {
             bool hasSlopedSideRoof = structure.LayoutRandom.NextBool(3, 4);
             bool hasPeak = structure.LayoutRandom.NextBool(3, 4);
 
-            List<Point16> path;
+            List<AnnotatedPoint16> path;
             if (hasSlopedSideRoof) {
                 int lowerRoofOffset = (int)(sideRoofSlope * lowerRoofLength);
                 path = [
-                    new Point16(left.X, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
-                    new Point16(unevenRoofStartX, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY - lowerRoofOffset),
-                    new Point16(unevenRoofStartX, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY - lowerRoofOffset),
-                    new Point16(right.X, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY)
+                    new AnnotatedPoint16(left.X, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY, ""),
+                    new AnnotatedPoint16(unevenRoofStartX, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY - lowerRoofOffset, "Left_Section"),
+                    new AnnotatedPoint16(unevenRoofStartX, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY - lowerRoofOffset, "Middle_Split"),
+                    new AnnotatedPoint16(right.X, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY, "Right_Section")
                 ];
             }
             else {
                 path = [
-                    new Point16(left.X, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
-                    new Point16(unevenRoofStartX, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
-                    new Point16(unevenRoofStartX, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY),
-                    new Point16(right.X, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY)
+                    new AnnotatedPoint16(left.X, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY, ""),
+                    new AnnotatedPoint16(unevenRoofStartX, leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY, "Left_Flat"),
+                    new AnnotatedPoint16(unevenRoofStartX, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY, "Middle_Split"),
+                    new AnnotatedPoint16(right.X, !leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY, "Right_Flat")
                 ];
             }
 
@@ -726,8 +736,8 @@ public static class StructureLayoutHelper {
                     ? (int)Math.Ceiling(left.X + higherRoofLength * 0.5)
                     : (int)Math.Ceiling(unevenRoofStartX + higherRoofLength * 0.5);
                 int roofPeakOffset = (int)(peakRoofSlope * 0.5 * higherRoofLength);
-                path.Insert(leftRoofHigher ? 1 : 3, new Point16(roofPeakX, upperRoofBottomY - roofPeakOffset));
-                if (higherRoofLength % 2 == 1) path.Insert(leftRoofHigher ? 1 : 3, new Point16(roofPeakX - 1, upperRoofBottomY - roofPeakOffset));
+                path.Insert(leftRoofHigher ? 1 : 3, new AnnotatedPoint16(roofPeakX, upperRoofBottomY - roofPeakOffset, "MiddlePeak"));
+                if (higherRoofLength % 2 == 1) path.Insert(leftRoofHigher ? 1 : 3, new AnnotatedPoint16(roofPeakX - 1, upperRoofBottomY - roofPeakOffset, "MiddlePeak_SideEvening"));
             }
 
             return path;
@@ -748,7 +758,7 @@ public static class StructureLayoutHelper {
             int fullLength = right.X - left.X - 2 + 2 * wallThickness;
 
             // make a switch; split roof can also be when rectangle rooms are forced
-            List<Point16> path;
+            List<AnnotatedPoint16> path;
             path = WavyPeak(param.Structure, left, right);
             // if (forceFlat)
             //     path = FlatRoof(left, right);

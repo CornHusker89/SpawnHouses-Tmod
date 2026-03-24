@@ -28,9 +28,9 @@ public class RoomLayout {
     public List<Gap> Gaps;
     public List<Room> Rooms;
 
-    public List<Shape> FloorVolumes;
-    public List<Shape> WallVolumes;
-    public List<Shape> RoomVolumes;
+    public List<(Shape volume, string name)> FloorVolumes;
+    public List<(Shape volume, string name)> WallVolumes;
+    public List<(Shape volume, string name)> RoomVolumes;
 
     /// <summary>
     ///     constructor which uses volumes to represent components
@@ -40,7 +40,7 @@ public class RoomLayout {
     /// <param name="wallVolumes"></param>
     /// <param name="roomVolumes"></param>
     /// <param name="convertToComponents"></param>
-    public RoomLayout(AdvStructure structure, List<Shape> floorVolumes, List<Shape> wallVolumes, List<Shape> roomVolumes, bool convertToComponents) {
+    public RoomLayout(AdvStructure structure, List<(Shape volume, string name)> floorVolumes, List<(Shape volume, string name)> wallVolumes, List<(Shape volume, string name)> roomVolumes, bool convertToComponents) {
         Structure = structure;
         FloorVolumes = floorVolumes;
         WallVolumes = wallVolumes;
@@ -71,14 +71,14 @@ public class RoomLayout {
     /// </summary>
     /// <param name="point"></param>
     /// <returns></returns>
-    public bool InFloors(Point16 point) => ComponentMode ? Floors.Any(floor => floor.Geometry.Contains(point)) : FloorVolumes.Any(floorVolume => floorVolume.Contains(point));
+    public bool InFloors(Point16 point) => ComponentMode ? Floors.Any(floor => floor.Geometry.Contains(point)) : FloorVolumes.Any(floorVolume => floorVolume.volume.Contains(point));
 
     /// <summary>
     ///     if the point is within any wall volume
     /// </summary>
     /// <param name="point"></param>
     /// <returns></returns>
-    public bool InWalls(Point16 point) => ComponentMode ? Walls.Any(wall => wall.Geometry.Contains(point)) : WallVolumes.Any(wallVolume => wallVolume.Contains(point));
+    public bool InWalls(Point16 point) => ComponentMode ? Walls.Any(wall => wall.Geometry.Contains(point)) : WallVolumes.Any(wallVolume => wallVolume.volume.Contains(point));
 
     /// <summary>
     ///     if the point is within any room volume
@@ -96,7 +96,7 @@ public class RoomLayout {
     /// </summary>
     /// <param name="point"></param>
     /// <returns></returns>
-    public bool InRooms(Point16 point) => ComponentMode ? Rooms.Any(room => room.Geometry.Contains(point)) : RoomVolumes.Any(roomVolume => roomVolume.Contains(point));
+    public bool InRooms(Point16 point) => ComponentMode ? Rooms.Any(room => room.Geometry.Contains(point)) : RoomVolumes.Any(roomVolume => roomVolume.volume.Contains(point));
 
     /// <summary>
     ///     checks if the point is contained within any volume
@@ -153,9 +153,9 @@ public class RoomLayout {
     /// </summary>
     /// <param name="offset"></param>
     public void Offset(Point16 offset) {
-        foreach (Shape shape in FloorVolumes) shape.Move(offset);
-        foreach (Shape shape in WallVolumes) shape.Move(offset);
-        foreach (Shape shape in RoomVolumes) shape.Move(offset);
+        foreach ((Shape volume, _) in FloorVolumes) volume.Move(offset);
+        foreach ((Shape volume, _) in WallVolumes) volume.Move(offset);
+        foreach ((Shape volume, _) in RoomVolumes) volume.Move(offset);
 
         if (!ComponentMode) return;
 
@@ -199,18 +199,17 @@ public class RoomLayout {
                     pos += step;
 
                 Room foundRoom = RoomHelper.GetRoomFromPos(Rooms, pos);
-                if (foundRoom?.InteriorRank > room.InteriorRank) foundRoom = null; // invalidate casts that find a room more interior
+                if (foundRoom?.InteriorRank > room.InteriorRank) foundRoom = null; // invalidate casts that find a room more interior than this one
                 if (foundRoom == room) foundRoom = null; // invalidate casts that find its own room
-
-                if (direction != lastDirection && curGapVolumes.Count != 0) {
-                    roomGaps.Add(new Gap(new VolumeComponentParams(Structure), Shape.Union(curGapVolumes), room, lastRoom, isHorizontal));
-                    curGapVolumes = [];
-                }
 
                 if (foundRoom != null) {
                     if (curGapVolumes.Count == 0) {
                         isHorizontal = direction is Directions.Left or Directions.Right;
                         lastRoom = foundRoom;
+                    }
+                    else if (direction != lastDirection) {
+                        roomGaps.Add(new Gap(new VolumeComponentParams(Structure), Shape.Union(curGapVolumes), room, lastRoom, isHorizontal, isHorizontal ? "Interior_Horizontal_Gap_#" : "Interior_Vertical_Gap_#"));
+                        curGapVolumes = [];
                     }
 
                     curGapVolumes.Add(new Shape(pos - step, new Point16(x, y) + step));
@@ -218,7 +217,7 @@ public class RoomLayout {
                 else {
                     // reset curGapSection
                     if (curGapVolumes.Count != 0) {
-                        roomGaps.Add(new Gap(Structure, Shape.Union(curGapVolumes), room, lastRoom, isHorizontal));
+                        roomGaps.Add(new Gap(Structure, Shape.Union(curGapVolumes), room, lastRoom, isHorizontal, isHorizontal ? "Interior_Horizontal_Gap_#" : "Interior_Vertical_Gap_#"));
                         curGapVolumes = [];
                     }
                 }
@@ -364,9 +363,9 @@ public class RoomLayout {
         Gaps = [];
         Rooms = [];
 
-        foreach (Shape shape in FloorVolumes) Floors.Add(new Floor(new VolumeComponentParams(Structure), shape));
-        foreach (Shape shape in WallVolumes) Walls.Add(new Wall(new VolumeComponentParams(Structure), shape));
-        foreach (Shape shape in RoomVolumes) Rooms.Add(new Room(new VolumeComponentParams(Structure), shape, []));
+        foreach ((Shape volume, string name) in FloorVolumes) Floors.Add(new Floor(new VolumeComponentParams(Structure), volume, name));
+        foreach ((Shape volume, string name) in WallVolumes) Walls.Add(new Wall(new VolumeComponentParams(Structure), volume, name));
+        foreach ((Shape volume, string name) in RoomVolumes) Rooms.Add(new Room(new VolumeComponentParams(Structure), volume, name, []));
 
         FloorVolumes = null;
         WallVolumes = null;

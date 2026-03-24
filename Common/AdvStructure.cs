@@ -100,7 +100,7 @@ public class AdvStructure : IDebugDraw {
     public void ApplyLayoutMethod(StructureLayoutGenerator generator = null) {
         if (StructureLayout != null) throw new Exception("this AdvStructure already has a layout set");
 
-        StructureLayout = new StructureLayout(LayoutParam);
+        StructureLayout = new StructureLayout(LayoutParam, "Layout_Type");
         StructureLayout.ExecuteGenerator();
         if (StructureLayout == null || Tilemap == null)
             FailedLayoutGeneration = true;

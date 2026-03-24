@@ -45,7 +45,8 @@ public class Roof : PathComponent {
     /// <param name="path"></param>
     /// <param name="startExtendable"></param>
     /// <param name="endExtendable"></param>
-    public Roof(PathComponentParams p, Path path, bool startExtendable, bool endExtendable) : base(p, path) {
+    /// <param name="name"></param>
+    public Roof(PathComponentParams p, Path path, bool startExtendable, bool endExtendable, string name) : base(p, path, name) {
         StartExtendable = startExtendable;
         EndExtendable = endExtendable;
         p.TagsRequired.Add(Tags.External);
@@ -58,7 +59,8 @@ public class Roof : PathComponent {
     /// <param name="path"></param>
     /// <param name="startExtendable"></param>
     /// <param name="endExtendable"></param>
-    public Roof(AdvStructure structure, Path path, bool startExtendable, bool endExtendable) : base(new PathComponentParams(structure), path) {
+    /// <param name="name"></param>
+    public Roof(AdvStructure structure, Path path, bool startExtendable, bool endExtendable, string name) : base(new PathComponentParams(structure), path, name) {
         StartExtendable = startExtendable;
         EndExtendable = endExtendable;
         Params.TagsRequired.Add(Tags.External);

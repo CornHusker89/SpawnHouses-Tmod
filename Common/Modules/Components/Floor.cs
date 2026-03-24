@@ -9,7 +9,8 @@ public class Floor : VolumeComponent {
     /// </summary>
     /// <param name="p"></param>
     /// <param name="shape"></param>
-    public Floor(VolumeComponentParams p, Shape shape) : base(p, shape) {
+    /// <param name="name"></param>
+    public Floor(VolumeComponentParams p, Shape shape, string name) : base(p, shape, name) {
     }
 
     /// <summary>
@@ -17,6 +18,7 @@ public class Floor : VolumeComponent {
     /// </summary>
     /// <param name="structure"></param>
     /// <param name="shape"></param>
-    public Floor(AdvStructure structure, Shape shape) : base(new VolumeComponentParams(structure), shape) {
+    /// <param name="name"></param>
+    public Floor(AdvStructure structure, Shape shape, string name) : base(new VolumeComponentParams(structure), shape, name) {
     }
 }
