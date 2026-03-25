@@ -23,7 +23,7 @@ public class Shape : PointGeometry {
     private bool[,]? _booleanTilemap;
 
     /// <summary>
-    ///     2d array of this shape showing if there is a tile, always 0-indexed
+    ///     2d array of this shape showing if there is a tile, 0-indexed but has a 1-tile buffer on every edge 
     /// </summary>
     public bool[,] BooleanTilemap {
         get { return _booleanTilemap ??= GetBooleanTilemap(); }
@@ -314,13 +314,13 @@ public class Shape : PointGeometry {
     /// </summary>
     /// <returns></returns>
     private bool[,] GetBooleanTilemap() {
-        bool[,] tilemap = new bool[Size.X, Size.Y];
-        ExecuteInArea((x, y) => { tilemap[x - BoundingBox.topLeft.X, y - BoundingBox.topLeft.Y] = true; });
+        bool[,] tilemap = new bool[Size.X + 2, Size.Y + 2];
+        ExecuteInArea((x, y) => { tilemap[x + 1 - BoundingBox.topLeft.X, y + 1 - BoundingBox.topLeft.Y] = true; });
         return tilemap;
     }
 
     /// <summary>
-    ///     gets a path the shape, in world coordinates (not tile)
+    ///     gets a path of the shape, in world coordinates (not tile)
     /// </summary>
     /// <returns></returns>
     private Point16[] GetExteriorDrawPath() {
@@ -337,7 +337,7 @@ public class Shape : PointGeometry {
         int maxTravelCount = Size.X * Size.Y;
 
         do {
-            int index = GeometryHelper.GetMarchingSquareIndex((x, y) => BooleanTilemap[x - Size.X, y - Size.Y], pos.X, pos.Y, Size);
+            int index = GeometryHelper.GetMarchingSquareIndex((x, y) => BooleanTilemap[x, y], pos.X - BoundingBox.topLeft.X, pos.Y - BoundingBox.topLeft.Y, Size);
             directionPoint16 = GeometryHelper.GetDirectionFromSquareIndex(index, directionPoint16);
 
             // before the new position is calculated

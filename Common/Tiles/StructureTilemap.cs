@@ -15,7 +15,7 @@ namespace SpawnHouses.Common.Tiles;
 
 public class StructureTilemap : IDebugDraw {
     public DebugInfoLevel DebugInfoVisibility { get; set; }
-    public string Name => Structure.Name + " Tilemap";
+    public string Name => Structure.Name + "_Tilemap";
 
     private readonly StructureTile[,] _tiles;
     public readonly AdvStructure Structure;
@@ -76,15 +76,60 @@ public class StructureTilemap : IDebugDraw {
         }
     }
 
+    /// <summary>
+    ///     uses coordinates relative to this tilemap
+    /// </summary>
+    /// <param name="point"></param>
     public StructureTile this[Point16 point] => this[point.X, point.Y];
 
+    /// <summary>
+    ///     uses coordinates relative to this tilemap
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
     public bool InBounds(int x, int y) => x >= 0 && x < Width && y >= 0 && y < Height;
 
+    /// <summary>
+    ///     uses coordinates relative to this tilemap
+    /// </summary>
+    /// <param name="point"></param>
+    /// <returns></returns>
     public bool InBounds(Point16 point) => InBounds(point.X, point.Y);
 
+    /// <summary>
+    ///     if this point's tile <see cref="StructureTile.IsInside" /> is true. uses coordinates relative to this tilemap.
+    ///     checks for being in tilemap bounds
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
     public bool InInterior(int x, int y) => InBounds(x, y) && this[x, y].IsInside;
 
+    /// <summary>
+    ///     uif this point's tile <see cref="StructureTile.IsInside" /> is true. uses coordinates relative to this tilemap.
+    ///     checks for being in tilemap bounds
+    /// </summary>
+    /// <param name="point"></param>
+    /// <returns></returns>
     public bool InInterior(Point16 point) => InInterior(point.X, point.Y);
+
+    /// <summary>
+    ///     if this point's tile <see cref="StructureTile.IsInside" /> is true. uses coordinates relative to this tilemap.
+    ///     does not check for being in tilemap bounds
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
+    public bool InInteriorUnsafe(int x, int y) => this[x, y].IsInside;
+
+    /// <summary>
+    ///     if this point's tile <see cref="StructureTile.IsInside" /> is true. uses coordinates relative to this tilemap.
+    ///     does not check for being in tilemap bounds
+    /// </summary>
+    /// <param name="point"></param>
+    /// <returns></returns>
+    public bool InInteriorUnsafe(Point16 point) => InInteriorUnsafe(point.X, point.Y);
 
     /// <summary>
     ///     gets tile from this tilemap using global tile coordinates
@@ -258,11 +303,47 @@ public class StructureTilemap : IDebugDraw {
             StructureTile.SetFrames(ConvertToGlobal(x, y));
     }
 
-    public void VisualizeExteriorTiles() {
-        for (int x = 0; x < Width; x++)
-        for (int y = 0; y < Height; y++) {
-            StructureTile tile = this[x, y];
-            if (!tile.IsExteriorComponent) _tiles[x, y] = null;
+    /// <summary>
+    ///     creates a representation of the tilemap with <see cref="SolidDebugTile" /> and <see cref="NonSolidDebugTile" />
+    /// </summary>
+    /// <returns></returns>
+    public IDebugTile?[,] CreateDebugTilemap() {
+        // set base tiles
+        var debugTilemap = new IDebugTile?[Width, Height];
+        for (int x = 0; x < Width; x++) {
+            for (int y = 0; y < Height; y++) {
+                StructureTile tile = this[x, y];
+                if (tile.IsExteriorComponent || tile.IsFloor || tile.IsWall || tile.IsGap) {
+                    SolidDebugTile debugTile = new();
+                    tile.CopyTo(debugTile);
+                    debugTilemap[x, y] = debugTile;
+                }
+                else if (tile.IsInside) {
+                    NonSolidDebugTile debugTile = new();
+                    tile.CopyTo(debugTile);
+                    debugTilemap[x, y] = debugTile;
+                }
+                else {
+                    debugTilemap[x, y] = null;
+                }
+            }
         }
+
+        // link tiles to their components
+        List<IComponent>? components = null;
+        if (Structure.StructureLayout.AllComponents != null)
+            components = Structure.StructureLayout.AllComponents;
+        else if (Structure.StructureLayout.ExternalComponents != null)
+            components = Structure.StructureLayout.ExternalComponents;
+
+        if (components != null)
+            foreach (IComponent component in components)
+                if (component is VolumeComponent volumeComponent)
+                    volumeComponent.Geometry.ExecuteInArea((x, y) => {
+                        if (InBounds(x, y) && debugTilemap[x, y] != null) debugTilemap[x, y]!.SetComponent(volumeComponent);
+                    });
+
+
+        return debugTilemap;
     }
 }

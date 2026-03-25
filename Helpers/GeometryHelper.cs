@@ -5,11 +5,12 @@ namespace SpawnHouses.Helpers;
 
 public static class GeometryHelper {
     /// <summary>
-    ///     converts 2x2 grid cell into a marching square index
+    ///     converts 2x2 grid cell into a marching square index. assumes that x and y are 0 indexed
     /// </summary>
-    /// <param name="isInside">does not </param>
+    /// <param name="isInside"></param>
     /// <param name="x"></param>
     /// <param name="y"></param>
+    /// <param name="size"></param>
     /// <returns></returns>
     public static int GetMarchingSquareIndex(Condition2D isInside, int x, int y, Point16 size) {
         int value = 0;
@@ -18,15 +19,15 @@ public static class GeometryHelper {
             value |= 1;
 
         // bottom-right
-        if (isInside.Invoke(x + 1, y) && size.X < x + 1)
+        if (x < size.X - 1 && isInside.Invoke(x + 1, y))
             value |= 2;
 
         // top-right
-        if (isInside.Invoke(x + 1, y - 1) && size.X < x + 1 && y - 1 >= 0)
+        if (x < size.X - 1 && y > 0 && isInside.Invoke(x + 1, y - 1))
             value |= 4;
 
         // top-left
-        if (isInside.Invoke(x, y - 1) && y - 1 >= 0)
+        if (y > 0 && isInside.Invoke(x, y - 1))
             value |= 8;
         
         return value;

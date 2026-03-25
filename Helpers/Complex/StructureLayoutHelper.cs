@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.Common;
+using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
@@ -431,14 +432,15 @@ public static class StructureLayoutHelper {
             Point16 tilemapSize = new(tilemap.Width, tilemap.Height);
             for (int y = 0; y < tilemap.Height - 1 && start == null; y++)
             for (int x = 0; x < tilemap.Width - 1; x++)
-                if (GeometryHelper.GetMarchingSquareIndex((tilemapX, tilemapY) => tilemap.InInterior(tilemapX - tilemapSize.X, tilemapY - tilemapSize.Y),
-                        x, y, tilemapSize) != 0) {
+                if (GeometryHelper.GetMarchingSquareIndex(tilemap.InInteriorUnsafe, x, y, tilemapSize) != 0) {
                     start = new Point16(x, y);
                     break;
                 }
 
-            if (start == null)
+            if (start == null) {
+                var thing = tilemap.CreateDebugTilemap();
                 throw new Exception("tilemap did not have any interior tiles");
+            }
 
             Point16 pos = start.Value;
             Point16 dir = new(0, 1);
@@ -450,8 +452,7 @@ public static class StructureLayoutHelper {
                 // add previous iteration's position
                 visited.Add(pos);
 
-                int squareIndex = GeometryHelper.GetMarchingSquareIndex((tilemapX, tilemapY) => tilemap.InInterior(tilemapX - tilemapSize.X, tilemapY - tilemapSize.Y),
-                    pos.X, pos.Y, tilemapSize);
+                int squareIndex = GeometryHelper.GetMarchingSquareIndex(tilemap.InInteriorUnsafe, pos.X, pos.Y, tilemapSize);
                 Point16 nextDir = GeometryHelper.GetDirectionFromSquareIndex(squareIndex, dir);
 
                 Point16 outlineOffset = squareIndex switch {
@@ -537,13 +538,15 @@ public static class StructureLayoutHelper {
         ///     creates a room
         /// </summary>
         /// <param name="param"></param>
+        /// <param name="structureLayout"></param>
         /// <param name="exteriorFloors"></param>
         /// <param name="exteriorWalls"></param>
         /// <param name="externalFloorThickness"></param>
         /// <param name="externalWallThickness"></param>
         /// <returns></returns>
-        public static Room Action(StructureLayoutParams param, List<Floor> exteriorFloors, List<Wall> exteriorWalls, int externalFloorThickness, int externalWallThickness) {
+        public static Room Action(StructureLayoutParams param, StructureLayout structureLayout, List<Floor> exteriorFloors, List<Wall> exteriorWalls, int externalFloorThickness, int externalWallThickness) {
             var externalGaps = GapsFromEntryPoints(param.Structure, param.EntryPoints, externalFloorThickness, externalWallThickness).ToList();
+            structureLayout.SetExternalGapComponents(externalGaps);
             TagMap.AddRequiredToEach(externalGaps, Tags.External);
             SetTilesExternalStatus(param, exteriorFloors, exteriorWalls, externalGaps);
             Room internalRoom = new(param.Structure, GetStructureInterior(param.Structure.Tilemap), "R_InteriorBase", externalGaps);

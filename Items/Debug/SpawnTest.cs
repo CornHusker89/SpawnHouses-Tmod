@@ -5,8 +5,6 @@ using SpawnHouses.Common.Palette;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types;
-using SpawnHouses.Common.Types.Geometry;
-using SpawnHouses.Helpers.Complex;
 using SpawnHouses.Structures;
 using Terraria;
 using Terraria.DataStructures;
@@ -40,7 +38,7 @@ public class SpawnTest : ModItem {
         requiredTags.Add(Tags.HasRooms, new Range(5, 7).Evaluate(scale));
         requiredTags.Add(Tags.HasHousing, new Range(5, 7).Evaluate(scale));
         Structure = new AdvStructure(
-            "test",
+            "Test",
             new StructureLayoutParams(
                 requiredTags,
                 [
@@ -62,11 +60,11 @@ public class SpawnTest : ModItem {
             generate: true
         );
 
-        Point16 left = new(x, y - 15);
-        Point16 right = new(x + 25, y - 15);
-        var points = StructureLayoutHelper.CreateRoof.WavyPeak(Structure, left, right);
-        Path path = new(points);
-        Shape shape = path.ToShape(1);
+        // Point16 left = new(x, y - 15);
+        // Point16 right = new(x + 25, y - 15);
+        // var points = StructureLayoutHelper.CreateRoof.WavyPeak(Structure, left, right);
+        // Path path = new(points);
+        // Shape shape = path.ToShape(1);
         // shape.ExecuteInArea((x2, y2) => {
         //     Tile tile = Main.tile[x2, y2];
         //     tile.HasTile = true;

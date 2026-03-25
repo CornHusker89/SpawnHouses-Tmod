@@ -1,3 +1,4 @@
+using System.Reflection;
 using SpawnHouses.Helpers;
 using Terraria;
 using Terraria.DataStructures;
@@ -10,6 +11,15 @@ namespace SpawnHouses.Common.Tiles;
 ///     has many of the same properties as the tML Tile, but uses direct references and has a few more properties
 /// </summary>
 public class StructureTile {
+    public static void SetFrames(int x, int y) {
+        WorldUtils.TileFrame(x, y);
+        Framing.WallFrame(x, y);
+    }
+
+    public static void SetFrames(Point16 point) {
+        SetFrames(point.X, point.Y);
+    }
+    
     /// <summary>
     ///     Resets the tile data at this position.<br />
     ///     Sets <see cref="HasTile" /> and <see cref="IsActuated" /> to <see langword="false" /> and sets the
@@ -40,7 +50,7 @@ public class StructureTile {
                 tile.HasTile = HasTile;
             }
             else {
-                Terraria.WorldGen.PlaceTile(x, y, TileType, true, style: Style);
+                WorldGen.PlaceTile(x, y, TileType, true, style: Style);
             }
 
             tile.IsActuated = IsActuated;
@@ -78,13 +88,10 @@ public class StructureTile {
         ApplySlopes(point.X, point.Y);
     }
 
-    public static void SetFrames(int x, int y) {
-        WorldUtils.TileFrame(x, y);
-        Framing.WallFrame(x, y);
-    }
-
-    public static void SetFrames(Point16 point) {
-        SetFrames(point.X, point.Y);
+    public void CopyTo(StructureTile tile) {
+        foreach (PropertyInfo property in typeof(StructureTile).GetProperties())
+            if (property.CanWrite)
+                property.SetValue(tile, property.GetValue(this, null), null);
     }
 
     #region Custom Fields

@@ -126,25 +126,26 @@ public static class StructureLayoutGen {
 
             // create exterior components
             exteriorFloors.Add(ExternalLayoutHelper.CreateFloor(param.Structure, floorTopY, param.LeftEntryPointX + 1 - (hasBasement ? 0 : externalWallThickness),
-                param.RightEntryPointX - 1 + (hasBasement ? 0 : externalWallThickness), true, externalFloorThickness));
+                param.RightEntryPointX - 1 + (hasBasement ? 0 : externalWallThickness), true, externalFloorThickness, "F_Main"));
 
             // if the top of either entry point is NOT flush with the roof
             if (left.Start.Y - 1 != (leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY))
                 exteriorWalls.Add(ExternalLayoutHelper.CreateWall(param.Structure, left.Start.X, left.Start.Y - 1,
-                    (leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY) + 1, false, externalWallThickness));
+                    (leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY) + 1, false, externalWallThickness, "W_TopSeal_LeftEntryPoint"));
             if (right.Start.Y - 1 != (!leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY))
                 exteriorWalls.Add(ExternalLayoutHelper.CreateWall(param.Structure, right.Start.X, right.Start.Y - 1,
-                    (!leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY) + 1, true, externalWallThickness));
+                    (!leftRoofHigher ? upperRoofBottomY : lowerRoofBottomY) + 1, true, externalWallThickness, "W_TopSeal_RightEntryPoint"));
 
             // if the bottom of either entry point is NOT flush with the floor
             if (left.End.Y + 1 != floorTopY)
                 exteriorWalls.Add(ExternalLayoutHelper.CreateWall(param.Structure, left.Start.X,
-                    left.End.Y + 1, floorTopY - 1 + externalFloorThickness, false, externalWallThickness));
+                    left.End.Y + 1, floorTopY - 1 + externalFloorThickness, false, externalWallThickness, "W_BottomSeal_LeftEntryPoint"));
             if (right.End.Y + 1 != floorTopY)
                 exteriorWalls.Add(ExternalLayoutHelper.CreateWall(param.Structure, right.Start.X,
-                    right.End.Y + 1, floorTopY - 1 + externalFloorThickness, true, externalWallThickness));
+                    right.End.Y + 1, floorTopY - 1 + externalFloorThickness, true, externalWallThickness, "W_BottomSeal_RightEntryPoint"));
 
-            Room internalRoom = StructureLayoutHelper.InitializeStructureInterior.Action(param, exteriorFloors, exteriorWalls, externalFloorThickness, externalWallThickness);
+            structureLayout.SetExternalComponents(exteriorFloors, exteriorWalls, roofs);
+            Room internalRoom = StructureLayoutHelper.InitializeStructureInterior.Action(param, structureLayout, exteriorFloors, exteriorWalls, externalFloorThickness, externalWallThickness);
 
             RoomLayoutParams roomLayoutParams = new(
                 param.Structure,
@@ -160,7 +161,7 @@ public static class StructureLayoutGen {
             param.TagsRequired.GetValueSafe(Tags.HasHousing, out int housingCount);
             structureLayout.TagsCurrent.Add(Tags.HasHousing, housingCount);
             structureLayout.TagsCurrent.Add(Tags.HasRooms, roomLayout.Rooms.Count);
-            structureLayout.SetComponents(exteriorFloors, exteriorWalls, internalRoom.Gaps, roofs, [roomLayout]);
+            structureLayout.SetInternalComponents([roomLayout]);
             
             foreach (Room room in param.Structure.StructureLayout.Rooms) {
                 //StructureLayoutHelper.CreateStairways.Action(param, room);

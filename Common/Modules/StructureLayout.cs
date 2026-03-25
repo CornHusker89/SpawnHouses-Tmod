@@ -10,15 +10,30 @@ using Terraria.DataStructures;
 namespace SpawnHouses.Common.Modules;
 
 public class StructureLayout : Generatable<StructureLayout, StructureLayoutParams, StructureLayoutGenerator> {
+    /// <summary>
+    ///     if external walls, floors, and roofs have been created and assigned. excludes any gaps, see <see cref="HasExternalGaps" />
+    /// </summary>
+    public bool HasExternalComponents;
+
+    /// <summary>
+    ///     if external gaps have been created and assigned
+    /// </summary>
+    public bool HasExternalGaps;
+
+    /// <summary>
+    ///     if all final components have been created and assigned
+    /// </summary>
+    public bool HasAllComponents;
+    
     public List<Floor> ExternalFloors { get; private set; }
     public List<Wall> ExternalWalls { get; private set; }
     public List<Gap> ExternalGaps { get; private set; }
     public List<Roof> Roofs { get; private set; }
     public List<RoomLayout> RoomLayouts { get; private set; }
-
-    public List<IComponent> ExternalComponents { get; private set; }
+    
     public (Point16 topLeft, Point16 bottomRight) BoundingBox { get; private set; }
 
+    public List<IComponent> ExternalComponents { get; private set; }
     /// <summary>
     ///     any <see cref="Room" />s are at the very end of the list
     /// </summary>
@@ -63,65 +78,91 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
 
         if (DebugInfoVisibility.DisplayName) DrawHelper.DrawText(Name, BoundingBox.topLeft * new Point16(16) - new Point16(16, 16), color);
 
-        if (AllComponents != null)
+        if (HasAllComponents)
             foreach (IComponent component in AllComponents)
                 component?.DrawDebugInfo();
+        else if (HasExternalComponents) {
+            foreach (IComponent component in ExternalComponents)
+                component?.DrawDebugInfo();
+        }
     }
 
     /// <summary>
-    ///     sets the components of this structure layout, and calls <see cref="UpdateComponentList" />
+    ///     sets the EXTERNAL components of this structure layout excluding gaps, and calls <see cref="UpdateComponentList" />
     /// </summary>
     /// <param name="externalFloors"></param>
     /// <param name="externalWalls"></param>
-    /// <param name="externalGaps"></param>
     /// <param name="roofs"></param>
-    /// <param name="roomLayouts"></param>
-    public void SetComponents(List<Floor> externalFloors, List<Wall> externalWalls, List<Gap> externalGaps, List<Roof> roofs, List<RoomLayout> roomLayouts) {
+    public void SetExternalComponents(List<Floor> externalFloors, List<Wall> externalWalls, List<Roof> roofs) {
         ExternalFloors = externalFloors;
         ExternalWalls = externalWalls;
-        ExternalGaps = externalGaps;
         Roofs = roofs;
-        RoomLayouts = roomLayouts;
-        ExternalComponents = [];
-        AllComponents = [];
         
+        ExternalComponents = [];
+        HasExternalComponents = true;
         UpdateComponentList();
     }
 
     /// <summary>
-    ///     resets <see cref="AllComponents" /> and rebuilds the list using the current lists of components.
-    ///     also updates the bounds
+    ///     sets the EXTERNAL gap components of this structure layout, calls <see cref="UpdateComponentList" />
+    /// </summary>
+    /// <param name="externalGaps"></param>
+    public void SetExternalGapComponents(List<Gap> externalGaps) {
+        ExternalGaps = externalGaps;
+
+        HasExternalGaps = true;
+        UpdateComponentList();
+    }
+
+    /// <summary>
+    ///     sets the INTERIOR components of this structure layout, and calls <see cref="UpdateComponentList" />
+    /// </summary>
+    /// <param name="roomLayouts"></param>
+    public void SetInternalComponents(List<RoomLayout> roomLayouts) {
+        RoomLayouts = roomLayouts;
+
+        AllComponents = [];
+        HasAllComponents = true;
+        UpdateComponentList();
+    }
+
+    /// <summary>
+    ///     rebuilds <see cref="ExternalComponents"/> and <see cref="AllComponents" /> using the current lists of components.
+    ///     also updates the bounding box
     /// </summary>
     public void UpdateComponentList() {
-        ExternalComponents.Clear();
-        AllComponents.Clear();
+        if (HasExternalComponents) {
+            ExternalComponents.Clear();
+            ExternalComponents.AddRange(ExternalFloors);
+            ExternalComponents.AddRange(ExternalWalls);
+            ExternalComponents.AddRange(Roofs);
 
-        ExternalComponents.AddRange(ExternalFloors);
-        ExternalComponents.AddRange(ExternalWalls);
-        ExternalComponents.AddRange(ExternalGaps);
-        ExternalComponents.AddRange(Roofs);
+            if (HasExternalGaps)
+                ExternalComponents.AddRange(ExternalGaps);
 
-        AllComponents.AddRange(ExternalComponents);
-        foreach (RoomLayout roomLayout in RoomLayouts) {
-            AllComponents.AddRange(roomLayout.Floors);
-            AllComponents.AddRange(roomLayout.Walls);
-            AllComponents.AddRange(roomLayout.Gaps);
+            int minX = int.MaxValue, minY = int.MaxValue, maxX = 0, maxY = 0;
+            foreach (IComponent component in ExternalComponents) {
+                if (component.Geometry.BoundingBox.topLeft.X < minX) minX = component.Geometry.BoundingBox.topLeft.X;
+                if (component.Geometry.BoundingBox.topLeft.Y < minY) minY = component.Geometry.BoundingBox.topLeft.Y;
+                if (component.Geometry.BoundingBox.bottomRight.X > maxX) maxX = component.Geometry.BoundingBox.bottomRight.X;
+                if (component.Geometry.BoundingBox.bottomRight.Y > maxY) maxY = component.Geometry.BoundingBox.bottomRight.Y;
+            }
+
+            BoundingBox = (new Point16(minX, minY), new Point16(maxX, maxY));
         }
 
-        // put rooms at the very end of the list
-        foreach (RoomLayout roomLayout in RoomLayouts) {
-            AllComponents.AddRange(roomLayout.Rooms);
-        }
+        if (HasAllComponents) {
+            AllComponents.Clear();
+            AllComponents.AddRange(ExternalComponents);
+            foreach (RoomLayout roomLayout in RoomLayouts) {
+                AllComponents.AddRange(roomLayout.Floors);
+                AllComponents.AddRange(roomLayout.Walls);
+                AllComponents.AddRange(roomLayout.Gaps);
+            }
 
-        int minX = int.MaxValue, minY = int.MaxValue, maxX = 0, maxY = 0;
-        foreach (IComponent component in AllComponents) {
-            if (component.Geometry.BoundingBox.topLeft.X < minX) minX = component.Geometry.BoundingBox.topLeft.X;
-            if (component.Geometry.BoundingBox.topLeft.Y < minY) minY = component.Geometry.BoundingBox.topLeft.Y;
-            if (component.Geometry.BoundingBox.bottomRight.X > maxX) maxX = component.Geometry.BoundingBox.bottomRight.X;
-            if (component.Geometry.BoundingBox.bottomRight.Y > maxY) maxY = component.Geometry.BoundingBox.bottomRight.Y;
+            // put rooms at the very end of the list
+            foreach (RoomLayout roomLayout in RoomLayouts) AllComponents.AddRange(roomLayout.Rooms);
         }
-
-        BoundingBox = (new Point16(minX, minY), new Point16(maxX, maxY));
     }
 
     /// <summary>
