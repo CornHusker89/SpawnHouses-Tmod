@@ -19,7 +19,9 @@ public class DebugInfoLevel {
     public bool DisplayGenerator => (_value & 32) == 32;
 
     public override string ToString() => _value.ToString();
-    public string GetDetailedString() => $"value: {_value}, Bounds: {DisplayBounds}, Points: {DisplayPoints}, DisplayName: {DisplayName}";
+
+    public string GetDetailedString() => $"value: {_value}, Bounds: {DisplayBounds}, Points: {DisplayPoints}, DisplayName: {DisplayName}, " +
+                                         $"DisplayType: {DisplayType}, DisplayId: {DisplayId}, DisplayGenerator: {DisplayGenerator}";
 
     /// <summary>
     ///     progresses through all possible options (adds 1 to internal value)

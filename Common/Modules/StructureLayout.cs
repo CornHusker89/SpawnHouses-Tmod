@@ -63,7 +63,7 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
         Color color = DrawHelper.GetColor(Id);
 
         if (DebugInfoVisibility.DisplayBounds) {
-            Point16 topLeftWorldPos = BoundingBox.topLeft * new Point16(16);
+            Point16 topLeftWorldPos = Params.Structure.Tilemap.ConvertToGlobal(BoundingBox.topLeft) * new Point16(16);
             DrawHelper.DrawRectangle(
                 new Rectangle(
                     topLeftWorldPos.X,

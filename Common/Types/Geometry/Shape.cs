@@ -350,7 +350,7 @@ public class Shape : PointGeometry {
                     if (lastDir == (1, 0))
                         path.Add(worldCoordPos + topLeftOffset);
                     if (lastDir == (0, -1)) {
-                        path.Add(worldCoordPos + bottomRightOffset);
+                        path.Add(worldCoordPos + bottomLeftOffset);
                         path.Add(worldCoordPos + topLeftOffset);
                     }
 
@@ -374,8 +374,8 @@ public class Shape : PointGeometry {
                     if (lastDir == (0, 1))
                         path.Add(worldCoordPos + topRightOffset);
                     if (lastDir == (1, 0)) {
-                        path.Add(worldCoordPos + topRightOffset);
                         path.Add(worldCoordPos + topLeftOffset);
+                        path.Add(worldCoordPos + topRightOffset);
                     }
 
                     path.Add(worldCoordPos + bottomRightOffset);
@@ -385,12 +385,17 @@ public class Shape : PointGeometry {
                 case (0, -1):
                     if (lastDir == (0, -1))
                         path.Add(worldCoordPos + bottomLeftOffset);
-                    if (lastDir == (-1, 0))
+                    if (lastDir == (-1, 0)) {
+                        path.Add(worldCoordPos + bottomRightOffset);
                         path.Add(worldCoordPos + bottomLeftOffset);
-                    path.Add(worldCoordPos + bottomRightOffset);
+                    }
+                    
                     path.Add(worldCoordPos + topLeftOffset);
                     break;
             }
+
+            if (path.Count > 2 && path[^1].X != path[^2].X && path[^1].Y != path[^2].Y)
+                Console.WriteLine("ah fuck");
 
             pos += directionPoint16;
             travelCount++;
