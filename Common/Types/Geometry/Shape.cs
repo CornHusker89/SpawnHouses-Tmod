@@ -26,7 +26,10 @@ public class Shape : PointGeometry {
     ///     2d array of this shape showing if there is a tile, 0-indexed but has a 1-tile buffer on every edge 
     /// </summary>
     public bool[,] BooleanTilemap {
-        get { return _booleanTilemap ??= GetBooleanTilemap(); }
+        get {
+            MakeBooleanTilemap();
+            return _booleanTilemap;
+        }
     }
 
 
@@ -37,7 +40,7 @@ public class Shape : PointGeometry {
     /// </summary>
     /// <returns></returns>
     public Point16[] ExteriorDrawPath {
-        get { return _exteriorPath ??= GetExteriorDrawPath(); }
+        get { return _exteriorPath ??= GetExteriorDrawPath(DrawHelper.DebugDrawWidth); }
     }
 
     protected sealed override void Init(Point16[] points, bool optimize) {
@@ -179,6 +182,16 @@ public class Shape : PointGeometry {
     public int GetUnusedBoundingBoxArea() => Size.X * Size.Y - GetArea();
 
     /// <summary>
+    ///     creates a new shape, moved by the offset. ex. if offset = (3, 0) will move shape 3 to the right in world coordinates
+    /// </summary>
+    /// <param name="offset"></param>
+    public Shape GetMovedShape(Point16 offset) {
+        var newPoints = new Point16[Points.Length];
+        for (int i = 0; i < Points.Length; i++) newPoints[i] = Points[i] + offset;
+        return new Shape(newPoints, optimize: false);
+    }
+
+    /// <summary>
     ///     returns this geometry's points with a uniform expansion
     /// </summary>
     /// <param name="distance"></param>
@@ -310,97 +323,229 @@ public class Shape : PointGeometry {
     }
 
     /// <summary>
-    ///     get a 2d array of this shape showing if there is a tile, always 0-indexed
+    ///     makes a 2d bool array of this shape showing if there is a tile at a given local coordinate,
+    ///     always 0-indexed, puts into <see cref="_booleanTilemap"/>
     /// </summary>
     /// <returns></returns>
-    private bool[,] GetBooleanTilemap() {
-        bool[,] tilemap = new bool[Size.X + 2, Size.Y + 2];
-        ExecuteInArea((x, y) => { tilemap[x + 1 - BoundingBox.topLeft.X, y + 1 - BoundingBox.topLeft.Y] = true; });
-        return tilemap;
+    private void MakeBooleanTilemap() {
+        throw new NotImplementedException();
+    }
+
+    private enum Dir {
+        Up,
+        Right,
+        Down,
+        Left
+    }
+
+    private static (int x, int y) ToOffset(Dir d) => d switch {
+        Dir.Up => (0, -1),
+        Dir.Right => (1, 0),
+        Dir.Down => (0, 1),
+        Dir.Left => (-1, 0)
+    };
+
+    private Dir GetNextDir(int index, Dir current) {
+        return index switch {
+            1 => Dir.Down,
+            2 => Dir.Right,
+            3 => Dir.Right,
+            4 => Dir.Up,
+            5 => Dir.Up, // resolve ambiguity consistently
+            6 => Dir.Up,
+            7 => Dir.Up,
+            8 => Dir.Left,
+            9 => Dir.Down,
+            10 => Dir.Down, // resolve ambiguity consistently
+            11 => Dir.Right,
+            12 => Dir.Left,
+            13 => Dir.Down,
+            14 => Dir.Left,
+            _ => current
+        };
     }
 
     /// <summary>
     ///     gets a path of the shape, in world coordinates (not tile)
     /// </summary>
     /// <returns></returns>
-    private Point16[] GetExteriorDrawPath() {
-        Point16 topLeftOffset = new(0, 0);
-        Point16 topRightOffset = new(15, 0);
-        Point16 bottomLeftOffset = new(0, 15);
-        Point16 bottomRightOffset = new(15, 15);
+    private Point16[] GetExteriorDrawPath(int drawWidth) {
+        // Point16 topLeftOffset = new(0, 0);
+        // Point16 topRightOffset = new(16 - drawWidth, 0);
+        // Point16 bottomLeftOffset = new(0, 16 - drawWidth);
+        // Point16 bottomRightOffset = new(16 - drawWidth, 16 - drawWidth);
+        //
+        // List<Point16> path = [];
+        // Point16 pos = Points[0];
+        // (int X, int Y) dir = (0, 1);
+        // int travelCount = 0;
+        // int maxTravelCount = Size.X * Size.Y;
+        //
+        // do {
+        //     int marchingIndex = GeometryHelper.GetMarchingSquareIndex(
+        //         (x, y) => BooleanTilemap[x, y], 
+        //         pos.X - BoundingBox.topLeft.X, 
+        //         pos.Y - BoundingBox.topLeft.Y,
+        //         Size
+        //     );
+        //     Point16 directionPoint16 = GeometryHelper.GetDirectionFromSquareIndex(marchingIndex);
+        //
+        //     // before the new position is calculated
+        //     Point16 worldCoordPos = pos * new Point16(16);
+        //     (int X, int Y) lastDir = dir;
+        //     dir = (directionPoint16.X, directionPoint16.Y);
+        //     switch (dir) {
+        //         // right
+        //         case (1, 0):
+        //             if (lastDir == (1, 0))
+        //                 path.Add(worldCoordPos + topLeftOffset);
+        //             if (lastDir == (0, -1)) {
+        //                 path.Add(worldCoordPos + bottomLeftOffset);
+        //                 path.Add(worldCoordPos + topLeftOffset);
+        //             }
+        //
+        //             path.Add(worldCoordPos + topRightOffset);
+        //             break;
+        //
+        //         // left
+        //         case (-1, 0):
+        //             if (lastDir == (-1, 0))
+        //                 path.Add(worldCoordPos + bottomRightOffset);
+        //             if (lastDir == (0, 1)) {
+        //                 path.Add(worldCoordPos + topRightOffset);
+        //                 path.Add(worldCoordPos + bottomRightOffset);
+        //             }
+        //
+        //             path.Add(worldCoordPos + bottomLeftOffset);
+        //             break;
+        //
+        //         // down
+        //         case (0, 1):
+        //             if (lastDir == (0, 1))
+        //                 path.Add(worldCoordPos + topRightOffset);
+        //             if (lastDir == (1, 0)) {
+        //                 path.Add(worldCoordPos + topLeftOffset);
+        //                 path.Add(worldCoordPos + topRightOffset);
+        //             }
+        //
+        //             path.Add(worldCoordPos + bottomRightOffset);
+        //             break;
+        //
+        //         // up
+        //         case (0, -1):
+        //             if (lastDir == (0, -1))
+        //                 path.Add(worldCoordPos + bottomLeftOffset);
+        //             if (lastDir == (-1, 0)) {
+        //                 path.Add(worldCoordPos + bottomRightOffset);
+        //                 path.Add(worldCoordPos + bottomLeftOffset);
+        //             }
+        //             
+        //             path.Add(worldCoordPos + topLeftOffset);
+        //             break;
+        //     }
+        //
+        //     pos += directionPoint16;
+        //     travelCount++;
+        // } while (pos != Points[0] && travelCount < maxTravelCount);
+        //
+        // return path.ToArray();
 
-        List<Point16> path = [];
-        Point16 pos = Points[0];
-        Point16 directionPoint16 = new(0, 1);
-        (int X, int Y) dir = (0, 1);
-        int travelCount = 0;
-        int maxTravelCount = Size.X * Size.Y;
 
-        do {
-            int index = GeometryHelper.GetMarchingSquareIndex((x, y) => BooleanTilemap[x, y], pos.X - BoundingBox.topLeft.X, pos.Y - BoundingBox.topLeft.Y, Size);
-            directionPoint16 = GeometryHelper.GetDirectionFromSquareIndex(index, directionPoint16);
+        var path = new List<Point16>();
 
-            // before the new position is calculated
-            Point16 worldCoordPos = pos * new Point16(16);
-            (int X, int Y) lastDir = dir;
-            dir = (directionPoint16.X, directionPoint16.Y);
-            switch (dir) {
-                // right
-                case (1, 0):
-                    if (lastDir == (1, 0))
-                        path.Add(worldCoordPos + topLeftOffset);
-                    if (lastDir == (0, -1)) {
-                        path.Add(worldCoordPos + bottomLeftOffset);
-                        path.Add(worldCoordPos + topLeftOffset);
-                    }
+        bool IsInside(int x, int y) {
+            if (x < 0 || y < 0 || x >= Size.X || y >= Size.Y)
+                return false;
+            return BooleanTilemap[x, y];
+        }
 
-                    path.Add(worldCoordPos + topRightOffset);
-                    break;
+        // --- find start corner ---
+        int cx = 0, cy = 0;
+        bool found = false;
 
-                // left
-                case (-1, 0):
-                    if (lastDir == (-1, 0))
-                        path.Add(worldCoordPos + bottomRightOffset);
-                    if (lastDir == (0, 1)) {
-                        path.Add(worldCoordPos + topRightOffset);
-                        path.Add(worldCoordPos + bottomRightOffset);
-                    }
-
-                    path.Add(worldCoordPos + bottomLeftOffset);
-                    break;
-
-                // down
-                case (0, 1):
-                    if (lastDir == (0, 1))
-                        path.Add(worldCoordPos + topRightOffset);
-                    if (lastDir == (1, 0)) {
-                        path.Add(worldCoordPos + topLeftOffset);
-                        path.Add(worldCoordPos + topRightOffset);
-                    }
-
-                    path.Add(worldCoordPos + bottomRightOffset);
-                    break;
-
-                // up
-                case (0, -1):
-                    if (lastDir == (0, -1))
-                        path.Add(worldCoordPos + bottomLeftOffset);
-                    if (lastDir == (-1, 0)) {
-                        path.Add(worldCoordPos + bottomRightOffset);
-                        path.Add(worldCoordPos + bottomLeftOffset);
-                    }
-                    
-                    path.Add(worldCoordPos + topLeftOffset);
-                    break;
+        for (int y = 0; y < Size.Y && !found; y++)
+        for (int x = 0; x < Size.X && !found; x++)
+            if (BooleanTilemap[x, y] && !IsInside(x, y - 1)) {
+                cx = x;
+                cy = y;
+                found = true;
             }
 
-            if (path.Count > 2 && path[^1].X != path[^2].X && path[^1].Y != path[^2].Y)
-                Console.WriteLine("ah fuck");
+        if (!found) return path.ToArray();
 
-            pos += directionPoint16;
-            travelCount++;
-        } while (pos != Points[0] && travelCount < maxTravelCount);
+        Dir dir = Dir.Right;
+        (int cx, int cy, Dir dir) startState = (cx, cy, dir);
 
+        int safety = 0;
+        int maxSteps = Size.X * Size.Y * 8;
+
+        do {
+            // ADD CURRENT CORNER ONLY
+            // Point16 cornerOffset = dir switch {
+            //     Dir.Left => new Point16(16 - drawWidth, 16 - drawWidth),
+            //     Dir.Right => new Point16(drawWidth, drawWidth),
+            //     Dir.Down => new Point16(16 - drawWidth, drawWidth),
+            //     Dir.Up => new Point16(drawWidth, 16 - drawWidth),
+            //     _ => throw new Exception()
+            // };
+            Point16 cornerOffset = new(0, 0);
+            path.Add(new Point16((cx + BoundingBox.topLeft.X) * 16, (cy + BoundingBox.topLeft.Y) * 16) + cornerOffset);
+
+            // --- build marching index ---
+            int A = IsInside(cx - 1, cy - 1) ? 1 : 0;
+            int B = IsInside(cx, cy - 1) ? 1 : 0;
+            int C = IsInside(cx, cy) ? 1 : 0;
+            int D = IsInside(cx - 1, cy) ? 1 : 0;
+
+            int index = (A << 3) | (B << 2) | (C << 1) | D;
+
+            // --- direction table (NO diagonals) ---
+            dir = index switch {
+                1 => Dir.Down,
+                2 => Dir.Right,
+                3 => Dir.Right,
+                4 => Dir.Up,
+                5 => Dir.Up,
+                6 => Dir.Up,
+                7 => Dir.Up,
+                8 => Dir.Left,
+                9 => Dir.Down,
+                10 => Dir.Down,
+                11 => Dir.Right,
+                12 => Dir.Left,
+                13 => Dir.Down,
+                14 => Dir.Left,
+                _ => dir
+            };
+
+            // --- MOVE EXACTLY ONE STEP ---
+            (int dx, int dy) = ToOffset(dir);
+            cx += dx;
+            cy += dy;
+
+            safety++;
+        } while ((cx, cy, dir) != startState && safety < maxSteps);
+
+        for (int i = 1; i < path.Count; i++) {
+            int dx = path[i].X - path[i - 1].X;
+            int dy = path[i].Y - path[i - 1].Y;
+
+            if (!(dx == 0 || dy == 0)) {
+                Console.WriteLine($"BAD STEP at {i}: ({dx}, {dy})");
+                break;
+            }
+
+            if (Math.Abs(dx) > 16 || Math.Abs(dy) > 16) {
+                Console.WriteLine($"TOO LARGE STEP at {i}: ({dx}, {dy})");
+                break;
+            }
+
+            if (dx != 0 && dy != 0) {
+                Console.WriteLine($"Dig at {i}: ({dx}, {dy})");
+                break;
+            }
+        }
+        
         return path.ToArray();
     }
 
@@ -509,8 +654,10 @@ public class Shape : PointGeometry {
                     Point16 p2 = Points[(i + 1) % Points.Length];
 
                     // Find intersection of edge with the current scanline
-                    if ((p1.Y <= y && p2.Y > y) || (p2.Y <= y && p1.Y > y)) {
-                        double intersectX = (int)Math.Round(p1.X + (double)(y - p1.Y) * (p2.X - p1.X) / (p2.Y - p1.Y));
+                    double scanY = y + 0.5;
+
+                    if ((p1.Y <= scanY && p2.Y > scanY) || (p2.Y <= scanY && p1.Y > scanY)) {
+                        double intersectX = p1.X + (scanY - p1.Y) * (p2.X - p1.X) / (p2.Y - p1.Y);
                         intersections.Add(intersectX);
                     }
                 }
@@ -520,8 +667,8 @@ public class Shape : PointGeometry {
                 for (int i = 0; i < intersections.Count; i += 2) {
                     if (i + 1 >= intersections.Count) break;
 
-                    int startX = (int)Math.Round(intersections[i]);
-                    int endX = (int)Math.Round(intersections[i + 1] - 0.05); // very slightly bias inward
+                    int startX = (int)Math.Round(intersections[i] - 0.5);
+                    int endX = (int)Math.Round(intersections[i + 1] - 0.5);
 
                     for (int x = startX; x <= endX; x++)
                         if (!Points.Contains(new Point16(x, y)))
