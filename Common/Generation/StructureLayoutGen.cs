@@ -50,7 +50,7 @@ public static class StructureLayoutGen {
                 upper = param.EntryPoints[0];
             }
 
-            return lower.Direction == Directions.Right && upper.Direction == Directions.Left;
+            return lower.Direction == LegacyDirections.Right && upper.Direction == LegacyDirections.Left;
         }
 
         public override bool Generate(StructureLayout structureLayout, StructureLayoutParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {

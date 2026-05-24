@@ -23,12 +23,12 @@ public sealed class Mineshaft : CustomStructure {
 
         // left
         [
-            new ConnectPoint(0, 13, Directions.Left)
+            new ConnectPoint(0, 13, LegacyDirections.Left)
         ],
 
         // right
         [
-            new ConnectPoint(20, 13, Directions.Right)
+            new ConnectPoint(20, 13, LegacyDirections.Right)
         ]
     ];
 

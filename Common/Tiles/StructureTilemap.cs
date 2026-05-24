@@ -47,7 +47,7 @@ public class StructureTilemap : IDebugDraw {
         Color color = DrawHelper.GetColor(Structure.StructureLayout.Id);
 
         if (DebugInfoVisibility.DisplayBounds)
-            DrawHelper.DrawRectangle(
+            DrawHelper.DrawWorldBasedBorder(
                 new Rectangle(
                     worldTileOffset.X,
                     worldTileOffset.Y,
@@ -58,7 +58,7 @@ public class StructureTilemap : IDebugDraw {
                 DrawHelper.DebugDrawWidth
             );
 
-        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawText(Name, worldTileOffset - new Point16(16, 16), color);
+        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, worldTileOffset - new Point16(16, 16), color);
     }
 
     /// <summary>

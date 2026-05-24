@@ -242,7 +242,7 @@ public static class BridgeIDUtils {
     public static bool IsBranchingHallway(CustomChainStructure structure) => BranchingHallwayIDs.Contains(structure.ID);
 }
 
-public static class Directions {
+public static class LegacyDirections {
     public const byte Up = 0;
     public const byte Down = 1;
     public const byte Left = 2;
@@ -256,6 +256,14 @@ public static class Directions {
     }
 }
 
+public enum Direction : byte {
+    Up = 0,
+    Down = 1,
+    Left = 2,
+    Right = 3,
+    None = 4
+}
+
 public class Range(int min, int max) {
     private int _value;
 
@@ -265,7 +273,7 @@ public class Range(int min, int max) {
     public int Value => Evaluated ? _value : Evaluate();
 
     public int Evaluate(float scale = -1) {
-        if (Math.Abs(scale - -1) < 0.01) scale = Terraria.WorldGen.genRand.NextFloat();
+        if (Math.Abs(scale - -1) < 0.01) scale = WorldGen.genRand.NextFloat();
 
         if (scale is < 0 or > 1) throw new ArgumentOutOfRangeException(nameof(scale), "scale must be between 0 and 1");
 

@@ -7,7 +7,14 @@ using Terraria.DataStructures;
 namespace SpawnHouses.Common.Types.Geometry;
 
 public abstract class PointGeometry {
+    /// <summary>
+    ///     bounding corners. in global coordinates
+    /// </summary>
     public (Point16 topLeft, Point16 bottomRight) BoundingBox;
+
+    /// <summary>
+    ///     geometry points. in global coordinates
+    /// </summary>
     public Point16[] Points;
     public Point16 Size;
 
@@ -105,7 +112,7 @@ public abstract class PointGeometry {
     }
 
     /// <summary>
-    ///     moves shape by the offset. ex. if offset = (3, 0) will move shape 3 to the right in world coordinates
+    ///     moves geometry by the offset. ex. if offset = (3, 0) will move geometry 3 to the right in world coordinates
     /// </summary>
     /// <param name="offset"></param>
     public void Move(Point16 offset) {

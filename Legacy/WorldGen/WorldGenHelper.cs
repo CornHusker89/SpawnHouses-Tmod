@@ -13,7 +13,7 @@ using Terraria.WorldBuilding;
 namespace SpawnHouses.Legacy.WorldGen;
 
 public static class WorldGenHelper {
-    private static byte _mainHouseOffsetDirection = Directions.None;
+    private static byte _mainHouseOffsetDirection = LegacyDirections.None;
 
     public static void GenerateMainHouse() {
         bool spawnUnderworld =
@@ -57,12 +57,12 @@ public static class WorldGenHelper {
                     if (leftSurface.sd < rightSurface.sd) {
                         initialX -= 120;
                         initialY = (int)leftSurface.average;
-                        _mainHouseOffsetDirection = Directions.Left;
+                        _mainHouseOffsetDirection = LegacyDirections.Left;
                     }
                     else {
                         initialX += 120;
                         initialY = (int)rightSurface.average;
-                        _mainHouseOffsetDirection = Directions.Right;
+                        _mainHouseOffsetDirection = LegacyDirections.Right;
                     }
                 }
                 else {
@@ -160,10 +160,10 @@ public static class WorldGenHelper {
             }
 
             bool startLeftSide;
-            if (_mainHouseOffsetDirection == Directions.None)
+            if (_mainHouseOffsetDirection == LegacyDirections.None)
                 startLeftSide = Terraria.WorldGen.genRand.NextBool();
             else
-                startLeftSide = _mainHouseOffsetDirection == Directions.Left;
+                startLeftSide = _mainHouseOffsetDirection == LegacyDirections.Left;
 
             if (FindValidLocation(startLeftSide) || FindValidLocation(!startLeftSide)) {
                 Mineshaft mineshaft = new((ushort)(x - 13), (ushort)(y - 13));

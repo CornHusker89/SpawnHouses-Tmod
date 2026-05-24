@@ -60,6 +60,9 @@ public class StructureManager : ModSystem {
         foreach (AdvStructure structure in StructureList)
             structure.DrawDebugInfo();
 
+        if (SpawnTest2.Component != null)
+            SpawnTest2.Component.DrawDebugInfo();
+
         Main.spriteBatch.End();
     }
 }

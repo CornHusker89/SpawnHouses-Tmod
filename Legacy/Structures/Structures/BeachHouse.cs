@@ -25,7 +25,7 @@ public sealed class BeachHouse : CustomStructure {
 
         // right
         [
-            new ConnectPoint(34, 31, Directions.Right)
+            new ConnectPoint(34, 31, LegacyDirections.Right)
         ]
     ];
 
@@ -38,7 +38,7 @@ public sealed class BeachHouse : CustomStructure {
 
         // left
         [
-            new ConnectPoint(0, 31, Directions.Left)
+            new ConnectPoint(0, 31, LegacyDirections.Left)
         ],
 
         // right
@@ -59,17 +59,17 @@ public sealed class BeachHouse : CustomStructure {
         Status = StructureStatus.GeneratedAndFound;
 
         if (!Reverse) {
-            Terraria.WorldGen.PlaceTile(X + 16, Y + 20, TileID.Beds, true, true, style: 22);
+            WorldGen.PlaceTile(X + 16, Y + 20, TileID.Beds, true, true, style: 22);
             NetMessage.SendTileSquare(-1, X + 15, Y + 19, 4, 2);
 
-            Terraria.WorldGen.PlaceTile(X + 14, Y + 28, TileID.Chairs, true, true, style: 0);
+            WorldGen.PlaceTile(X + 14, Y + 28, TileID.Chairs, true, true, style: 0);
             NetMessage.SendTileSquare(-1, X + 14, Y + 27, 1, 2);
         }
         else {
-            Terraria.WorldGen.PlaceTile(X + 17, Y + 20, TileID.Beds, true, true, style: 22);
+            WorldGen.PlaceTile(X + 17, Y + 20, TileID.Beds, true, true, style: 22);
             NetMessage.SendTileSquare(-1, X + 16, Y + 19, 4, 2);
 
-            Terraria.WorldGen.PlaceTile(X + 20, Y + 28, TileID.Chairs, true, true, style: 0);
+            WorldGen.PlaceTile(X + 20, Y + 28, TileID.Chairs, true, true, style: 0);
             NetMessage.SendTileSquare(-1, X + 20, Y + 27, 1, 2);
         }
     }

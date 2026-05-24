@@ -22,12 +22,12 @@ public sealed class Firepit : CustomStructure {
 
         // left
         [
-            new ConnectPoint(-1, 2, Directions.Left)
+            new ConnectPoint(-1, 2, LegacyDirections.Left)
         ],
 
         // right
         [
-            new ConnectPoint(7, 2, Directions.Right)
+            new ConnectPoint(7, 2, LegacyDirections.Right)
         ]
     ];
 
@@ -55,19 +55,19 @@ public sealed class Firepit : CustomStructure {
         tile.Slope = SlopeType.Solid;
         tile.IsHalfBlock = false;
 
-        ushort leftX = (ushort)(X - Terraria.WorldGen.genRand.Next(2, 6));
-        ushort rightX = (ushort)(X + 6 + Terraria.WorldGen.genRand.Next(2, 6));
+        ushort leftX = (ushort)(X - WorldGen.genRand.Next(2, 6));
+        ushort rightX = (ushort)(X + 6 + WorldGen.genRand.Next(2, 6));
         ushort curLeftY = (ushort)(Y - 8);
         ushort curRightY = (ushort)(Y - 8);
-        while (!Terraria.WorldGen.SolidTile(leftX, curLeftY))
+        while (!WorldGen.SolidTile(leftX, curLeftY))
             curLeftY++;
-        while (!Terraria.WorldGen.SolidTile(rightX, curRightY))
+        while (!WorldGen.SolidTile(rightX, curRightY))
             curRightY++;
 
-        if (Terraria.WorldGen.genRand.Next(0, 3) != 0) // 2/3 chance
-            Terraria.WorldGen.PlaceTile(leftX, curLeftY - 1, TileID.BeachPiles, true);
-        if (Terraria.WorldGen.genRand.Next(0, 3) != 0)
-            Terraria.WorldGen.PlaceTile(rightX, curRightY - 1, TileID.BeachPiles, true);
+        if (WorldGen.genRand.Next(0, 3) != 0) // 2/3 chance
+            WorldGen.PlaceTile(leftX, curLeftY - 1, TileID.BeachPiles, true);
+        if (WorldGen.genRand.Next(0, 3) != 0)
+            WorldGen.PlaceTile(rightX, curRightY - 1, TileID.BeachPiles, true);
 
         _GenerateStructure();
         FrameTiles(X + 3, Y + 1, 3);

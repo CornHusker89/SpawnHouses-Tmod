@@ -85,12 +85,12 @@ public sealed class MainHouse : CustomStructure {
 
         // left
         [
-            new ConnectPoint(0, 16, Directions.Left)
+            new ConnectPoint(0, 16, LegacyDirections.Left)
         ],
 
         // right
         [
-            new ConnectPoint(62, 16, Directions.Right)
+            new ConnectPoint(62, 16, LegacyDirections.Right)
         ]
     ];
 
@@ -125,7 +125,7 @@ public sealed class MainHouse : CustomStructure {
         if (leftType == _type_not_generated && rightType == _type_not_generated) {
             double size = ModContent.GetInstance<SpawnHousesConfig>().SpawnPointHouseSize;
             if (size is 3) {
-                if (Terraria.WorldGen.genRand.NextBool())
+                if (WorldGen.genRand.NextBool())
                     LeftSmall = true;
                 else
                     RightSmall = true;
@@ -143,7 +143,7 @@ public sealed class MainHouse : CustomStructure {
         }
         else {
             if (LeftSmall) {
-                if (hasBasement && (RightSmall || Terraria.WorldGen.genRand.NextBool())) {
+                if (hasBasement && (RightSmall || WorldGen.genRand.NextBool())) {
                     LeftType = _type_small_basement_left;
                     generatedBasement = true;
                 }
@@ -161,7 +161,7 @@ public sealed class MainHouse : CustomStructure {
             else if (ModHelper.IsMSEnabled) {
                 LeftType = _type_magicstorage_left;
             }
-            else if (hasBasement && (RightSmall || Terraria.WorldGen.genRand.NextBool())) {
+            else if (hasBasement && (RightSmall || WorldGen.genRand.NextBool())) {
                 LeftType = _type_basement_left;
                 generatedBasement = true;
             }
@@ -314,7 +314,7 @@ public sealed class MainHouse : CustomStructure {
         if (signIndex != -1)
             Sign.TextSign(signIndex, signString);
 
-        Terraria.WorldGen.PlaceTile(X + LeftSize - 1, Y + 14, TileID.WorkBenches, true, true, style: 0);
+        WorldGen.PlaceTile(X + LeftSize - 1, Y + 14, TileID.WorkBenches, true, true, style: 0);
         Generator.GenerateStructure("Structures/StructureFiles/mainHouse/mainHouse_Rose",
             new Point16(X + LeftSize - 1, Y + 8), ModInstance.Mod);
 
@@ -322,18 +322,18 @@ public sealed class MainHouse : CustomStructure {
         if (!InUnderworld) {
             ushort[] blocklistWallIDs =
                 [WallID.StoneSlab, WallID.PearlstoneBrick, WallID.SnowBrick, WallID.RichMaogany];
-            int leftBushCount = Terraria.WorldGen.genRand.Next(2, 5);
+            int leftBushCount = WorldGen.genRand.Next(2, 5);
             for (int i = 0; i < leftBushCount; i++) {
-                int xOffset = Terraria.WorldGen.genRand.Next(0, 12);
-                StructureGenHelper.PlaceBush(new Point(X + xOffset, Y + 15 + Terraria.WorldGen.genRand.Next(0, 2)),
+                int xOffset = WorldGen.genRand.Next(0, 12);
+                StructureGenHelper.PlaceBush(new Point(X + xOffset, Y + 15 + WorldGen.genRand.Next(0, 2)),
                     wallBlocklistIDs: blocklistWallIDs);
             }
 
-            int rightBushCount = Terraria.WorldGen.genRand.Next(2, 5);
+            int rightBushCount = WorldGen.genRand.Next(2, 5);
             for (int i = 0; i < rightBushCount; i++) {
-                int xOffset = Terraria.WorldGen.genRand.Next(0, 12);
+                int xOffset = WorldGen.genRand.Next(0, 12);
                 StructureGenHelper.PlaceBush(
-                    new Point(X + StructureXSize - 1 - xOffset, Y + 15 + Terraria.WorldGen.genRand.Next(0, 2)),
+                    new Point(X + StructureXSize - 1 - xOffset, Y + 15 + WorldGen.genRand.Next(0, 2)),
                     wallBlocklistIDs: blocklistWallIDs);
             }
         }

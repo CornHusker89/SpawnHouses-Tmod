@@ -26,8 +26,8 @@ public class EntryPoint {
         Size = size;
         Direction = direction;
     }
-    
-    public bool IsHorizontal => Direction is Directions.Right or Directions.Left;
+
+    public bool IsHorizontal => Direction is LegacyDirections.Right or LegacyDirections.Left;
     
     /// <summary>the upper/left point, with offset applied</summary>
     public Point16 Start => _baseStart + Offset;

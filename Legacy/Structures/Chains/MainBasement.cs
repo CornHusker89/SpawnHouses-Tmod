@@ -104,7 +104,7 @@ public class MainBasement : StructureChain {
         // change base direction chances based on desired shape
         if (connectPoint.ParentStructure != RootStructure)
             if (_shape <= 0.21f) {
-                int rootY = RootStructure.ConnectPoints[Directions.Left][0].Y;
+                int rootY = RootStructure.ConnectPoints[LegacyDirections.Left][0].Y;
                 if (connectPoint.Y == rootY || targetConnectPoint.Y == rootY)
                     return false;
             }
@@ -126,7 +126,7 @@ public class MainBasement : StructureChain {
         }
 
         byte direction = connectPoint.Direction;
-        if (direction == Directions.Down) direction = Directions.Left;
+        if (direction == LegacyDirections.Down) direction = LegacyDirections.Left;
 
         int startX = RootStructure.ConnectPoints[direction][0].X;
         if (Math.Abs(targetConnectPoint.X - startX) > maxDistance)

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Parameters;
@@ -10,39 +11,35 @@ using Terraria.DataStructures;
 namespace SpawnHouses.Common.Modules;
 
 public class StructureLayout : Generatable<StructureLayout, StructureLayoutParams, StructureLayoutGenerator> {
-    /// <summary>
-    ///     if external walls, floors, and roofs have been created and assigned. excludes any gaps, see <see cref="HasExternalGaps" />
-    /// </summary>
-    public bool HasExternalComponents;
-
-    /// <summary>
-    ///     if external gaps have been created and assigned
-    /// </summary>
-    public bool HasExternalGaps;
-
-    /// <summary>
-    ///     if all final components have been created and assigned
-    /// </summary>
-    public bool HasAllComponents;
-    
+    [CanBeNull]
     public List<Floor> ExternalFloors { get; private set; }
+
+    [CanBeNull]
     public List<Wall> ExternalWalls { get; private set; }
+
+    [CanBeNull]
     public List<Gap> ExternalGaps { get; private set; }
+
+    [CanBeNull]
     public List<Roof> Roofs { get; private set; }
+
+    [CanBeNull]
     public List<RoomLayout> RoomLayouts { get; private set; }
     
     public (Point16 topLeft, Point16 bottomRight) BoundingBox { get; private set; }
 
+    [CanBeNull]
     public List<IComponent> ExternalComponents { get; private set; }
     /// <summary>
     ///     any <see cref="Room" />s are at the very end of the list
     /// </summary>
+    [CanBeNull]
     public List<IComponent> AllComponents { get; private set; }
     
     public Room[] Rooms {
         get {
             int len = 0;
-            foreach (RoomLayout roomLayout in RoomLayouts) len += roomLayout.Rooms.Count;
+            foreach (RoomLayout roomLayout in RoomLayouts!) len += roomLayout.Rooms.Count;
             var rooms = new Room[len];
             int count = 0;
             foreach (RoomLayout roomLayout in RoomLayouts) {
@@ -64,7 +61,7 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
 
         if (DebugInfoVisibility.DisplayBounds) {
             Point16 topLeftWorldPos = Params.Structure.Tilemap.ConvertToGlobal(BoundingBox.topLeft) * new Point16(16);
-            DrawHelper.DrawRectangle(
+            DrawHelper.DrawWorldBasedBorder(
                 new Rectangle(
                     topLeftWorldPos.X,
                     topLeftWorldPos.Y,
@@ -76,12 +73,12 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
             );
         }
 
-        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawText(Name, BoundingBox.topLeft * new Point16(16) - new Point16(16, 16), color);
+        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, BoundingBox.topLeft * new Point16(16) - new Point16(16, 16), color);
 
-        if (HasAllComponents)
+        if (AllComponents != null)
             foreach (IComponent component in AllComponents)
                 component?.DrawDebugInfo();
-        else if (HasExternalComponents) {
+        else if (ExternalComponents != null) {
             foreach (IComponent component in ExternalComponents)
                 component?.DrawDebugInfo();
         }
@@ -98,8 +95,6 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
         ExternalWalls = externalWalls;
         Roofs = roofs;
         
-        ExternalComponents = [];
-        HasExternalComponents = true;
         UpdateComponentList();
     }
 
@@ -109,8 +104,7 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
     /// <param name="externalGaps"></param>
     public void SetExternalGapComponents(List<Gap> externalGaps) {
         ExternalGaps = externalGaps;
-
-        HasExternalGaps = true;
+        
         UpdateComponentList();
     }
 
@@ -120,9 +114,7 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
     /// <param name="roomLayouts"></param>
     public void SetInternalComponents(List<RoomLayout> roomLayouts) {
         RoomLayouts = roomLayouts;
-
-        AllComponents = [];
-        HasAllComponents = true;
+        
         UpdateComponentList();
     }
 
@@ -131,13 +123,13 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
     ///     also updates the bounding box
     /// </summary>
     public void UpdateComponentList() {
-        if (HasExternalComponents) {
-            ExternalComponents.Clear();
-            ExternalComponents.AddRange(ExternalFloors);
+        if (ExternalFloors != null && ExternalWalls != null && Roofs != null) {
+            ExternalComponents = [];
+            ExternalComponents!.AddRange(ExternalFloors);
             ExternalComponents.AddRange(ExternalWalls);
             ExternalComponents.AddRange(Roofs);
 
-            if (HasExternalGaps)
+            if (ExternalGaps != null)
                 ExternalComponents.AddRange(ExternalGaps);
 
             int minX = int.MaxValue, minY = int.MaxValue, maxX = 0, maxY = 0;
@@ -151,9 +143,9 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
             BoundingBox = (new Point16(minX, minY), new Point16(maxX, maxY));
         }
 
-        if (HasAllComponents) {
-            AllComponents.Clear();
-            AllComponents.AddRange(ExternalComponents);
+        if (ExternalComponents != null && ExternalGaps != null && RoomLayouts != null) {
+            AllComponents = [];
+            AllComponents!.AddRange(ExternalComponents);
             foreach (RoomLayout roomLayout in RoomLayouts) {
                 AllComponents.AddRange(roomLayout.Floors);
                 AllComponents.AddRange(roomLayout.Walls);
@@ -170,10 +162,20 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
     /// </summary>
     /// <param name="offset"></param>
     public void Offset(Point16 offset) {
-        foreach (Floor floor in ExternalFloors) floor.Geometry.Move(offset);
-        foreach (Wall wall in ExternalWalls) wall.Geometry.Move(offset);
-        foreach (Gap gap in ExternalGaps) gap.Geometry.Move(offset);
-        foreach (Roof roof in Roofs) roof.Geometry.Move(offset);
-        foreach (RoomLayout roomSection in RoomLayouts) roomSection.Offset(offset);
+        if (ExternalFloors != null)
+            foreach (Floor floor in ExternalFloors)
+                floor.Geometry.Move(offset);
+        if (ExternalWalls != null)
+            foreach (Wall wall in ExternalWalls)
+                wall.Geometry.Move(offset);
+        if (ExternalGaps != null)
+            foreach (Gap gap in ExternalGaps)
+                gap.Geometry.Move(offset);
+        if (Roofs != null)
+            foreach (Roof roof in Roofs)
+                roof.Geometry.Move(offset);
+        if (RoomLayouts != null)
+            foreach (RoomLayout roomSection in RoomLayouts)
+                roomSection.Offset(offset);
     }
 }

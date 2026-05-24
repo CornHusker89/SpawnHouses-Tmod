@@ -18,7 +18,7 @@ public class MainBasement_Entry1 : CustomChainStructure {
             [
                 // top
                 [
-                    new ChainConnectPoint(4, 0, Directions.Up, null, true)
+                    new ChainConnectPoint(4, 0, LegacyDirections.Up, null, true)
                 ],
 
                 // bottom
@@ -26,12 +26,12 @@ public class MainBasement_Entry1 : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 15, Directions.Left, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(0, 15, LegacyDirections.Left, new Seal.MainBasement_SealWall())
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(9, 15, Directions.Right, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(9, 15, LegacyDirections.Right, new Seal.MainBasement_SealWall())
                 ]
             ],
             x, y, status, cost, weight) {
@@ -47,7 +47,7 @@ public class MainBasement_Entry2 : CustomChainStructure {
             [
                 // top
                 [
-                    new ChainConnectPoint(3, 0, Directions.Up, null, true)
+                    new ChainConnectPoint(3, 0, LegacyDirections.Up, null, true)
                 ],
 
                 // bottom
@@ -55,12 +55,12 @@ public class MainBasement_Entry2 : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 14, Directions.Left, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(0, 14, LegacyDirections.Left, new Seal.MainBasement_SealWall())
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(14, 14, Directions.Right, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(14, 14, LegacyDirections.Right, new Seal.MainBasement_SealWall())
                 ]
             ],
             x, y, status, cost, weight) {
@@ -85,7 +85,7 @@ public class MainBasement_Hallway4 : CustomChainStructure {
             [
                 // top
                 [
-                    new ChainConnectPoint(2, 0, Directions.Down, new Seal.MainBasement_SealFloor(), true,
+                    new ChainConnectPoint(2, 0, LegacyDirections.Down, new Seal.MainBasement_SealFloor(), true,
                         GenerateChances.Guaranteed)
                 ],
 
@@ -94,13 +94,13 @@ public class MainBasement_Hallway4 : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 10, Directions.Left, new Seal.MainBasement_SealWall(), false,
+                    new ChainConnectPoint(0, 10, LegacyDirections.Left, new Seal.MainBasement_SealWall(), false,
                         GenerateChances.Guaranteed)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(5, 10, Directions.Right, new Seal.MainBasement_SealWall(), false,
+                    new ChainConnectPoint(5, 10, LegacyDirections.Right, new Seal.MainBasement_SealWall(), false,
                         GenerateChances.Guaranteed)
                 ]
             ],
@@ -123,17 +123,17 @@ public class MainBasement_Hallway5 : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 6, Directions.Left, new Seal.MainBasement_SealWall(), true,
+                    new ChainConnectPoint(0, 6, LegacyDirections.Left, new Seal.MainBasement_SealWall(), true,
                         GenerateChances.Guaranteed),
-                    new ChainConnectPoint(1, 21, Directions.Left, new Seal.MainBasement_SealWall(), false,
+                    new ChainConnectPoint(1, 21, LegacyDirections.Left, new Seal.MainBasement_SealWall(), false,
                         GenerateChances.Guaranteed)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(7, 6, Directions.Right, new Seal.MainBasement_SealWall(), false,
+                    new ChainConnectPoint(7, 6, LegacyDirections.Right, new Seal.MainBasement_SealWall(), false,
                         GenerateChances.Guaranteed),
-                    new ChainConnectPoint(6, 21, Directions.Right, new Seal.MainBasement_SealWall(), false,
+                    new ChainConnectPoint(6, 21, LegacyDirections.Right, new Seal.MainBasement_SealWall(), false,
                         GenerateChances.Guaranteed)
                 ]
             ],
@@ -162,19 +162,19 @@ public class MainBasement_Hallway9 : CustomChainStructure {
 
                 // bottom
                 [
-                    new ChainConnectPoint(2, 10, Directions.Up, new Seal.MainBasement_SealFloor(), false,
+                    new ChainConnectPoint(2, 10, LegacyDirections.Up, new Seal.MainBasement_SealFloor(), false,
                         GenerateChances.Guaranteed)
                 ],
 
                 // left
                 [
-                    new ChainConnectPoint(0, 5, Directions.Left, new Seal.MainBasement_SealWall(), true,
+                    new ChainConnectPoint(0, 5, LegacyDirections.Left, new Seal.MainBasement_SealWall(), true,
                         GenerateChances.Guaranteed)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(5, 5, Directions.Right, new Seal.MainBasement_SealWall(), false,
+                    new ChainConnectPoint(5, 5, LegacyDirections.Right, new Seal.MainBasement_SealWall(), false,
                         GenerateChances.Guaranteed)
                 ]
             ],
@@ -197,12 +197,12 @@ public class MainBasement_Room1 : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 8, Directions.Left, new Seal.MainBasement_SealWall(), true)
+                    new ChainConnectPoint(0, 8, LegacyDirections.Left, new Seal.MainBasement_SealWall(), true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(21, 8, Directions.Right, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(21, 8, LegacyDirections.Right, new Seal.MainBasement_SealWall())
                 ]
             ],
             x, y, status, cost, weight) {
@@ -221,17 +221,17 @@ public class MainBasement_Room1_WithFloor : CustomChainStructure {
 
                 // bottom
                 [
-                    new ChainConnectPoint(10, 8, Directions.Down, new Seal.MainBasement_SealFloor())
+                    new ChainConnectPoint(10, 8, LegacyDirections.Down, new Seal.MainBasement_SealFloor())
                 ],
 
                 // left
                 [
-                    new ChainConnectPoint(0, 8, Directions.Left, new Seal.MainBasement_SealWall(), true)
+                    new ChainConnectPoint(0, 8, LegacyDirections.Left, new Seal.MainBasement_SealWall(), true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(21, 8, Directions.Right, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(21, 8, LegacyDirections.Right, new Seal.MainBasement_SealWall())
                 ]
             ],
             x, y, status, cost, weight) {
@@ -253,12 +253,12 @@ public class MainBasement_Room2 : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 6, Directions.Left, new Seal.MainBasement_SealWall(), true)
+                    new ChainConnectPoint(0, 6, LegacyDirections.Left, new Seal.MainBasement_SealWall(), true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(22, 6, Directions.Right, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(22, 6, LegacyDirections.Right, new Seal.MainBasement_SealWall())
                 ]
             ],
             x, y, status, cost, weight) {
@@ -274,7 +274,7 @@ public class MainBasement_Room2_WithRoof : CustomChainStructure {
             [
                 // top
                 [
-                    new ChainConnectPoint(3, 0, Directions.Up, new Seal.MainBasement_SealRoof())
+                    new ChainConnectPoint(3, 0, LegacyDirections.Up, new Seal.MainBasement_SealRoof())
                 ],
 
                 // bottom
@@ -282,12 +282,12 @@ public class MainBasement_Room2_WithRoof : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 6, Directions.Left, new Seal.MainBasement_SealWall(), true)
+                    new ChainConnectPoint(0, 6, LegacyDirections.Left, new Seal.MainBasement_SealWall(), true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(22, 6, Directions.Right, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(22, 6, LegacyDirections.Right, new Seal.MainBasement_SealWall())
                 ]
             ],
             x, y, status, cost, weight) {
@@ -309,12 +309,12 @@ public class MainBasement_Room3 : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 6, Directions.Left, new Seal.MainBasement_SealWall(), true)
+                    new ChainConnectPoint(0, 6, LegacyDirections.Left, new Seal.MainBasement_SealWall(), true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(9, 6, Directions.Right, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(9, 6, LegacyDirections.Right, new Seal.MainBasement_SealWall())
                 ]
             ],
             x, y, status, cost, weight) {
@@ -336,12 +336,12 @@ public class MainBasement_Room4 : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 10, Directions.Left, new Seal.MainBasement_SealWall(), true)
+                    new ChainConnectPoint(0, 10, LegacyDirections.Left, new Seal.MainBasement_SealWall(), true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(12, 10, Directions.Right, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(12, 10, LegacyDirections.Right, new Seal.MainBasement_SealWall())
                 ]
             ],
             x, y, status, cost, weight) {
@@ -366,12 +366,12 @@ public class MainBasement_Room5 : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 8, Directions.Left, new Seal.MainBasement_SealWall(), true)
+                    new ChainConnectPoint(0, 8, LegacyDirections.Left, new Seal.MainBasement_SealWall(), true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(21, 8, Directions.Right, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(21, 8, LegacyDirections.Right, new Seal.MainBasement_SealWall())
                 ]
             ],
             x, y, status, cost, weight) {
@@ -428,17 +428,17 @@ public class MainBasement_Room6 : CustomChainStructure {
 
                 // bottom
                 [
-                    new ChainConnectPoint(15, 14, Directions.Down, new Seal.MainBasement_SealFloor())
+                    new ChainConnectPoint(15, 14, LegacyDirections.Down, new Seal.MainBasement_SealFloor())
                 ],
 
                 // left
                 [
-                    new ChainConnectPoint(0, 6, Directions.Left, new Seal.MainBasement_SealWall(), true)
+                    new ChainConnectPoint(0, 6, LegacyDirections.Left, new Seal.MainBasement_SealWall(), true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(15, 6, Directions.Right, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(15, 6, LegacyDirections.Right, new Seal.MainBasement_SealWall())
                 ]
             ],
             x, y, status, cost, weight) {
@@ -469,12 +469,12 @@ public class MainBasement_Room7 : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 11, Directions.Left, new Seal.MainBasement_SealWall(), true)
+                    new ChainConnectPoint(0, 11, LegacyDirections.Left, new Seal.MainBasement_SealWall(), true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(26, 11, Directions.Right, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(26, 11, LegacyDirections.Right, new Seal.MainBasement_SealWall())
                 ]
             ],
             x, y, status, cost, weight) {

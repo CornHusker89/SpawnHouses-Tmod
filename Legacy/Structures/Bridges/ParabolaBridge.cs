@@ -26,7 +26,7 @@ public class ParabolaBridge : Bridge {
         bool backwardsGeneration,
         ConnectPoint point1 = null, ConnectPoint point2 = null)
         :
-        base(backwardsGeneration ? [Directions.Left, Directions.Right] : [Directions.Right, Directions.Left],
+        base(backwardsGeneration ? [LegacyDirections.Left, LegacyDirections.Right] : [LegacyDirections.Right, LegacyDirections.Left],
             minDeltaX, maxDeltaX, minDeltaY, maxDeltaY, deltaXMultiple, deltaYMultiple, point1, point2) {
         StructureFilePath = structureFilePath;
         StructureLength = structureLength;

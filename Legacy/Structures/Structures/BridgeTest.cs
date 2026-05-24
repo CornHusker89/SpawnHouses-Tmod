@@ -20,12 +20,12 @@ public sealed class BridgeTest : CustomStructure {
 
         // left
         [
-            new ConnectPoint(0, 0, Directions.Left)
+            new ConnectPoint(0, 0, LegacyDirections.Left)
         ],
 
         // right
         [
-            new ConnectPoint(7, 0, Directions.Right)
+            new ConnectPoint(7, 0, LegacyDirections.Right)
         ]
     ];
 

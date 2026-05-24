@@ -20,27 +20,32 @@ namespace SpawnHouses.Common.Types.Geometry;
 public class Shape : PointGeometry {
     public bool IsBox { get; private set; } // because many shapes will be boxes, introduce optimizations for boxes
 
-    private bool[,]? _booleanTilemap;
+    private (bool hasTile, Direction outwardNormal)[,]? _perimeterTilemap;
+    private bool[,]? _tilemap;
+    private Point16[]? _exteriorDrawPath;
 
     /// <summary>
-    ///     2d array of this shape showing if there is a tile, 0-indexed but has a 1-tile buffer on every edge 
+    ///     if there is a tile at a specific coordinate for the interior of the shape, 0-indexed
     /// </summary>
-    public bool[,] BooleanTilemap {
+    public (bool hasTile, Direction outwardNormal)[,] PerimeterTilemap {
         get {
-            MakeBooleanTilemap();
-            return _booleanTilemap;
+            return _perimeterTilemap ??= GetPerimeterTilemap();
         }
     }
 
-
-    private Point16[]? _exteriorPath;
+    /// <summary>
+    ///     if there is a tile at a specific coordinate for the interior of the shape, 0-indexed
+    /// </summary>
+    public bool[,] Tilemap {
+        get { return _tilemap ??= GetTilemap(); }
+    }
 
     /// <summary>
     ///     path of points to draw the exterior of the shape, in world coordinates (not tile)
     /// </summary>
     /// <returns></returns>
     public Point16[] ExteriorDrawPath {
-        get { return _exteriorPath ??= GetExteriorDrawPath(DrawHelper.DebugDrawWidth); }
+        get { return _exteriorDrawPath ??= GetExteriorDrawPath(DrawHelper.DebugDrawWidth); }
     }
 
     protected sealed override void Init(Point16[] points, bool optimize) {
@@ -71,8 +76,8 @@ public class Shape : PointGeometry {
         }
 
 
-        _booleanTilemap = null;
-        _exteriorPath = null;
+        _tilemap = null;
+        _exteriorDrawPath = null;
         SetBoundingBoxAndSize();
     }
 
@@ -142,6 +147,10 @@ public class Shape : PointGeometry {
 
 
     #region Shape Self-Geometry
+
+    private Point16 ToLocal(Point16 point) => point - BoundingBox.topLeft;
+    private (int x, int y) ToLocal(int x, int y) => (x - BoundingBox.topLeft.X, y - BoundingBox.topLeft.Y);
+    private Point16 ToGlobal(Point16 point) => point + BoundingBox.topLeft;
 
     /// <summary>
     ///     the number of tiles this shape encloses
@@ -321,15 +330,134 @@ public class Shape : PointGeometry {
         average /= sizes.Count;
         return (min, max, average);
     }
-
+    
     /// <summary>
-    ///     makes a 2d bool array of this shape showing if there is a tile at a given local coordinate,
-    ///     always 0-indexed, puts into <see cref="_booleanTilemap"/>
+    ///     makes a 2d bool array of this shape showing if there is a tile at a given local coordinate along the edge of the shape,
+    ///     always 0-indexed, puts into <see cref="_tilemap"/>
     /// </summary>
     /// <returns></returns>
-    private void MakeBooleanTilemap() {
-        throw new NotImplementedException();
+    private (bool hasTile, Direction outwardNormal)[,] GetPerimeterTilemap() {
+        var map = new (bool hasTile, Direction outwardNormal)[Size.X, Size.Y];
+
+        if (IsBox) {
+            for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
+                map[x, BoundingBox.topLeft.Y] = (true, Direction.Up);
+            for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
+                map[x, BoundingBox.bottomRight.Y] = (true, Direction.Down);
+            for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
+                map[BoundingBox.topLeft.X, y] = (true, Direction.Left);
+            for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
+                map[BoundingBox.bottomRight.X, y] = (true, Direction.Right);
+        }
+        else {
+            for (int i = 0; i < Points.Length; i++) {
+                Point16 p0 = ToLocal(Points[i]);
+                Point16 p1 = ToLocal(Points[(i + 1) % Points.Length]);
+                int x0 = p0.X;
+                int y0 = p0.Y;
+                int x1 = p1.X;
+                int y1 = p1.Y;
+
+                int ex = p1.X - p0.X;
+                int ey = p1.Y - p0.Y;
+
+                // calc normal for whole line
+                int nx = ey;
+                int ny = -ex;
+                Direction normal;
+                if (Math.Abs(nx) > Math.Abs(ny))
+                    normal = nx > 0 ? Direction.Right : Direction.Left;
+                else
+                    normal = ny > 0 ? Direction.Down : Direction.Up;
+
+                int dx = Math.Abs(x1 - x0);
+                int sx = x0 < x1 ? 1 : -1;
+
+                int dy = -Math.Abs(y1 - y0);
+                int sy = y0 < y1 ? 1 : -1;
+
+                int err = dx + dy;
+
+                while (true) {
+                    map[x0, y0] = (true, normal);
+
+                    if (x0 == x1 && y0 == y1)
+                        break;
+
+                    int e2 = 2 * err;
+
+                    if (e2 >= dy) {
+                        err += dy;
+                        x0 += sx;
+                    }
+
+                    if (e2 <= dx) {
+                        err += dx;
+                        y0 += sy;
+                    }
+                }
+            }
+        }
+
+        return map;
     }
+
+    /// <summary>
+    ///     makes a 2d bool array of this shape showing if there is a tile at a given local coordinate within the shape,
+    ///     always 0-indexed
+    /// </summary>
+    /// <returns></returns>
+    private bool[,] GetTilemap() {
+        bool[,] map = new bool[Size.X, Size.Y];
+
+        if (IsBox) {
+            for (int x = 0; x < Size.X; x++)
+            for (int y = 0; y <= Size.Y; y++)
+                map[x, y] = true;
+
+            return map;
+        }
+
+        var perimeterMap = PerimeterTilemap;
+        for (int y = 0; y < Size.Y; y++) {
+            // ensure that all edges are consistently added
+            for (int x = 0; x < Size.X; x++)
+                if (perimeterMap[x, y].hasTile)
+                    map[x, y] = true;
+
+            // do normal scanline
+            double scanY = y + 0.5;
+            List<double> intersections = [];
+
+            for (int i = 0; i < Points.Length; i++) {
+                Point16 p1 = ToLocal(Points[i]);
+                Point16 p2 = ToLocal(Points[(i + 1) % Points.Length]);
+
+                if ((p1.Y <= scanY && p2.Y > scanY) ||
+                    (p2.Y <= scanY && p1.Y > scanY)) {
+                    double intersectX =
+                        p1.X + (scanY - p1.Y) *
+                        (p2.X - p1.X) /
+                        (p2.Y - p1.Y);
+
+                    intersections.Add(intersectX);
+                }
+            }
+
+            intersections.Sort();
+
+            for (int i = 0; i + 1 < intersections.Count; i += 2) {
+                int startX = (int)Math.Ceiling(intersections[i] + 0.5);
+                int endX = (int)Math.Floor(intersections[i + 1] + 0.5);
+
+                for (int x = startX; x <= endX; x++)
+                    map[x, y] = true;
+            }
+        }
+
+        return map;
+    }
+    
 
     private enum Dir {
         Up,
@@ -338,6 +466,7 @@ public class Shape : PointGeometry {
         Left
     }
 
+    // TODO this is dumb inline this
     private static (int x, int y) ToOffset(Dir d) => d switch {
         Dir.Up => (0, -1),
         Dir.Right => (1, 0),
@@ -456,7 +585,7 @@ public class Shape : PointGeometry {
         bool IsInside(int x, int y) {
             if (x < 0 || y < 0 || x >= Size.X || y >= Size.Y)
                 return false;
-            return BooleanTilemap[x, y];
+            return Tilemap[x, y];
         }
 
         // --- find start corner ---
@@ -465,7 +594,7 @@ public class Shape : PointGeometry {
 
         for (int y = 0; y < Size.Y && !found; y++)
         for (int x = 0; x < Size.X && !found; x++)
-            if (BooleanTilemap[x, y] && !IsInside(x, y - 1)) {
+            if (Tilemap[x, y] && !IsInside(x, y - 1)) {
                 cx = x;
                 cy = y;
                 found = true;
@@ -570,68 +699,26 @@ public class Shape : PointGeometry {
     #region Execute-In
 
     /// <param name="action">x, y, direction</param>
-    /// <param name="completeLoop"></param>
-    public void ExecuteOnPerimeter(Action<int, int, byte> action, bool completeLoop = true) {
+    public void ExecuteOnPerimeter(Action<int, int, Direction> action) {
         if (IsBox) {
             // go line-by-line
             for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
-                action.Invoke(x, BoundingBox.topLeft.Y, Directions.Up);
-            if (completeLoop)
-                for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
-                    action.Invoke(x, BoundingBox.bottomRight.Y, Directions.Down);
+                action.Invoke(x, BoundingBox.topLeft.Y, Direction.Up);
+            for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
+                action.Invoke(x, BoundingBox.bottomRight.Y, Direction.Down);
             for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
-                action.Invoke(BoundingBox.topLeft.X, y, Directions.Left);
+                action.Invoke(BoundingBox.topLeft.X, y, Direction.Left);
             for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
-                action.Invoke(BoundingBox.bottomRight.X, y, Directions.Right);
+                action.Invoke(BoundingBox.bottomRight.X, y, Direction.Right);
         }
         else {
-            for (int pointNum = 0; pointNum < Points.Length - 1; pointNum++)
-                // test for a vertical line
-                if (Points[pointNum].X == Points[pointNum + 1].X) {
-                    int lowerY = Math.Min(Points[pointNum].Y, Points[pointNum + 1].Y);
-                    int higherY = Math.Max(Points[pointNum].Y, Points[pointNum + 1].Y);
-                    for (int y = lowerY; y < higherY; y++)
-                        action.Invoke(Points[pointNum].X, y,
-                            Points[pointNum].X > Center.X ? Directions.Right : Directions.Left);
-                }
-                else {
-                    double slope = (double)(Points[pointNum].Y - Points[pointNum + 1].Y) /
-                                   (Points[pointNum].X - Points[pointNum + 1].X);
-
-                    // determine whether to iterate along x/y-axis
-                    if (Math.Abs(slope) > 1) {
-                        // by y
-                        slope = 1 / slope;
-                        int lowerY = Math.Min(Points[pointNum].Y, Points[pointNum + 1].Y);
-                        int higherY = Math.Max(Points[pointNum].Y, Points[pointNum + 1].Y);
-                        int startingX = Points[pointNum].Y < Points[pointNum + 1].Y
-                            ? Points[pointNum + 1].X
-                            : Points[pointNum].X;
-                        for (int y = lowerY; y < higherY; y++) {
-                            // round towards the middle
-                            double x = startingX + slope * (y - lowerY);
-                            if (x < Center.X)
-                                action.Invoke((int)Math.Floor(x), y, Directions.Left);
-                            else
-                                action.Invoke((int)Math.Ceiling(x), y, Directions.Right);
-                        }
-                    }
-                    else {
-                        // by x
-                        int lowerX = Math.Min(Points[pointNum].X, Points[pointNum + 1].X);
-                        int higherX = Math.Max(Points[pointNum].X, Points[pointNum + 1].X);
-                        int startingY = Points[pointNum].X < Points[pointNum + 1].X
-                            ? Points[pointNum + 1].Y
-                            : Points[pointNum].Y;
-                        for (int x = lowerX; x < higherX; x++) {
-                            double y = startingY + slope * (x - lowerX);
-                            if (y < Center.Y)
-                                action.Invoke(x, (int)Math.Floor(y), Directions.Up);
-                            else
-                                action.Invoke(x, (int)Math.Ceiling(y), Directions.Down);
-                        }
-                    }
-                }
+            var map = PerimeterTilemap;
+            for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
+            for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++) {
+                (int localX, int localY) = ToLocal(x, y);
+                if (map[localX, localY].hasTile)
+                    action.Invoke(x, y, map[localX, localY].outwardNormal);
+            }
         }
     }
 
@@ -646,50 +733,14 @@ public class Shape : PointGeometry {
                 action.Invoke(x, y);
         }
         else {
+            bool[,] map = Tilemap;
+            for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
             for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++) {
-                var intersections = new List<double>();
-
-                for (int i = 0; i < Points.Length; i++) {
-                    Point16 p1 = Points[i];
-                    Point16 p2 = Points[(i + 1) % Points.Length];
-
-                    // Find intersection of edge with the current scanline
-                    double scanY = y + 0.5;
-
-                    if ((p1.Y <= scanY && p2.Y > scanY) || (p2.Y <= scanY && p1.Y > scanY)) {
-                        double intersectX = p1.X + (scanY - p1.Y) * (p2.X - p1.X) / (p2.Y - p1.Y);
-                        intersections.Add(intersectX);
-                    }
-                }
-
-                intersections.Sort();
-
-                for (int i = 0; i < intersections.Count; i += 2) {
-                    if (i + 1 >= intersections.Count) break;
-
-                    int startX = (int)Math.Round(intersections[i] - 0.5);
-                    int endX = (int)Math.Round(intersections[i + 1] - 0.5);
-
-                    for (int x = startX; x <= endX; x++)
-                        if (!Points.Contains(new Point16(x, y)))
-                            action.Invoke(x, y);
-                }
+                (int localX, int localY) = ToLocal(x, y);
+                if (map[localX, localY])
+                    action.Invoke(x, y);
             }
 
-            // Handle horizontal edges
-            for (int i = 0; i < Points.Length; i++) {
-                Point16 p1 = Points[i];
-                Point16 p2 = Points[(i + 1) % Points.Length];
-                if (p1.Y == p2.Y) {
-                    int startX = Math.Min(p1.X, p2.X);
-                    int endX = Math.Max(p1.X, p2.X);
-                    for (int x = startX + 1; x <= endX - 1; x++)
-                        if (!Points.Contains(new Point16(x, p1.Y)))
-                            action(x, p1.Y);
-                }
-            }
-
-            foreach (Point16 point in Points) action(point.X, point.Y);
         }
     }
 
@@ -708,12 +759,10 @@ public class Shape : PointGeometry {
             return;
         }
 
-        for (int x = 0; x < Size.X; x++) {
-            int xWorldCoord = x + BoundingBox.topLeft.X;
-            for (int y = 0; y < Size.Y; y++) {
-                int yWorldCoord = y + BoundingBox.topLeft.Y;
-                if (!BooleanTilemap[x, y]) continue;
-                action(xWorldCoord, yWorldCoord, slopingAlgorithm(x, y, BooleanTilemap));
+        for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++) {
+            for (int y = BoundingBox.topLeft.Y; y < BoundingBox.bottomRight.Y; y++) {
+                if (!Tilemap[x, y]) continue;
+                action(x, y, slopingAlgorithm(x, y, Tilemap));
             }
         }
     }

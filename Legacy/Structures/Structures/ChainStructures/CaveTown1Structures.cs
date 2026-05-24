@@ -18,13 +18,13 @@ public class CaveTown1_Test1 : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 7, Directions.Left),
-                    new ChainConnectPoint(0, 15, Directions.Left, rootPoint: true)
+                    new ChainConnectPoint(0, 7, LegacyDirections.Left),
+                    new ChainConnectPoint(0, 15, LegacyDirections.Left, rootPoint: true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(29, 15, Directions.Right)
+                    new ChainConnectPoint(29, 15, LegacyDirections.Right)
                 ]
             ],
             x, y, status, cost, weight) {
@@ -46,12 +46,12 @@ public class CaveTown1_Test2 : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 12, Directions.Left, rootPoint: true)
+                    new ChainConnectPoint(0, 12, LegacyDirections.Left, rootPoint: true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(24, 12, Directions.Right)
+                    new ChainConnectPoint(24, 12, LegacyDirections.Right)
                 ]
             ],
             x, y, status, cost, weight) {

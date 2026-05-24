@@ -17,13 +17,13 @@ public sealed class TestChainStructure : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 6, Directions.Left, null, true)
+                    new ChainConnectPoint(0, 6, LegacyDirections.Left, null, true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(14, 6, Directions.Right),
-                    new ChainConnectPoint(14, 12, Directions.Right)
+                    new ChainConnectPoint(14, 6, LegacyDirections.Right),
+                    new ChainConnectPoint(14, 12, LegacyDirections.Right)
                 ]
             ],
             x, y, status, cost, weight) {

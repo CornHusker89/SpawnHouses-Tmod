@@ -11,22 +11,22 @@ public sealed class TestChainStructure2 : CustomChainStructure {
             [
                 // top
                 [
-                    new ChainConnectPoint(7, 0, Directions.Up)
+                    new ChainConnectPoint(7, 0, LegacyDirections.Up)
                 ],
 
                 // bottom
                 [
-                    new ChainConnectPoint(7, 7, Directions.Down)
+                    new ChainConnectPoint(7, 7, LegacyDirections.Down)
                 ],
 
                 // left
                 [
-                    new ChainConnectPoint(0, 7, Directions.Left, null, true)
+                    new ChainConnectPoint(0, 7, LegacyDirections.Left, null, true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(14, 7, Directions.Right)
+                    new ChainConnectPoint(14, 7, LegacyDirections.Right)
                 ]
             ],
             x, y, status, cost, weight) {

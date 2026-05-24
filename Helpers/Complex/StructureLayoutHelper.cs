@@ -392,13 +392,13 @@ public static class StructureLayoutHelper {
                         structure,
                         new Shape(
                             true,
-                            entryPoint.Start + new Point16(entryPoint.Direction is Directions.Right ? -wallWidth + 1 : wallWidth - 1, 0),
-                            entryPoint.End + new Point16(entryPoint.Direction is Directions.Right ? -wallWidth + 1 : wallWidth - 1, 0)
+                            entryPoint.Start + new Point16(entryPoint.Direction is LegacyDirections.Right ? -wallWidth + 1 : wallWidth - 1, 0),
+                            entryPoint.End + new Point16(entryPoint.Direction is LegacyDirections.Right ? -wallWidth + 1 : wallWidth - 1, 0)
                         ),
                         null!,
                         null,
                         true,
-                        entryPoint.Direction is Directions.Left ? $"EntryPoint_Left_GenOrder{i}" : $"EntryPoint_Right_GenOrder{i}"
+                        entryPoint.Direction is LegacyDirections.Left ? $"EntryPoint_Left_GenOrder{i}" : $"EntryPoint_Right_GenOrder{i}"
                     );
                 else
                     gaps[i] = new Gap(
@@ -406,12 +406,12 @@ public static class StructureLayoutHelper {
                         new Shape(
                             true,
                             entryPoint.Start,
-                            entryPoint.End + new Point16(0, entryPoint.Direction is Directions.Down ? floorWidth - 1 : -floorWidth + 1)
+                            entryPoint.End + new Point16(0, entryPoint.Direction is LegacyDirections.Down ? floorWidth - 1 : -floorWidth + 1)
                         ),
                         null!,
                         null,
                         false,
-                        entryPoint.Direction is Directions.Up ? $"EntryPoint_Up_GenOrder{i}" : $"EntryPoint_Down_GenOrder{i}"
+                        entryPoint.Direction is LegacyDirections.Up ? $"EntryPoint_Up_GenOrder{i}" : $"EntryPoint_Down_GenOrder{i}"
                     );
             }
 
@@ -453,7 +453,7 @@ public static class StructureLayoutHelper {
                 visited.Add(pos);
 
                 int squareIndex = GeometryHelper.GetMarchingSquareIndex(tilemap.InInteriorUnsafe, pos.X, pos.Y, tilemapSize);
-                Point16 nextDir = GeometryHelper.GetDirectionFromSquareIndex(squareIndex, dir);
+                Point16 nextDir = GeometryHelper.GetDirectionFromSquareIndex(squareIndex);
 
                 Point16 outlineOffset = squareIndex switch {
                     1 => new Point16(0, 0), // BL only: BL

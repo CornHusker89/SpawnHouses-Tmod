@@ -1,6 +1,7 @@
 using SpawnHouses.Structures.Bridges;
 using SpawnHouses.Structures.StructureParts;
 using SpawnHouses.Structures.Structures.ChainStructures;
+using Terraria;
 
 namespace SpawnHouses.Structures.Chains;
 
@@ -29,11 +30,11 @@ public class CaveTown1 : StructureChain {
         CustomChainStructure targetStructure) {
         int netSideDistance = 0;
         foreach (byte direction in connectPoint.ParentStructure.BridgeDirectionHistory) {
-            if (direction == Directions.Left) netSideDistance--;
-            if (direction == Directions.Right) netSideDistance++;
+            if (direction == LegacyDirections.Left) netSideDistance--;
+            if (direction == LegacyDirections.Right) netSideDistance++;
         }
 
-        if (connectPoint.Direction is Directions.Left)
+        if (connectPoint.Direction is LegacyDirections.Left)
             return netSideDistance >= 0;
         return netSideDistance <= 0;
     }
@@ -46,7 +47,7 @@ public class CaveTown1 : StructureChain {
             newBridgeList = _bridgeListLarge;
 
         for (ushort i = 0; i < 5000; i++) {
-            int index = Terraria.WorldGen.genRand.Next(0, newBridgeList.Length);
+            int index = WorldGen.genRand.Next(0, newBridgeList.Length);
             if (newBridgeList[index].InputDirections[0] == direction)
                 return newBridgeList[index];
         }

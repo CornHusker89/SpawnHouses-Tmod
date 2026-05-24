@@ -180,22 +180,22 @@ public class RoomLayout {
             Room lastRoom = null!;
             List<Shape> curGapVolumes = [];
             bool isHorizontal = false;
-            byte lastDirection = Directions.None;
+            Direction lastDirection = Direction.None;
 
             room.Geometry.ExecuteOnPerimeter((x, y, direction) => {
                 Point16 pos = new(x, y);
-                if (lastDirection == Directions.None) lastDirection = direction;
+                if (lastDirection == Direction.None) lastDirection = direction;
 
                 Point16 step = direction switch {
-                    Directions.Up => new Point16(0, -1),
-                    Directions.Down => new Point16(0, 1),
-                    Directions.Left => new Point16(-1, 0),
-                    Directions.Right => new Point16(1, 0),
+                    Direction.Up => new Point16(0, -1),
+                    Direction.Down => new Point16(0, 1),
+                    Direction.Left => new Point16(-1, 0),
+                    Direction.Right => new Point16(1, 0),
                     _ => new Point16(0, 0)
                 };
 
                 pos += step;
-                while (direction is Directions.Up or Directions.Down ? InFloors(pos) : InWalls(pos))
+                while (direction is Direction.Up or Direction.Down ? InFloors(pos) : InWalls(pos))
                     pos += step;
 
                 Room foundRoom = RoomHelper.GetRoomFromPos(Rooms, pos);
@@ -204,7 +204,7 @@ public class RoomLayout {
 
                 if (foundRoom != null) {
                     if (curGapVolumes.Count == 0) {
-                        isHorizontal = direction is Directions.Left or Directions.Right;
+                        isHorizontal = direction is Direction.Left or Direction.Right;
                         lastRoom = foundRoom;
                     }
                     else if (direction != lastDirection) {

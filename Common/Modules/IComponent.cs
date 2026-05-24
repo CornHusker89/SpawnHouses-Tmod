@@ -38,16 +38,16 @@ public abstract class VolumeComponent : Generatable<VolumeComponent, VolumeCompo
             Point16 tilemapOffsetWorldCoords = Params.Structure.Tilemap.globalTileOffset * new Point16(16);
             var path = new Point16[Geometry.ExteriorDrawPath.Length];
             for (int i = 0; i < path.Length; i++) path[i] = Geometry.ExteriorDrawPath[i] + tilemapOffsetWorldCoords;
-            DrawHelper.DrawPath(path, color, DrawHelper.DebugDrawWidth);
+            DrawHelper.DrawWorldBasedPath(path, color, DrawHelper.DebugDrawWidth);
         }
 
         if (DebugInfoVisibility.DisplayPoints) {
             var points = new Point16[Geometry.Points.Length];
             for (int i = 0; i < points.Length; i++) points[i] = Geometry.Points[i] * new Point16(16) + new Point16(8);
-            DrawHelper.DrawPoints(points, color, DrawHelper.DebugDrawWidth * 2);
+            DrawHelper.DrawWorldBasedPoints(points, color, DrawHelper.DebugDrawWidth * 2);
         }
 
-        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawText(Name, Geometry.Center, color);
+        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, Geometry.Center, color);
     }
 }
 
@@ -73,9 +73,9 @@ public abstract class PathComponent : Generatable<PathComponent, PathComponentPa
         if (DebugInfoVisibility.DisplayPoints) {
             var points = new Point16[Geometry.Points.Length];
             for (int i = 0; i < points.Length; i++) points[i] = Geometry.Points[i] * new Point16(16) + new Point16(8);
-            DrawHelper.DrawPoints(points, color, 6);
+            DrawHelper.DrawWorldBasedPoints(points, color, 6);
         }
 
-        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawText(Name, Geometry.Center, color);
+        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, Geometry.Center, color);
     }
 }

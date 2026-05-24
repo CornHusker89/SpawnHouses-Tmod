@@ -119,100 +119,106 @@ public static class DrawHelper {
     ///     starts <see cref="Main.spriteBatch" /> in a world-relative state, useful for overlaying on tiles
     /// </summary>
     public static void BeginWorldSpriteBatch() => Main.spriteBatch.Begin(default, null, null, null, null, null, Main.GameViewMatrix.TransformationMatrix);
-
+    
     /// <summary>
     ///     draws a path of points. path segments cannot be diagonal
     /// </summary>
-    /// <param name="path">expected to be world coordinates (tile coords * 16)</param>
+    /// <param name="path">expected to be world coordinates (tile coords * 16), with no additional offsets</param>
     /// <param name="color"></param>
     /// <param name="width"></param>
     /// <remarks>assumes world relative sprite batch has already begun</remarks>
-    public static void DrawPath(Point16[] path, Color color, int width) {
-        for (int i = 0; i < path.Length - 1; i++) {
+    public static void DrawWorldBasedPath(Point16[] path, Color color, int width) {
+        Point16 screenPos = Main.screenPosition.ToPoint16();
+        for (int i = 0; i < path.Length; i++) {
             Point16 cur = path[i];
-            Point16 next = path[i + 1];
+            Point16 next = path[(i + 1) % path.Length];
 
             if (cur.X != next.X && cur.Y != next.Y)
                 throw new Exception("path segments cannot be diagonal");
 
             Main.spriteBatch.Draw(
                 PixelTexture.Value,
-                cur.X != next.X ? new Rectangle(Math.Min(cur.X, next.X), cur.Y, Math.Abs(cur.X - next.X), width) : new Rectangle(Math.Min(cur.Y, next.Y), cur.X, Math.Abs(cur.Y - next.Y), width),
+                cur.X != next.X ? new Rectangle(Math.Min(cur.X, next.X) - screenPos.X, cur.Y - screenPos.Y, Math.Abs(cur.X - next.X), width) : new Rectangle(cur.X - screenPos.X, Math.Min(cur.Y, next.Y) - screenPos.Y, width, Math.Abs(cur.Y - next.Y)),
                 color
             );
         }
     }
 
     /// <summary>
-    ///     draws rectangles relative to the player camera
+    ///     draws border-like rectangles relative to the world
     /// </summary>
-    /// <param name="rectangle">expected to be world coordinates (tile coords * 16)</param>
+    /// <param name="rectangle">expected to be world coordinates (tile coords * 16), with no additional offsets</param>
     /// <param name="color"></param>
     /// <param name="width"></param>
     /// <remarks>assumes world relative sprite batch has already begun</remarks>
-    public static void DrawRectangle(Rectangle rectangle, Color color, int width) {
-        Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(rectangle.Left, rectangle.Top, rectangle.Width, width), color);
-        Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(rectangle.Right, rectangle.Top, width, rectangle.Height), color);
-        Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(rectangle.Left, rectangle.Bottom, rectangle.Width, width), color);
-        Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(rectangle.Left, rectangle.Top, width, rectangle.Height), color);
+    public static void DrawWorldBasedBorder(Rectangle rectangle, Color color, int width) {
+        Point16 screenPos = Main.screenPosition.ToPoint16();
+        Rectangle offsetRectangle = new(rectangle.X - screenPos.X, rectangle.Y - screenPos.Y, rectangle.Width, rectangle.Height);
+        Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Left, offsetRectangle.Top, offsetRectangle.Width, width), color);
+        Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Right, offsetRectangle.Top, width, offsetRectangle.Height), color);
+        Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Left, offsetRectangle.Bottom, offsetRectangle.Width, width), color);
+        Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Left, offsetRectangle.Top, width, offsetRectangle.Height), color);
     }
 
     /// <summary>
-    ///     draws rectangles relative to the player camera. Main.spriteBatch must be ended before this is called
+    ///     draws border-like relative to the world
     /// </summary>
-    /// <param name="rectangles">expected to be world coordinates (tile coords * 16)</param>
+    /// <param name="rectangles">expected to be world coordinates (tile coords * 16), with no additional offsets</param>
     /// <param name="color"></param>
     /// <param name="width"></param>
     /// <remarks>assumes world relative sprite batch has already begun</remarks>
-    public static void DrawRectangles(Rectangle[] rectangles, Color color, int width) {
+    public static void DrawWorldBasedBorders(Rectangle[] rectangles, Color color, int width) {
         foreach (Rectangle rectangle in rectangles)
-            DrawRectangle(rectangle, color, width);
+            DrawWorldBasedBorder(rectangle, color, width);
     }
 
     /// <summary>
-    ///     draws rectangles relative to the player camera. Main.spriteBatch must be ended before this is called
+    ///     draws border-like relative to the world
     /// </summary>
-    /// <param name="rectangles">expected to be world coordinates (tile coords * 16)</param>
+    /// <param name="rectangles">expected to be world coordinates (tile coords * 16), with no additional offsets</param>
     /// <param name="colors">must have a color for every rectangle</param>
     /// <param name="width"></param>
     /// <remarks>assumes world relative sprite batch has already begun</remarks>
-    public static void DrawRectangles(Rectangle[] rectangles, Color[] colors, int width) {
+    public static void DrawWorldBasedBorders(Rectangle[] rectangles, Color[] colors, int width) {
         for (int index = 0; index < rectangles.Length; index++) {
             Rectangle rect = rectangles[index];
             Color color = colors[index];
-            DrawRectangle(rect, color, width);
+            DrawWorldBasedBorder(rect, color, width);
         }
     }
 
     /// <summary>
     /// </summary>
-    /// <param name="point">middle of the point, in world coordinates (not tile)</param>
+    /// <param name="point">middle of the point, in world coordinates (not tile), with no additional offsets</param>
     /// <param name="color"></param>
     /// <param name="width"></param>
     /// <remarks>assumes world relative sprite batch has already begun</remarks>
-    public static void DrawPoint(Point16 point, Color color, int width) =>
-        Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(point.X - width / 2, point.Y - width / 2, width, width), color);
+    public static void DrawWorldBasedPoint(Point16 point, Color color, int width) {
+        Point16 offsetPoint = point - Main.screenPosition.ToPoint16();
+        Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetPoint.X - width / 2, offsetPoint.Y - width / 2, width, width), color);
+    }
 
     /// <summary>
     /// </summary>
-    /// <param name="points">middle of the points, in world coordinates (not tile)</param>
+    /// <param name="points">middle of the points, in world coordinates (not tile), with no additional offsets</param>
     /// <param name="color"></param>
     /// <param name="width"></param>
     /// <remarks>assumes world relative sprite batch has already begun</remarks>
-    public static void DrawPoints(Point16[] points, Color color, int width) {
+    public static void DrawWorldBasedPoints(Point16[] points, Color color, int width) {
         foreach (Point16 point in points)
-            DrawPoint(point, color, width);
+            DrawWorldBasedPoint(point, color, width);
     }
 
     /// <summary>
     /// </summary>
     /// <param name="text"></param>
-    /// <param name="position"></param>
+    /// <param name="position">in world coordinates, with no additional offsets</param>
     /// <param name="color"></param>
     /// <remarks>assumes world relative sprite batch has already begun</remarks>
-    public static void DrawText(string text, Point16 position, Color color) {
+    public static void DrawWorldBasedText(string text, Point16 position, Color color) {
+        Point16 offsetPosition = position - Main.screenPosition.ToPoint16();
         //Main.spriteBatch.DrawString();
-        Utils.DrawBorderString(Main.spriteBatch, text, position.ToVector2(), color);
+        Utils.DrawBorderString(Main.spriteBatch, text, offsetPosition.ToVector2(), color);
     }
 
     public static Color GetColor(ushort id) => AllColors[id % AllColors.Length];

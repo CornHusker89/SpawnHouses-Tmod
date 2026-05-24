@@ -45,12 +45,12 @@ public class SpawnTest : ModItem {
                     new EntryPoint(
                         new Point16(x, y - 2),
                         3,
-                        Directions.Right
+                        LegacyDirections.Right
                     ),
                     new EntryPoint(
                         new Point16(x + 25, y - 8),
                         3,
-                        Directions.Left
+                        LegacyDirections.Left
                     )
                 ],
                 new Range(350, 500).Evaluate(scale),

@@ -1,4 +1,5 @@
 #nullable enable
+using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Types.Geometry;
 using Terraria;
 using Terraria.DataStructures;
@@ -8,6 +9,8 @@ using Terraria.ModLoader;
 namespace SpawnHouses.Items.Debug;
 
 public class SpawnTest2 : ModItem {
+    public static IComponent? Component;
+    
     public override void SetDefaults() {
         Item.useStyle = ItemUseStyleID.Swing;
         Item.useTime = 20;
@@ -24,32 +27,42 @@ public class SpawnTest2 : ModItem {
         Path original = new(
             new Point16(x - 15, y + 5),
             new Point16(x - 10, y + 10),
-            new Point16(x, y - 10),
-            new Point16(x + 8, y + 8),
-            new Point16(x + 12, y + 8),
-            new Point16(x + 20, y + 8),
-            new Point16(x + 30, y - 12)
+            new Point16(x, y - 10)
+            // new Point16(x + 8, y + 8),
+            // new Point16(x + 12, y + 8),
+            // new Point16(x + 20, y + 8),
+            // new Point16(x + 30, y - 12)
         );
 
-        Shape originalShape = original.ToShape(2);
-        Path upper = original.GetOffsetEvenPath(-3, true, true);
-        Shape upperShape = upper.ToShape(2);
-
+        Shape originalShape = original.ToShape(6);
+        
         originalShape.ExecuteInArea((x2, y2) => {
-            Tile tile = Main.tile[x2, y2];
-            tile.HasTile = true;
-            tile.TileType = TileID.AmberGemspark;
+            WorldGen.PlaceTile(x2, y2, TileID.EmeraldGemspark);
         });
 
-        upperShape.ExecuteInArea((x2, y2) => {
-            Tile tile = Main.tile[x2, y2];
-            tile.HasTile = true;
-            tile.TileType = TileID.EmeraldGemspark;
-        });
+        // AdvStructure dummyStructure = new(
+        //     "thing",
+        //     new StructureLayoutParams(new TagMap(), [
+        //         new EntryPoint(new Point16(10, 10), 3, Directions.Right),
+        //         new EntryPoint(new Point16(15, 10), 3, Directions.Left)
+        //     ], 100, false),
+        //     PalettePresets.Medieval,
+        //     generate: false
+        // );
+        // dummyStructure.FailedLayoutGeneration = true;
+        // dummyStructure.Tilemap = new StructureTilemap(
+        //     dummyStructure,
+        //     100,
+        //     100,
+        //     (Main.MouseWorld / 16).ToPoint16()
+        // );
+        //
+        // Floor floor = new(new VolumeComponentParams(dummyStructure, new TagMap()), originalShape.GetMovedShape((-Main.MouseWorld / 16).ToPoint16()), "floor1");
+        // floor.DebugInfoVisibility.AddBounds();
+        // floor.DebugInfoVisibility.AddName();
+        // floor.DebugInfoVisibility.AddPoints();
 
-        
-        
-
+        // Component = floor;
         return true;
     }
 }
