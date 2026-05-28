@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SpawnHouses.Legacy.Structures;
 using SpawnHouses.Structures.StructureParts;
 using Terraria;
 using Terraria.ModLoader;
@@ -79,7 +80,7 @@ public abstract class StructureChain {
                 RootStructure = PlaceNewStructure(null, false, EntryPosX, EntryPosY);
             }
             else {
-                int index = Terraria.WorldGen.genRand.Next(0, _rootStructureList.Length);
+                int index = WorldGen.genRand.Next(0, _rootStructureList.Length);
                 RootStructure = _rootStructureList[index].Clone();
                 RootStructure.SetPosition(EntryPosX, EntryPosY);
             }
@@ -134,7 +135,7 @@ public abstract class StructureChain {
                 });
 
                 if (count == 0 &&
-                    Terraria.WorldGen.genRand
+                    WorldGen.genRand
                         .NextBool()) // 0 because the bridge going into this is a parent, not child. also random bool cuz otherwise it feels too empty
                 {
                     structure.ActionOnEachConnectPoint(point => { _failedConnectPointList.Remove(point); });
@@ -408,7 +409,7 @@ public abstract class StructureChain {
     protected virtual CustomChainStructure GetNewStructure(ChainConnectPoint parentConnectPoint,
         bool closeToMaxBranchLength, int structureWeightSum, CustomChainStructure[] usableStructureList) {
         for (int i = 0; i < 50; i++) {
-            double randomValue = Terraria.WorldGen.genRand.NextDouble() * structureWeightSum;
+            double randomValue = WorldGen.genRand.NextDouble() * structureWeightSum;
             CustomChainStructure structure =
                 usableStructureList.Last(curStructure => curStructure.Weight <= randomValue).Clone();
 
@@ -435,7 +436,7 @@ public abstract class StructureChain {
     /// <returns>The bridge object to be used for the generation</returns>
     protected virtual Bridge GetBridgeOfDirection(Bridge[] bridges, byte direction, CustomChainStructure structure) {
         for (ushort i = 0; i < 5000; i++) {
-            int index = Terraria.WorldGen.genRand.Next(0, bridges.Length);
+            int index = WorldGen.genRand.Next(0, bridges.Length);
             if (bridges[index].InputDirections[0] == direction)
                 return bridges[index].Clone();
         }
@@ -456,7 +457,7 @@ public abstract class StructureChain {
         if (bridge.DeltaXMultiple != 0) {
             int minRangeX = bridge.MinDeltaX / bridge.DeltaXMultiple;
             int maxRangeX = bridge.MaxDeltaX / bridge.DeltaXMultiple;
-            deltaX = Terraria.WorldGen.genRand.Next(minRangeX, maxRangeX + 1) * bridge.DeltaXMultiple;
+            deltaX = WorldGen.genRand.Next(minRangeX, maxRangeX + 1) * bridge.DeltaXMultiple;
         }
         else {
             deltaX = 0;
@@ -465,7 +466,7 @@ public abstract class StructureChain {
         if (bridge.DeltaYMultiple != 0) {
             int minRangeY = bridge.MinDeltaY / bridge.DeltaYMultiple;
             int maxRangeY = bridge.MaxDeltaY / bridge.DeltaYMultiple;
-            deltaY = Terraria.WorldGen.genRand.Next(minRangeY, maxRangeY + 1) * bridge.DeltaYMultiple;
+            deltaY = WorldGen.genRand.Next(minRangeY, maxRangeY + 1) * bridge.DeltaYMultiple;
         }
         else {
             deltaY = 0;
@@ -492,7 +493,7 @@ public abstract class StructureChain {
     protected virtual bool ConnectPointAttrition(ChainConnectPoint connectPoint, byte currentBranchLength,
         byte minBranchLength, byte maxBranchLength) {
         if (connectPoint.GenerateChance != GenerateChances.Guaranteed)
-            if ((Terraria.WorldGen.genRand.Next(0, maxBranchLength - currentBranchLength) == 0 ||
+            if ((WorldGen.genRand.Next(0, maxBranchLength - currentBranchLength) == 0 ||
                  currentBranchLength >= maxBranchLength) && currentBranchLength >= minBranchLength)
                 return false;
         if (connectPoint.GenerateChance == GenerateChances.Rejected)

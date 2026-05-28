@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.Common;
+using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types.Geometry;

@@ -40,6 +40,8 @@ public class SpawnTest2 : ModItem {
             WorldGen.PlaceTile(x2, y2, TileID.EmeraldGemspark);
         });
 
+        originalShape.ExecuteOnPerimeter((x3, y3, _) => { WorldGen.PlaceTile(x3, y3, TileID.AmberGemspark); });
+
         // AdvStructure dummyStructure = new(
         //     "thing",
         //     new StructureLayoutParams(new TagMap(), [

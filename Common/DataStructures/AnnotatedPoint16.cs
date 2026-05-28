@@ -1,6 +1,6 @@
 using Terraria.DataStructures;
 
-namespace SpawnHouses.Common.Types.Geometry;
+namespace SpawnHouses.Common.DataStructures;
 
 // not a struct because strings aren't primitives
 public class AnnotatedPoint16 {

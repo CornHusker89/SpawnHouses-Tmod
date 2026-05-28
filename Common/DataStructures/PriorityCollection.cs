@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SpawnHouses.Common.Types;
+namespace SpawnHouses.Common.DataStructures;
 
 /// <summary>
 ///     contains multiple hashsets, sorted based on priority. intended for use when determining priority splits with the bsp algorithm.

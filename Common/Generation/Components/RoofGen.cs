@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Palette;
@@ -58,7 +59,7 @@ public static class RoofGen {
 
                 switch (tallLeftSide) {
                     case true when tallRightSide: {
-                        Shape topShape = roofTopPath.FillFromBoundingBox(new PartialPoint16(0, 0, false), new Point16(0, -1));
+                        Shape topShape = roofTopPath.FillFromBoundingBox(new PartialPoint32(0, 0, false), new Point16(0, -1));
                         ComponentHelper.FillShapeWalls.Action(topShape, param.Structure,
                             (x, _) => x > topShape.BoundingBox.topLeft.X && x < topShape.BoundingBox.bottomRight.X
                                 ? palette.Roof.PrimaryRoofBackground

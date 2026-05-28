@@ -4,7 +4,7 @@ using SpawnHouses.Common;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Helpers;
 using SpawnHouses.Items.Debug;
-using SpawnHouses.Structures;
+using SpawnHouses.Legacy.Structures;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;

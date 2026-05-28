@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Helpers;
-using SpawnHouses.Structures;
+using SpawnHouses.Legacy.Structures;
 using SpawnHouses.Structures.Chains;
 using SpawnHouses.Structures.StructureParts;
 using SpawnHouses.Structures.Structures;

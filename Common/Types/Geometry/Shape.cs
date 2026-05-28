@@ -4,8 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Helpers;
-using SpawnHouses.Structures;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -41,11 +41,11 @@ public class Shape : PointGeometry {
     }
 
     /// <summary>
-    ///     path of points to draw the exterior of the shape, in world coordinates (not tile)
+    ///     path of points to draw the exterior of the shape, in local (relative to the shape's topleft bounding box corner),  world coordinates (not tile)
     /// </summary>
     /// <returns></returns>
     public Point16[] ExteriorDrawPath {
-        get { return _exteriorDrawPath ??= GetExteriorDrawPath(DrawHelper.DebugDrawWidth); }
+        get { return _exteriorDrawPath ??= GetExteriorDrawPath(); }
     }
 
     protected sealed override void Init(Point16[] points, bool optimize) {
@@ -151,7 +151,36 @@ public class Shape : PointGeometry {
     private Point16 ToLocal(Point16 point) => point - BoundingBox.topLeft;
     private (int x, int y) ToLocal(int x, int y) => (x - BoundingBox.topLeft.X, y - BoundingBox.topLeft.Y);
     private Point16 ToGlobal(Point16 point) => point + BoundingBox.topLeft;
+    private (int x, int y) ToGlobal(int x, int y) => (x + BoundingBox.topLeft.X, y + BoundingBox.topLeft.Y);
 
+    /// <summary>
+    ///     expects shape's local coords
+    /// </summary>
+    public bool IsInsideBoundingBoxLocal(int x, int y) =>
+        x >= 0
+        && x < Size.X
+        && y >= 0
+        && y < Size.Y;
+
+    /// <summary>
+    ///     expects shape's local coords
+    /// </summary>
+    public bool IsInsideBoundingBoxLocal(Point16 pos) => IsInsideBoundingBoxLocal(pos.X, pos.Y);
+
+    /// <summary>
+    ///     expects shape's global coords
+    /// </summary>
+    public bool IsInsideBoundingBoxGlobal(int x, int y) =>
+        x >= BoundingBox.topLeft.X
+        && x <= BoundingBox.bottomRight.X
+        && y >= BoundingBox.topLeft.Y
+        && y <= BoundingBox.bottomRight.Y;
+
+    /// <summary>
+    ///     expects shape's global coords
+    /// </summary>
+    public bool IsInsideBoundingBoxGlobal(Point16 point) => IsInsideBoundingBoxLocal(ToLocal(point));
+    
     /// <summary>
     ///     the number of tiles this shape encloses
     /// </summary>
@@ -253,29 +282,29 @@ public class Shape : PointGeometry {
     /// </summary>
     /// <param name="significantAngle">only vertices that create a deviation (in deg) larger than this will be considered</param>
     /// <returns></returns>
-    public List<PartialPoint16> GetCorners(float significantAngle = 30f) {
-        List<PartialPoint16> corners = [];
+    public List<PartialPoint32> GetCorners(float significantAngle = 30f) {
+        List<PartialPoint32> corners = [];
         foreach (Point16 point in GetExpandedShape(1).CollapseVertices(significantAngle)) {
             bool xCorner = point.X > BoundingBox.topLeft.X
                            && point.X < BoundingBox.bottomRight.X;
             bool yCorner = point.Y > BoundingBox.topLeft.Y
                            && point.Y < BoundingBox.bottomRight.Y;
             if (xCorner && yCorner)
-                corners.Add(new PartialPoint16(point));
+                corners.Add(new PartialPoint32(point));
             else if (xCorner && !yCorner)
-                corners.Add(new PartialPoint16(point.X, 0, hasY: false));
+                corners.Add(new PartialPoint32(point.X, 0, hasY: false));
             else if (!xCorner && yCorner)
-                corners.Add(new PartialPoint16(0, point.Y, false));
+                corners.Add(new PartialPoint32(0, point.Y, false));
         }
 
         // sanitize list to remove repeat values
         for (int i = 0; i < corners.Count; i++) {
-            PartialPoint16 target = corners[i];
+            PartialPoint32 target = corners[i];
             if (target.HasX == target.HasY) // only check cases where only 1 axis is valid
                 continue;
 
-            PartialPoint16 last = corners[i - 1 != -1 ? i - 1 : corners.Count - 1];
-            PartialPoint16 next = corners[i + 1 != corners.Count ? i + 1 : 0];
+            PartialPoint32 last = corners[i - 1 != -1 ? i - 1 : corners.Count - 1];
+            PartialPoint32 next = corners[i + 1 != corners.Count ? i + 1 : 0];
 
             if ((last is { HasX: true, HasY: true } && (target.X == last.X || target.Y == last.Y))
                 || (next is { HasX: true, HasY: true } && (target.X == next.X || target.Y == next.Y))) {
@@ -340,14 +369,14 @@ public class Shape : PointGeometry {
         var map = new (bool hasTile, Direction outwardNormal)[Size.X, Size.Y];
 
         if (IsBox) {
-            for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
-                map[x, BoundingBox.topLeft.Y] = (true, Direction.Up);
-            for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
-                map[x, BoundingBox.bottomRight.Y] = (true, Direction.Down);
-            for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
-                map[BoundingBox.topLeft.X, y] = (true, Direction.Left);
-            for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
-                map[BoundingBox.bottomRight.X, y] = (true, Direction.Right);
+            for (int x = 0; x < Size.X; x++)
+                map[x, 0] = (true, Direction.Up);
+            for (int x = 0; x < Size.X; x++)
+                map[x, Size.Y - 1] = (true, Direction.Down);
+            for (int y = 0; y < Size.Y; y++)
+                map[0, y] = (true, Direction.Left);
+            for (int y = 0; y < Size.Y; y++)
+                map[Size.X - 1, y] = (true, Direction.Right);
         }
         else {
             for (int i = 0; i < Points.Length; i++) {
@@ -412,7 +441,7 @@ public class Shape : PointGeometry {
 
         if (IsBox) {
             for (int x = 0; x < Size.X; x++)
-            for (int y = 0; y <= Size.Y; y++)
+            for (int y = 0; y < Size.Y; y++)
                 map[x, y] = true;
 
             return map;
@@ -457,221 +486,78 @@ public class Shape : PointGeometry {
 
         return map;
     }
-    
-
-    private enum Dir {
-        Up,
-        Right,
-        Down,
-        Left
-    }
-
-    // TODO this is dumb inline this
-    private static (int x, int y) ToOffset(Dir d) => d switch {
-        Dir.Up => (0, -1),
-        Dir.Right => (1, 0),
-        Dir.Down => (0, 1),
-        Dir.Left => (-1, 0)
-    };
-
-    private Dir GetNextDir(int index, Dir current) {
-        return index switch {
-            1 => Dir.Down,
-            2 => Dir.Right,
-            3 => Dir.Right,
-            4 => Dir.Up,
-            5 => Dir.Up, // resolve ambiguity consistently
-            6 => Dir.Up,
-            7 => Dir.Up,
-            8 => Dir.Left,
-            9 => Dir.Down,
-            10 => Dir.Down, // resolve ambiguity consistently
-            11 => Dir.Right,
-            12 => Dir.Left,
-            13 => Dir.Down,
-            14 => Dir.Left,
-            _ => current
-        };
-    }
 
     /// <summary>
-    ///     gets a path of the shape, in world coordinates (not tile)
+    ///     gets a path around the outside of the shape, in local world coordinates (not tile)
     /// </summary>
     /// <returns></returns>
-    private Point16[] GetExteriorDrawPath(int drawWidth) {
-        // Point16 topLeftOffset = new(0, 0);
-        // Point16 topRightOffset = new(16 - drawWidth, 0);
-        // Point16 bottomLeftOffset = new(0, 16 - drawWidth);
-        // Point16 bottomRightOffset = new(16 - drawWidth, 16 - drawWidth);
-        //
-        // List<Point16> path = [];
-        // Point16 pos = Points[0];
-        // (int X, int Y) dir = (0, 1);
-        // int travelCount = 0;
-        // int maxTravelCount = Size.X * Size.Y;
-        //
-        // do {
-        //     int marchingIndex = GeometryHelper.GetMarchingSquareIndex(
-        //         (x, y) => BooleanTilemap[x, y], 
-        //         pos.X - BoundingBox.topLeft.X, 
-        //         pos.Y - BoundingBox.topLeft.Y,
-        //         Size
-        //     );
-        //     Point16 directionPoint16 = GeometryHelper.GetDirectionFromSquareIndex(marchingIndex);
-        //
-        //     // before the new position is calculated
-        //     Point16 worldCoordPos = pos * new Point16(16);
-        //     (int X, int Y) lastDir = dir;
-        //     dir = (directionPoint16.X, directionPoint16.Y);
-        //     switch (dir) {
-        //         // right
-        //         case (1, 0):
-        //             if (lastDir == (1, 0))
-        //                 path.Add(worldCoordPos + topLeftOffset);
-        //             if (lastDir == (0, -1)) {
-        //                 path.Add(worldCoordPos + bottomLeftOffset);
-        //                 path.Add(worldCoordPos + topLeftOffset);
-        //             }
-        //
-        //             path.Add(worldCoordPos + topRightOffset);
-        //             break;
-        //
-        //         // left
-        //         case (-1, 0):
-        //             if (lastDir == (-1, 0))
-        //                 path.Add(worldCoordPos + bottomRightOffset);
-        //             if (lastDir == (0, 1)) {
-        //                 path.Add(worldCoordPos + topRightOffset);
-        //                 path.Add(worldCoordPos + bottomRightOffset);
-        //             }
-        //
-        //             path.Add(worldCoordPos + bottomLeftOffset);
-        //             break;
-        //
-        //         // down
-        //         case (0, 1):
-        //             if (lastDir == (0, 1))
-        //                 path.Add(worldCoordPos + topRightOffset);
-        //             if (lastDir == (1, 0)) {
-        //                 path.Add(worldCoordPos + topLeftOffset);
-        //                 path.Add(worldCoordPos + topRightOffset);
-        //             }
-        //
-        //             path.Add(worldCoordPos + bottomRightOffset);
-        //             break;
-        //
-        //         // up
-        //         case (0, -1):
-        //             if (lastDir == (0, -1))
-        //                 path.Add(worldCoordPos + bottomLeftOffset);
-        //             if (lastDir == (-1, 0)) {
-        //                 path.Add(worldCoordPos + bottomRightOffset);
-        //                 path.Add(worldCoordPos + bottomLeftOffset);
-        //             }
-        //             
-        //             path.Add(worldCoordPos + topLeftOffset);
-        //             break;
-        //     }
-        //
-        //     pos += directionPoint16;
-        //     travelCount++;
-        // } while (pos != Points[0] && travelCount < maxTravelCount);
-        //
-        // return path.ToArray();
+    private Point16[] GetExteriorDrawPath() {
+        List<Point16> path = [];
 
-
-        var path = new List<Point16>();
-
-        bool IsInside(int x, int y) {
-            if (x < 0 || y < 0 || x >= Size.X || y >= Size.Y)
-                return false;
-            return Tilemap[x, y];
-        }
-
-        // --- find start corner ---
-        int cx = 0, cy = 0;
+        // find start tile
         bool found = false;
-
-        for (int y = 0; y < Size.Y && !found; y++)
+        Point16 start = default;
         for (int x = 0; x < Size.X && !found; x++)
-            if (Tilemap[x, y] && !IsInside(x, y - 1)) {
-                cx = x;
-                cy = y;
+        for (int y = 0; y < Size.Y && !found; y++) {
+            if (PerimeterTilemap[x, y].hasTile) {
+                start = new Point16(x, y);
                 found = true;
             }
+        }
 
-        if (!found) return path.ToArray();
+        if (!found)
+            throw new Exception();
 
-        Dir dir = Dir.Right;
-        (int cx, int cy, Dir dir) startState = (cx, cy, dir);
-
-        int safety = 0;
-        int maxSteps = Size.X * Size.Y * 8;
-
+        // traverse perimeter
+        bool loopComplete = false;
+        int safety = Size.X * Size.Y * 2;
+        int steps = 0;
+        Point16 pos = start;
+        Point16 prev = start + new Point16(0, 1); // because of the search pattern for the first tile, prev must be below in some way
         do {
-            // ADD CURRENT CORNER ONLY
-            // Point16 cornerOffset = dir switch {
-            //     Dir.Left => new Point16(16 - drawWidth, 16 - drawWidth),
-            //     Dir.Right => new Point16(drawWidth, drawWidth),
-            //     Dir.Down => new Point16(16 - drawWidth, drawWidth),
-            //     Dir.Up => new Point16(drawWidth, 16 - drawWidth),
-            //     _ => throw new Exception()
-            // };
-            Point16 cornerOffset = new(0, 0);
-            path.Add(new Point16((cx + BoundingBox.topLeft.X) * 16, (cy + BoundingBox.topLeft.Y) * 16) + cornerOffset);
+            steps++;
+            Direction direction = DirectionUtils.GetDirectionFromPoints(pos, prev);
+            for (int i = 0; i < 7; i++) {
+                direction = DirectionUtils.TurnRight(direction, true);
 
-            // --- build marching index ---
-            int A = IsInside(cx - 1, cy - 1) ? 1 : 0;
-            int B = IsInside(cx, cy - 1) ? 1 : 0;
-            int C = IsInside(cx, cy) ? 1 : 0;
-            int D = IsInside(cx - 1, cy) ? 1 : 0;
+                // append to draw path on each corner traversal
+                switch (direction) {
+                    case Direction.UpRight:
+                        path.Add((pos + BoundingBox.topLeft) * new Point16(16) + new Point16(16, 0));
+                        break;
+                    case Direction.DownRight:
+                        path.Add((pos + BoundingBox.topLeft) * new Point16(16) + new Point16(16, 16));
+                        break;
+                    case Direction.DownLeft:
+                        path.Add((pos + BoundingBox.topLeft) * new Point16(16) + new Point16(0, 16));
+                        break;
+                    case Direction.UpLeft:
+                        path.Add((pos + BoundingBox.topLeft) * new Point16(16) + new Point16(0, 0));
+                        break;
+                }
 
-            int index = (A << 3) | (B << 2) | (C << 1) | D;
+                if (path.Count >= 3 && path[^1] == path[0]) {
+                    path.RemoveAt(path.Count - 1);
+                    loopComplete = true;
+                    break;
+                }
 
-            // --- direction table (NO diagonals) ---
-            dir = index switch {
-                1 => Dir.Down,
-                2 => Dir.Right,
-                3 => Dir.Right,
-                4 => Dir.Up,
-                5 => Dir.Up,
-                6 => Dir.Up,
-                7 => Dir.Up,
-                8 => Dir.Left,
-                9 => Dir.Down,
-                10 => Dir.Down,
-                11 => Dir.Right,
-                12 => Dir.Left,
-                13 => Dir.Down,
-                14 => Dir.Left,
-                _ => dir
-            };
-
-            // --- MOVE EXACTLY ONE STEP ---
-            (int dx, int dy) = ToOffset(dir);
-            cx += dx;
-            cy += dy;
-
-            safety++;
-        } while ((cx, cy, dir) != startState && safety < maxSteps);
-
-        for (int i = 1; i < path.Count; i++) {
-            int dx = path[i].X - path[i - 1].X;
-            int dy = path[i].Y - path[i - 1].Y;
-
-            if (!(dx == 0 || dy == 0)) {
-                Console.WriteLine($"BAD STEP at {i}: ({dx}, {dy})");
-                break;
+                // if possible, advance in the current direction
+                Point16 testPos = DirectionUtils.Offset(pos, direction);
+                if (IsInsideBoundingBoxLocal(testPos) && PerimeterTilemap[testPos.X, testPos.Y].hasTile) {
+                    prev = pos;
+                    pos = testPos;
+                    break;
+                }
             }
+        } while (!loopComplete && steps < safety);
 
-            if (Math.Abs(dx) > 16 || Math.Abs(dy) > 16) {
-                Console.WriteLine($"TOO LARGE STEP at {i}: ({dx}, {dy})");
-                break;
-            }
+        if (steps == safety && Size != new Point16(1)) throw new Exception("perimeter traversal took longer than should be possible");
 
-            if (dx != 0 && dy != 0) {
-                Console.WriteLine($"Dig at {i}: ({dx}, {dy})");
-                break;
+        for (int i = 0; i < path.Count - 1; i++) {
+            if (path[i] == path[i + 1]) {
+                path.RemoveAt(i);
+                i--;
             }
         }
         
@@ -759,10 +645,12 @@ public class Shape : PointGeometry {
             return;
         }
 
+        bool[,] map = Tilemap;
         for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++) {
             for (int y = BoundingBox.topLeft.Y; y < BoundingBox.bottomRight.Y; y++) {
-                if (!Tilemap[x, y]) continue;
-                action(x, y, slopingAlgorithm(x, y, Tilemap));
+                (int localX, int localY) = ToLocal(x, y);
+                if (map[localX, localY])
+                    action(x, y, slopingAlgorithm(localX, localY, Tilemap));
             }
         }
     }

@@ -1,7 +1,7 @@
 #nullable enable
 using Microsoft.Xna.Framework;
 using SpawnHouses.Legacy;
-using SpawnHouses.Structures;
+using SpawnHouses.Legacy.Structures;
 using Terraria;
 using Terraria.ModLoader;
 using WorldGenTesting.Helpers;

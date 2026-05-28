@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SpawnHouses.Common.DataStructures;
 using Terraria;
 using Terraria.DataStructures;
 
@@ -241,7 +242,7 @@ public class Path : PointGeometry {
     /// <param name="axes">leave axis empty to ignore axis, otherwise either 0 or 1 to fill from lower or higher edge respectively</param>
     /// <param name="offset">the offset of the selected axeso</param>
     /// <returns></returns>
-    public Shape FillFromBoundingBox(PartialPoint16 axes, Point16 offset) {
+    public Shape FillFromBoundingBox(PartialPoint32 axes, Point16 offset) {
         if ((axes.X is not (0 or 1) && axes.HasX) || (axes.Y is not (0 or 1) && axes.HasY))
             throw new Exception("both axes of corner should be either 0 or 1 (if they exist) to represent the lower or higher bounding box edges respectively");
         if (axes is { HasX: false, HasY: false })

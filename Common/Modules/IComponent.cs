@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types;
@@ -35,19 +36,20 @@ public abstract class VolumeComponent : Generatable<VolumeComponent, VolumeCompo
         Color color = DrawHelper.GetColor(this);
 
         if (DebugInfoVisibility.DisplayBounds) {
-            Point16 tilemapOffsetWorldCoords = Params.Structure.Tilemap.globalTileOffset * new Point16(16);
-            var path = new Point16[Geometry.ExteriorDrawPath.Length];
+            Point32 tilemapOffsetWorldCoords = Params.Structure.Tilemap.globalTileOffset * new Point32(16);
+            var path = new Point32[Geometry.ExteriorDrawPath.Length];
             for (int i = 0; i < path.Length; i++) path[i] = Geometry.ExteriorDrawPath[i] + tilemapOffsetWorldCoords;
             DrawHelper.DrawWorldBasedPath(path, color, DrawHelper.DebugDrawWidth);
         }
 
         if (DebugInfoVisibility.DisplayPoints) {
-            var points = new Point16[Geometry.Points.Length];
-            for (int i = 0; i < points.Length; i++) points[i] = Geometry.Points[i] * new Point16(16) + new Point16(8);
+            Point32 tilemapOffsetWorldCoords = Params.Structure.Tilemap.globalTileOffset * new Point32(16);
+            var points = new Point32[Geometry.Points.Length];
+            for (int i = 0; i < points.Length; i++) points[i] = Geometry.Points[i] * new Point16(16) + tilemapOffsetWorldCoords + new Point16(8);
             DrawHelper.DrawWorldBasedPoints(points, color, DrawHelper.DebugDrawWidth * 2);
         }
 
-        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, Geometry.Center, color);
+        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, Geometry.Center.ToPoint32(), color);
     }
 }
 
@@ -71,11 +73,11 @@ public abstract class PathComponent : Generatable<PathComponent, PathComponentPa
         }
 
         if (DebugInfoVisibility.DisplayPoints) {
-            var points = new Point16[Geometry.Points.Length];
-            for (int i = 0; i < points.Length; i++) points[i] = Geometry.Points[i] * new Point16(16) + new Point16(8);
+            var points = new Point32[Geometry.Points.Length];
+            for (int i = 0; i < points.Length; i++) points[i] = Geometry.Points[i] * new Point32(16) + new Point16(8);
             DrawHelper.DrawWorldBasedPoints(points, color, 6);
         }
 
-        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, Geometry.Center, color);
+        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, Geometry.Center.ToPoint32(), color);
     }
 }

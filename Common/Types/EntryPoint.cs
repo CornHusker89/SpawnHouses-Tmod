@@ -1,4 +1,4 @@
-using SpawnHouses.Structures;
+using SpawnHouses.Legacy.Structures;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Common.Types;

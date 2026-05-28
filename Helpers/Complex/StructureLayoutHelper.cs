@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.Common;
+using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Parameters;
@@ -11,12 +12,12 @@ using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Common.Types.Geometry;
-using SpawnHouses.Structures;
+using SpawnHouses.Legacy.Structures;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.Utilities.Terraria.Utilities;
-using Range = SpawnHouses.Structures.Range;
+using Range = SpawnHouses.Legacy.Structures.Range;
 
 namespace SpawnHouses.Helpers.Complex;
 
@@ -102,12 +103,12 @@ public static class StructureLayoutHelper {
         /// <param name="horizontalGapYs"></param>
         /// <param name="validCutRange"></param>
         /// <returns></returns>
-        private static HashSet<int> GetValidSplits(Shape roomVolume, PriorityCollection<PartialPoint16> prioritySplits, bool splitAlongX, int splitWidth,
+        private static HashSet<int> GetValidSplits(Shape roomVolume, PriorityCollection<PartialPoint32> prioritySplits, bool splitAlongX, int splitWidth,
             HashSet<int> verticalGapXs, HashSet<int> horizontalGapYs, Range validCutRange) {
             // ensure that, taking blocklisted coordinates into account, there is valid places for the split
             HashSet<int> validSplitStarts = [];
             foreach (var tuple in prioritySplits.ToSortedHashSetArray()) {
-                foreach (PartialPoint16 split in tuple.set) {
+                foreach (PartialPoint32 split in tuple.set) {
                     if ((splitAlongX && split.HasY) || (!splitAlongX && split.HasX)) // ignore invalid coordinates
                         continue;
 
@@ -158,7 +159,7 @@ public static class StructureLayoutHelper {
         /// <param name="targetRoomCount"></param>
         /// <returns>RoomLayout is NOT in component mode</returns>
         /// <remarks>fully clears blocklist before returning</remarks>
-        private static RoomLayout SplitBsp(RoomLayoutParams param, Room room, PriorityCollection<PartialPoint16> prioritySplits, bool prioritizeSplitsOnGapFloors, int targetRoomCount) {
+        private static RoomLayout SplitBsp(RoomLayoutParams param, Room room, PriorityCollection<PartialPoint32> prioritySplits, bool prioritizeSplitsOnGapFloors, int targetRoomCount) {
             if (param.RoomHeight.Max < param.FloorWidth.Max + 2 * param.RoomHeight.Min)
                 ModContent.GetInstance<SpawnHouses>().Logger.Warn(
                     $"a max room height of {param.RoomHeight.Max} was given, but at least {param.FloorWidth.Max + 2 * param.RoomHeight.Min} is required");
@@ -189,7 +190,7 @@ public static class StructureLayoutHelper {
                             iterationHorizontalGapYs.Add(y);
 
                             if (prioritizeSplitsOnGapFloors && gap.Geometry.BoundingBox.bottomRight.Y != room.Geometry.BoundingBox.bottomRight.Y)
-                                prioritySplits.AddItem(new PartialPoint16(0, gap.Geometry.BoundingBox.bottomRight.Y + 1, false), 0);
+                                prioritySplits.AddItem(new PartialPoint32(0, gap.Geometry.BoundingBox.bottomRight.Y + 1, false), 0);
                         }
                     else
                         for (int x = gap.Geometry.BoundingBox.topLeft.X; x <= gap.Geometry.BoundingBox.bottomRight.X; x++)
@@ -233,7 +234,7 @@ public static class StructureLayoutHelper {
                 else
                     yCutCount++;
 
-                prioritySplits.AddToBlocklist(new PartialPoint16(splitStart, splitStart, !splitAlongX, splitAlongX));
+                prioritySplits.AddToBlocklist(new PartialPoint32(splitStart, splitStart, !splitAlongX, splitAlongX));
 
                 if (roomSubsections.lower is not null) {
                     if (param.IsWithinMaxSize(roomSubsections.lower) && param.Structure.LayoutRandom.NextDouble() < (1 - Math.Pow(1 - largeRoomChance, param.Attempts)) * 0.35 &&
@@ -288,8 +289,8 @@ public static class StructureLayoutHelper {
             RoomLayout? pickedLayout = null;
 
             var possibleLayouts = new RoomLayout[p.Attempts];
-            PriorityCollection<PartialPoint16> prioritySplits = new((thisObj, otherObj) => (thisObj.X == otherObj.X || !thisObj.HasX) && (thisObj.Y == otherObj.Y || thisObj.HasY));
-            foreach (PartialPoint16 corner in room.Geometry.GetCorners())
+            PriorityCollection<PartialPoint32> prioritySplits = new((thisObj, otherObj) => (thisObj.X == otherObj.X || !thisObj.HasX) && (thisObj.Y == otherObj.Y || thisObj.HasY));
+            foreach (PartialPoint32 corner in room.Geometry.GetCorners())
                 prioritySplits.AddItem(corner, 1);
 
             int targetRoomCount = p.TagsRequired.GetValue(Tags.HasRooms);
@@ -432,7 +433,7 @@ public static class StructureLayoutHelper {
             Point16 tilemapSize = new(tilemap.Width, tilemap.Height);
             for (int y = 0; y < tilemap.Height - 1 && start == null; y++)
             for (int x = 0; x < tilemap.Width - 1; x++)
-                if (GeometryHelper.GetMarchingSquareIndex(tilemap.InInteriorUnsafe, x, y, tilemapSize) != 0) {
+                if (GeometryHelper.GetMarchingSquareIndex(tilemap.InInterior, x, y, tilemapSize) != 0) {
                     start = new Point16(x, y);
                     break;
                 }

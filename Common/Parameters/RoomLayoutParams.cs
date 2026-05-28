@@ -1,7 +1,7 @@
 #nullable enable
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types.Geometry;
-using Range = SpawnHouses.Structures.Range;
+using Range = SpawnHouses.Legacy.Structures.Range;
 
 namespace SpawnHouses.Common.Parameters;
 

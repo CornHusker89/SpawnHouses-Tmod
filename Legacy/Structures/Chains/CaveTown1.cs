@@ -1,3 +1,4 @@
+using SpawnHouses.Legacy.Structures;
 using SpawnHouses.Structures.Bridges;
 using SpawnHouses.Structures.StructureParts;
 using SpawnHouses.Structures.Structures.ChainStructures;

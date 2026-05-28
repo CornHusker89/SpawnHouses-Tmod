@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
@@ -73,7 +74,7 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
             );
         }
 
-        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, BoundingBox.topLeft * new Point16(16) - new Point16(16, 16), color);
+        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, BoundingBox.topLeft * new Point32(16) - new Point16(16, 16), color);
 
         if (AllComponents != null)
             foreach (IComponent component in AllComponents)

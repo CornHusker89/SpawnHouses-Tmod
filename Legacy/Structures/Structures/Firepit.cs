@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using SpawnHouses.Legacy.Helpers;
+using SpawnHouses.Legacy.Structures;
 using SpawnHouses.Structures.StructureParts;
 using Terraria;
 using Terraria.ID;

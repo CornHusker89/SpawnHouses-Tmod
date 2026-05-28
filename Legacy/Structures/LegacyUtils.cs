@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using SpawnHouses.Helpers;
+using SpawnHouses.Structures;
 using SpawnHouses.Structures.Bridges;
 using SpawnHouses.Structures.ChainStructures;
 using SpawnHouses.Structures.Structures;
@@ -11,7 +12,7 @@ using SpawnHouses.Structures.Structures.ChainStructures;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace SpawnHouses.Structures;
+namespace SpawnHouses.Legacy.Structures;
 
 // ReSharper disable InconsistentNaming
 public enum StructureID : ushort {
@@ -256,14 +257,6 @@ public static class LegacyDirections {
     }
 }
 
-public enum Direction : byte {
-    Up = 0,
-    Down = 1,
-    Left = 2,
-    Right = 3,
-    None = 4
-}
-
 public class Range(int min, int max) {
     private int _value;
 
@@ -273,7 +266,7 @@ public class Range(int min, int max) {
     public int Value => Evaluated ? _value : Evaluate();
 
     public int Evaluate(float scale = -1) {
-        if (Math.Abs(scale - -1) < 0.01) scale = WorldGen.genRand.NextFloat();
+        if (Math.Abs(scale - -1) < 0.01) scale = Terraria.WorldGen.genRand.NextFloat();
 
         if (scale is < 0 or > 1) throw new ArgumentOutOfRangeException(nameof(scale), "scale must be between 0 and 1");
 

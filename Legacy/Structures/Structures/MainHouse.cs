@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Legacy.Helpers;
+using SpawnHouses.Legacy.Structures;
 using SpawnHouses.StructureHelper;
 using SpawnHouses.Structures.StructureParts;
 using Terraria;

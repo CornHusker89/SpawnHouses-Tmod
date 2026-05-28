@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Palette;
@@ -58,7 +59,7 @@ public class StructureTilemap : IDebugDraw {
                 DrawHelper.DebugDrawWidth
             );
 
-        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, worldTileOffset - new Point16(16, 16), color);
+        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, worldTileOffset - new Point32(16, 16), color);
     }
 
     /// <summary>

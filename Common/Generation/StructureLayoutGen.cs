@@ -10,11 +10,11 @@ using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Helpers;
 using SpawnHouses.Helpers.Complex;
-using SpawnHouses.Structures;
+using SpawnHouses.Legacy.Structures;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.Utilities;
-using Range = SpawnHouses.Structures.Range;
+using Range = SpawnHouses.Legacy.Structures.Range;
 
 namespace SpawnHouses.Common.Generation;
 

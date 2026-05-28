@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using SpawnHouses.Legacy.Structures;
 using SpawnHouses.Structures.StructureParts;
 
 namespace SpawnHouses.Structures;

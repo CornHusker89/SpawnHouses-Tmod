@@ -1,3 +1,4 @@
+using SpawnHouses.Legacy.Structures;
 using SpawnHouses.Structures.StructureParts;
 
 namespace SpawnHouses.Structures.ChainStructures;
