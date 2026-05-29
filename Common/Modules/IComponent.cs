@@ -1,11 +1,10 @@
 using Microsoft.Xna.Framework;
-using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Helpers;
-using Terraria.DataStructures;
+using Terraria;
 using Terraria.Utilities;
 
 namespace SpawnHouses.Common.Modules;
@@ -34,22 +33,21 @@ public abstract class VolumeComponent : Generatable<VolumeComponent, VolumeCompo
 
     public override void DrawDebugInfo() {
         Color color = DrawHelper.GetColor(this);
-
+        Point tilemapOffsetWorldCoords = Params.Structure.Tilemap.globalTileOffset.ToPoint() * new Point(16, 16);
+        
         if (DebugInfoVisibility.DisplayBounds) {
-            Point32 tilemapOffsetWorldCoords = Params.Structure.Tilemap.globalTileOffset * new Point32(16);
-            var path = new Point32[Geometry.ExteriorDrawPath.Length];
-            for (int i = 0; i < path.Length; i++) path[i] = Geometry.ExteriorDrawPath[i] + tilemapOffsetWorldCoords;
-            DrawHelper.DrawWorldBasedPath(path, color, DrawHelper.DebugDrawWidth);
+            var path = new Point[Geometry.ExteriorDrawPath.Length];
+            for (int i = 0; i < path.Length; i++) path[i] = Geometry.ExteriorDrawPath[i].ToPoint() + tilemapOffsetWorldCoords;
+            DrawHelper.DrawWorldBasedRectangularPath(path, color, DrawHelper.DebugDrawWidth);
         }
 
         if (DebugInfoVisibility.DisplayPoints) {
-            Point32 tilemapOffsetWorldCoords = Params.Structure.Tilemap.globalTileOffset * new Point32(16);
-            var points = new Point32[Geometry.Points.Length];
-            for (int i = 0; i < points.Length; i++) points[i] = Geometry.Points[i] * new Point16(16) + tilemapOffsetWorldCoords + new Point16(8);
+            var points = new Point[Geometry.Points.Length];
+            for (int i = 0; i < points.Length; i++) points[i] = Geometry.Points[i].ToPoint() * new Point(16, 16) + tilemapOffsetWorldCoords + new Point(8, 8);
             DrawHelper.DrawWorldBasedPoints(points, color, DrawHelper.DebugDrawWidth * 2);
         }
 
-        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, Geometry.Center.ToPoint32(), color);
+        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, Geometry.Center.ToPoint() * new Point(16, 16) + tilemapOffsetWorldCoords, color);
     }
 }
 
@@ -73,11 +71,11 @@ public abstract class PathComponent : Generatable<PathComponent, PathComponentPa
         }
 
         if (DebugInfoVisibility.DisplayPoints) {
-            var points = new Point32[Geometry.Points.Length];
-            for (int i = 0; i < points.Length; i++) points[i] = Geometry.Points[i] * new Point32(16) + new Point16(8);
+            var points = new Point[Geometry.Points.Length];
+            for (int i = 0; i < points.Length; i++) points[i] = Geometry.Points[i].ToPoint() * new Point(16, 16) + new Point(8, 8);
             DrawHelper.DrawWorldBasedPoints(points, color, 6);
         }
 
-        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, Geometry.Center.ToPoint32(), color);
+        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, Geometry.Center.ToPoint(), color);
     }
 }

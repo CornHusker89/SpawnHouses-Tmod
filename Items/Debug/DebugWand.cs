@@ -61,8 +61,8 @@ public class DebugWand : ModItem {
             }
 
             if (selectedStructureIndexes.Count == 0) {
+                Main.NewText(SelectedStructure != null ? "deselected current structure" : "no structure found on cursor", Color.Yellow);
                 SelectedStructure = null;
-                Main.NewText("no structure found on cursor", Color.Yellow);
                 return true;
             }
 
@@ -83,12 +83,14 @@ public class DebugWand : ModItem {
         // cycle structure debug info mode
         else if (_itemMode == 1) {
             if (SelectedStructure == null) {
-                Main.NewText("no structure selected", Color.Yellow);
+                StructureManager.DefaultDebugInfoLevel.EnableNext();
+
+                Main.NewText($"set default DebugInfoVisibility to {StructureManager.DefaultDebugInfoLevel.GetDetailedString()}", Color.Yellow);
                 return true;
             }
 
-            SelectedStructure.DebugInfoVisibility.Cycle();
-            SelectedStructure.SetDebugVisibility();
+            SelectedStructure.DebugInfoVisibility.EnableNext();
+            SelectedStructure.UpdateDebugVisibility();
             Main.NewText($"set structure (layout) id {SelectedStructure.StructureLayout.Id}'s DebugInfoVisibility to {SelectedStructure.DebugInfoVisibility.GetDetailedString()}", Color.Yellow);
         }
 

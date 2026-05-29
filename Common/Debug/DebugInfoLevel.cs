@@ -18,6 +18,8 @@ public class DebugInfoLevel {
     public bool DisplayId => (_value & 16) == 16;
     public bool DisplayGenerator => (_value & 32) == 32;
 
+    public DebugInfoLevel Clone() => new(_value);
+
     public override string ToString() => _value.ToString();
 
     public string GetDetailedString() => $"value: {_value}, Bounds: {DisplayBounds}, Points: {DisplayPoints}, DisplayName: {DisplayName}, " +
@@ -30,6 +32,21 @@ public class DebugInfoLevel {
         _value++;
         if (_value >= 64)
             _value = 0;
+    }
+
+    /// <summary>
+    ///     enables next display type, disables all if every display type is enabled
+    /// </summary>
+    public void EnableNext() {
+        _value = _value switch {
+            < 1 => 1,
+            < 2 => 3,
+            < 4 => 7,
+            < 8 => 15,
+            < 16 => 31,
+            < 32 => 63,
+            _ => 0
+        };
     }
 
     public void Clear() => _value = 0;

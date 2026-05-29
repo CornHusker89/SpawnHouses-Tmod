@@ -2,11 +2,9 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
-using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Modules.Components;
 using Terraria;
-using Terraria.DataStructures;
 using Terraria.ModLoader;
 
 namespace SpawnHouses.Helpers;
@@ -14,15 +12,15 @@ namespace SpawnHouses.Helpers;
 public static class DrawHelper {
     private static readonly Asset<Texture2D> PixelTexture = ModContent.Request<Texture2D>("SpawnHouses/Common/Assets/Pixel");
 
-    public static int DebugDrawWidth { get; private set; } = 5;
+    public static int DebugDrawWidth { get; private set; } = 3;
 
     public static void IncreaseDebugDrawWidth() {
         DebugDrawWidth++;
-        if (DebugDrawWidth <= 0) DebugDrawWidth = 1;
     }
 
     public static void DecreaseDebugDrawWidth() {
         DebugDrawWidth--;
+        if (DebugDrawWidth <= 0) DebugDrawWidth = 1;
     }
 
     /// <summary>
@@ -122,18 +120,18 @@ public static class DrawHelper {
     public static void BeginWorldSpriteBatch() => Main.spriteBatch.Begin(default, null, null, null, null, null, Main.GameViewMatrix.TransformationMatrix);
     
     /// <summary>
-    ///     draws a path of points. path segments cannot be diagonal
+    ///     draws a path of non-diagonal points. path segments cannot be diagonal
     /// </summary>
     /// <param name="path">expected to be world coordinates (tile coords * 16), with no additional offsets</param>
     /// <param name="color"></param>
     /// <param name="width"></param>
     /// <remarks>assumes world relative sprite batch has already begun</remarks>
-    public static void DrawWorldBasedPath(Point32[] path, Color color, int width) {
-        Point32 screenPos = Main.screenPosition.ToPoint32();
-        Point16 drawWidthOffset2D = new(DebugDrawWidth);
+    public static void DrawWorldBasedRectangularPath(Point[] path, Color color, int width) {
+        Point screenPos = Main.screenPosition.ToPoint();
+        Point drawWidthOffset2D = new(-DebugDrawWidth / 2, -DebugDrawWidth / 2);
         for (int i = 0; i < path.Length; i++) {
-            Point32 cur = path[i] - drawWidthOffset2D;
-            Point32 next = path[(i + 1) % path.Length] - drawWidthOffset2D;
+            Point cur = path[i] + drawWidthOffset2D;
+            Point next = path[(i + 1) % path.Length] + drawWidthOffset2D;
 
             if (cur.X != next.X && cur.Y != next.Y)
                 throw new Exception("path segments cannot be diagonal");
@@ -154,9 +152,9 @@ public static class DrawHelper {
     /// <param name="width"></param>
     /// <remarks>assumes world relative sprite batch has already begun</remarks>
     public static void DrawWorldBasedBorder(Rectangle rectangle, Color color, int width) {
-        Point32 screenPos = Main.screenPosition.ToPoint32();
-        int drawWidthOffset = DebugDrawWidth;
-        Rectangle offsetRectangle = new(rectangle.X - screenPos.X - drawWidthOffset, rectangle.Y - screenPos.Y - drawWidthOffset, rectangle.Width, rectangle.Height);
+        Point screenPos = Main.screenPosition.ToPoint();
+        int drawWidthOffset = -DebugDrawWidth / 2;
+        Rectangle offsetRectangle = new(rectangle.X - screenPos.X + drawWidthOffset, rectangle.Y - screenPos.Y + drawWidthOffset, rectangle.Width, rectangle.Height);
         Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Left, offsetRectangle.Top, offsetRectangle.Width, width), color);
         Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Right, offsetRectangle.Top, width, offsetRectangle.Height), color);
         Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Left, offsetRectangle.Bottom, offsetRectangle.Width, width), color);
@@ -196,8 +194,8 @@ public static class DrawHelper {
     /// <param name="color"></param>
     /// <param name="width"></param>
     /// <remarks>assumes world relative sprite batch has already begun</remarks>
-    public static void DrawWorldBasedPoint(Point32 point, Color color, int width) {
-        Point32 offsetPoint = point - Main.screenPosition.ToPoint32();
+    public static void DrawWorldBasedPoint(Point point, Color color, int width) {
+        Point offsetPoint = point - Main.screenPosition.ToPoint();
         Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetPoint.X - width / 2, offsetPoint.Y - width / 2, width, width), color);
     }
 
@@ -207,8 +205,8 @@ public static class DrawHelper {
     /// <param name="color"></param>
     /// <param name="width"></param>
     /// <remarks>assumes world relative sprite batch has already begun</remarks>
-    public static void DrawWorldBasedPoints(Point32[] points, Color color, int width) {
-        foreach (Point32 point in points)
+    public static void DrawWorldBasedPoints(Point[] points, Color color, int width) {
+        foreach (Point point in points)
             DrawWorldBasedPoint(point, color, width);
     }
 
@@ -218,8 +216,8 @@ public static class DrawHelper {
     /// <param name="position">in world coordinates, with no additional offsets</param>
     /// <param name="color"></param>
     /// <remarks>assumes world relative sprite batch has already begun</remarks>
-    public static void DrawWorldBasedText(string text, Point32 position, Color color) {
-        Point32 offsetPosition = position - Main.screenPosition.ToPoint32();
+    public static void DrawWorldBasedText(string text, Point position, Color color) {
+        Point offsetPosition = position - Main.screenPosition.ToPoint();
         //Main.spriteBatch.DrawString();
         Terraria.Utils.DrawBorderString(Main.spriteBatch, text, offsetPosition.ToVector2(), color);
     }

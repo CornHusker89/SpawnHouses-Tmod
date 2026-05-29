@@ -399,7 +399,7 @@ public static class StructureLayoutHelper {
                         null!,
                         null,
                         true,
-                        entryPoint.Direction is LegacyDirections.Left ? $"EntryPoint_Left_GenOrder{i}" : $"EntryPoint_Right_GenOrder{i}"
+                        entryPoint.Direction is LegacyDirections.Left ? $"EP_Left_GenOrder{i}" : $"EP_Right_GenOrder{i}"
                     );
                 else
                     gaps[i] = new Gap(

@@ -10,7 +10,7 @@ using Terraria.Utilities;
 
 namespace SpawnHouses.Common.Types;
 
-public interface IGeneratable : IDebugDraw {
+public interface IGeneratable : ICanDebugDraw {
     /// <summary>
     ///     if the generatable instance has had a generator run on it at least once
     /// </summary>
@@ -59,7 +59,7 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
     where TGenerator : IGenerator<TParams, TSelf> {
     public DebugInfoLevel DebugInfoVisibility { get; set; }
 
-    /// (ideally) a unique identifier. during assignment, any #'s get replaced with generatable's id
+    /// (ideally) a unique identifier. during assignment, any "#" get replaced with generatable's id
     public string Name { get; }
     
     public bool HasGenerated { get; set; }
@@ -116,7 +116,7 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
     /// <exception cref="Exception"></exception>
     protected void SetGenerator() {
         Type instanceType = GetType();
-        if (!AdvStructure.InstanceGenerators.TryGetValue(instanceType, out var generators)) throw new Exception($"instance type {GetType().FullName} generators not found");
+        if (!GlobalGeneratorUtils.InstanceGenerators.TryGetValue(instanceType, out var generators)) throw new Exception($"instance type {GetType().FullName} generators not found");
         var typedGenerators = generators.Cast<IGenerator>().ToArray();
 
         int generatorIndex = 0;

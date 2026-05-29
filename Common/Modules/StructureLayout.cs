@@ -1,17 +1,19 @@
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Helpers;
+using Terraria;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Common.Modules;
 
 public class StructureLayout : Generatable<StructureLayout, StructureLayoutParams, StructureLayoutGenerator> {
+    public string Name => Params.Structure.Name + "_Layout";
+    
     [CanBeNull]
     public List<Floor> ExternalFloors { get; private set; }
 
@@ -64,17 +66,17 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
             Point16 topLeftWorldPos = Params.Structure.Tilemap.ConvertToGlobal(BoundingBox.topLeft) * new Point16(16);
             DrawHelper.DrawWorldBasedBorder(
                 new Rectangle(
-                    topLeftWorldPos.X,
-                    topLeftWorldPos.Y,
-                    (BoundingBox.bottomRight.X - BoundingBox.topLeft.X) * 16,
-                    (BoundingBox.bottomRight.Y - BoundingBox.topLeft.Y) * 16
+                    topLeftWorldPos.X - DrawHelper.DebugDrawWidth,
+                    topLeftWorldPos.Y - DrawHelper.DebugDrawWidth,
+                    (BoundingBox.bottomRight.X - BoundingBox.topLeft.X + 1) * 16 + DrawHelper.DebugDrawWidth * 2,
+                    (BoundingBox.bottomRight.Y - BoundingBox.topLeft.Y + 1) * 16 + DrawHelper.DebugDrawWidth * 2
                 ),
                 color,
                 DrawHelper.DebugDrawWidth
             );
         }
 
-        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, BoundingBox.topLeft * new Point32(16) - new Point16(16, 16), color);
+        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, BoundingBox.topLeft.ToPoint() * new Point(16, 16) - new Point(16, 16), color);
 
         if (AllComponents != null)
             foreach (IComponent component in AllComponents)
@@ -87,7 +89,7 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
 
     /// <summary>
     ///     sets the EXTERNAL components of this structure layout excluding gaps, and calls <see cref="UpdateComponentList" />
-    /// </summary>
+    /// </summary>  
     /// <param name="externalFloors"></param>
     /// <param name="externalWalls"></param>
     /// <param name="roofs"></param>

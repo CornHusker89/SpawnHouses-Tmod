@@ -2,7 +2,7 @@ using Terraria;
 
 namespace SpawnHouses.Common.Debug;
 
-public interface IDebugDraw {
+public interface ICanDebugDraw {
     public string Name { get; }
     public DebugInfoLevel DebugInfoVisibility { get; set; }
 

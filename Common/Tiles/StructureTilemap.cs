@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Palette;
@@ -14,7 +13,7 @@ using Terraria.ID;
 
 namespace SpawnHouses.Common.Tiles;
 
-public class StructureTilemap : IDebugDraw {
+public class StructureTilemap : ICanDebugDraw {
     public DebugInfoLevel DebugInfoVisibility { get; set; }
     public string Name => Structure.Name + "_Tilemap";
 
@@ -44,7 +43,7 @@ public class StructureTilemap : IDebugDraw {
     /// </summary>
     /// <remarks>assumes that a world-relative batch has begun in <see cref="Main.spriteBatch" />. does not end sprite batch</remarks>
     public void DrawDebugInfo() {
-        Point16 worldTileOffset = globalTileOffset * new Point16(16);
+        Point worldTileOffset = globalTileOffset.ToPoint() * new Point(16, 16);
         Color color = DrawHelper.GetColor(Structure.StructureLayout.Id);
 
         if (DebugInfoVisibility.DisplayBounds)
@@ -59,7 +58,7 @@ public class StructureTilemap : IDebugDraw {
                 DrawHelper.DebugDrawWidth
             );
 
-        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, worldTileOffset - new Point32(16, 16), color);
+        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, worldTileOffset - new Point(16, 24), color);
     }
 
     /// <summary>

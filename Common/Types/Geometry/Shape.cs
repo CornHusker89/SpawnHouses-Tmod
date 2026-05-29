@@ -517,7 +517,7 @@ public class Shape : PointGeometry {
         do {
             steps++;
             Direction direction = DirectionUtils.GetDirectionFromPoints(pos, prev);
-            for (int i = 0; i < 7; i++) {
+            for (int i = 0; i < 8; i++) {
                 direction = DirectionUtils.TurnRight(direction, true);
 
                 // append to draw path on each corner traversal

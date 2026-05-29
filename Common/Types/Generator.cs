@@ -55,6 +55,7 @@ public interface IGenerator<TParams, in TGeneratable> : IGenerator
 public abstract class Generator<TParams, TGeneratable> : IGenerator<TParams, TGeneratable>
     where TParams : IParams
     where TGeneratable : IGeneratable {
+    
     public abstract HashSet<Tag> PossibleTags { get; }
 
     public abstract bool CanGenerate(TGeneratable generatable, TParams param, UnifiedRandom random);

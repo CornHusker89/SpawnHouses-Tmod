@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Palette;
@@ -16,13 +15,11 @@ namespace SpawnHouses.Common;
 /// <summary>
 ///     the central object that everything for adv. structures revolve around
 /// </summary>
-public class AdvStructure : IDebugDraw {
-    /// <summary>type corresponds to the final component's type</summary>
-    public static readonly Dictionary<Type, List<IGenerator>> InstanceGenerators = new();
-
+public class AdvStructure : ICanDebugDraw {
+    
     public DebugInfoLevel DebugInfoVisibility { get; set; }
     public string Name { get; init; }
-
+    
     public readonly Dictionary<Type, List<IGenerator>> InstanceGeneratorQueue = [];
 
     /// <summary>
@@ -53,7 +50,6 @@ public class AdvStructure : IDebugDraw {
     ///     <see cref="PlaceTilemap" />
     /// </param>
     public AdvStructure(string name, StructureLayoutParams layoutParam, TilePalette palette, int seed = -1, bool generate = true) {
-        DebugInfoVisibility = new DebugInfoLevel();
         Name = name;
         
         Seed = seed == -1 ? WorldGen.genRand.Next() : seed;
@@ -69,6 +65,9 @@ public class AdvStructure : IDebugDraw {
             FillComponents();
             PlaceTilemap();
         }
+
+        DebugInfoVisibility = StructureManager.DefaultDebugInfoLevel.Clone();
+        UpdateDebugVisibility();
     }
 
     public void DrawDebugInfo() {
@@ -85,13 +84,13 @@ public class AdvStructure : IDebugDraw {
     public void SetDebugVisibility(DebugInfoLevel infoLevel) {
         Tilemap.DebugInfoVisibility = infoLevel;
         StructureLayout.DebugInfoVisibility = infoLevel;
-        foreach (IComponent component in StructureLayout.AllComponents) component.DebugInfoVisibility = infoLevel;
+        foreach (IComponent component in StructureLayout.AllComponents!) component.DebugInfoVisibility = infoLevel;
     }
 
     /// <summary>
     ///     recursively sets this <see cref="DebugInfoLevel" /> for everything in this structure to this <see cref="AdvStructure" />'s <see cref="DebugInfoVisibility" />
     /// </summary>
-    public void SetDebugVisibility() => SetDebugVisibility(DebugInfoVisibility);
+    public void UpdateDebugVisibility() => SetDebugVisibility(DebugInfoVisibility);
     
     /// <summary>
     ///     calculates a structure's layout but does not apply component generators
@@ -116,7 +115,7 @@ public class AdvStructure : IDebugDraw {
         if (FailedLayoutGeneration)
             throw new Exception("layout generation was called but failed, aborting filling components");
 
-        foreach (IComponent component in StructureLayout.AllComponents)
+        foreach (IComponent component in StructureLayout.AllComponents!)
             component.ExecuteGenerator();
     }
 
@@ -131,30 +130,4 @@ public class AdvStructure : IDebugDraw {
 
         Tilemap.ApplyTilemap();
     }
-
-    #region Generators
-
-    public static void LoadGenerators(Assembly assembly) {
-        var pluginTypes = assembly.GetTypes();
-        foreach (Type type in pluginTypes) {
-            ModuleGenerator moduleInfo = type.GetCustomAttribute<ModuleGenerator>();
-
-            if (moduleInfo != null) {
-                if (!InstanceGenerators.TryGetValue(moduleInfo.ModuleType, out var generatorList))
-                    InstanceGenerators[moduleInfo.ModuleType] = generatorList = [];
-                generatorList.Add((IGenerator)Activator.CreateInstance(type));
-            }
-        }
-    }
-
-    internal static void LoadGenerators() {
-        LoadGenerators(Assembly.GetExecutingAssembly());
-    }
-
-    #endregion
-}
-
-[AttributeUsage(AttributeTargets.Class)]
-public class ModuleGenerator(Type moduleType) : Attribute {
-    public readonly Type ModuleType = moduleType;
 }

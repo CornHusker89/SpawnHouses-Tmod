@@ -124,7 +124,7 @@ public static class ExternalLayoutHelper {
                 if (lastPoint?.Y < thisPoint.Y) thisRoofStartExtendable = false;
 
                 if (thisPoint.Y == nextPoint.Y) {
-                    floors.Add(CreateFloor(structure, thisPoint.Y, thisPoint.X, nextPoint.X, false, floorWidth, $"F_RoofPathI{pathIndex}_" + path[pathIndex + 1].Name, isExternal));
+                    floors.Add(CreateFloor(structure, thisPoint.Y, thisPoint.X, nextPoint.X, false, floorWidth, $"F_RoofPathIndex{pathIndex}_" + path[pathIndex + 1].Name, isExternal));
                 }
                 else {
                     List<Point16> floorPoints = [];
@@ -152,7 +152,7 @@ public static class ExternalLayoutHelper {
 
                     floorPoints.Add(nextPoint + new Point16(0, -floorWidth));
 
-                    Floor floor = new(structure, new Shape(floorPoints), $"F_RoofPathI{pathIndex}_" + path[pathIndex + 1].Name);
+                    Floor floor = new(structure, new Shape(floorPoints), $"F_RoofPathIndex{pathIndex}_" + path[pathIndex + 1].Name);
                     if (isExternal)
                         floor.Params.TagsRequired.Add(Tags.External);
                     floors.Add(floor);
@@ -171,13 +171,13 @@ public static class ExternalLayoutHelper {
 
                 if (lastComponentWasFloor)
                     walls.Add(CreateWall(structure, thisPoint.X, nextPoint.Y > thisPoint.Y ? thisPoint.Y + 1 : thisPoint.Y - floorWidth,
-                        nextPoint.Y > thisPoint.Y ? nextPoint.Y - floorWidth : nextPoint.Y + 1, extendWallsHigher, wallWidth, $"F_RoofPathI{pathIndex}_" + path[pathIndex + 1].Name, isExternal));
+                        nextPoint.Y > thisPoint.Y ? nextPoint.Y - floorWidth : nextPoint.Y + 1, extendWallsHigher, wallWidth, $"F_RoofPathIndex{pathIndex}_" + path[pathIndex + 1].Name, isExternal));
                 else if (roofPoints.Count == 0)
                     walls.Add(CreateWall(structure, thisPoint.X, thisPoint.Y,
-                        nextPoint.Y > thisPoint.Y ? nextPoint.Y : nextPoint.Y + 1, extendWallsHigher, wallWidth, $"F_RoofPathI{pathIndex}_" + path[pathIndex + 1].Name, isExternal));
+                        nextPoint.Y > thisPoint.Y ? nextPoint.Y : nextPoint.Y + 1, extendWallsHigher, wallWidth, $"F_RoofPathIndex{pathIndex}_" + path[pathIndex + 1].Name, isExternal));
                 else
                     walls.Add(CreateWall(structure, thisPoint.X, thisPoint.Y,
-                        nextPoint.Y > thisPoint.Y ? nextPoint.Y - floorWidth : nextPoint.Y + 1, extendWallsHigher, wallWidth, $"F_RoofPathI{pathIndex}_" + path[pathIndex + 1].Name, isExternal));
+                        nextPoint.Y > thisPoint.Y ? nextPoint.Y - floorWidth : nextPoint.Y + 1, extendWallsHigher, wallWidth, $"F_RoofPathIndex{pathIndex}_" + path[pathIndex + 1].Name, isExternal));
             }
 
             lastComponentWasFloor = isFloor;

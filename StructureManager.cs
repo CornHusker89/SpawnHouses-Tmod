@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using SpawnHouses.Common;
+using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Tagging;
+using SpawnHouses.Common.Types;
 using SpawnHouses.Helpers;
 using SpawnHouses.Items.Debug;
 using SpawnHouses.Legacy.Structures;
@@ -20,6 +22,8 @@ public class StructureManager : ModSystem {
 
     public static List<AdvStructure> StructureList { get; private set; } = [];
 
+    public static DebugInfoLevel DefaultDebugInfoLevel = new();
+
     /// <summary>
     ///     returns the next component id, and advances the counter. begins at id 1
     /// </summary>
@@ -31,7 +35,7 @@ public class StructureManager : ModSystem {
 
     public override void Load() {
         Tags.SetInternalTagNames();
-        AdvStructure.LoadGenerators();
+        GlobalGeneratorUtils.LoadGenerators();
     }
 
     public override void SaveWorldData(TagCompound tag) {
