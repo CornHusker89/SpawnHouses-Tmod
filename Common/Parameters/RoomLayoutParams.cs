@@ -31,12 +31,12 @@ public class RoomLayoutParams : IParams {
     /// </summary>
     /// <param name="volume"></param>
     /// <returns></returns>
-    public bool IsWithinMinSize(Shape volume) => volume.Size.X >= RoomWidth.Min && volume.Size.Y >= RoomHeight.Min;
+    public bool IsWithinMinSize(Shape volume) => volume.BoundingBox.Width >= RoomWidth.Min && volume.BoundingBox.Height >= RoomHeight.Min;
 
     /// <summary>
     ///     true if volume's dimensions are not larger than max sizes
     /// </summary>
     /// <param name="volume"></param>
     /// <returns></returns>
-    public bool IsWithinMaxSize(Shape volume) => volume.Size.X <= RoomWidth.Max && volume.Size.Y <= RoomHeight.Max;
+    public bool IsWithinMaxSize(Shape volume) => volume.BoundingBox.Width <= RoomWidth.Max && volume.BoundingBox.Height <= RoomHeight.Max;
 }

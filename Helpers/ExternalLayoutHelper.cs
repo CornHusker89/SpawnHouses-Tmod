@@ -200,7 +200,7 @@ public static class ExternalLayoutHelper {
     public static int GetHighestRoofPoint(IEnumerable<Roof> roofs) {
         int topY = int.MaxValue;
         foreach (Roof roof in roofs) {
-            int pos = roof.GetBoundingShape().BoundingBox.topLeft.Y;
+            int pos = roof.GetBoundingShape().BoundingBox.Top;
             if (pos < topY) topY = pos;
         }
 

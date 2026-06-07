@@ -30,8 +30,8 @@ public static class RoomGen {
         public override bool CanGenerate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random) => param.TagsRequired.HasTag(Tags.RoomTypeBedroom);
 
         public override bool Generate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
-            int endY = component.Geometry.BoundingBox.bottomRight.Y;
-            int mainTopY = component.Geometry.BoundingBox.topLeft.Y;
+            int endY = component.Geometry.BoundingBox.Bottom;
+            int mainTopY = component.Geometry.BoundingBox.Top;
             int mainBottomY = endY - 1;
 
             ComponentHelper.FillShapeWalls.Action(component.Geometry, param.Structure, (_, y) => {
@@ -65,8 +65,8 @@ public static class RoomGen {
         public override bool CanGenerate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random) => param.TagsRequired.HasTag(Tags.RoomTypeLiving);
 
         public override bool Generate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
-            int endY = component.Geometry.BoundingBox.bottomRight.Y;
-            int mainTopY = component.Geometry.BoundingBox.topLeft.Y;
+            int endY = component.Geometry.BoundingBox.Bottom;
+            int mainTopY = component.Geometry.BoundingBox.Top;
             int mainBottomY = endY - 1;
 
             component.TagsCurrent.Add(Tags.RoomTypeLiving);

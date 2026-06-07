@@ -6,6 +6,7 @@ using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Palette;
 using SpawnHouses.Common.Types;
+using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Helpers;
 using Terraria;
 using Terraria.DataStructures;
@@ -13,32 +14,31 @@ using Terraria.ID;
 
 namespace SpawnHouses.Common.Tiles;
 
-public class StructureTilemap : ICanDebugDraw {
+public class StructureTilemap : ICanDebugDraw, IBoundingBox {
     private readonly DebugLabel _label;
     public DebugInfoLevel DebugInfoVisibility { get; set; }
     public string Name => Structure.Name + "_Tilemap";
+
+    public Rectangle BoundingBox { get; }
 
     private readonly StructureTile[,] _tiles;
     public readonly AdvStructure Structure;
     public List<MultiTile> MultiTiles;
     
     /// <summary>the actual global tile coordinates of the top left tile in this tilemap</summary>
-    public Point16 globalTileOffset;
+    public Point16 GlobalTileOffset;
 
-    public ushort Width { get; }
-    public ushort Height { get; }
-
-    public (Point16 TopLeft, Point16 BottomRight) BoundingBox => (globalTileOffset, globalTileOffset + new Point16(Width - 1, Height - 1));
+    public int Width => BoundingBox.Width;
+    public int Height => BoundingBox.Height;
 
     public StructureTilemap(AdvStructure structure, ushort width, ushort height, Point16? globalTileOffset = null) {
         Structure = structure;
-        Width = width;
-        Height = height;
         _tiles = new StructureTile[width, height];
-        this.globalTileOffset = globalTileOffset ?? new Point16(0, 0);
+        GlobalTileOffset = globalTileOffset ?? new Point16(0, 0);
+        BoundingBox = new Rectangle(GlobalTileOffset.X, GlobalTileOffset.Y, width, height);
         MultiTiles = [];
 
-        _label = new DebugLabel(this.globalTileOffset, this);
+        _label = new DebugLabel(GlobalTileOffset, this);
         DebugInfoVisibility = new DebugInfoLevel();
     }
 
@@ -47,17 +47,11 @@ public class StructureTilemap : ICanDebugDraw {
     /// </summary>
     /// <remarks>assumes that a world-relative batch has begun in <see cref="Main.spriteBatch" />. does not end sprite batch</remarks>
     public List<DebugLabel> DrawDebugInfo() {
-        Point worldTileOffset = globalTileOffset.ToPoint() * new Point(16, 16);
         Color color = DrawHelper.GetColor(Structure.StructureLayout.Id);
 
         if (DebugInfoVisibility.DisplayBounds)
             DrawHelper.DrawWorldBasedBorder(
-                new Rectangle(
-                    worldTileOffset.X,
-                    worldTileOffset.Y,
-                    Width * 16,
-                    Height * 16
-                ),
+                BoundingBox.Scale(16),
                 color,
                 DrawHelper.DebugDrawWidth
             );
@@ -141,24 +135,24 @@ public class StructureTilemap : ICanDebugDraw {
     /// <param name="x"></param>
     /// <param name="y"></param>
     /// <returns></returns>
-    public StructureTile GetTileByGlobalPos(int x, int y) => this[x - globalTileOffset.X, y - globalTileOffset.Y];
+    public StructureTile GetTileByGlobalPos(int x, int y) => this[x - GlobalTileOffset.X, y - GlobalTileOffset.Y];
 
     /// <summary>
     ///     gets tile from this tilemap using global tile coordinates
     /// </summary>
     /// <param name="pos"></param>
     /// <returns></returns>
-    public StructureTile GetTileByGlobalPos(Point16 pos) => this[pos - globalTileOffset];
+    public StructureTile GetTileByGlobalPos(Point16 pos) => this[pos - GlobalTileOffset];
 
-    public int ConvertToRelative(int coordinate, bool isX) => coordinate - (isX ? globalTileOffset.X : globalTileOffset.Y);
+    public int ConvertToRelative(int coordinate, bool isX) => coordinate - (isX ? GlobalTileOffset.X : GlobalTileOffset.Y);
 
-    public Point16 ConvertToRelative(int x, int y) => new(x - globalTileOffset.X, y - globalTileOffset.Y);
+    public Point16 ConvertToRelative(int x, int y) => new(x - GlobalTileOffset.X, y - GlobalTileOffset.Y);
 
     public Point16 ConvertToRelative(Point16 point) => ConvertToRelative(point.X, point.Y);
 
-    public int ConvertToGlobal(int coordinate, bool isX) => coordinate + (isX ? globalTileOffset.X : globalTileOffset.Y);
+    public int ConvertToGlobal(int coordinate, bool isX) => coordinate + (isX ? GlobalTileOffset.X : GlobalTileOffset.Y);
 
-    public Point16 ConvertToGlobal(int x, int y) => new(x + globalTileOffset.X, y + globalTileOffset.Y);
+    public Point16 ConvertToGlobal(int x, int y) => new(x + GlobalTileOffset.X, y + GlobalTileOffset.Y);
 
     public Point16 ConvertToGlobal(Point16 point) => ConvertToGlobal(point.X, point.Y);
 
@@ -167,7 +161,7 @@ public class StructureTilemap : ICanDebugDraw {
     /// </summary>
     /// <param name="structureLayout"></param>
     public void OffsetExternalLayout(StructureLayout structureLayout) {
-        Point16 offset = globalTileOffset * Point16.NegativeOne;
+        Point16 offset = GlobalTileOffset * Point16.NegativeOne;
         structureLayout.Offset(offset);
     }
 
@@ -176,7 +170,7 @@ public class StructureTilemap : ICanDebugDraw {
     /// </summary>
     /// <param name="entryPoint"></param>
     public void OffsetEntryPoint(EntryPoint entryPoint) {
-        entryPoint.Offset = globalTileOffset * Point16.NegativeOne;
+        entryPoint.Offset = GlobalTileOffset * Point16.NegativeOne;
     }
 
     public void PlaceTile(int x, int y, TilePaintedType? paintedType, BlockType blockType = BlockType.Solid, bool actuated = false) {
@@ -293,7 +287,7 @@ public class StructureTilemap : ICanDebugDraw {
 
         // place MultiTiles
         foreach (MultiTile multiTile in MultiTiles) {
-            Point16 originPoint = ConvertToGlobal(multiTile.Volume.BoundingBox.topLeft + multiTile.Origin);
+            Point16 originPoint = ConvertToGlobal(multiTile.Volume.BoundingBox.TopLeftPoint16() + multiTile.Origin);
             WorldGen.PlaceObject(originPoint.X, originPoint.Y, multiTile.TileType, true, multiTile.Style, direction: multiTile.FacingRight ? 1 : -1);
             multiTile.Volume.ExecuteInArea((x, y) => {
                 Tile tile = Main.tile[ConvertToGlobal(x, y)];

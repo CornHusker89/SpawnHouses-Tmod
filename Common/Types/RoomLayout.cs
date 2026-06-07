@@ -5,7 +5,6 @@ using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Helpers;
-using SpawnHouses.Structures;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Common.Types;
@@ -256,14 +255,14 @@ public class RoomLayout {
     /// </summary>
     /// <returns></returns>
     private void ResizeAndMoveGaps() {
-        short[] horizontalGapSizes = Gaps.Where(gap => !gap.IsHorizontal).Select(gap => gap.Geometry.Size.X).ToArray();
-        short maxFloorGapSize = horizontalGapSizes.Length != 0 ? horizontalGapSizes.Max() : (short)7;
+        int[] horizontalGapSizes = Gaps.Where(gap => !gap.IsHorizontal).Select(gap => gap.Geometry.BoundingBox.Width).ToArray();
+        int maxFloorGapSize = horizontalGapSizes.Length != 0 ? horizontalGapSizes.Max() : 7;
 
         // filter out gaps which are too small and resize gaps
         for (int gapIndex = Gaps.Count - 1; gapIndex >= 0; gapIndex--) {
             Gap gap = Gaps[gapIndex];
             if (gap.IsHorizontal) {
-                if (gap.Geometry.Size.Y < 3) {
+                if (gap.Geometry.BoundingBox.Height < 3) {
                     Gaps.RemoveAt(gapIndex);
                     continue;
                 }
@@ -271,24 +270,24 @@ public class RoomLayout {
                 var points = gap.Geometry.Points;
                 for (int pointIndex = 0; pointIndex < gap.Geometry.Points.Length; pointIndex++)
                     // ensure doors aren't too tall
-                    if (points[pointIndex].Y < gap.Geometry.BoundingBox.bottomRight.Y - 2)
-                        points[pointIndex] = new Point16(points[pointIndex].X, gap.Geometry.BoundingBox.bottomRight.Y - 2);
+                    if (points[pointIndex].Y < gap.Geometry.BoundingBox.Bottom - 2)
+                        points[pointIndex] = new Point16(points[pointIndex].X, gap.Geometry.BoundingBox.Bottom - 2);
 
                 gap.Geometry = new Shape(points);
             }
             else {
-                if (gap.Geometry.Size.X < 2) {
+                if (gap.Geometry.BoundingBox.Width < 2) {
                     Gaps.RemoveAt(gapIndex);
                     continue;
                 }
 
-                int suggestedSize = (int)(gap.Geometry.Size.X / (float)maxFloorGapSize * 2 + 2);
+                int suggestedSize = (int)(gap.Geometry.BoundingBox.Width / (float)maxFloorGapSize * 2 + 2);
                 // randomly move the gap, if there's space to do so
-                if (suggestedSize < gap.Geometry.Size.X) {
-                    int gapCenter = (int)(Structure.LayoutRandom.NextDouble() * gap.Geometry.Size.X) + gap.Geometry.BoundingBox.topLeft.X;
+                if (suggestedSize < gap.Geometry.BoundingBox.Width) {
+                    int gapCenter = (int)(Structure.LayoutRandom.NextDouble() * gap.Geometry.BoundingBox.Width) + gap.Geometry.BoundingBox.Left;
                     int leftX = gapCenter - (int)Math.Floor((double)suggestedSize / 2);
-                    int outOfBoundsDistance = Math.Max(0, gap.Geometry.BoundingBox.topLeft.X - leftX);
-                    leftX = Math.Max(leftX, gap.Geometry.BoundingBox.topLeft.X);
+                    int outOfBoundsDistance = Math.Max(0, gap.Geometry.BoundingBox.Left - leftX);
+                    leftX = Math.Max(leftX, gap.Geometry.BoundingBox.Left);
                     int rightX = gapCenter + (int)Math.Ceiling((double)suggestedSize / 2) + outOfBoundsDistance;
                     var points = gap.Geometry.Points;
                     for (int pointIndex = 0; pointIndex < gap.Geometry.Points.Length; pointIndex++) {
@@ -311,19 +310,19 @@ public class RoomLayout {
             Gap potentialChainGap = Gaps.Find(potentialGap =>
                 !potentialGap.IsHorizontal &&
                 potentialGap.InteriorRoom == gap.ExteriorRoom &&
-                gap.Geometry.BoundingBox.topLeft.X <= potentialGap.Geometry.BoundingBox.topLeft.X &&
-                gap.Geometry.BoundingBox.bottomRight.X >= potentialGap.Geometry.BoundingBox.bottomRight.X
+                gap.Geometry.BoundingBox.Left <= potentialGap.Geometry.BoundingBox.Left &&
+                gap.Geometry.BoundingBox.Right >= potentialGap.Geometry.BoundingBox.Right
             );
 
             // 60% chance to go for chain gaps
             if (potentialChainGap != null && Structure.LayoutRandom.NextDouble() < 0.6) {
                 var points = gap.Geometry.Points;
                 for (int pointIndex = 0; pointIndex < gap.Geometry.Points.Length; pointIndex++) {
-                    if (points[pointIndex].X < potentialChainGap.Geometry.BoundingBox.topLeft.X)
-                        points[pointIndex] = new Point16(potentialChainGap.Geometry.BoundingBox.topLeft.X, points[pointIndex].Y);
+                    if (points[pointIndex].X < potentialChainGap.Geometry.BoundingBox.Left)
+                        points[pointIndex] = new Point16(potentialChainGap.Geometry.BoundingBox.Left, points[pointIndex].Y);
 
-                    if (points[pointIndex].X > potentialChainGap.Geometry.BoundingBox.bottomRight.X)
-                        points[pointIndex] = new Point16(potentialChainGap.Geometry.BoundingBox.bottomRight.X, points[pointIndex].Y);
+                    if (points[pointIndex].X > potentialChainGap.Geometry.BoundingBox.Right)
+                        points[pointIndex] = new Point16(potentialChainGap.Geometry.BoundingBox.Right, points[pointIndex].Y);
                 }
 
                 gap.Geometry = new Shape(points);

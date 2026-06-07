@@ -98,14 +98,14 @@ public static class FloorGen {
         public override bool CanGenerate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random) => component.Geometry.GetDetailedAxisSizes(false).average >= 3 && param.TagsRequired.HasTag(Tags.FloorHollow);
 
         public override bool Generate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
-            int xStart = component.Geometry.BoundingBox.topLeft.X;
-            int[] topY = new int[component.Geometry.Size.X];
-            int[] bottomY = new int[component.Geometry.Size.X];
+            int xStart = component.Geometry.BoundingBox.Left;
+            int[] topY = new int[component.Geometry.BoundingBox.Width];
+            int[] bottomY = new int[component.Geometry.BoundingBox.Width];
             int supportInterval = random.Next(3, 5);
 
             component.Geometry.ExecuteInArea((x, y) => {
                 if ((x - xStart - 2) % supportInterval == 0 || x == xStart ||
-                    x == component.Geometry.BoundingBox.bottomRight.X) {
+                    x == component.Geometry.BoundingBox.Right) {
                     tilemap.PlaceTile(x, y, palette.InternalFloor.Vertical);
                 }
                 else {

@@ -6,14 +6,19 @@ using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types;
+using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Helpers;
 using Terraria.DataStructures;
+using Utils = Terraria.Utils;
 
 namespace SpawnHouses.Common.Modules;
 
-public class StructureLayout : Generatable<StructureLayout, StructureLayoutParams, StructureLayoutGenerator> {
+public class StructureLayout : Generatable<StructureLayout, StructureLayoutParams, StructureLayoutGenerator>, IBoundingBox {
     private readonly DebugLabel _label;
+    
     public string Name => Params.Structure.Name + "_Layout";
+
+    public Rectangle BoundingBox { get; private set; }
     
     [CanBeNull]
     public List<Floor> ExternalFloors { get; private set; }
@@ -29,8 +34,6 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
 
     [CanBeNull]
     public List<RoomLayout> RoomLayouts { get; private set; }
-    
-    public (Point16 topLeft, Point16 bottomRight) BoundingBox { get; private set; }
 
     [CanBeNull]
     public List<IComponent> ExternalComponents { get; private set; }
@@ -58,20 +61,20 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
     }
 
     public StructureLayout(StructureLayoutParams param, string name) : base(param, new TagMap(), name) {
-        _label = new DebugLabel(BoundingBox.topLeft, this);
+        _label = new DebugLabel(BoundingBox.TopLeftPoint16(), this);
     }
 
     public override List<DebugLabel> DrawDebugInfo() {
         Color color = DrawHelper.GetColor(Id);
 
         if (DebugInfoVisibility.DisplayBounds) {
-            Point16 topLeftWorldPos = Params.Structure.Tilemap.ConvertToGlobal(BoundingBox.topLeft) * new Point16(16);
+            Point16 topLeftWorldPos = Params.Structure.Tilemap.ConvertToGlobal(BoundingBox.TopLeftPoint16()) * new Point16(16);
             DrawHelper.DrawWorldBasedBorder(
                 new Rectangle(
                     topLeftWorldPos.X - DrawHelper.DebugDrawWidth,
                     topLeftWorldPos.Y - DrawHelper.DebugDrawWidth,
-                    (BoundingBox.bottomRight.X - BoundingBox.topLeft.X + 1) * 16 + DrawHelper.DebugDrawWidth * 2,
-                    (BoundingBox.bottomRight.Y - BoundingBox.topLeft.Y + 1) * 16 + DrawHelper.DebugDrawWidth * 2
+                    BoundingBox.Width * 16 + DrawHelper.DebugDrawWidth * 2,
+                    BoundingBox.Height * 16 + DrawHelper.DebugDrawWidth * 2
                 ),
                 color,
                 DrawHelper.DebugDrawWidth
@@ -146,13 +149,13 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
 
             int minX = int.MaxValue, minY = int.MaxValue, maxX = 0, maxY = 0;
             foreach (IComponent component in ExternalComponents) {
-                if (component.Geometry.BoundingBox.topLeft.X < minX) minX = component.Geometry.BoundingBox.topLeft.X;
-                if (component.Geometry.BoundingBox.topLeft.Y < minY) minY = component.Geometry.BoundingBox.topLeft.Y;
-                if (component.Geometry.BoundingBox.bottomRight.X > maxX) maxX = component.Geometry.BoundingBox.bottomRight.X;
-                if (component.Geometry.BoundingBox.bottomRight.Y > maxY) maxY = component.Geometry.BoundingBox.bottomRight.Y;
+                if (component.Geometry.BoundingBox.Left < minX) minX = component.Geometry.BoundingBox.Left;
+                if (component.Geometry.BoundingBox.Top < minY) minY = component.Geometry.BoundingBox.Top;
+                if (component.Geometry.BoundingBox.Right > maxX) maxX = component.Geometry.BoundingBox.Right;
+                if (component.Geometry.BoundingBox.Bottom > maxY) maxY = component.Geometry.BoundingBox.Bottom;
             }
 
-            BoundingBox = (new Point16(minX, minY), new Point16(maxX, maxY));
+            BoundingBox = Utils.CornerRectangle(new Point(minX, minY), new Point(maxX, maxY));
         }
 
         if (ExternalComponents != null && ExternalGaps != null && RoomLayouts != null) {

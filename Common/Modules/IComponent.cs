@@ -31,13 +31,13 @@ public abstract class VolumeComponent : Generatable<VolumeComponent, VolumeCompo
     public Shape Geometry { get; set; }
 
     protected VolumeComponent(VolumeComponentParams param, Shape geometry, string name) : base(param, new TagMap(), name) {
-        _label = new DebugLabel(geometry.Center, this);
+        _label = new DebugLabel(geometry.BoundingBox.CenterPoint16(), this);
         Geometry = geometry;
     }
 
     public override List<DebugLabel> DrawDebugInfo() {
         Color color = DrawHelper.GetColor(this);
-        Point tilemapOffsetWorldCoords = Params.Structure.Tilemap.globalTileOffset.ToPoint() * new Point(16, 16);
+        Point tilemapOffsetWorldCoords = Params.Structure.Tilemap.GlobalTileOffset.ToPoint() * new Point(16, 16);
         
         if (DebugInfoVisibility.DisplayBounds) {
             var path = new Point[Geometry.ExteriorDrawPath.Length];

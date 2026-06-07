@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using SpawnHouses.Common.Types;
+using SpawnHouses.Helpers;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent;
@@ -49,13 +50,11 @@ public class DebugLabel {
         return new Rectangle(pos.X, pos.Y, (int)dimensions.X, (int)dimensions.Y);
     }
 
-    public bool IsVisible((Point16 topLeft, Point16 bottomRight) boundingBox) {
+    public bool IsVisible(Rectangle boundingBox) {
         if (!ParentObj.DebugInfoVisibility.IsDisplayingText)
             return false;
-
-        Point16 size = new(boundingBox.bottomRight.X - boundingBox.topLeft.X, boundingBox.bottomRight.Y - boundingBox.topLeft.Y);
+        
         Rectangle screenRect = new((int)Main.screenPosition.X, (int)Main.screenPosition.Y, Main.screenWidth, Main.screenHeight);
-        Rectangle geoPixelBoundingBox = new(boundingBox.topLeft.X * 16, boundingBox.topLeft.Y * 16, size.X * 16, size.Y * 16);
-        return screenRect.Intersects(geoPixelBoundingBox);
+        return screenRect.Intersects(boundingBox.Scale(16));
     }
 }

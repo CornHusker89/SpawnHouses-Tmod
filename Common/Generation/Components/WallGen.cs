@@ -50,10 +50,10 @@ public static class WallGen {
 
         public override bool Generate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
             bool external = param.TagsRequired.HasTag(Tags.External);
-            int yStart = component.Geometry.BoundingBox.topLeft.Y;
-            int yEnd = component.Geometry.BoundingBox.bottomRight.Y;
-            int[] lowX = new int[component.Geometry.Size.Y];
-            int[] highX = new int[component.Geometry.Size.Y];
+            int yStart = component.Geometry.BoundingBox.Top;
+            int yEnd = component.Geometry.BoundingBox.Bottom;
+            int[] lowX = new int[component.Geometry.BoundingBox.Height];
+            int[] highX = new int[component.Geometry.BoundingBox.Height];
             component.Geometry.ExecuteInArea((x, y) => {
                 // replace default values
                 if (lowX[y - yStart] == 0) lowX[y - yStart] = x;

@@ -50,18 +50,18 @@ public static class StructureLayoutHelper {
         private static (bool success, bool cutOnX) EvaluateCutOnX(RoomLayoutParams param, Shape roomVolume, int floorWidth, int wallWidth, int xCutCount, int yCutCount) {
             int expandedArea = roomVolume.GetExpandedShape(1).GetArea(true);
             bool canSplitAlongX =
-                roomVolume.Size.Y >= floorWidth + 2 * param.RoomHeight.Min // make sure volume is tall enough to be split
+                roomVolume.BoundingBox.Height >= floorWidth + 2 * param.RoomHeight.Min // make sure volume is tall enough to be split
                 && expandedArea > 90 // make sure area is large enough to be split (area is approximated and it's thoroughly checked later, so it's low balled)
-                && roomVolume.Size.X < roomVolume.Size.Y * 1.3; // make sure width/height ratio of resulting rooms isn't stupid
+                && roomVolume.BoundingBox.Width < roomVolume.BoundingBox.Height * 1.3; // make sure width/height ratio of resulting rooms isn't stupid
 
             bool canSplitAlongY =
-                roomVolume.Size.X >= wallWidth + 2 * param.RoomWidth.Min
+                roomVolume.BoundingBox.Width >= wallWidth + 2 * param.RoomWidth.Min
                 && expandedArea > 90
-                && roomVolume.Size.Y < roomVolume.Size.X * 1.6;
+                && roomVolume.BoundingBox.Height < roomVolume.BoundingBox.Width * 1.6;
 
             switch (canSplitAlongX) {
                 case true when canSplitAlongY: {
-                    if (roomVolume.Size.Y > param.RoomHeight.Max) return (true, true);
+                    if (roomVolume.BoundingBox.Height > param.RoomHeight.Max) return (true, true);
                     double xWeight = Math.Pow(1.0 / (xCutCount + 2), 3);
                     double yWeight = Math.Pow(1.0 / (yCutCount + 1), 3);
                     double totalWeight = xWeight + yWeight;
@@ -186,14 +186,14 @@ public static class StructureLayoutHelper {
                 prioritySplits.RemoveHashSet(0); // clear any gap floors from previous iterations
                 foreach (Gap gap in iterationGaps)
                     if (gap.IsHorizontal)
-                        for (int y = gap.Geometry.BoundingBox.topLeft.Y; y <= gap.Geometry.BoundingBox.bottomRight.Y; y++) {
+                        for (int y = gap.Geometry.BoundingBox.Top; y <= gap.Geometry.BoundingBox.Bottom; y++) {
                             iterationHorizontalGapYs.Add(y);
 
-                            if (prioritizeSplitsOnGapFloors && gap.Geometry.BoundingBox.bottomRight.Y != room.Geometry.BoundingBox.bottomRight.Y)
-                                prioritySplits.AddItem(new PartialPoint32(0, gap.Geometry.BoundingBox.bottomRight.Y + 1, false), 0);
+                            if (prioritizeSplitsOnGapFloors && gap.Geometry.BoundingBox.Bottom != room.Geometry.BoundingBox.Bottom)
+                                prioritySplits.AddItem(new PartialPoint32(0, gap.Geometry.BoundingBox.Bottom + 1, false), 0);
                         }
                     else
-                        for (int x = gap.Geometry.BoundingBox.topLeft.X; x <= gap.Geometry.BoundingBox.bottomRight.X; x++)
+                        for (int x = gap.Geometry.BoundingBox.Left; x <= gap.Geometry.BoundingBox.Right; x++)
                             iterationVerticalGapXs.Add(x);
 
                 // set this iteration's parameters
@@ -212,8 +212,8 @@ public static class StructureLayoutHelper {
 
                 int iterationSplitWidth = splitAlongX ? iterationFloorWidth : iterationWallWidth;
                 int outerBoundaryWidth = splitAlongX ? param.RoomHeight.Min : param.RoomWidth.Min;
-                Range validCutRange = new((splitAlongX ? roomVolume.BoundingBox.topLeft.Y : roomVolume.BoundingBox.topLeft.X) + outerBoundaryWidth,
-                    (splitAlongX ? roomVolume.BoundingBox.bottomRight.Y : roomVolume.BoundingBox.bottomRight.X) - outerBoundaryWidth - iterationSplitWidth
+                Range validCutRange = new((splitAlongX ? roomVolume.BoundingBox.Top : roomVolume.BoundingBox.Left) + outerBoundaryWidth,
+                    (splitAlongX ? roomVolume.BoundingBox.Bottom : roomVolume.BoundingBox.Right) - outerBoundaryWidth - iterationSplitWidth
                 );
 
                 var validSplitStarts = GetValidSplits(roomVolume, prioritySplits, splitAlongX, iterationSplitWidth, iterationVerticalGapXs, iterationHorizontalGapYs, validCutRange);
@@ -320,7 +320,7 @@ public static class StructureLayoutHelper {
             pickedLayout.ConvertToComponents();
             foreach (Gap gap in room.Gaps) {
                 if (gap.InteriorRoom == room)
-                    gap.InteriorRoom = RoomHelper.GetClosestRoom(pickedLayout.Rooms, gap.Geometry.Center);
+                    gap.InteriorRoom = RoomHelper.GetClosestRoom(pickedLayout.Rooms, gap.Geometry.BoundingBox.CenterPoint16());
             }
 
             p.Structure.StructureLayout.TagsCurrent.Add(Tags.HasRooms, pickedLayout.Rooms.Count);
@@ -356,7 +356,7 @@ public static class StructureLayoutHelper {
             List<Stairway> stairways = [];
             foreach (Gap gap in room.Gaps)
                 if (gap.IsHorizontal) {
-                    Point16 gapBottom = gap.Geometry.BoundingBox.bottomRight;
+                    Point16 gapBottom = gap.Geometry.BoundingBox.BottomRightPoint16();
                     if (room.Geometry.Contains(gapBottom + new Point16(1, 1)) || room.Geometry.Contains(gapBottom + new Point16(-1, 1))) {
                         CreateStairwayToGap(param, gapBottom);
                         //somehow make sure that the stair ways dont collide and take up too much space and stuff

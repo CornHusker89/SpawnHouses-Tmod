@@ -6,6 +6,7 @@ using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types;
+using SpawnHouses.Helpers;
 using Terraria.DataStructures;
 using Terraria.Utilities;
 
@@ -26,9 +27,9 @@ public class GapGen {
         public override bool CanGenerate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random) => !((Gap)component).IsHorizontal;
 
         public override bool Generate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
-            int xStart = component.Geometry.BoundingBox.topLeft.X;
-            int[] topY = new int[component.Geometry.Size.X];
-            int[] bottomY = new int[component.Geometry.Size.X];
+            int xStart = component.Geometry.BoundingBox.Left;
+            int[] topY = new int[component.Geometry.BoundingBox.Width];
+            int[] bottomY = new int[component.Geometry.BoundingBox.Width];
             bool external = !param.TagsRequired.HasTag(Tags.External);
 
             component.Geometry.ExecuteInArea((x, y) => {
@@ -83,7 +84,7 @@ public class GapGen {
                     tilemap.PlaceWall(x, y, palette.InternalWall.PrimaryBackground);
                     tilemap[x, y].ClearTile(false);
                 });
-            tilemap.PlaceMultiTile(component.Geometry.BoundingBox.topLeft, new Point16(1, 3),
+            tilemap.PlaceMultiTile(component.Geometry.BoundingBox.TopLeftPoint16(), new Point16(1, 3),
                 (external ? palette.ExternalWall : palette.InternalWall).Door, false, MultiTile.DoorOrigin);
 
             if (external)

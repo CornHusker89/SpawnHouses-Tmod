@@ -140,6 +140,13 @@ public class Shape : PointGeometry {
     /// <returns></returns>
     private Shape(IEnumerable<Point16> points, bool optimize, bool boxShorthand = false) {
         var pointsArray = points.ToArray();
+        if (boxShorthand && pointsArray.Length == 2)
+            pointsArray = [
+                new Point16(pointsArray[0].X, pointsArray[0].Y),
+                new Point16(pointsArray[1].X, pointsArray[0].Y),
+                new Point16(pointsArray[1].X, pointsArray[1].Y),
+                new Point16(pointsArray[0].X, pointsArray[1].Y)
+            ];
         Init(pointsArray, optimize);
     }
 
@@ -148,19 +155,19 @@ public class Shape : PointGeometry {
 
     #region Shape Self-Geometry
 
-    private Point16 ToLocal(Point16 point) => point - BoundingBox.topLeft;
-    private (int x, int y) ToLocal(int x, int y) => (x - BoundingBox.topLeft.X, y - BoundingBox.topLeft.Y);
-    private Point16 ToGlobal(Point16 point) => point + BoundingBox.topLeft;
-    private (int x, int y) ToGlobal(int x, int y) => (x + BoundingBox.topLeft.X, y + BoundingBox.topLeft.Y);
+    private Point16 ToLocal(Point16 point) => point - BoundingBox.TopLeftPoint16();
+    private (int x, int y) ToLocal(int x, int y) => (x - BoundingBox.Left, y - BoundingBox.Top);
+    private Point16 ToGlobal(Point16 point) => point + BoundingBox.TopLeftPoint16();
+    private (int x, int y) ToGlobal(int x, int y) => (x + BoundingBox.Left, y + BoundingBox.Top);
 
     /// <summary>
     ///     expects shape's local coords
     /// </summary>
     public bool IsInsideBoundingBoxLocal(int x, int y) =>
         x >= 0
-        && x < Size.X
+        && x < BoundingBox.Width
         && y >= 0
-        && y < Size.Y;
+        && y < BoundingBox.Height;
 
     /// <summary>
     ///     expects shape's local coords
@@ -171,10 +178,10 @@ public class Shape : PointGeometry {
     ///     expects shape's global coords
     /// </summary>
     public bool IsInsideBoundingBoxGlobal(int x, int y) =>
-        x >= BoundingBox.topLeft.X
-        && x <= BoundingBox.bottomRight.X
-        && y >= BoundingBox.topLeft.Y
-        && y <= BoundingBox.bottomRight.Y;
+        x >= BoundingBox.Left
+        && x <= BoundingBox.Right
+        && y >= BoundingBox.Top
+        && y <= BoundingBox.Bottom;
 
     /// <summary>
     ///     expects shape's global coords
@@ -187,8 +194,7 @@ public class Shape : PointGeometry {
     /// <param name="approximate">if an approximation algorithm is used. otherwise, area is evaluated using <see cref="ExecuteInArea(System.Action{int,int})" /></param>
     public int GetArea(bool approximate = false) {
         if (IsBox)
-            return (BoundingBox.bottomRight.X - BoundingBox.topLeft.X) *
-                   (BoundingBox.bottomRight.Y - BoundingBox.topLeft.Y);
+            return BoundingBox.Width * BoundingBox.Height;
 
         if (approximate) {
             double area = 0;
@@ -211,13 +217,13 @@ public class Shape : PointGeometry {
     ///     gets the ratio of bounding box size to actual shape area. can indicate how box-like the shape is
     /// </summary>
     /// <returns></returns>
-    public double GetBoundingBoxEfficiency() => (double)Size.X * Size.Y / GetArea();
+    public double GetBoundingBoxEfficiency() => (double)BoundingBox.Width * BoundingBox.Height / GetArea();
 
     /// <summary>
     ///     gets number of tiles that are within the bounding box but not in the shape. can indicate how box-like the shape is
     /// </summary>
     /// <returns></returns>
-    public int GetUnusedBoundingBoxArea() => Size.X * Size.Y - GetArea();
+    public int GetUnusedBoundingBoxArea() => BoundingBox.Width * BoundingBox.Height - GetArea();
 
     /// <summary>
     ///     creates a new shape, moved by the offset. ex. if offset = (3, 0) will move shape 3 to the right in world coordinates
@@ -235,7 +241,7 @@ public class Shape : PointGeometry {
     /// <param name="distance"></param>
     /// <returns></returns>
     private Point16[] GetExpansionEven(int distance) {
-        if (distance < 0 && (-distance > Size.X / 2 || -distance > Size.Y / 2))
+        if (distance < 0 && (-distance > BoundingBox.Width / 2 || -distance > BoundingBox.Height / 2))
             throw new Exception("negative shape expansion amount is larger than an axis size, at risk of turning shape inside-out");
         
         bool clockwise = IsClockwise();
@@ -285,10 +291,10 @@ public class Shape : PointGeometry {
     public List<PartialPoint32> GetCorners(float significantAngle = 30f) {
         List<PartialPoint32> corners = [];
         foreach (Point16 point in GetExpandedShape(1).CollapseVertices(significantAngle)) {
-            bool xCorner = point.X > BoundingBox.topLeft.X
-                           && point.X < BoundingBox.bottomRight.X;
-            bool yCorner = point.Y > BoundingBox.topLeft.Y
-                           && point.Y < BoundingBox.bottomRight.Y;
+            bool xCorner = point.X > BoundingBox.Left
+                           && point.X < BoundingBox.Right;
+            bool yCorner = point.Y > BoundingBox.Top
+                           && point.Y < BoundingBox.Bottom;
             if (xCorner && yCorner)
                 corners.Add(new PartialPoint32(point));
             else if (xCorner && !yCorner)
@@ -366,17 +372,17 @@ public class Shape : PointGeometry {
     /// </summary>
     /// <returns></returns>
     private (bool hasTile, Direction outwardNormal)[,] GetPerimeterTilemap() {
-        var map = new (bool hasTile, Direction outwardNormal)[Size.X, Size.Y];
+        var map = new (bool hasTile, Direction outwardNormal)[BoundingBox.Width, BoundingBox.Height];
 
         if (IsBox) {
-            for (int x = 0; x < Size.X; x++)
+            for (int x = 0; x < BoundingBox.Width; x++)
                 map[x, 0] = (true, Direction.Up);
-            for (int x = 0; x < Size.X; x++)
-                map[x, Size.Y - 1] = (true, Direction.Down);
-            for (int y = 0; y < Size.Y; y++)
+            for (int x = 0; x < BoundingBox.Width; x++)
+                map[x, BoundingBox.Height - 1] = (true, Direction.Down);
+            for (int y = 0; y < BoundingBox.Height; y++)
                 map[0, y] = (true, Direction.Left);
-            for (int y = 0; y < Size.Y; y++)
-                map[Size.X - 1, y] = (true, Direction.Right);
+            for (int y = 0; y < BoundingBox.Height; y++)
+                map[BoundingBox.Width - 1, y] = (true, Direction.Right);
         }
         else {
             for (int i = 0; i < Points.Length; i++) {
@@ -437,20 +443,20 @@ public class Shape : PointGeometry {
     /// </summary>
     /// <returns></returns>
     private bool[,] GetTilemap() {
-        bool[,] map = new bool[Size.X, Size.Y];
+        bool[,] map = new bool[BoundingBox.Width, BoundingBox.Height];
 
         if (IsBox) {
-            for (int x = 0; x < Size.X; x++)
-            for (int y = 0; y < Size.Y; y++)
+            for (int x = 0; x < BoundingBox.Width; x++)
+            for (int y = 0; y < BoundingBox.Height; y++)
                 map[x, y] = true;
 
             return map;
         }
 
         var perimeterMap = PerimeterTilemap;
-        for (int y = 0; y < Size.Y; y++) {
+        for (int y = 0; y < BoundingBox.Height; y++) {
             // ensure that all edges are consistently added
-            for (int x = 0; x < Size.X; x++)
+            for (int x = 0; x < BoundingBox.Width; x++)
                 if (perimeterMap[x, y].hasTile)
                     map[x, y] = true;
 
@@ -497,8 +503,8 @@ public class Shape : PointGeometry {
         // find start tile
         bool found = false;
         Point16 start = default;
-        for (int x = 0; x < Size.X && !found; x++)
-        for (int y = 0; y < Size.Y && !found; y++) {
+        for (int x = 0; x < BoundingBox.Width && !found; x++)
+        for (int y = 0; y < BoundingBox.Height && !found; y++) {
             if (PerimeterTilemap[x, y].hasTile) {
                 start = new Point16(x, y);
                 found = true;
@@ -510,7 +516,7 @@ public class Shape : PointGeometry {
 
         // traverse perimeter
         bool loopComplete = false;
-        int safety = Size.X * Size.Y * 2;
+        int safety = BoundingBox.Width * BoundingBox.Height * 2;
         int steps = 0;
         Point16 pos = start;
         Point16 prev = start + new Point16(0, 1); // because of the search pattern for the first tile, prev must be below in some way
@@ -523,16 +529,16 @@ public class Shape : PointGeometry {
                 // append to draw path on each corner traversal
                 switch (direction) {
                     case Direction.UpRight:
-                        path.Add((pos + BoundingBox.topLeft) * new Point16(16) + new Point16(16, 0));
+                        path.Add((pos + BoundingBox.TopLeftPoint16()) * new Point16(16) + new Point16(16, 0));
                         break;
                     case Direction.DownRight:
-                        path.Add((pos + BoundingBox.topLeft) * new Point16(16) + new Point16(16, 16));
+                        path.Add((pos + BoundingBox.TopLeftPoint16()) * new Point16(16) + new Point16(16, 16));
                         break;
                     case Direction.DownLeft:
-                        path.Add((pos + BoundingBox.topLeft) * new Point16(16) + new Point16(0, 16));
+                        path.Add((pos + BoundingBox.TopLeftPoint16()) * new Point16(16) + new Point16(0, 16));
                         break;
                     case Direction.UpLeft:
-                        path.Add((pos + BoundingBox.topLeft) * new Point16(16) + new Point16(0, 0));
+                        path.Add((pos + BoundingBox.TopLeftPoint16()) * new Point16(16) + new Point16(0, 0));
                         break;
                 }
 
@@ -552,7 +558,7 @@ public class Shape : PointGeometry {
             }
         } while (!loopComplete && steps < safety);
 
-        if (steps == safety && Size != new Point16(1)) throw new Exception("perimeter traversal took longer than should be possible");
+        if (steps == safety && BoundingBox.SizePoint16() != new Point16(1)) throw new Exception("perimeter traversal took longer than should be possible");
 
         for (int i = 0; i < path.Count - 1; i++) {
             if (path[i] == path[i + 1]) {
@@ -588,19 +594,19 @@ public class Shape : PointGeometry {
     public void ExecuteOnPerimeter(Action<int, int, Direction> action) {
         if (IsBox) {
             // go line-by-line
-            for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
-                action.Invoke(x, BoundingBox.topLeft.Y, Direction.Up);
-            for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
-                action.Invoke(x, BoundingBox.bottomRight.Y, Direction.Down);
-            for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
-                action.Invoke(BoundingBox.topLeft.X, y, Direction.Left);
-            for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
-                action.Invoke(BoundingBox.bottomRight.X, y, Direction.Right);
+            for (int x = BoundingBox.Left; x <= BoundingBox.Right; x++)
+                action.Invoke(x, BoundingBox.Top, Direction.Up);
+            for (int x = BoundingBox.Left; x <= BoundingBox.Right; x++)
+                action.Invoke(x, BoundingBox.Bottom, Direction.Down);
+            for (int y = BoundingBox.Top; y <= BoundingBox.Bottom; y++)
+                action.Invoke(BoundingBox.Left, y, Direction.Left);
+            for (int y = BoundingBox.Top; y <= BoundingBox.Bottom; y++)
+                action.Invoke(BoundingBox.Right, y, Direction.Right);
         }
         else {
             var map = PerimeterTilemap;
-            for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
-            for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++) {
+            for (int x = BoundingBox.Left; x <= BoundingBox.Right; x++)
+            for (int y = BoundingBox.Top; y <= BoundingBox.Bottom; y++) {
                 (int localX, int localY) = ToLocal(x, y);
                 if (map[localX, localY].hasTile)
                     action.Invoke(x, y, map[localX, localY].outwardNormal);
@@ -614,14 +620,14 @@ public class Shape : PointGeometry {
     /// <param name="action"></param>
     public void ExecuteInArea(Action<int, int> action) {
         if (IsBox) {
-            for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
-            for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++)
+            for (int x = BoundingBox.Left; x <= BoundingBox.Right; x++)
+            for (int y = BoundingBox.Top; y <= BoundingBox.Bottom; y++)
                 action.Invoke(x, y);
         }
         else {
             bool[,] map = Tilemap;
-            for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++)
-            for (int y = BoundingBox.topLeft.Y; y <= BoundingBox.bottomRight.Y; y++) {
+            for (int x = BoundingBox.Left; x <= BoundingBox.Right; x++)
+            for (int y = BoundingBox.Top; y <= BoundingBox.Bottom; y++) {
                 (int localX, int localY) = ToLocal(x, y);
                 if (map[localX, localY])
                     action.Invoke(x, y);
@@ -646,8 +652,8 @@ public class Shape : PointGeometry {
         }
 
         bool[,] map = Tilemap;
-        for (int x = BoundingBox.topLeft.X; x <= BoundingBox.bottomRight.X; x++) {
-            for (int y = BoundingBox.topLeft.Y; y < BoundingBox.bottomRight.Y; y++) {
+        for (int x = BoundingBox.Left; x <= BoundingBox.Right; x++) {
+            for (int y = BoundingBox.Top; y <= BoundingBox.Bottom; y++) {
                 (int localX, int localY) = ToLocal(x, y);
                 if (map[localX, localY])
                     action(x, y, slopingAlgorithm(localX, localY, Tilemap));
@@ -662,8 +668,8 @@ public class Shape : PointGeometry {
 
     public bool Contains(Point16 point) {
         if (IsBox)
-            return point.X >= BoundingBox.topLeft.X && point.X <= BoundingBox.bottomRight.X &&
-                   point.Y >= BoundingBox.topLeft.Y && point.Y <= BoundingBox.bottomRight.Y;
+            return point.X >= BoundingBox.Left && point.X <= BoundingBox.Right &&
+                   point.Y >= BoundingBox.Top && point.Y <= BoundingBox.Bottom;
 
         int crossingCount = 0;
         for (int i = 0; i < Points.Length; i++) {
@@ -680,10 +686,10 @@ public class Shape : PointGeometry {
 
     public bool HasIntersection(Shape other) {
         if (IsBox && other.IsBox)
-            return BoundingBox.topLeft.X <= other.BoundingBox.bottomRight.X &&
-                   BoundingBox.bottomRight.X >= other.BoundingBox.topLeft.X &&
-                   BoundingBox.topLeft.Y <= other.BoundingBox.bottomRight.Y &&
-                   BoundingBox.bottomRight.Y >= other.BoundingBox.topLeft.Y;
+            return BoundingBox.Left <= other.BoundingBox.Right &&
+                   BoundingBox.Right >= other.BoundingBox.Left &&
+                   BoundingBox.Top <= other.BoundingBox.Bottom &&
+                   BoundingBox.Bottom >= other.BoundingBox.Top;
 
         var axes = GetUniqueAxes(this).Concat(GetUniqueAxes(other)).ToList();
 
@@ -892,10 +898,10 @@ public class Shape : PointGeometry {
         int bestSectionCount = 1;
         double bestError = double.MaxValue;
 
-        int maxSections = ((alongXAxis ? Size.X : Size.Y) + splitWidth) / (minSectionWidth + splitWidth);
+        int maxSections = ((alongXAxis ? BoundingBox.Width : BoundingBox.Height) + splitWidth) / (minSectionWidth + splitWidth);
 
         for (int n = 1; n <= maxSections; n++) {
-            int usable = (alongXAxis ? Size.X : Size.Y) - (n - 1) * splitWidth;
+            int usable = (alongXAxis ? BoundingBox.Width : BoundingBox.Height) - (n - 1) * splitWidth;
 
             if (usable < n * minSectionWidth)
                 continue;
@@ -910,7 +916,7 @@ public class Shape : PointGeometry {
         }
 
         int sectionCount = bestSectionCount;
-        int usableWidth = (alongXAxis ? Size.X : Size.Y) - (sectionCount - 1) * splitWidth;
+        int usableWidth = (alongXAxis ? BoundingBox.Width : BoundingBox.Height) - (sectionCount - 1) * splitWidth;
 
         int baseWidth = usableWidth / sectionCount;
         int remainder = usableWidth % sectionCount;

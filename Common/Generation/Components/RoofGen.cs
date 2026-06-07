@@ -34,7 +34,7 @@ public static class RoofGen {
         );
 
         public override Shape GetBoundingShape(PathComponentParams param, Path geometry, UnifiedRandom random) =>
-            new(true, geometry.BoundingBox.topLeft + new Point16(0, -4), geometry.BoundingBox.bottomRight);
+            new(true, geometry.BoundingBox.TopLeftPoint16() + new Point16(0, -4), geometry.BoundingBox.BottomRightPoint16());
 
         public override bool Generate(PathComponent component, PathComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
             bool extrudeRoof = param.Structure.LayoutRandom.NextBool();
@@ -61,7 +61,7 @@ public static class RoofGen {
                     case true when tallRightSide: {
                         Shape topShape = roofTopPath.FillFromBoundingBox(new PartialPoint32(0, 0, false), new Point16(0, -1));
                         ComponentHelper.FillShapeWalls.Action(topShape, param.Structure,
-                            (x, _) => x > topShape.BoundingBox.topLeft.X && x < topShape.BoundingBox.bottomRight.X
+                            (x, _) => x > topShape.BoundingBox.Left && x < topShape.BoundingBox.Right
                                 ? palette.Roof.PrimaryRoofBackground
                                 : null);
                         break;
@@ -69,13 +69,13 @@ public static class RoofGen {
                     case true: {
                         Shape topLeftShape = roofTopPath.FillFromCorner(new Point16(0, 0), new Point16(0, 1));
                         ComponentHelper.FillShapeWalls.Action(topLeftShape, param.Structure,
-                            (x, _) => x > topLeftShape.BoundingBox.topLeft.X && x < topLeftShape.BoundingBox.bottomRight.X ? palette.Roof.PrimaryRoofBackground : null);
+                            (x, _) => x > topLeftShape.BoundingBox.Left && x < topLeftShape.BoundingBox.Right ? palette.Roof.PrimaryRoofBackground : null);
                         break;
                     }
                     default: { // tall right side
                         Shape topRightShape = roofTopPath.FillFromCorner(new Point16(1, 0), new Point16(0, 1));
                         ComponentHelper.FillShapeWalls.Action(topRightShape, param.Structure,
-                            (x, _) => x > topRightShape.BoundingBox.topLeft.X && x < topRightShape.BoundingBox.bottomRight.X ? palette.Roof.PrimaryRoofBackground : null);
+                            (x, _) => x > topRightShape.BoundingBox.Left && x < topRightShape.BoundingBox.Right ? palette.Roof.PrimaryRoofBackground : null);
                         break;
                     }
                 }
@@ -99,8 +99,8 @@ public static class RoofGen {
             interiorWallPath.Reverse();
             Shape wallsShape = interiorWallPath.ToShape(roofComponent.Geometry);
             ComponentHelper.FillShapeWalls.Action(wallsShape, param.Structure,
-                (x, _) => (x > wallsShape.BoundingBox.topLeft.X + 8 || !roofComponent.LowerXExtendable)
-                          && (x < wallsShape.BoundingBox.bottomRight.X || !roofComponent.HigherXExtendable)
+                (x, _) => (x > wallsShape.BoundingBox.Left + 8 || !roofComponent.LowerXExtendable)
+                          && (x < wallsShape.BoundingBox.Right || !roofComponent.HigherXExtendable)
                     ? palette.Roof.PrimaryInteriorBackground
                     : null);
 
@@ -129,7 +129,7 @@ public static class RoofGen {
 
         public override bool CanGenerate(PathComponent component, PathComponentParams param, UnifiedRandom random) => false;
 
-        public override Shape GetBoundingShape(PathComponentParams param, Path geometry, UnifiedRandom random) => new(true, geometry.BoundingBox.topLeft + new Point16(0, -4), geometry.BoundingBox.bottomRight);
+        public override Shape GetBoundingShape(PathComponentParams param, Path geometry, UnifiedRandom random) => new(true, geometry.BoundingBox.TopLeftPoint16() + new Point16(0, -4), geometry.BoundingBox.BottomRightPoint16());
 
         public override bool Generate(PathComponent component, PathComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) => true;
     }

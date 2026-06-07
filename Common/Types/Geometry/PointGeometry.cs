@@ -6,22 +6,16 @@ using Terraria.DataStructures;
 
 namespace SpawnHouses.Common.Types.Geometry;
 
-public abstract class PointGeometry {
+public abstract class PointGeometry : IBoundingBox {
     /// <summary>
     ///     bounding corners. in global coordinates
     /// </summary>
-    public (Point16 topLeft, Point16 bottomRight) BoundingBox;
+    public Rectangle BoundingBox { get; protected set; }
 
     /// <summary>
     ///     geometry points. in global coordinates
     /// </summary>
-    public Point16[] Points;
-    public Point16 Size;
-
-    /// <summary>
-    ///     the geometric center of the bounding box
-    /// </summary>
-    public Point16 Center => BoundingBox.topLeft + Size / new Point16(2, 2);
+    public Point16[] Points { get; protected set; }
 
     protected abstract void Init(Point16[] points, bool optimize);
 
@@ -34,8 +28,7 @@ public abstract class PointGeometry {
             maxY = Math.Max(point.Y, maxY);
         }
 
-        BoundingBox = (new Point16(minX, minY), new Point16(maxX, maxY));
-        Size = new Point16(1 + maxX - minX, 1 + maxY - minY);
+        BoundingBox = new Rectangle(minX, minY, maxX - minX, maxY - minY);
     }
 
     protected static int Cross(Point16 o, Point16 a, Point16 b) => (a.X - o.X) * (b.Y - o.Y) - (a.Y - o.Y) * (b.X - o.X);
@@ -159,8 +152,8 @@ public abstract class PointGeometry {
             maxSetSize = Points.Length - 2;
 
         HashSet<int> removedIndexes = [];
-        float maxSetWidth = Size.X * maxSetProportion;
-        float maxSetHeight = Size.X * maxSetProportion;
+        float maxSetWidth = BoundingBox.Width * maxSetProportion;
+        float maxSetHeight = BoundingBox.Width * maxSetProportion;
 
         bool removedItem = false;
         for (int setSize = maxSetSize; setSize >= 1; setSize--) {

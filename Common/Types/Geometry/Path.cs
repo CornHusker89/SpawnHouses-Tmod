@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.Common.DataStructures;
+using SpawnHouses.Helpers;
 using Terraria;
 using Terraria.DataStructures;
 
@@ -199,7 +200,7 @@ public class Path : PointGeometry {
     /// <param name="corner">determines which of the 4 bounding box corners to use, both axes should be either 0 or 1</param>
     /// <returns>start index (inclusive) and end index (inclusive) of the subpath</returns>
     public (int startIndex, int endIndex) GetVisibleSubpathFromCorner(Point16 corner) {
-        Point16 outsideCorner = BoundingBox.topLeft + (Size + Point16.NegativeOne) * corner;
+        Point16 outsideCorner = BoundingBox.TopLeftPoint16() + (BoundingBox.SizePoint16() + Point16.NegativeOne) * corner;
         int xIndex = -1, xLength = int.MaxValue, yIndex = -1, yLength = int.MaxValue;
         for (int i = 0; i < Points.Length; i++) {
             Point16 point = Points[i];
@@ -225,7 +226,7 @@ public class Path : PointGeometry {
     /// <returns></returns>
     public Shape FillFromCorner(Point16 corner, Point16 offset = default) {
         if (corner.X is not (0 or 1) || corner.Y is not (0 or 1)) throw new Exception("both axes of corner should be either 0 or 1 to represent the lower or higher sides respectively");
-        Point16 outsideCorner = BoundingBox.topLeft + (Size + Point16.NegativeOne) * corner + offset;
+        Point16 outsideCorner = BoundingBox.TopLeftPoint16() + (BoundingBox.SizePoint16() + Point16.NegativeOne) * corner + offset;
 
         // make sure that it only captures points that create the bounding box on the applicable corner
         (int pathStartIndex, int pathEndIndex) = GetVisibleSubpathFromCorner(corner);
@@ -275,16 +276,16 @@ public class Path : PointGeometry {
         // create added points in a lower --> higher order, then reverse if needed
         List<Point16> newPointsFromBoundingBox = [];
         if (axes is { HasX: true, X: 0 } or { HasY: true, Y: 0 }) // top left
-            newPointsFromBoundingBox.Add(BoundingBox.topLeft +
+            newPointsFromBoundingBox.Add(BoundingBox.TopLeftPoint16() +
                                          offset * new Point16(axes is { HasX: true, X: 0 } ? 1 : 0, axes is { HasY: true, Y: 0 } ? 1 : 0));
         if (axes is { HasX: true, X: 1 } or { HasY: true, Y: 0 }) // top right
-            newPointsFromBoundingBox.Add(new Point16(BoundingBox.bottomRight.X, BoundingBox.topLeft.Y) +
+            newPointsFromBoundingBox.Add(new Point16(BoundingBox.Right, BoundingBox.Top) +
                                          offset * new Point16(axes is { HasX: true, X: 1 } ? 1 : 0, axes is { HasY: true, Y: 0 } ? 1 : 0));
         if (axes is { HasX: true, X: 0 } or { HasY: true, Y: 1 }) // bottom left
-            newPointsFromBoundingBox.Add(new Point16(BoundingBox.topLeft.X, BoundingBox.bottomRight.Y) +
+            newPointsFromBoundingBox.Add(new Point16(BoundingBox.Left, BoundingBox.Bottom) +
                                          offset * new Point16(axes is { HasX: true, X: 0 } ? 1 : 0, axes is { HasY: true, Y: 1 } ? 1 : 0));
         if (axes is { HasX: true, X: 1 } or { HasY: true, Y: 1 }) // bottom right
-            newPointsFromBoundingBox.Add(BoundingBox.bottomRight +
+            newPointsFromBoundingBox.Add(BoundingBox.BottomRightPoint16() +
                                          offset * new Point16(axes is { HasX: true, X: 1 } ? 1 : 0, axes is { HasY: true, Y: 1 } ? 1 : 0));
 
         bool pathStartsHigher;
