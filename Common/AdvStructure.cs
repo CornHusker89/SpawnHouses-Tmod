@@ -7,6 +7,7 @@ using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types;
 using Terraria;
+using Terraria.ModLoader;
 using Terraria.Utilities;
 using IComponent = SpawnHouses.Common.Modules.IComponent;
 
@@ -44,10 +45,10 @@ public class AdvStructure : ICanDebugDraw {
     /// <param name="name"></param>
     /// <param name="layoutParam"></param>
     /// <param name="palette"></param>
-    /// <param name="seed">if -1, creates a new random seed from the base terraria random generator</param>
+    /// <param name="seed">if -1, creates a new random seed from the normal terraria random generator</param>
     /// <param name="generate">
-    ///     if true, will call <see cref="ApplyLayoutMethod" />, <see cref="FillComponents" /> and
-    ///     <see cref="PlaceTilemap" />
+    ///     if true, will call <see cref="ApplyLayoutMethod" />, <see cref="FillComponents" />,
+    ///     <see cref="Register"/>, and <see cref="PlaceTilemap" /> 
     /// </param>
     public AdvStructure(string name, StructureLayoutParams layoutParam, TilePalette palette, int seed = -1, bool generate = true) {
         Name = name;
@@ -59,10 +60,10 @@ public class AdvStructure : ICanDebugDraw {
         LayoutParam.Structure = this;
         Palette = palette;
         
-        StructureManager.StructureList.Add(this);
         if (generate) {
             ApplyLayoutMethod();
             FillComponents();
+            Register();
             PlaceTilemap();
         }
 
@@ -70,11 +71,16 @@ public class AdvStructure : ICanDebugDraw {
         UpdateDebugVisibility();
     }
 
-    public void DrawDebugInfo() {
+    public List<DebugLabel> DrawDebugInfo() {
         if (FailedLayoutGeneration)
-            return;
-        Tilemap?.DrawDebugInfo();
-        StructureLayout?.DrawDebugInfo();
+            return [];
+
+        List<DebugLabel> labels = [];
+        if (Tilemap != null)
+            labels.AddRange(Tilemap.DrawDebugInfo());
+        if (StructureLayout != null)
+            labels.AddRange(StructureLayout.DrawDebugInfo());
+        return labels;
     }
 
     /// <summary>
@@ -101,12 +107,14 @@ public class AdvStructure : ICanDebugDraw {
 
         StructureLayout = new StructureLayout(LayoutParam, "Layout_Type");
         StructureLayout.ExecuteGenerator();
-        if (StructureLayout == null || Tilemap == null)
+        if (StructureLayout == null || Tilemap == null) {
             FailedLayoutGeneration = true;
+            ModContent.GetInstance<SpawnHouses>().Logger.Warn($"structure with see {Seed} failed layout generation");
+        }
     }
 
     /// <summary>
-    ///     Fills current layout with tiles/walls
+    ///     fills current layout with tiles/walls
     /// </summary>
     /// <exception cref="Exception">Throws when no layout has been set</exception>
     public void FillComponents() {
@@ -130,4 +138,9 @@ public class AdvStructure : ICanDebugDraw {
 
         Tilemap.ApplyTilemap();
     }
+
+    /// <summary>
+    ///     adds this structure to the global structure list and initializes some debug fields
+    /// </summary>
+    public void Register() => StructureManager.RegisterStructure(this);
 }

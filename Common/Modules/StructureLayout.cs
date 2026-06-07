@@ -1,17 +1,18 @@
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Helpers;
-using Terraria;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Common.Modules;
 
 public class StructureLayout : Generatable<StructureLayout, StructureLayoutParams, StructureLayoutGenerator> {
+    private readonly DebugLabel _label;
     public string Name => Params.Structure.Name + "_Layout";
     
     [CanBeNull]
@@ -57,9 +58,10 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
     }
 
     public StructureLayout(StructureLayoutParams param, string name) : base(param, new TagMap(), name) {
+        _label = new DebugLabel(BoundingBox.topLeft, this);
     }
 
-    public override void DrawDebugInfo() {
+    public override List<DebugLabel> DrawDebugInfo() {
         Color color = DrawHelper.GetColor(Id);
 
         if (DebugInfoVisibility.DisplayBounds) {
@@ -76,15 +78,22 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
             );
         }
 
-        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, BoundingBox.topLeft.ToPoint() * new Point(16, 16) - new Point(16, 16), color);
-
+        List<DebugLabel> labels = [];
         if (AllComponents != null)
-            foreach (IComponent component in AllComponents)
-                component?.DrawDebugInfo();
+            foreach (IComponent component in AllComponents) {
+                if (component != null)
+                    labels.AddRange(component.DrawDebugInfo());
+            }
         else if (ExternalComponents != null) {
             foreach (IComponent component in ExternalComponents)
-                component?.DrawDebugInfo();
+                if (component != null)
+                    labels.AddRange(component.DrawDebugInfo());
         }
+
+        if (_label.IsVisible(BoundingBox))
+            labels.Add(_label);
+
+        return labels;
     }
 
     /// <summary>

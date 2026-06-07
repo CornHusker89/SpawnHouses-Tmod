@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types;
@@ -25,13 +27,15 @@ public interface IComponent<out TGeometry> : IComponent
 }
 
 public abstract class VolumeComponent : Generatable<VolumeComponent, VolumeComponentParams, VolumeComponentGenerator>, IComponent<Shape> {
+    private readonly DebugLabel _label;
     public Shape Geometry { get; set; }
 
     protected VolumeComponent(VolumeComponentParams param, Shape geometry, string name) : base(param, new TagMap(), name) {
+        _label = new DebugLabel(geometry.Center, this);
         Geometry = geometry;
     }
 
-    public override void DrawDebugInfo() {
+    public override List<DebugLabel> DrawDebugInfo() {
         Color color = DrawHelper.GetColor(this);
         Point tilemapOffsetWorldCoords = Params.Structure.Tilemap.globalTileOffset.ToPoint() * new Point(16, 16);
         
@@ -47,14 +51,16 @@ public abstract class VolumeComponent : Generatable<VolumeComponent, VolumeCompo
             DrawHelper.DrawWorldBasedPoints(points, color, DrawHelper.DebugDrawWidth * 2);
         }
 
-        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, Geometry.Center.ToPoint() * new Point(16, 16) + tilemapOffsetWorldCoords, color);
+        return _label.IsVisible(Geometry.BoundingBox) ? [_label] : [];
     }
 }
 
 public abstract class PathComponent : Generatable<PathComponent, PathComponentParams, PathComponentGenerator>, IComponent<Path> {
+    private readonly DebugLabel _label;
     public Path Geometry { get; set; }
 
     protected PathComponent(PathComponentParams param, Path geometry, string name) : base(param, new TagMap(), name) {
+        _label = new DebugLabel(geometry.Points[0], this);
         Geometry = geometry;
     }
 
@@ -64,7 +70,7 @@ public abstract class PathComponent : Generatable<PathComponent, PathComponentPa
         return Generator!.GetBoundingShape(Params, Geometry, new UnifiedRandom(Id));
     }
 
-    public override void DrawDebugInfo() {
+    public override List<DebugLabel> DrawDebugInfo() {
         Color color = DrawHelper.GetColor(this);
 
         if (DebugInfoVisibility.DisplayBounds) {
@@ -76,6 +82,6 @@ public abstract class PathComponent : Generatable<PathComponent, PathComponentPa
             DrawHelper.DrawWorldBasedPoints(points, color, 6);
         }
 
-        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, Geometry.Center.ToPoint(), color);
+        return _label.IsVisible(Geometry.BoundingBox) ? [_label] : [];
     }
 }

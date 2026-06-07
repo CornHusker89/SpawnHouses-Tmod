@@ -2,6 +2,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
+using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Modules.Components;
 using Terraria;
@@ -153,12 +154,14 @@ public static class DrawHelper {
     /// <remarks>assumes world relative sprite batch has already begun</remarks>
     public static void DrawWorldBasedBorder(Rectangle rectangle, Color color, int width) {
         Point screenPos = Main.screenPosition.ToPoint();
-        int drawWidthOffset = -DebugDrawWidth / 2;
-        Rectangle offsetRectangle = new(rectangle.X - screenPos.X + drawWidthOffset, rectangle.Y - screenPos.Y + drawWidthOffset, rectangle.Width, rectangle.Height);
-        Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Left, offsetRectangle.Top, offsetRectangle.Width, width), color);
-        Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Right, offsetRectangle.Top, width, offsetRectangle.Height), color);
-        Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Left, offsetRectangle.Bottom, offsetRectangle.Width, width), color);
-        Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Left, offsetRectangle.Top, width, offsetRectangle.Height), color);
+        int drawWidthOffset = -width / 2;
+        Vector2 start = new(rectangle.X - screenPos.X + drawWidthOffset, rectangle.Y - screenPos.Y + drawWidthOffset);
+        //Rectangle offsetRectangle = new(, , );
+        Terraria.Utils.DrawRectangle(Main.spriteBatch, start, start + new Vector2(rectangle.Width, rectangle.Height), color, color, width);
+        // Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Left, offsetRectangle.Top, offsetRectangle.Width, width), color);
+        // Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Right, offsetRectangle.Top, width, offsetRectangle.Height), color);
+        // Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Left, offsetRectangle.Bottom, offsetRectangle.Width, width), color);
+        // Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Left, offsetRectangle.Top, width, offsetRectangle.Height), color);
     }
 
     /// <summary>
@@ -218,8 +221,37 @@ public static class DrawHelper {
     /// <remarks>assumes world relative sprite batch has already begun</remarks>
     public static void DrawWorldBasedText(string text, Point position, Color color) {
         Point offsetPosition = position - Main.screenPosition.ToPoint();
-        //Main.spriteBatch.DrawString();
+        // uses font FontAssets.MouseText
         Terraria.Utils.DrawBorderString(Main.spriteBatch, text, offsetPosition.ToVector2(), color);
+    }
+
+    /// <summary>
+    ///     handles upda
+    /// </summary>
+    /// <param name="label"></param>
+    /// <param name="position">in world coordinates, with no additional offsets</param>
+    /// <param name="drawWidth"></param>
+    /// <param name="color"></param>
+    /// <remarks>assumes world relative sprite batch has already begun</remarks>
+    public static void DrawDebugLabel(DebugLabel label, Point position, int drawWidth, Color color) {
+        Point offsetPosition = position - Main.screenPosition.ToPoint();
+
+        // draw containing box
+        Terraria.Utils.DrawRectangle(
+            Main.spriteBatch,
+            offsetPosition.ToVector2() - new Vector2(drawWidth * 2, drawWidth * 2),
+            offsetPosition.ToVector2() + label.GetTextDimensions() + new Vector2(drawWidth * 2, drawWidth * 2),
+            color,
+            color,
+            drawWidth
+        );
+
+        // draw text
+        Terraria.Utils.DrawBorderString(Main.spriteBatch, label.ParentObj.Name, offsetPosition.ToVector2(), color);
+
+        // draw line to root
+        Point offsetLabelRoot = label.Root.ToPoint() - Main.screenPosition.ToPoint();
+        Terraria.Utils.DrawLine(Main.spriteBatch, offsetPosition, offsetLabelRoot, color);
     }
 
     public static Color GetColor(ushort id) => AllColors[id % AllColors.Length];

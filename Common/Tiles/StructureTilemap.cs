@@ -14,6 +14,7 @@ using Terraria.ID;
 namespace SpawnHouses.Common.Tiles;
 
 public class StructureTilemap : ICanDebugDraw {
+    private readonly DebugLabel _label;
     public DebugInfoLevel DebugInfoVisibility { get; set; }
     public string Name => Structure.Name + "_Tilemap";
 
@@ -27,22 +28,25 @@ public class StructureTilemap : ICanDebugDraw {
     public ushort Width { get; }
     public ushort Height { get; }
 
+    public (Point16 TopLeft, Point16 BottomRight) BoundingBox => (globalTileOffset, globalTileOffset + new Point16(Width - 1, Height - 1));
+
     public StructureTilemap(AdvStructure structure, ushort width, ushort height, Point16? globalTileOffset = null) {
-        DebugInfoVisibility = new DebugInfoLevel();
-        
         Structure = structure;
         Width = width;
         Height = height;
         _tiles = new StructureTile[width, height];
         this.globalTileOffset = globalTileOffset ?? new Point16(0, 0);
         MultiTiles = [];
+
+        _label = new DebugLabel(this.globalTileOffset, this);
+        DebugInfoVisibility = new DebugInfoLevel();
     }
 
     /// <summary>
     ///     can only draw the bounding box
     /// </summary>
     /// <remarks>assumes that a world-relative batch has begun in <see cref="Main.spriteBatch" />. does not end sprite batch</remarks>
-    public void DrawDebugInfo() {
+    public List<DebugLabel> DrawDebugInfo() {
         Point worldTileOffset = globalTileOffset.ToPoint() * new Point(16, 16);
         Color color = DrawHelper.GetColor(Structure.StructureLayout.Id);
 
@@ -58,7 +62,7 @@ public class StructureTilemap : ICanDebugDraw {
                 DrawHelper.DebugDrawWidth
             );
 
-        if (DebugInfoVisibility.DisplayName) DrawHelper.DrawWorldBasedText(Name, worldTileOffset - new Point(16, 24), color);
+        return _label.IsVisible(BoundingBox) ? [_label] : [];
     }
 
     /// <summary>

@@ -439,7 +439,7 @@ public static class StructureLayoutHelper {
                 }
 
             if (start == null) {
-                var thing = tilemap.CreateDebugTilemap();
+                var debugTilemap = tilemap.CreateDebugTilemap();
                 throw new Exception("tilemap did not have any interior tiles");
             }
 

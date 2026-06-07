@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using SpawnHouses.Common;
 using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Tagging;
@@ -16,13 +17,19 @@ namespace SpawnHouses;
 #nullable enable
 
 public class StructureManager : ModSystem {
+    private static readonly List<AdvStructure> StructureList = [];
+    
     public static Version WorldVersion = new(ModInstance.Mod.Version.ToString());
     
     public static ushort GeneratableCount { get; private set; }
 
-    public static List<AdvStructure> StructureList { get; private set; } = [];
+    public static readonly DebugInfoLevel DefaultDebugInfoLevel = new();
 
-    public static DebugInfoLevel DefaultDebugInfoLevel = new();
+    /// <summary>
+    ///     shallow copies then exposes the internal structure list
+    /// </summary>
+    /// <returns></returns>
+    public static AdvStructure[] GetStructureList() => StructureList.ToArray();
 
     /// <summary>
     ///     returns the next component id, and advances the counter. begins at id 1
@@ -31,6 +38,17 @@ public class StructureManager : ModSystem {
     public static ushort NextGeneratableId() {
         GeneratableCount++;
         return GeneratableCount;
+    }
+
+    /// <summary>
+    ///     <see cref="AdvStructure.ApplyLayoutMethod" /> and <see cref="AdvStructure.FillComponents" /> must be called before this
+    /// </summary>
+    /// <param name="structure"></param>
+    public static void RegisterStructure(AdvStructure structure) {
+        if (structure.FailedLayoutGeneration)
+            return;
+        if (structure.StructureLayout == null) throw new ArgumentException("structure must have an initialized layout");
+        StructureList.Add(structure);
     }
 
     public override void Load() {
@@ -60,12 +78,49 @@ public class StructureManager : ModSystem {
 
     public override void PostDrawTiles() {
         DrawHelper.BeginWorldSpriteBatch();
+        Dictionary<DebugLabel, Point> labels = [];
 
         foreach (AdvStructure structure in StructureList)
-            structure.DrawDebugInfo();
+        foreach (DebugLabel label in structure.DrawDebugInfo())
+            labels.Add(label, label.Root.ToPoint() * new Point(16, 16));
 
-        if (SpawnTest2.Component != null)
-            SpawnTest2.Component.DrawDebugInfo();
+        // move each label away from each other and the structure
+        for (int iter = 0; iter < 12; iter++) {
+            foreach (var a in labels) {
+                // label-label
+                foreach (var b in labels) {
+                    if (ReferenceEquals(a.Key, b.Key))
+                        continue;
+
+                    if (a.Key.GetRectangle(a.Value).Intersects(a.Key.GetRectangle(b.Value))) {
+                        Vector2 delta = (a.Value - b.Value).ToVector2();
+
+                        if (delta == Vector2.Zero)
+                            delta = Vector2.UnitY;
+
+                        labels[a.Key] += (Vector2.Normalize(delta) * 4f).ToPoint();
+                    }
+                }
+
+                // label-structure
+                foreach (var box in componentRects)
+                    if (LabelRect(a).Intersects(box)) {
+                        Vector2 away = a.Position - box.Center.ToVector2();
+
+                        if (away == Vector2.Zero)
+                            away = Vector2.UnitY;
+
+                        pos += Vector2.Normalize(away) * 4f;
+                    }
+
+                // gentle spring back to preferred
+                Vector2 preferred = a.Anchor + new Vector2(0, -24);
+
+                pos += (preferred - a.Position) * 0.1f;
+
+                a.Position += pos;
+            }
+        }
 
         Main.spriteBatch.End();
     }

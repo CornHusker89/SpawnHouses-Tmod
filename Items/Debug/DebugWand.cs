@@ -47,12 +47,13 @@ public class DebugWand : ModItem {
         // structure select mode
         if (_itemMode == 0) {
             Point16 worldMousePos = (Main.MouseWorld / 16).ToPoint16();
+            var structureList = StructureManager.GetStructureList();
 
             // if multiple structures are within bounds, select the next structure index after the current one
             List<int> selectedStructureIndexes = [];
             int curSelectedStructureIndex = -1;
-            for (int i = 0; i < StructureManager.StructureList.Count; i++) {
-                AdvStructure structure = StructureManager.StructureList[i];
+            for (int i = 0; i < structureList.Length; i++) {
+                AdvStructure structure = structureList[i];
                 if (structure == SelectedStructure)
                     curSelectedStructureIndex = i;
 
@@ -67,14 +68,14 @@ public class DebugWand : ModItem {
             }
 
             if (curSelectedStructureIndex == -1) {
-                SelectedStructure = StructureManager.StructureList[selectedStructureIndexes[0]];
+                SelectedStructure = structureList[selectedStructureIndexes[0]];
             }
             else {
                 // if the last selected structure was at/past the end of the selection candidates, wrap around to the front
                 if (curSelectedStructureIndex >= selectedStructureIndexes[^1])
-                    SelectedStructure = StructureManager.StructureList[0];
+                    SelectedStructure = structureList[0];
                 else
-                    SelectedStructure = StructureManager.StructureList[selectedStructureIndexes.First(index => index > curSelectedStructureIndex)];
+                    SelectedStructure = structureList[selectedStructureIndexes.First(index => index > curSelectedStructureIndex)];
             }
 
             Main.NewText($"selected structure (layout) id {SelectedStructure.StructureLayout.Id}, name: {SelectedStructure.Name}", Color.Yellow);

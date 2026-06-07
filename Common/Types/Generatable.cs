@@ -41,6 +41,12 @@ public interface IGeneratable : ICanDebugDraw {
     /// </summary>
     /// <returns></returns>
     public int GetGeneratorHash();
+
+    /// <summary>
+    ///     gets the name of the generator
+    /// </summary>
+    /// <returns></returns>
+    public string GetGeneratorName();
 }
 
 public interface IGeneratable<TSelf, TParams, TGenerator> : IGeneratable
@@ -78,7 +84,7 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
         Name = name.Replace("#", Id.ToString());
     }
 
-    public abstract void DrawDebugInfo();
+    public abstract List<DebugLabel> DrawDebugInfo();
 
     /// <summary>
     ///     gets a generator for this module
@@ -149,5 +155,7 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
         HasGenerated = true;
     }
 
+    public string GetGeneratorName() => Generator.GetType().Name;
+    
     public int GetGeneratorHash() => Generator.GetType().FullName!.GetHashCode();
 }
