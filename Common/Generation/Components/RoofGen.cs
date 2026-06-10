@@ -34,7 +34,7 @@ public static class RoofGen {
         );
 
         public override Shape GetBoundingShape(PathComponentParams param, Path geometry, UnifiedRandom random) =>
-            new(true, geometry.BoundingBox.TopLeftPoint16() + new Point16(0, -4), geometry.BoundingBox.BottomRightPoint16());
+            new(true, geometry.BoundingBox.TopLeftPoint16 + new Point16(0, -4), geometry.BoundingBox.BottomRightPoint16);
 
         public override bool Generate(PathComponent component, PathComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
             bool extrudeRoof = param.Structure.LayoutRandom.NextBool();
@@ -59,7 +59,7 @@ public static class RoofGen {
 
                 switch (tallLeftSide) {
                     case true when tallRightSide: {
-                        Shape topShape = roofTopPath.FillFromBoundingBox(new PartialPoint32(0, 0, false), new Point16(0, -1));
+                        Shape topShape = roofTopPath.FillFromBoundingBox(new PartialPoint(0, 0, false), new Point16(0, -1));
                         ComponentHelper.FillShapeWalls.Action(topShape, param.Structure,
                             (x, _) => x > topShape.BoundingBox.Left && x < topShape.BoundingBox.Right
                                 ? palette.Roof.PrimaryRoofBackground
@@ -129,7 +129,7 @@ public static class RoofGen {
 
         public override bool CanGenerate(PathComponent component, PathComponentParams param, UnifiedRandom random) => false;
 
-        public override Shape GetBoundingShape(PathComponentParams param, Path geometry, UnifiedRandom random) => new(true, geometry.BoundingBox.TopLeftPoint16() + new Point16(0, -4), geometry.BoundingBox.BottomRightPoint16());
+        public override Shape GetBoundingShape(PathComponentParams param, Path geometry, UnifiedRandom random) => new(true, geometry.BoundingBox.TopLeftPoint16 + new Point16(0, -4), geometry.BoundingBox.BottomRightPoint16);
 
         public override bool Generate(PathComponent component, PathComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) => true;
     }

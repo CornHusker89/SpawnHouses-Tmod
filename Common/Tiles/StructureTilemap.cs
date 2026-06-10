@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Palette;
@@ -19,7 +20,7 @@ public class StructureTilemap : ICanDebugDraw, IBoundingBox {
     public DebugInfoLevel DebugInfoVisibility { get; set; }
     public string Name => Structure.Name + "_Tilemap";
 
-    public Rectangle BoundingBox { get; }
+    public TileBox BoundingBox { get; }
 
     private readonly StructureTile[,] _tiles;
     public readonly AdvStructure Structure;
@@ -35,7 +36,7 @@ public class StructureTilemap : ICanDebugDraw, IBoundingBox {
         Structure = structure;
         _tiles = new StructureTile[width, height];
         GlobalTileOffset = globalTileOffset ?? new Point16(0, 0);
-        BoundingBox = new Rectangle(GlobalTileOffset.X, GlobalTileOffset.Y, width, height);
+        BoundingBox = new TileBox(GlobalTileOffset.X, GlobalTileOffset.Y, width, height);
         MultiTiles = [];
 
         _label = new DebugLabel(GlobalTileOffset, this);
@@ -287,7 +288,7 @@ public class StructureTilemap : ICanDebugDraw, IBoundingBox {
 
         // place MultiTiles
         foreach (MultiTile multiTile in MultiTiles) {
-            Point16 originPoint = ConvertToGlobal(multiTile.Volume.BoundingBox.TopLeftPoint16() + multiTile.Origin);
+            Point16 originPoint = ConvertToGlobal(multiTile.Volume.BoundingBox.TopLeftPoint16 + multiTile.Origin);
             WorldGen.PlaceObject(originPoint.X, originPoint.Y, multiTile.TileType, true, multiTile.Style, direction: multiTile.FacingRight ? 1 : -1);
             multiTile.Volume.ExecuteInArea((x, y) => {
                 Tile tile = Main.tile[ConvertToGlobal(x, y)];

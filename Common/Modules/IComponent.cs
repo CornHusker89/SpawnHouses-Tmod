@@ -31,7 +31,7 @@ public abstract class VolumeComponent : Generatable<VolumeComponent, VolumeCompo
     public Shape Geometry { get; set; }
 
     protected VolumeComponent(VolumeComponentParams param, Shape geometry, string name) : base(param, new TagMap(), name) {
-        _label = new DebugLabel(geometry.BoundingBox.CenterPoint16(), this);
+        _label = new DebugLabel(geometry.BoundingBox.CenterPoint16, this);
         Geometry = geometry;
     }
 

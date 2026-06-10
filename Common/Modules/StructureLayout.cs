@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Parameters;
@@ -9,7 +10,6 @@ using SpawnHouses.Common.Types;
 using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Helpers;
 using Terraria.DataStructures;
-using Utils = Terraria.Utils;
 
 namespace SpawnHouses.Common.Modules;
 
@@ -18,7 +18,7 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
     
     public string Name => Params.Structure.Name + "_Layout";
 
-    public Rectangle BoundingBox { get; private set; }
+    public TileBox BoundingBox { get; private set; }
     
     [CanBeNull]
     public List<Floor> ExternalFloors { get; private set; }
@@ -61,14 +61,14 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
     }
 
     public StructureLayout(StructureLayoutParams param, string name) : base(param, new TagMap(), name) {
-        _label = new DebugLabel(BoundingBox.TopLeftPoint16(), this);
+        _label = new DebugLabel(BoundingBox.TopLeftPoint16, this);
     }
 
     public override List<DebugLabel> DrawDebugInfo() {
         Color color = DrawHelper.GetColor(Id);
 
         if (DebugInfoVisibility.DisplayBounds) {
-            Point16 topLeftWorldPos = Params.Structure.Tilemap.ConvertToGlobal(BoundingBox.TopLeftPoint16()) * new Point16(16);
+            Point16 topLeftWorldPos = Params.Structure.Tilemap.ConvertToGlobal(BoundingBox.TopLeftPoint16) * new Point16(16);
             DrawHelper.DrawWorldBasedBorder(
                 new Rectangle(
                     topLeftWorldPos.X - DrawHelper.DebugDrawWidth,
@@ -155,7 +155,7 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
                 if (component.Geometry.BoundingBox.Bottom > maxY) maxY = component.Geometry.BoundingBox.Bottom;
             }
 
-            BoundingBox = Utils.CornerRectangle(new Point(minX, minY), new Point(maxX, maxY));
+            BoundingBox = new TileBox(new Point16(minX, minY), new Point16(maxX, maxY));
         }
 
         if (ExternalComponents != null && ExternalGaps != null && RoomLayouts != null) {

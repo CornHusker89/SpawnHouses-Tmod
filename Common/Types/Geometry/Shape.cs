@@ -155,9 +155,9 @@ public class Shape : PointGeometry {
 
     #region Shape Self-Geometry
 
-    private Point16 ToLocal(Point16 point) => point - BoundingBox.TopLeftPoint16();
+    private Point16 ToLocal(Point16 point) => point - BoundingBox.TopLeftPoint16;
     private (int x, int y) ToLocal(int x, int y) => (x - BoundingBox.Left, y - BoundingBox.Top);
-    private Point16 ToGlobal(Point16 point) => point + BoundingBox.TopLeftPoint16();
+    private Point16 ToGlobal(Point16 point) => point + BoundingBox.TopLeftPoint16;
     private (int x, int y) ToGlobal(int x, int y) => (x + BoundingBox.Left, y + BoundingBox.Top);
 
     /// <summary>
@@ -288,29 +288,29 @@ public class Shape : PointGeometry {
     /// </summary>
     /// <param name="significantAngle">only vertices that create a deviation (in deg) larger than this will be considered</param>
     /// <returns></returns>
-    public List<PartialPoint32> GetCorners(float significantAngle = 30f) {
-        List<PartialPoint32> corners = [];
+    public List<PartialPoint> GetCorners(float significantAngle = 30f) {
+        List<PartialPoint> corners = [];
         foreach (Point16 point in GetExpandedShape(1).CollapseVertices(significantAngle)) {
             bool xCorner = point.X > BoundingBox.Left
                            && point.X < BoundingBox.Right;
             bool yCorner = point.Y > BoundingBox.Top
                            && point.Y < BoundingBox.Bottom;
             if (xCorner && yCorner)
-                corners.Add(new PartialPoint32(point));
+                corners.Add(new PartialPoint(point));
             else if (xCorner && !yCorner)
-                corners.Add(new PartialPoint32(point.X, 0, hasY: false));
+                corners.Add(new PartialPoint(point.X, 0, hasY: false));
             else if (!xCorner && yCorner)
-                corners.Add(new PartialPoint32(0, point.Y, false));
+                corners.Add(new PartialPoint(0, point.Y, false));
         }
 
         // sanitize list to remove repeat values
         for (int i = 0; i < corners.Count; i++) {
-            PartialPoint32 target = corners[i];
+            PartialPoint target = corners[i];
             if (target.HasX == target.HasY) // only check cases where only 1 axis is valid
                 continue;
 
-            PartialPoint32 last = corners[i - 1 != -1 ? i - 1 : corners.Count - 1];
-            PartialPoint32 next = corners[i + 1 != corners.Count ? i + 1 : 0];
+            PartialPoint last = corners[i - 1 != -1 ? i - 1 : corners.Count - 1];
+            PartialPoint next = corners[i + 1 != corners.Count ? i + 1 : 0];
 
             if ((last is { HasX: true, HasY: true } && (target.X == last.X || target.Y == last.Y))
                 || (next is { HasX: true, HasY: true } && (target.X == next.X || target.Y == next.Y))) {
@@ -529,16 +529,16 @@ public class Shape : PointGeometry {
                 // append to draw path on each corner traversal
                 switch (direction) {
                     case Direction.UpRight:
-                        path.Add((pos + BoundingBox.TopLeftPoint16()) * new Point16(16) + new Point16(16, 0));
+                        path.Add((pos + BoundingBox.TopLeftPoint16) * new Point16(16) + new Point16(16, 0));
                         break;
                     case Direction.DownRight:
-                        path.Add((pos + BoundingBox.TopLeftPoint16()) * new Point16(16) + new Point16(16, 16));
+                        path.Add((pos + BoundingBox.TopLeftPoint16) * new Point16(16) + new Point16(16, 16));
                         break;
                     case Direction.DownLeft:
-                        path.Add((pos + BoundingBox.TopLeftPoint16()) * new Point16(16) + new Point16(0, 16));
+                        path.Add((pos + BoundingBox.TopLeftPoint16) * new Point16(16) + new Point16(0, 16));
                         break;
                     case Direction.UpLeft:
-                        path.Add((pos + BoundingBox.TopLeftPoint16()) * new Point16(16) + new Point16(0, 0));
+                        path.Add((pos + BoundingBox.TopLeftPoint16) * new Point16(16) + new Point16(0, 0));
                         break;
                 }
 
@@ -558,7 +558,7 @@ public class Shape : PointGeometry {
             }
         } while (!loopComplete && steps < safety);
 
-        if (steps == safety && BoundingBox.SizePoint16() != new Point16(1)) throw new Exception("perimeter traversal took longer than should be possible");
+        if (steps == safety && BoundingBox.SizePoint16 != new Point16(1)) throw new Exception("perimeter traversal took longer than should be possible");
 
         for (int i = 0; i < path.Count - 1; i++) {
             if (path[i] == path[i + 1]) {

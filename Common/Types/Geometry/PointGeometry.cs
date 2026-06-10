@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Common.DataStructures;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Common.Types.Geometry;
@@ -10,7 +11,7 @@ public abstract class PointGeometry : IBoundingBox {
     /// <summary>
     ///     bounding corners. in global coordinates
     /// </summary>
-    public Rectangle BoundingBox { get; protected set; }
+    public TileBox BoundingBox { get; protected set; }
 
     /// <summary>
     ///     geometry points. in global coordinates
@@ -28,7 +29,7 @@ public abstract class PointGeometry : IBoundingBox {
             maxY = Math.Max(point.Y, maxY);
         }
 
-        BoundingBox = new Rectangle(minX, minY, maxX - minX, maxY - minY);
+        BoundingBox = new TileBox(minX, minY, maxX - minX, maxY - minY);
     }
 
     protected static int Cross(Point16 o, Point16 a, Point16 b) => (a.X - o.X) * (b.Y - o.Y) - (a.Y - o.Y) * (b.X - o.X);

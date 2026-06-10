@@ -79,10 +79,13 @@ public class StructureManager : ModSystem {
     public override void PostDrawTiles() {
         DrawHelper.BeginWorldSpriteBatch();
         Dictionary<DebugLabel, Point> labels = [];
+        List<Rectangle> structureRects = [];
 
         foreach (AdvStructure structure in StructureList)
-        foreach (DebugLabel label in structure.DrawDebugInfo())
+        foreach (DebugLabel label in structure.DrawDebugInfo()) {
             labels.Add(label, label.Root.ToPoint() * new Point(16, 16));
+            structureRects.Add(structure.StructureLayout.BoundingBox.ToRectangle());
+        }
 
         // move each label away from each other and the structure
         for (int iter = 0; iter < 12; iter++) {
@@ -103,22 +106,19 @@ public class StructureManager : ModSystem {
                 }
 
                 // label-structure
-                foreach (var box in componentRects)
-                    if (LabelRect(a).Intersects(box)) {
-                        Vector2 away = a.Position - box.Center.ToVector2();
+                foreach (Rectangle box in structureRects)
+                    if (a.Key.GetRectangle(a.Value).Intersects(box)) {
+                        Vector2 delta = (a.Value - box.Center).ToVector2();
 
-                        if (away == Vector2.Zero)
-                            away = Vector2.UnitY;
+                        if (delta == Vector2.Zero)
+                            delta = Vector2.UnitY;
 
-                        pos += Vector2.Normalize(away) * 4f;
+                        labels[a.Key] += (Vector2.Normalize(delta) * 4f).ToPoint();
                     }
 
-                // gentle spring back to preferred
-                Vector2 preferred = a.Anchor + new Vector2(0, -24);
-
-                pos += (preferred - a.Position) * 0.1f;
-
-                a.Position += pos;
+                // gentle spring back to root
+                Vector2 deltaToRoot = (a.Value - a.Key.Root.ToPoint()).ToVector2();
+                labels[a.Key] += (deltaToRoot * 0.1f).ToPoint();
             }
         }
 

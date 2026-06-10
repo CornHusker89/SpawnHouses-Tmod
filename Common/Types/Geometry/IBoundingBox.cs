@@ -1,7 +1,7 @@
-using Microsoft.Xna.Framework;
+using SpawnHouses.Common.DataStructures;
 
 namespace SpawnHouses.Common.Types.Geometry;
 
 public interface IBoundingBox {
-    public Rectangle BoundingBox { get; }
+    public TileBox BoundingBox { get; }
 }

@@ -103,12 +103,12 @@ public static class StructureLayoutHelper {
         /// <param name="horizontalGapYs"></param>
         /// <param name="validCutRange"></param>
         /// <returns></returns>
-        private static HashSet<int> GetValidSplits(Shape roomVolume, PriorityCollection<PartialPoint32> prioritySplits, bool splitAlongX, int splitWidth,
+        private static HashSet<int> GetValidSplits(Shape roomVolume, PriorityCollection<PartialPoint> prioritySplits, bool splitAlongX, int splitWidth,
             HashSet<int> verticalGapXs, HashSet<int> horizontalGapYs, Range validCutRange) {
             // ensure that, taking blocklisted coordinates into account, there is valid places for the split
             HashSet<int> validSplitStarts = [];
             foreach (var tuple in prioritySplits.ToSortedHashSetArray()) {
-                foreach (PartialPoint32 split in tuple.set) {
+                foreach (PartialPoint split in tuple.set) {
                     if ((splitAlongX && split.HasY) || (!splitAlongX && split.HasX)) // ignore invalid coordinates
                         continue;
 
@@ -159,7 +159,7 @@ public static class StructureLayoutHelper {
         /// <param name="targetRoomCount"></param>
         /// <returns>RoomLayout is NOT in component mode</returns>
         /// <remarks>fully clears blocklist before returning</remarks>
-        private static RoomLayout SplitBsp(RoomLayoutParams param, Room room, PriorityCollection<PartialPoint32> prioritySplits, bool prioritizeSplitsOnGapFloors, int targetRoomCount) {
+        private static RoomLayout SplitBsp(RoomLayoutParams param, Room room, PriorityCollection<PartialPoint> prioritySplits, bool prioritizeSplitsOnGapFloors, int targetRoomCount) {
             if (param.RoomHeight.Max < param.FloorWidth.Max + 2 * param.RoomHeight.Min)
                 ModContent.GetInstance<SpawnHouses>().Logger.Warn(
                     $"a max room height of {param.RoomHeight.Max} was given, but at least {param.FloorWidth.Max + 2 * param.RoomHeight.Min} is required");
@@ -190,7 +190,7 @@ public static class StructureLayoutHelper {
                             iterationHorizontalGapYs.Add(y);
 
                             if (prioritizeSplitsOnGapFloors && gap.Geometry.BoundingBox.Bottom != room.Geometry.BoundingBox.Bottom)
-                                prioritySplits.AddItem(new PartialPoint32(0, gap.Geometry.BoundingBox.Bottom + 1, false), 0);
+                                prioritySplits.AddItem(new PartialPoint(0, gap.Geometry.BoundingBox.Bottom + 1, false), 0);
                         }
                     else
                         for (int x = gap.Geometry.BoundingBox.Left; x <= gap.Geometry.BoundingBox.Right; x++)
@@ -234,7 +234,7 @@ public static class StructureLayoutHelper {
                 else
                     yCutCount++;
 
-                prioritySplits.AddToBlocklist(new PartialPoint32(splitStart, splitStart, !splitAlongX, splitAlongX));
+                prioritySplits.AddToBlocklist(new PartialPoint(splitStart, splitStart, !splitAlongX, splitAlongX));
 
                 if (roomSubsections.lower is not null) {
                     if (param.IsWithinMaxSize(roomSubsections.lower) && param.Structure.LayoutRandom.NextDouble() < (1 - Math.Pow(1 - largeRoomChance, param.Attempts)) * 0.35 &&
@@ -289,8 +289,8 @@ public static class StructureLayoutHelper {
             RoomLayout? pickedLayout = null;
 
             var possibleLayouts = new RoomLayout[p.Attempts];
-            PriorityCollection<PartialPoint32> prioritySplits = new((thisObj, otherObj) => (thisObj.X == otherObj.X || !thisObj.HasX) && (thisObj.Y == otherObj.Y || thisObj.HasY));
-            foreach (PartialPoint32 corner in room.Geometry.GetCorners())
+            PriorityCollection<PartialPoint> prioritySplits = new((thisObj, otherObj) => (thisObj.X == otherObj.X || !thisObj.HasX) && (thisObj.Y == otherObj.Y || thisObj.HasY));
+            foreach (PartialPoint corner in room.Geometry.GetCorners())
                 prioritySplits.AddItem(corner, 1);
 
             int targetRoomCount = p.TagsRequired.GetValue(Tags.HasRooms);
@@ -320,7 +320,7 @@ public static class StructureLayoutHelper {
             pickedLayout.ConvertToComponents();
             foreach (Gap gap in room.Gaps) {
                 if (gap.InteriorRoom == room)
-                    gap.InteriorRoom = RoomHelper.GetClosestRoom(pickedLayout.Rooms, gap.Geometry.BoundingBox.CenterPoint16());
+                    gap.InteriorRoom = RoomHelper.GetClosestRoom(pickedLayout.Rooms, gap.Geometry.BoundingBox.CenterPoint16);
             }
 
             p.Structure.StructureLayout.TagsCurrent.Add(Tags.HasRooms, pickedLayout.Rooms.Count);
@@ -356,7 +356,7 @@ public static class StructureLayoutHelper {
             List<Stairway> stairways = [];
             foreach (Gap gap in room.Gaps)
                 if (gap.IsHorizontal) {
-                    Point16 gapBottom = gap.Geometry.BoundingBox.BottomRightPoint16();
+                    Point16 gapBottom = gap.Geometry.BoundingBox.BottomRightPoint16;
                     if (room.Geometry.Contains(gapBottom + new Point16(1, 1)) || room.Geometry.Contains(gapBottom + new Point16(-1, 1))) {
                         CreateStairwayToGap(param, gapBottom);
                         //somehow make sure that the stair ways dont collide and take up too much space and stuff

@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework;
+using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Types;
-using SpawnHouses.Helpers;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent;
@@ -50,7 +50,7 @@ public class DebugLabel {
         return new Rectangle(pos.X, pos.Y, (int)dimensions.X, (int)dimensions.Y);
     }
 
-    public bool IsVisible(Rectangle boundingBox) {
+    public bool IsVisible(TileBox boundingBox) {
         if (!ParentObj.DebugInfoVisibility.IsDisplayingText)
             return false;
         

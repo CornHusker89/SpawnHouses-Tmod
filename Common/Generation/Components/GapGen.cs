@@ -6,7 +6,6 @@ using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types;
-using SpawnHouses.Helpers;
 using Terraria.DataStructures;
 using Terraria.Utilities;
 
@@ -84,7 +83,7 @@ public class GapGen {
                     tilemap.PlaceWall(x, y, palette.InternalWall.PrimaryBackground);
                     tilemap[x, y].ClearTile(false);
                 });
-            tilemap.PlaceMultiTile(component.Geometry.BoundingBox.TopLeftPoint16(), new Point16(1, 3),
+            tilemap.PlaceMultiTile(component.Geometry.BoundingBox.TopLeftPoint16, new Point16(1, 3),
                 (external ? palette.ExternalWall : palette.InternalWall).Door, false, MultiTile.DoorOrigin);
 
             if (external)
