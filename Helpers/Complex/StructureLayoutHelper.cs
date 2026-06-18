@@ -205,7 +205,7 @@ public static class StructureLayoutHelper {
 
                 if (!valid) {
                     // if the room can't be split at all, don't add it back to the queue
-                    finishedRoomVolumes.Add((roomVolume, $"R_BSP_GenOrder{finishedRoomVolumes.Count}"));
+                    finishedRoomVolumes.Add((roomVolume, $"Rm_BSP_GenOrder{finishedRoomVolumes.Count}"));
                     extraCuts++;
                     continue;
                 }
@@ -219,7 +219,7 @@ public static class StructureLayoutHelper {
                 var validSplitStarts = GetValidSplits(roomVolume, prioritySplits, splitAlongX, iterationSplitWidth, iterationVerticalGapXs, iterationHorizontalGapYs, validCutRange);
 
                 if (validSplitStarts.Count == 0) {
-                    finishedRoomVolumes.Add((roomVolume, $"R_BSP_GenOrder{finishedRoomVolumes.Count}"));
+                    finishedRoomVolumes.Add((roomVolume, $"Rm_BSP_GenOrder{finishedRoomVolumes.Count}"));
                     extraCuts++;
                     continue;
                 }
@@ -240,7 +240,7 @@ public static class StructureLayoutHelper {
                     if (param.IsWithinMaxSize(roomSubsections.lower) && param.Structure.LayoutRandom.NextDouble() < (1 - Math.Pow(1 - largeRoomChance, param.Attempts)) * 0.35 &&
                         curLargeRoomCount < maxLargeRooms && inverseProgressFactor < 0.92) {
                         curLargeRoomCount++;
-                        finishedRoomVolumes.Add((roomSubsections.lower, $"R_BSP_GenOrder{finishedRoomVolumes.Count}"));
+                        finishedRoomVolumes.Add((roomSubsections.lower, $"Rm_BSP_GenOrder{finishedRoomVolumes.Count}"));
                         extraCuts++;
                     }
                     else {
@@ -252,7 +252,7 @@ public static class StructureLayoutHelper {
                     if (param.IsWithinMaxSize(roomSubsections.higher) && param.Structure.LayoutRandom.NextDouble() < (1 - Math.Pow(1 - largeRoomChance, param.Attempts)) * 0.35 &&
                         curLargeRoomCount < maxLargeRooms && inverseProgressFactor < 0.92) {
                         curLargeRoomCount++;
-                        finishedRoomVolumes.Add((roomSubsections.higher, $"R_BSP_GenOrder{finishedRoomVolumes.Count}"));
+                        finishedRoomVolumes.Add((roomSubsections.higher, $"Rm_BSP_GenOrder{finishedRoomVolumes.Count}"));
                         extraCuts++;
                     }
                     else {

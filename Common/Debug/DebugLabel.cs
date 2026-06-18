@@ -9,9 +9,18 @@ namespace SpawnHouses.Common.Debug;
 
 public class DebugLabel {
     /// the origin of the label in global tile coordinates
-    public readonly Point16 Root;
+    public Point16 Root;
 
     public readonly ICanDebugDraw ParentObj;
+
+    private Vector2? _textDimensions;
+
+    public Vector2 TextDimensions {
+        get {
+            _textDimensions ??= GetTextDimensions();
+            return _textDimensions.Value;
+        }
+    }
 
     /// <summary>
     /// </summary>
@@ -43,12 +52,9 @@ public class DebugLabel {
     /// <summary>
     /// </summary>
     /// <returns></returns>
-    public Vector2 GetTextDimensions() => FontAssets.MouseText.Value.MeasureString(GetDisplayString());
+    private Vector2 GetTextDimensions() => FontAssets.MouseText.Value.MeasureString(GetDisplayString());
 
-    public Rectangle GetRectangle(Point pos) {
-        Vector2 dimensions = GetTextDimensions();
-        return new Rectangle(pos.X, pos.Y, (int)dimensions.X, (int)dimensions.Y);
-    }
+    public Rectangle GetTextBoundingBox(Point pos) => new(pos.X, pos.Y, (int)TextDimensions.X, (int)TextDimensions.Y);
 
     public bool IsVisible(TileBox boundingBox) {
         if (!ParentObj.DebugInfoVisibility.IsDisplayingText)

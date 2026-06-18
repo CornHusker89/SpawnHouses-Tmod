@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Common;
+using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Debug;
+using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Tagging;
+using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Helpers;
 using SpawnHouses.Items.Debug;
@@ -18,6 +21,8 @@ namespace SpawnHouses;
 
 public class StructureManager : ModSystem {
     private static readonly List<AdvStructure> StructureList = [];
+
+    private static int DebugDrawFrameCount;
     
     public static Version WorldVersion = new(ModInstance.Mod.Version.ToString());
     
@@ -77,6 +82,11 @@ public class StructureManager : ModSystem {
     }
 
     public override void PostDrawTiles() {
+        if (DebugDrawFrameCount < 3) {
+            DebugDrawFrameCount++;
+            return;
+        }
+        
         DrawHelper.BeginWorldSpriteBatch();
         Dictionary<DebugLabel, Point> labels = [];
         List<Rectangle> structureRects = [];
@@ -84,42 +94,59 @@ public class StructureManager : ModSystem {
         foreach (AdvStructure structure in StructureList)
         foreach (DebugLabel label in structure.DrawDebugInfo()) {
             labels.Add(label, label.Root.ToPoint() * new Point(16, 16));
-            structureRects.Add(structure.StructureLayout.BoundingBox.ToRectangle());
+            TileBox structureGlobalTileBoundingBox = structure.Tilemap.ConvertToGlobal(structure.StructureLayout.BoundingBox);
+            structureRects.Add(structureGlobalTileBoundingBox.Scale(16));
         }
 
         // move each label away from each other and the structure
-        for (int iter = 0; iter < 12; iter++) {
+        for (int iter = 0; iter < 8; iter++) {
             foreach (var a in labels) {
-                // label-label
-                foreach (var b in labels) {
-                    if (ReferenceEquals(a.Key, b.Key))
-                        continue;
-
-                    if (a.Key.GetRectangle(a.Value).Intersects(a.Key.GetRectangle(b.Value))) {
-                        Vector2 delta = (a.Value - b.Value).ToVector2();
-
-                        if (delta == Vector2.Zero)
-                            delta = Vector2.UnitY;
-
-                        labels[a.Key] += (Vector2.Normalize(delta) * 4f).ToPoint();
-                    }
-                }
+                // gentle spring back to root
+                Vector2 deltaToRoot = (a.Value - a.Key.Root.ToPoint() * new Point(16, 16)).ToVector2();
+                labels[a.Key] -= (deltaToRoot * 0.1f).ToPoint();
 
                 // label-structure
-                foreach (Rectangle box in structureRects)
-                    if (a.Key.GetRectangle(a.Value).Intersects(box)) {
+                foreach (Rectangle box in structureRects) {
+                    Rectangle aRect = a.Key.GetTextBoundingBox(a.Value);
+                    if (aRect.Intersects(box)) {
                         Vector2 delta = (a.Value - box.Center).ToVector2();
 
                         if (delta == Vector2.Zero)
                             delta = Vector2.UnitY;
 
-                        labels[a.Key] += (Vector2.Normalize(delta) * 4f).ToPoint();
+                        labels[a.Key] += (Vector2.Normalize(delta) * 7).ToPoint();
                     }
+                }
+                
+                // label-label
+                foreach (var b in labels) {
+                    Rectangle aRect = a.Key.GetTextBoundingBox(a.Value);
+                    if (ReferenceEquals(a.Key, b.Key))
+                        continue;
+                    if (aRect.Intersects(a.Key.GetTextBoundingBox(b.Value))) {
+                        Vector2 delta = (a.Value - b.Value).ToVector2();
+        
+                        if (delta == Vector2.Zero)
+                            delta = Vector2.UnitY;
 
-                // gentle spring back to root
-                Vector2 deltaToRoot = (a.Value - a.Key.Root.ToPoint()).ToVector2();
-                labels[a.Key] += (deltaToRoot * 0.1f).ToPoint();
+                        labels[a.Key] += delta.ToPoint();
+                        labels[b.Key] -= delta.ToPoint();
+                    }
+                }
             }
+        }
+
+        foreach (DebugLabel label in labels.Keys) {
+            Color color;
+            if (label.ParentObj is IComponent component)
+                color = DrawHelper.GetColor(component);
+            else if (label.ParentObj is IGeneratable generatable)
+                color = DrawHelper.GetColor(generatable.Id);
+            else if (label.ParentObj is StructureTilemap tilemap)
+                color = DrawHelper.GetColor(tilemap.Structure.StructureLayout.Id);
+            else
+                color = DrawHelper.GetColor((ushort)label.ParentObj.GetHashCode());
+            DrawHelper.DrawDebugLabel(label, labels[label], DrawHelper.DebugDrawWidth, color);
         }
 
         Main.spriteBatch.End();

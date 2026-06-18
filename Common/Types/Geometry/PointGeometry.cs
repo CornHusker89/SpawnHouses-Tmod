@@ -29,7 +29,7 @@ public abstract class PointGeometry : IBoundingBox {
             maxY = Math.Max(point.Y, maxY);
         }
 
-        BoundingBox = new TileBox(minX, minY, maxX - minX, maxY - minY);
+        BoundingBox = new TileBox(minX, minY, maxX - minX + 1, maxY - minY + 1);
     }
 
     protected static int Cross(Point16 o, Point16 a, Point16 b) => (a.X - o.X) * (b.Y - o.Y) - (a.Y - o.Y) * (b.X - o.X);

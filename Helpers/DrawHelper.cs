@@ -155,13 +155,13 @@ public static class DrawHelper {
     public static void DrawWorldBasedBorder(Rectangle rectangle, Color color, int width) {
         Point screenPos = Main.screenPosition.ToPoint();
         int drawWidthOffset = -width / 2;
-        Vector2 start = new(rectangle.X - screenPos.X + drawWidthOffset, rectangle.Y - screenPos.Y + drawWidthOffset);
-        //Rectangle offsetRectangle = new(, , );
-        Terraria.Utils.DrawRectangle(Main.spriteBatch, start, start + new Vector2(rectangle.Width, rectangle.Height), color, color, width);
-        // Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Left, offsetRectangle.Top, offsetRectangle.Width, width), color);
-        // Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Right, offsetRectangle.Top, width, offsetRectangle.Height), color);
-        // Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Left, offsetRectangle.Bottom, offsetRectangle.Width, width), color);
-        // Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Left, offsetRectangle.Top, width, offsetRectangle.Height), color);
+        Point start = new(rectangle.X - screenPos.X + drawWidthOffset, rectangle.Y - screenPos.Y + drawWidthOffset);
+        Rectangle offsetRectangle = new(start.X, start.Y, rectangle.Width, rectangle.Height);
+        //Terraria.Utils.DrawRectangle(Main.spriteBatch, start, start + new Vector2(rectangle.Width, rectangle.Height), color, color, width);
+        Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Left, offsetRectangle.Top, offsetRectangle.Width, width), color);
+        Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Right, offsetRectangle.Top, width, offsetRectangle.Height), color);
+        Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Left, offsetRectangle.Bottom, offsetRectangle.Width, width), color);
+        Main.spriteBatch.Draw(PixelTexture.Value, new Rectangle(offsetRectangle.Left, offsetRectangle.Top, width, offsetRectangle.Height), color);
     }
 
     /// <summary>
@@ -234,24 +234,35 @@ public static class DrawHelper {
     /// <param name="color"></param>
     /// <remarks>assumes world relative sprite batch has already begun</remarks>
     public static void DrawDebugLabel(DebugLabel label, Point position, int drawWidth, Color color) {
-        Point offsetPosition = position - Main.screenPosition.ToPoint();
-
+        Point textDimensions = label.TextDimensions.ToPoint();
+        
         // draw containing box
-        Terraria.Utils.DrawRectangle(
-            Main.spriteBatch,
-            offsetPosition.ToVector2() - new Vector2(drawWidth * 2, drawWidth * 2),
-            offsetPosition.ToVector2() + label.GetTextDimensions() + new Vector2(drawWidth * 2, drawWidth * 2),
-            color,
+        DrawWorldBasedBorder(
+            new Rectangle(position.X, position.Y, textDimensions.X + drawWidth * 7, textDimensions.Y),
             color,
             drawWidth
         );
 
         // draw text
-        Terraria.Utils.DrawBorderString(Main.spriteBatch, label.ParentObj.Name, offsetPosition.ToVector2(), color);
+        DrawWorldBasedText(label.ParentObj.Name, position + new Point(drawWidth * 2, drawWidth * 1), color);
 
         // draw line to root
-        Point offsetLabelRoot = label.Root.ToPoint() - Main.screenPosition.ToPoint();
-        Terraria.Utils.DrawLine(Main.spriteBatch, offsetPosition, offsetLabelRoot, color);
+        Point offsetLabelRoot = label.Root.ToPoint() * new Point(16, 16);
+        Vector2 lineStartOffset;
+        if (offsetLabelRoot.X < position.X + textDimensions.X / 2) {
+            if (offsetLabelRoot.Y < position.Y + textDimensions.Y / 2) // from top left
+                lineStartOffset = new Vector2(0, 0);
+            else // from bottom left
+                lineStartOffset = new Vector2(0, textDimensions.Y);
+        }
+        else {
+            if (offsetLabelRoot.Y < position.Y + textDimensions.Y / 2) // from top right
+                lineStartOffset = new Vector2(textDimensions.X + drawWidth * 7, 0);
+            else // from bottom right
+                lineStartOffset = new Vector2(textDimensions.X + drawWidth * 7, textDimensions.Y);
+        }
+
+        Terraria.Utils.DrawLine(Main.spriteBatch, position.ToVector2() + lineStartOffset, offsetLabelRoot.ToVector2(), color, color, DebugDrawWidth);
     }
 
     public static Color GetColor(ushort id) => AllColors[id % AllColors.Length];

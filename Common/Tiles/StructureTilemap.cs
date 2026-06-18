@@ -6,7 +6,6 @@ using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Palette;
-using SpawnHouses.Common.Types;
 using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Helpers;
 using Terraria;
@@ -157,22 +156,7 @@ public class StructureTilemap : ICanDebugDraw, IBoundingBox {
 
     public Point16 ConvertToGlobal(Point16 point) => ConvertToGlobal(point.X, point.Y);
 
-    /// <summary>
-    ///     offsets given <see cref="StructureLayout" /> by this tilemap's tile offset
-    /// </summary>
-    /// <param name="structureLayout"></param>
-    public void OffsetExternalLayout(StructureLayout structureLayout) {
-        Point16 offset = GlobalTileOffset * Point16.NegativeOne;
-        structureLayout.Offset(offset);
-    }
-
-    /// <summary>
-    ///     offsets given <see cref="EntryPoint" /> by this tilemap's tile offset
-    /// </summary>
-    /// <param name="entryPoint"></param>
-    public void OffsetEntryPoint(EntryPoint entryPoint) {
-        entryPoint.Offset = GlobalTileOffset * Point16.NegativeOne;
-    }
+    public TileBox ConvertToGlobal(TileBox tileBox) => tileBox.Offset(GlobalTileOffset);
 
     public void PlaceTile(int x, int y, TilePaintedType? paintedType, BlockType blockType = BlockType.Solid, bool actuated = false) {
         if (paintedType == null) return;

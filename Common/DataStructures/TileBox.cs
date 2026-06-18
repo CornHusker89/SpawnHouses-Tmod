@@ -29,8 +29,8 @@ public readonly struct TileBox {
     public TileBox(Point16 topLeft, Point16 bottomRight) {
         X = topLeft.X;
         Y = topLeft.Y;
-        Width = bottomRight.X - bottomRight.X + 1;
-        Height = bottomRight.Y - bottomRight.Y + 1;
+        Width = bottomRight.X - topLeft.X + 1;
+        Height = bottomRight.Y - topLeft.Y + 1;
     }
 
     public Point16 TopLeftPoint16 => new(X, Y);
@@ -41,11 +41,11 @@ public readonly struct TileBox {
     public Point16 SizePoint16 => new(Width, Height);
 
     /// <summary>
-    ///     note that the bottom and right values will be different by -1
+    ///     note that the width and height values will be different by -1
     /// </summary>
     /// <returns></returns>
     [Pure]
-    public Rectangle ToRectangle() => new(X, Y, Width - 1, Height - 1);
+    public Rectangle ToRectangle() => new(X, Y, Width, Height);
 
     /// <summary>
     ///     scales both rectangle size and preexisting translation
@@ -54,7 +54,7 @@ public readonly struct TileBox {
     /// <param name="scale"></param>
     /// <returns></returns>
     [Pure]
-    public Rectangle Scale(int scale) => new(X * scale, Y * scale, Width * scale, Height * scale);
+    public Rectangle Scale(int scale) => new(X * scale, Y * scale, (Width + 1) * scale, (Height + 1) * scale);
 
     /// <inheritdoc cref="Scale(int)" />
     [Pure]
@@ -85,6 +85,23 @@ public readonly struct TileBox {
     /// <inheritdoc cref="AnchoredScaleLocal(float)" />
     [Pure]
     public Rectangle AnchoredScaleLocal(float scale) => new(X, Y, (int)(Height * scale), (int)(Width * scale));
+
+    /// <summary>
+    ///     ADDs the offset to the current position
+    /// </summary>
+    /// <param name="offsetX"></param>
+    /// <param name="offsetY"></param>
+    /// <returns></returns>
+    [Pure]
+    public TileBox Offset(int offsetX, int offsetY) => new(X + offsetX, Y + offsetY, Width, Height);
+
+    /// <summary>
+    ///     ADDs the offset to the current position
+    /// </summary>
+    /// <param name="offset"></param>
+    /// <returns></returns>
+    [Pure]
+    public TileBox Offset(Point16 offset) => new(X + offset.X, Y + offset.Y, Width, Height);
 
     [Pure]
     public bool Intersects(TileBox value) =>

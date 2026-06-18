@@ -68,11 +68,11 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
         Color color = DrawHelper.GetColor(Id);
 
         if (DebugInfoVisibility.DisplayBounds) {
-            Point16 topLeftWorldPos = Params.Structure.Tilemap.ConvertToGlobal(BoundingBox.TopLeftPoint16) * new Point16(16);
+            Point16 topLeftLocalPos = Params.Structure.Tilemap.ConvertToGlobal(BoundingBox.TopLeftPoint16);
             DrawHelper.DrawWorldBasedBorder(
                 new Rectangle(
-                    topLeftWorldPos.X - DrawHelper.DebugDrawWidth,
-                    topLeftWorldPos.Y - DrawHelper.DebugDrawWidth,
+                    topLeftLocalPos.X * 16 - DrawHelper.DebugDrawWidth,
+                    topLeftLocalPos.Y * 16 - DrawHelper.DebugDrawWidth,
                     BoundingBox.Width * 16 + DrawHelper.DebugDrawWidth * 2,
                     BoundingBox.Height * 16 + DrawHelper.DebugDrawWidth * 2
                 ),
@@ -93,7 +93,7 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
                     labels.AddRange(component.DrawDebugInfo());
         }
 
-        if (_label.IsVisible(BoundingBox))
+        if (_label.IsVisible(Params.Structure.Tilemap.ConvertToGlobal(BoundingBox)))
             labels.Add(_label);
 
         return labels;
@@ -156,6 +156,7 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
             }
 
             BoundingBox = new TileBox(new Point16(minX, minY), new Point16(maxX, maxY));
+            _label.Root = BoundingBox.TopLeftPoint16;
         }
 
         if (ExternalComponents != null && ExternalGaps != null && RoomLayouts != null) {
@@ -170,6 +171,13 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
             // put rooms at the very end of the list
             foreach (RoomLayout roomLayout in RoomLayouts) AllComponents.AddRange(roomLayout.Rooms);
         }
+
+        if (AllComponents != null)
+            foreach (IComponent component in AllComponents)
+                component.UpdateLabelRoot();
+        else if (ExternalComponents != null)
+            foreach (IComponent component in ExternalComponents)
+                component.UpdateLabelRoot();
     }
 
     /// <summary>

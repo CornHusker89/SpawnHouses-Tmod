@@ -7,6 +7,7 @@ using SpawnHouses.Common.Types;
 using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Helpers;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.Utilities;
 
 namespace SpawnHouses.Common.Modules;
@@ -16,6 +17,11 @@ public interface IComponent : IGeneratable {
     ///     geometry that this component will occupy. set by the shape in the params at the time of component generation
     /// </summary>
     public PointGeometry Geometry { get; }
+
+    /// <summary>
+    ///     updates the internal debug label's root point
+    /// </summary>
+    public void UpdateLabelRoot();
 }
 
 public interface IComponent<out TGeometry> : IComponent
@@ -31,7 +37,7 @@ public abstract class VolumeComponent : Generatable<VolumeComponent, VolumeCompo
     public Shape Geometry { get; set; }
 
     protected VolumeComponent(VolumeComponentParams param, Shape geometry, string name) : base(param, new TagMap(), name) {
-        _label = new DebugLabel(geometry.BoundingBox.CenterPoint16, this);
+        _label = new DebugLabel(Point16.Zero, this);
         Geometry = geometry;
     }
 
@@ -51,7 +57,11 @@ public abstract class VolumeComponent : Generatable<VolumeComponent, VolumeCompo
             DrawHelper.DrawWorldBasedPoints(points, color, DrawHelper.DebugDrawWidth * 2);
         }
 
-        return _label.IsVisible(Geometry.BoundingBox) ? [_label] : [];
+        return _label.IsVisible(Params.Structure.Tilemap.ConvertToGlobal(Geometry.BoundingBox)) ? [_label] : [];
+    }
+
+    public void UpdateLabelRoot() {
+        _label.Root = Params.Structure.Tilemap.ConvertToGlobal(Geometry.BoundingBox.CenterPoint16);
     }
 }
 
@@ -60,10 +70,10 @@ public abstract class PathComponent : Generatable<PathComponent, PathComponentPa
     public Path Geometry { get; set; }
 
     protected PathComponent(PathComponentParams param, Path geometry, string name) : base(param, new TagMap(), name) {
-        _label = new DebugLabel(geometry.Points[0], this);
+        _label = new DebugLabel(Point16.Zero, this);
         Geometry = geometry;
     }
-
+    
     public Shape GetBoundingShape() {
         if (Generator == null) SetGenerator();
 
@@ -82,6 +92,10 @@ public abstract class PathComponent : Generatable<PathComponent, PathComponentPa
             DrawHelper.DrawWorldBasedPoints(points, color, 6);
         }
 
-        return _label.IsVisible(Geometry.BoundingBox) ? [_label] : [];
+        return _label.IsVisible(Params.Structure.Tilemap.ConvertToGlobal(Geometry.BoundingBox)) ? [_label] : [];
+    }
+
+    public void UpdateLabelRoot() {
+        _label.Root = Params.Structure.Tilemap.ConvertToGlobal(Geometry.Points[0]);
     }
 }

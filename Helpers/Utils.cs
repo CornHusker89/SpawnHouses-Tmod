@@ -1,22 +1,16 @@
 using System.Diagnostics.Contracts;
 using Microsoft.Xna.Framework;
-using Terraria.DataStructures;
+using SpawnHouses.Common.DataStructures;
 
 namespace SpawnHouses.Helpers;
 
 public static class Utils {
-    public static Point TopLeftPoint(this Rectangle r) => new(r.X, r.Y);
-    public static Point TopRightPoint(this Rectangle r) => new(r.X + r.Width - 1, r.Y);
-    public static Point BottomLeftPoint(this Rectangle r) => new(r.X, r.Y + r.Height - 1);
-    public static Point BottomRightPoint(this Rectangle r) => new(r.X + r.Width - 1, r.Y + r.Height - 1);
-    public static Point SizePoint(this Rectangle r) => new(r.Width, r.Height);
-
-    public static Point16 TopLeftPoint16(this Rectangle r) => new(r.X, r.Y);
-    public static Point16 TopRightPoint16(this Rectangle r) => new(r.X + r.Width - 1, r.Y);
-    public static Point16 BottomLeftPoint16(this Rectangle r) => new(r.X, r.Y + r.Height - 1);
-    public static Point16 BottomRightPoint16(this Rectangle r) => new(r.X + r.Width - 1, r.Y + r.Height - 1);
-    public static Point16 CenterPoint16(this Rectangle r) => new(r.X + (r.Width - 1) / 2, r.Y + (r.Height - 1) / 2);
-    public static Point16 SizePoint16(this Rectangle r) => new(r.Width, r.Height);
+    /// <summary>
+    ///     note that width and height will be different by +1
+    /// </summary>
+    /// <param name="rect"></param>
+    /// <returns></returns>
+    public static TileBox ToTileBox(this Rectangle rect) => new(rect.X, rect.Y, rect.Width + 1, rect.Height + 1);
 
     /// <summary>
     ///     scales both rectangle size and preexisting translation
