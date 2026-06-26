@@ -41,7 +41,7 @@ public abstract class VolumeComponent : Generatable<VolumeComponent, VolumeCompo
         Geometry = geometry;
     }
 
-    public override List<DebugLabel> DrawDebugInfo() {
+    public override List<DebugLabel> DrawDebugGeometry() {
         Color color = DrawHelper.GetColor(this);
         Point tilemapOffsetWorldCoords = Params.Structure.Tilemap.GlobalTileOffset.ToPoint() * new Point(16, 16);
         
@@ -80,7 +80,7 @@ public abstract class PathComponent : Generatable<PathComponent, PathComponentPa
         return Generator!.GetBoundingShape(Params, Geometry, new UnifiedRandom(Id));
     }
 
-    public override List<DebugLabel> DrawDebugInfo() {
+    public override List<DebugLabel> DrawDebugGeometry() {
         Color color = DrawHelper.GetColor(this);
 
         if (DebugInfoVisibility.DisplayBounds) {

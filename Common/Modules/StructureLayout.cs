@@ -64,7 +64,7 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
         _label = new DebugLabel(BoundingBox.TopLeftPoint16, this);
     }
 
-    public override List<DebugLabel> DrawDebugInfo() {
+    public override List<DebugLabel> DrawDebugGeometry() {
         Color color = DrawHelper.GetColor(Id);
 
         if (DebugInfoVisibility.DisplayBounds) {
@@ -85,12 +85,12 @@ public class StructureLayout : Generatable<StructureLayout, StructureLayoutParam
         if (AllComponents != null)
             foreach (IComponent component in AllComponents) {
                 if (component != null)
-                    labels.AddRange(component.DrawDebugInfo());
+                    labels.AddRange(component.DrawDebugGeometry());
             }
         else if (ExternalComponents != null) {
             foreach (IComponent component in ExternalComponents)
                 if (component != null)
-                    labels.AddRange(component.DrawDebugInfo());
+                    labels.AddRange(component.DrawDebugGeometry());
         }
 
         if (_label.IsVisible(Params.Structure.Tilemap.ConvertToGlobal(BoundingBox)))

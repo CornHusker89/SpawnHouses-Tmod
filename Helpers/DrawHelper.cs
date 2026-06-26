@@ -32,8 +32,6 @@ public static class DrawHelper {
         Color.Red,
         Color.Green,
         Color.Orange,
-        Color.DarkSalmon,
-        Color.DarkBlue,
         Color.Purple,
         Color.Pink,
         Color.Brown,
@@ -51,11 +49,9 @@ public static class DrawHelper {
         Color.RosyBrown,
         Color.HotPink,
         Color.Maroon,
-        Color.DarkSalmon,
         Color.Crimson,
         Color.Pink,
         Color.LightSalmon,
-        Color.DarkRed,
         Color.Coral
     ];
 
@@ -70,7 +66,6 @@ public static class DrawHelper {
         Color.SkyBlue,
         Color.BlueViolet,
         Color.RoyalBlue,
-        Color.DarkCyan,
         Color.Indigo
     ];
 
@@ -93,7 +88,6 @@ public static class DrawHelper {
         Color.Gray,
         Color.LightSlateGray,
         Color.DarkSlateGray,
-        Color.Black
     ];
 
     /// <summary>
@@ -101,7 +95,6 @@ public static class DrawHelper {
     /// </summary>
     private static readonly Color[] StairwayColors = [
         Color.Green,
-        Color.DarkGreen,
         Color.LightGreen,
         Color.Olive
     ];
@@ -244,7 +237,7 @@ public static class DrawHelper {
         );
 
         // draw text
-        DrawWorldBasedText(label.ParentObj.Name, position + new Point(drawWidth * 2, drawWidth * 1), color);
+        DrawWorldBasedText(label.GetDisplayString(), position + new Point(drawWidth * 2, drawWidth * 1), color);
 
         // draw line to root
         Point offsetLabelRoot = label.Root.ToPoint() * new Point(16, 16);

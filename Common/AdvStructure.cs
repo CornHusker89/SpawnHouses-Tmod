@@ -71,15 +71,15 @@ public class AdvStructure : ICanDebugDraw {
         UpdateDebugVisibility();
     }
 
-    public List<DebugLabel> DrawDebugInfo() {
+    public List<DebugLabel> DrawDebugGeometry() {
         if (FailedLayoutGeneration)
             return [];
 
         List<DebugLabel> labels = [];
         if (Tilemap != null)
-            labels.AddRange(Tilemap.DrawDebugInfo());
+            labels.AddRange(Tilemap.DrawDebugGeometry());
         if (StructureLayout != null)
-            labels.AddRange(StructureLayout.DrawDebugInfo());
+            labels.AddRange(StructureLayout.DrawDebugGeometry());
         return labels;
     }
 

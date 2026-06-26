@@ -20,9 +20,11 @@ namespace SpawnHouses;
 #nullable enable
 
 public class StructureManager : ModSystem {
-    private static readonly List<AdvStructure> StructureList = [];
+    private static int _debugDrawFrameCount;
 
-    private static int DebugDrawFrameCount;
+    private static Dictionary<DebugLabel, Point> _labels = [];
+    
+    private static readonly List<AdvStructure> StructureList = [];
     
     public static Version WorldVersion = new(ModInstance.Mod.Version.ToString());
     
@@ -82,61 +84,20 @@ public class StructureManager : ModSystem {
     }
 
     public override void PostDrawTiles() {
-        if (DebugDrawFrameCount < 3) {
-            DebugDrawFrameCount++;
-            return;
-        }
-        
+        _debugDrawFrameCount++;
+
         DrawHelper.BeginWorldSpriteBatch();
-        Dictionary<DebugLabel, Point> labels = [];
-        List<Rectangle> structureRects = [];
 
-        foreach (AdvStructure structure in StructureList)
-        foreach (DebugLabel label in structure.DrawDebugInfo()) {
-            labels.Add(label, label.Root.ToPoint() * new Point(16, 16));
-            TileBox structureGlobalTileBoundingBox = structure.Tilemap.ConvertToGlobal(structure.StructureLayout.BoundingBox);
-            structureRects.Add(structureGlobalTileBoundingBox.Scale(16));
+        if (_debugDrawFrameCount < 20) {
+            _debugDrawFrameCount = 0;
+            UpdateLabelPositionsAndDraw();
+        }
+        else {
+            foreach (AdvStructure structure in StructureList)
+                structure.DrawDebugGeometry();
         }
 
-        // move each label away from each other and the structure
-        for (int iter = 0; iter < 8; iter++) {
-            foreach (var a in labels) {
-                // gentle spring back to root
-                Vector2 deltaToRoot = (a.Value - a.Key.Root.ToPoint() * new Point(16, 16)).ToVector2();
-                labels[a.Key] -= (deltaToRoot * 0.1f).ToPoint();
-
-                // label-structure
-                foreach (Rectangle box in structureRects) {
-                    Rectangle aRect = a.Key.GetTextBoundingBox(a.Value);
-                    if (aRect.Intersects(box)) {
-                        Vector2 delta = (a.Value - box.Center).ToVector2();
-
-                        if (delta == Vector2.Zero)
-                            delta = Vector2.UnitY;
-
-                        labels[a.Key] += (Vector2.Normalize(delta) * 7).ToPoint();
-                    }
-                }
-                
-                // label-label
-                foreach (var b in labels) {
-                    Rectangle aRect = a.Key.GetTextBoundingBox(a.Value);
-                    if (ReferenceEquals(a.Key, b.Key))
-                        continue;
-                    if (aRect.Intersects(a.Key.GetTextBoundingBox(b.Value))) {
-                        Vector2 delta = (a.Value - b.Value).ToVector2();
-        
-                        if (delta == Vector2.Zero)
-                            delta = Vector2.UnitY;
-
-                        labels[a.Key] += delta.ToPoint();
-                        labels[b.Key] -= delta.ToPoint();
-                    }
-                }
-            }
-        }
-
-        foreach (DebugLabel label in labels.Keys) {
+        foreach (DebugLabel label in _labels.Keys) {
             Color color;
             if (label.ParentObj is IComponent component)
                 color = DrawHelper.GetColor(component);
@@ -146,9 +107,60 @@ public class StructureManager : ModSystem {
                 color = DrawHelper.GetColor(tilemap.Structure.StructureLayout.Id);
             else
                 color = DrawHelper.GetColor((ushort)label.ParentObj.GetHashCode());
-            DrawHelper.DrawDebugLabel(label, labels[label], DrawHelper.DebugDrawWidth, color);
+            DrawHelper.DrawDebugLabel(label, _labels[label], DrawHelper.DebugDrawWidth, color);
         }
 
         Main.spriteBatch.End();
+    }
+
+    private static void UpdateLabelPositionsAndDraw() {
+        List<Rectangle> structureRects = [];
+        _labels.Clear();
+
+        foreach (AdvStructure structure in StructureList) {
+            foreach (DebugLabel label in structure.DrawDebugGeometry()) {
+                _labels.Add(label, label.Root.ToPoint() * new Point(16, 16));
+                TileBox structureGlobalTileBoundingBox = structure.Tilemap.ConvertToGlobal(structure.StructureLayout.BoundingBox);
+                structureRects.Add(structureGlobalTileBoundingBox.Scale(16));
+            }
+        }
+
+        // move each label away from each other and the structure
+        for (int i = 0; i < 7; i++) {
+            foreach (var a in _labels) {
+                // gentle spring back to root
+                Vector2 deltaToRoot = (a.Value - a.Key.Root.ToPoint() * new Point(16, 16)).ToVector2();
+                _labels[a.Key] -= (deltaToRoot * 0.03f).ToPoint();
+
+                // label-structure
+                foreach (Rectangle box in structureRects) {
+                    Rectangle aRect = a.Key.GetTextBoundingBox(a.Value);
+                    if (aRect.Intersects(box)) {
+                        Vector2 delta = (aRect.Center - box.Center).ToVector2();
+
+                        if (delta == Vector2.Zero)
+                            delta = Vector2.UnitY;
+
+                        _labels[a.Key] += (Vector2.Normalize(delta) * 7).ToPoint();
+                    }
+                }
+                
+                // label-label
+                foreach (var b in _labels) {
+                    Rectangle aRect = a.Key.GetTextBoundingBox(a.Value);
+                    if (ReferenceEquals(a.Key, b.Key))
+                        continue;
+                    if (aRect.Intersects(a.Key.GetTextBoundingBox(b.Value))) {
+                        Vector2 delta = (a.Value - b.Value).ToVector2() * 0.65f;
+        
+                        if (delta == Vector2.Zero)
+                            delta = Vector2.UnitY;
+
+                        _labels[a.Key] += delta.ToPoint();
+                        _labels[b.Key] -= delta.ToPoint();
+                    }
+                }
+            }
+        }
     }
 }

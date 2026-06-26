@@ -84,7 +84,7 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
         Name = name.Replace("#", Id.ToString());
     }
 
-    public abstract List<DebugLabel> DrawDebugInfo();
+    public abstract List<DebugLabel> DrawDebugGeometry();
 
     /// <summary>
     ///     gets a generator for this module

@@ -46,7 +46,7 @@ public class StructureTilemap : ICanDebugDraw, IBoundingBox {
     ///     can only draw the bounding box
     /// </summary>
     /// <remarks>assumes that a world-relative batch has begun in <see cref="Main.spriteBatch" />. does not end sprite batch</remarks>
-    public List<DebugLabel> DrawDebugInfo() {
+    public List<DebugLabel> DrawDebugGeometry() {
         Color color = DrawHelper.GetColor(Structure.StructureLayout.Id);
 
         if (DebugInfoVisibility.DisplayBounds)

@@ -269,7 +269,7 @@ public static class StructureLayoutHelper {
             }
 
             // finalize any rooms left over after we have the target housing
-            List<(Shape Shape, string name)> namedRoomQueue = roomQueue.Select(r => (r, $"R_BSPLeftover_GenOrder{finishedRoomVolumes.Count}")).ToList();
+            List<(Shape Shape, string name)> namedRoomQueue = roomQueue.Select(r => (r, $"Rm_BSPLeftover_GenOrder{finishedRoomVolumes.Count}")).ToList();
             finishedRoomVolumes.AddRange(namedRoomQueue);
             
             prioritySplits.ClearBlocklist();
@@ -427,59 +427,92 @@ public static class StructureLayoutHelper {
         /// <exception cref="Exception"></exception>
         /// <remarks>assumes only one interior in the tilemap</remarks>
         private static Shape GetStructureInterior(StructureTilemap tilemap) {
-            List<Point16> outline = [];
+            // Build the boundary by collecting all exterior-facing edges of interior tiles,
+            // then stitch those edges into a single polygon. This approach is more robust
+            // than a fragile marching-squares walker that can miss corners in complex shapes.
 
-            Point16? start = null;
-            Point16 tilemapSize = new(tilemap.Width, tilemap.Height);
-            for (int y = 0; y < tilemap.Height - 1 && start == null; y++)
-            for (int x = 0; x < tilemap.Width - 1; x++)
-                if (GeometryHelper.GetMarchingSquareIndex(tilemap.InInterior, x, y, tilemapSize) != 0) {
-                    start = new Point16(x, y);
-                    break;
-                }
+            int width = tilemap.Width;
+            int height = tilemap.Height;
 
-            if (start == null) {
-                var debugTilemap = tilemap.CreateDebugTilemap();
-                throw new Exception("tilemap did not have any interior tiles");
+            // tilemap.InInterior is a method: use tilemap.InInterior(x,y) to query
+
+            // Collect directed boundary edges (from -> to). We orient each tile's
+            // boundary edges in a consistent CCW order so edges chain cleanly.
+            var edges = new HashSet<string>(); // key: "ax,ay->bx,by"
+
+            for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++) {
+                if (!tilemap.InInterior(x, y)) continue;
+
+                // neighbors: treat out-of-bounds as not-inside
+                bool up = y - 1 >= 0 && tilemap.InInterior(x, y - 1);
+                bool right = x + 1 < width && tilemap.InInterior(x + 1, y);
+                bool down = y + 1 < height && tilemap.InInterior(x, y + 1);
+                bool left = x - 1 >= 0 && tilemap.InInterior(x - 1, y);
+
+                // oriented CCW around the tile: (x,y) -> (x+1,y) -> (x+1,y+1) -> (x,y+1)
+                if (!up) edges.Add($"{x},{y}->{x + 1},{y}"); // top edge
+                if (!right) edges.Add($"{x + 1},{y}->{x + 1},{y + 1}"); // right edge
+                if (!down) edges.Add($"{x + 1},{y + 1}->{x},{y + 1}"); // bottom edge
+                if (!left) edges.Add($"{x},{y + 1}->{x},{y}"); // left edge
             }
 
-            Point16 pos = start.Value;
-            Point16 dir = new(0, 1);
-            HashSet<Point16> visited = [];
-            int steps = 0;
-            int maxSteps = tilemap.Width * tilemap.Height * 4;
+            if (edges.Count == 0) throw new Exception("tilemap did not have any interior tiles");
 
-            do {
-                // add previous iteration's position
-                visited.Add(pos);
+            // Build adjacency map from the directed edges
+            var adj = new Dictionary<Point16, List<Point16>>();
 
-                int squareIndex = GeometryHelper.GetMarchingSquareIndex(tilemap.InInteriorUnsafe, pos.X, pos.Y, tilemapSize);
-                Point16 nextDir = GeometryHelper.GetDirectionFromSquareIndex(squareIndex);
+            static Point16 ParsePoint(string s) {
+                string[] parts = s.Split(',');
+                return new Point16(int.Parse(parts[0]), int.Parse(parts[1]));
+            }
 
-                Point16 outlineOffset = squareIndex switch {
-                    1 => new Point16(0, 0), // BL only: BL
-                    2 => new Point16(1, 0), // BR only: BR
-                    3 => new Point16(0, 0), // BL + BR: BL
-                    4 => new Point16(1, -1), // TR only: TR
-                    5 => dir.X == -1 ? new Point16(1, -1) : new Point16(0, 0), // BL + TR: TR if we were going left, otherwise BL
-                    6 => new Point16(1, 0), // BR + TR: BR
-                    7 => new Point16(1, 0), // BL + BR + TR: BR
-                    8 => new Point16(0, -1), // TL only: TL
-                    9 => new Point16(0, -1), // BL + TL: TL
-                    10 => dir.Y == -1 ? new Point16(1, 0) : new Point16(0, -1), // BR + TL: BR if we were going left, otherwise TL
-                    11 => new Point16(0, 0), // BL + BR + TL: BL
-                    12 => new Point16(1, -1), // TR + TL: TR
-                    13 => new Point16(0, -1), // BL + TR + TL: TL
-                    14 => new Point16(1, -1), // BR + TR + TL: TR
-                    _ => new Point16(0, 0) // 0 or 15
-                };
+            foreach (string key in edges) {
+                string[] parts = key.Split("->");
+                Point16 a = ParsePoint(parts[0]);
+                Point16 b = ParsePoint(parts[1]);
 
-                if (nextDir != dir) outline.Add(pos + outlineOffset);
+                if (!adj.TryGetValue(a, out var list)) {
+                    list = new List<Point16>();
+                    adj[a] = list;
+                }
 
-                pos += nextDir;
-                dir = nextDir;
-                steps++;
-            } while (pos != start.Value && !visited.Contains(pos) && steps < maxSteps);
+                // avoid duplicates
+                if (!list.Contains(b)) list.Add(b);
+            }
+
+            // start from the top-most, then left-most vertex to produce a stable start
+            Point16 start = adj.Keys.OrderBy(p => p.Y).ThenBy(p => p.X).First();
+
+            var outline = new List<Point16> { start };
+            var usedEdges = new HashSet<string>();
+            Point16 cur = start;
+
+            // Walk the directed edges until we return to start. At each vertex pick the
+            // next outgoing edge that hasn't been used yet. For well-formed single
+            // interior shapes this will produce the outer boundary in order.
+            while (true) {
+                if (!adj.TryGetValue(cur, out var outs) || outs.Count == 0) break;
+
+                Point16? next = null;
+                foreach (Point16 candidate in outs) {
+                    string ekey = $"{cur.X},{cur.Y}->{candidate.X},{candidate.Y}";
+                    if (!usedEdges.Contains(ekey)) {
+                        next = candidate;
+                        usedEdges.Add(ekey);
+                        break;
+                    }
+                }
+
+                if (next == null) break; // no unused outgoing edge
+
+                if (next.Value.Equals(start))
+                    // closed loop complete
+                    break;
+
+                outline.Add(next.Value);
+                cur = next.Value;
+            }
 
             return new Shape(outline);
         }
@@ -550,7 +583,7 @@ public static class StructureLayoutHelper {
             structureLayout.SetExternalGapComponents(externalGaps);
             TagMap.AddRequiredToEach(externalGaps, Tags.External);
             SetTilesExternalStatus(param, exteriorFloors, exteriorWalls, externalGaps);
-            Room internalRoom = new(param.Structure, GetStructureInterior(param.Structure.Tilemap), "R_InteriorBase", externalGaps);
+            Room internalRoom = new(param.Structure, GetStructureInterior(param.Structure.Tilemap), "Rm_InteriorBase", externalGaps);
 
             foreach (Gap gap in externalGaps)
                 gap.InteriorRoom = internalRoom;
