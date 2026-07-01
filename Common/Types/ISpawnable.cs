@@ -1,6 +1,7 @@
+using SpawnHouses.Common.DataStructures;
 using Terraria.DataStructures;
 
-namespace SpawnHouses.Types;
+namespace SpawnHouses.Common.Types;
 
 public interface ISpawnable {
     public TileBox BoundingBox { get; }

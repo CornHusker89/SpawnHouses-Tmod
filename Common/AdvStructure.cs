@@ -142,5 +142,5 @@ public class AdvStructure : ICanDebugDraw {
     /// <summary>
     ///     adds this structure to the global structure list and initializes some debug fields
     /// </summary>
-    public void Register() => StructureManager.RegisterStructure(this);
+    public void Register() => StructureManager.RegisterAdvStructure(this);
 }

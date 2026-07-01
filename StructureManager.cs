@@ -1,8 +1,19 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
+using SpawnHouses.Common;
+using SpawnHouses.Common.DataStructures;
+using SpawnHouses.Common.Debug;
+using SpawnHouses.Common.Modules;
+using SpawnHouses.Common.Tagging;
+using SpawnHouses.Common.Tiles;
+using SpawnHouses.Common.Types;
 using SpawnHouses.Helpers;
+using SpawnHouses.Items.Debug;
+using SpawnHouses.Legacy.Structures;
+using SpawnHouses.Structures;
 using SpawnHouses.Structures.Structures;
-using SpawnHouses.Types;
+using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
@@ -12,11 +23,11 @@ namespace SpawnHouses;
 
 public class StructureManager : ModSystem {
     private static int _debugDrawFrameCount;
-
-    public static List<CustomStructure> CustomStructures = [];
     private static Dictionary<DebugLabel, Point> _labels = [];
-    
-    private static readonly List<AdvStructure> StructureList = [];
+
+    private static readonly List<AdvStructure> AdvStructures = [];
+
+    public static List<CustomStructure> LegacyStructures = [];
     
     public static Version WorldVersion = new(ModInstance.Mod.Version.ToString());
     
@@ -28,7 +39,7 @@ public class StructureManager : ModSystem {
     ///     shallow copies then exposes the internal structure list
     /// </summary>
     /// <returns></returns>
-    public static AdvStructure[] GetStructureList() => StructureList.ToArray();
+    public static AdvStructure[] GetStructureList() => AdvStructures.ToArray();
 
     /// <summary>
     ///     returns the next component id, and advances the counter. begins at id 1
@@ -43,11 +54,11 @@ public class StructureManager : ModSystem {
     ///     <see cref="AdvStructure.ApplyLayoutMethod" /> and <see cref="AdvStructure.FillComponents" /> must be called before this
     /// </summary>
     /// <param name="structure"></param>
-    public static void RegisterStructure(AdvStructure structure) {
+    public static void RegisterAdvStructure(AdvStructure structure) {
         if (structure.FailedLayoutGeneration)
             return;
         if (structure.StructureLayout == null) throw new ArgumentException("structure must have an initialized layout");
-        StructureList.Add(structure);
+        AdvStructures.Add(structure);
     }
 
     public override void Load() {
@@ -56,58 +67,54 @@ public class StructureManager : ModSystem {
     }
 
     public override void SaveWorldData(TagCompound tag) {
-        tag["WorldModVersion"] = WorldModVersion;
-
-        for (int i = 0; i < CustomStructures.Count; i++) tag["Structure" + i] = CustomStructures[i];
         tag["WorldVersion"] = WorldVersion;
+        for (int i = 0; i < LegacyStructures.Count; i++) tag["Structure" + i] = LegacyStructures[i];
         tag["GeneratableCount"] = GeneratableCount;
     }
 
     public override void LoadWorldData(TagCompound tag) {
-        WorldVersion = tag.ContainsKey("WorldVersion")
-            ? new Version(tag.GetString("WorldVersion"))
-            : new Version("0.3.2");
-        CustomStructures.Clear();
+        // "WorldModVersion" is the old name
+        if (tag.ContainsKey("WorldVersion"))
+            WorldVersion = new Version(tag.GetString("WorldVersion"));
+        else if (tag.ContainsKey("WorldModVersion"))
+            WorldVersion = new Version(tag.GetString("WorldVersion"));
+        else
+            WorldVersion = new Version("0.3.2");
 
-        // "WorldVersion" is the old name
-        WorldModVersion = tag.ContainsKey("WorldModVersion")
-            ? new Version(tag.GetString("WorldModVersion"))
-            : tag.ContainsKey("WorldVersion")
-                ? new Version(tag.GetString("WorldVersion"))
-                : new Version("0.3.2");
+        LegacyStructures.Clear();
 
-        if (WorldModVersion.Major == 0) {
-            // the rest are unrecoverable. mainhouse might use just 1 structure, basement uses seeds, mineshaft doesn't exist
+        if (WorldVersion.Major == 0) {
+            // the rest are unrecoverable. mainhouse might use just 1 structure file, basement uses seeds, mineshaft doesn't exist
             if (tag.ContainsKey("BeachHouse"))
                 tag["Structure1"] = tag.Get<BeachHouse>("BeachHouse");
         }
-        else if (WorldModVersion.Major == 1) {
+        else if (WorldVersion.Major == 1) {
             if (tag.ContainsKey("MainHouse"))
-                CustomStructures.Add(tag.Get<MainHouse>("MainHouse"));
+                LegacyStructures.Add(tag.Get<MainHouse>("MainHouse"));
             if (tag.ContainsKey("MainBasement"))
-                CustomStructures.Add(tag.Get<MainHouse>("MainBasement"));
+                LegacyStructures.Add(tag.Get<MainHouse>("MainBasement"));
             if (tag.ContainsKey("Mineshaft"))
-                CustomStructures.Add(tag.Get<MainHouse>("Mineshaft"));
+                LegacyStructures.Add(tag.Get<MainHouse>("Mineshaft"));
             if (tag.ContainsKey("BeachHouse"))
-                CustomStructures.Add(tag.Get<MainHouse>("BeachHouse"));
+                LegacyStructures.Add(tag.Get<MainHouse>("BeachHouse"));
         }
-        else if (WorldModVersion.Major == 2) {
+        else if (WorldVersion.Major == 2) {
             int i = 0;
             while (tag.ContainsKey("Structure" + i)) {
-                CustomStructures.Add(tag.Get<CustomStructure>("Structure" + i));
+                LegacyStructures.Add(tag.Get<CustomStructure>("Structure" + i));
                 i++;
             }
         }
+        
         GeneratableCount = tag.ContainsKey("GeneratableCount") ? tag.Get<ushort>("GeneratableCount") : (ushort)0;
     }
 
     public override void ClearWorld() {
-        WorldVersion = new Version(ModInstance.Mod.Version.ToString());
+        WorldVersion = ModContent.GetInstance<SpawnHouses>().Version;
+        LegacyStructures.Clear();
+        
         GeneratableCount = 0;
-
         DebugWand.SelectedStructure = null;
-        WorldModVersion = SpawnHousesMod.Instance.Version;
-        CustomStructures.Clear();
     }
 
     public override void PostDrawTiles() {
@@ -117,10 +124,10 @@ public class StructureManager : ModSystem {
 
         if (_debugDrawFrameCount < 20) {
             _debugDrawFrameCount = 0;
-            UpdateLabelPositionsAndDraw();
+            UpdateDebugLabelsAndDraw();
         }
         else {
-            foreach (AdvStructure structure in StructureList)
+            foreach (AdvStructure structure in AdvStructures)
                 structure.DrawDebugGeometry();
         }
 
@@ -140,11 +147,11 @@ public class StructureManager : ModSystem {
         Main.spriteBatch.End();
     }
 
-    private static void UpdateLabelPositionsAndDraw() {
+    private static void UpdateDebugLabelsAndDraw() {
         List<Rectangle> structureRects = [];
         _labels.Clear();
 
-        foreach (AdvStructure structure in StructureList) {
+        foreach (AdvStructure structure in AdvStructures) {
             foreach (DebugLabel label in structure.DrawDebugGeometry()) {
                 _labels.Add(label, label.Root.ToPoint() * new Point(16, 16));
                 TileBox structureGlobalTileBoundingBox = structure.Tilemap.ConvertToGlobal(structure.StructureLayout.BoundingBox);
