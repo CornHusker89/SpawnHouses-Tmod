@@ -4,11 +4,12 @@ using System.Linq;
 using SpawnHouses.Legacy.Structures;
 using SpawnHouses.Structures.StructureParts;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ModLoader;
 
 namespace SpawnHouses.Structures;
 
-public abstract class StructureChain {
+public abstract class StructureChain : ISpawnable {
     private readonly Bridge[] _bridges;
     private readonly CustomChainStructure[] _originalStructureList;
     private readonly CustomChainStructure[] _rootStructureList;
@@ -341,6 +342,13 @@ public abstract class StructureChain {
 
         return true;
     }
+
+    /// <summary>
+    ///     Should return true when the player is close to the structure, whatever that means for each structure
+    /// </summary>
+    /// <param name="playerPos"></param>
+    /// <returns></returns>
+    public virtual bool IsFound(Point16 playerPos) => true;
 
     /// <summary>
     ///     Recursively calls OnFound() on every structure in the chain

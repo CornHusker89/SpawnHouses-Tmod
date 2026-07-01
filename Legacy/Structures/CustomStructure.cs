@@ -10,16 +10,11 @@ using Terraria.WorldBuilding;
 
 namespace SpawnHouses.Structures;
 
-public abstract class CustomStructure {
+public abstract class CustomStructure : ISpawnable {
     public ConnectPoint[][] ConnectPoints;
     public string FilePath;
     public ushort ID;
     public byte Status;
-    public ushort StructureXSize;
-    public ushort StructureYSize;
-    public ushort X;
-    public ushort Y;
-
 
     protected CustomStructure(string filePath, ushort structureXSize, ushort structureYSize,
         ConnectPoint[][] connectPoints, byte status, ushort x, ushort y, bool isChainStructure = false) {
@@ -95,6 +90,13 @@ public abstract class CustomStructure {
         _GenerateStructure();
         Status = StructureStatus.GeneratedButNotFound;
     }
+
+    /// <summary>
+    ///     Should return true when the player is close to the structure, whatever that means for each structure
+    /// </summary>
+    /// <param name="playerPos"></param>
+    /// <returns></returns>
+    public virtual bool IsFound(Point16 playerPos) => true;
 
     /// <summary>
     ///     Changes structure status

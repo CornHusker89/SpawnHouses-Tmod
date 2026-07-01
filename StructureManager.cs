@@ -1,17 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
-using SpawnHouses.Common;
-using SpawnHouses.Common.DataStructures;
-using SpawnHouses.Common.Debug;
-using SpawnHouses.Common.Modules;
-using SpawnHouses.Common.Tagging;
-using SpawnHouses.Common.Tiles;
-using SpawnHouses.Common.Types;
 using SpawnHouses.Helpers;
-using SpawnHouses.Items.Debug;
-using SpawnHouses.Legacy.Structures;
-using Terraria;
+using SpawnHouses.Structures.Structures;
+using SpawnHouses.Types;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
@@ -22,6 +13,7 @@ namespace SpawnHouses;
 public class StructureManager : ModSystem {
     private static int _debugDrawFrameCount;
 
+    public static List<CustomStructure> CustomStructures = [];
     private static Dictionary<DebugLabel, Point> _labels = [];
     
     private static readonly List<AdvStructure> StructureList = [];
@@ -64,6 +56,9 @@ public class StructureManager : ModSystem {
     }
 
     public override void SaveWorldData(TagCompound tag) {
+        tag["WorldModVersion"] = WorldModVersion;
+
+        for (int i = 0; i < CustomStructures.Count; i++) tag["Structure" + i] = CustomStructures[i];
         tag["WorldVersion"] = WorldVersion;
         tag["GeneratableCount"] = GeneratableCount;
     }
@@ -72,7 +67,37 @@ public class StructureManager : ModSystem {
         WorldVersion = tag.ContainsKey("WorldVersion")
             ? new Version(tag.GetString("WorldVersion"))
             : new Version("0.3.2");
+        CustomStructures.Clear();
 
+        // "WorldVersion" is the old name
+        WorldModVersion = tag.ContainsKey("WorldModVersion")
+            ? new Version(tag.GetString("WorldModVersion"))
+            : tag.ContainsKey("WorldVersion")
+                ? new Version(tag.GetString("WorldVersion"))
+                : new Version("0.3.2");
+
+        if (WorldModVersion.Major == 0) {
+            // the rest are unrecoverable. mainhouse might use just 1 structure, basement uses seeds, mineshaft doesn't exist
+            if (tag.ContainsKey("BeachHouse"))
+                tag["Structure1"] = tag.Get<BeachHouse>("BeachHouse");
+        }
+        else if (WorldModVersion.Major == 1) {
+            if (tag.ContainsKey("MainHouse"))
+                CustomStructures.Add(tag.Get<MainHouse>("MainHouse"));
+            if (tag.ContainsKey("MainBasement"))
+                CustomStructures.Add(tag.Get<MainHouse>("MainBasement"));
+            if (tag.ContainsKey("Mineshaft"))
+                CustomStructures.Add(tag.Get<MainHouse>("Mineshaft"));
+            if (tag.ContainsKey("BeachHouse"))
+                CustomStructures.Add(tag.Get<MainHouse>("BeachHouse"));
+        }
+        else if (WorldModVersion.Major == 2) {
+            int i = 0;
+            while (tag.ContainsKey("Structure" + i)) {
+                CustomStructures.Add(tag.Get<CustomStructure>("Structure" + i));
+                i++;
+            }
+        }
         GeneratableCount = tag.ContainsKey("GeneratableCount") ? tag.Get<ushort>("GeneratableCount") : (ushort)0;
     }
 
@@ -81,6 +106,8 @@ public class StructureManager : ModSystem {
         GeneratableCount = 0;
 
         DebugWand.SelectedStructure = null;
+        WorldModVersion = SpawnHousesMod.Instance.Version;
+        CustomStructures.Clear();
     }
 
     public override void PostDrawTiles() {
