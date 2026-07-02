@@ -1,9 +1,8 @@
 using Microsoft.Xna.Framework;
-using SpawnHouses.Legacy;
-using SpawnHouses.Legacy.Helpers;
-using SpawnHouses.Legacy.Structures;
-using SpawnHouses.Structures.StructureParts;
+using SpawnHouses.Helpers;
+using SpawnHouses.Types;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.WorldBuilding;
 
@@ -11,7 +10,7 @@ namespace SpawnHouses.Structures.Structures;
 
 public sealed class Mineshaft : CustomStructure {
     // constants
-    public static readonly string _filePath = "Structures/StructureFiles/mineshaft";
+    public static readonly string _filePath = "Assets/StructureFiles/mineshaft.shstruct";
     public static readonly ushort _structureXSize = 21;
     public static readonly ushort _structureYSize = 22;
 
@@ -24,12 +23,12 @@ public sealed class Mineshaft : CustomStructure {
 
         // left
         [
-            new ConnectPoint(0, 13, LegacyDirections.Left)
+            new ConnectPoint(0, 13, Directions.Left)
         ],
 
         // right
         [
-            new ConnectPoint(20, 13, LegacyDirections.Right)
+            new ConnectPoint(20, 13, Directions.Right)
         ]
     ];
 
@@ -38,11 +37,11 @@ public sealed class Mineshaft : CustomStructure {
     public Mineshaft(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated) :
         base(_filePath, _structureXSize, _structureYSize,
             CopyConnectPoints(_connectPoints), status, x, y) {
-        if (LegacyStructureManager.MainHouse is not null && LegacyStructureManager.MainHouse.X > X)
+        if (StructureManager.MainHouse is not null && StructureManager.MainHouse.X > X)
             IsLeftSide = true;
     }
 
-    public override void Generate() {
+    public override void Generate(bool bare = false) {
         StructureGenHelper.Blend(ConnectPoints[2][0], 7, TileID.Grass);
         StructureGenHelper.Blend(ConnectPoints[3][0], 7, TileID.Grass, blendLeftSide: false);
 
@@ -53,7 +52,7 @@ public sealed class Mineshaft : CustomStructure {
             new Shapes.Rectangle(2, 10 + tunnelSteps * 15),
             new Actions.ClearTile(true)
         );
-        StructureGenHelper.DigVerticalTunnel(new Point(X + 10, Y + 14), 3, tunnelSteps);
+        StructureGenHelper.DigVerticalTunnel(new Point16(X + 10, Y + 14), 3, tunnelSteps);
 
         // place rope
         for (int i = 5; i < 300; i++) {
@@ -71,13 +70,13 @@ public sealed class Mineshaft : CustomStructure {
         int surfaceY = Y + 5;
         while (!WorldGen.SolidTile(leftBushX, surfaceY))
             surfaceY++;
-        StructureGenHelper.PlaceBush(new Point(leftBushX, surfaceY - 1));
+        StructureGenHelper.PlaceBush(new Point16(leftBushX, surfaceY - 1));
 
         int rightBushX = X + _structureXSize + WorldGen.genRand.Next(-2, 2);
         surfaceY = Y + 5;
         while (!WorldGen.SolidTile(rightBushX, surfaceY))
             surfaceY++;
-        StructureGenHelper.PlaceBush(new Point(rightBushX, surfaceY - 1));
+        StructureGenHelper.PlaceBush(new Point16(rightBushX, surfaceY - 1));
         FrameTiles(X + 10, Y + 160, 180);
 
         Status = StructureStatus.GeneratedAndFound;

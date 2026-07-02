@@ -1,44 +1,43 @@
 using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Legacy;
-using SpawnHouses.Legacy.Helpers;
-using SpawnHouses.Legacy.Structures;
+using SpawnHouses.Enums;
+using SpawnHouses.Helpers;
 using SpawnHouses.Structures.Bridges;
-using SpawnHouses.Structures.StructureParts;
 using SpawnHouses.Structures.Structures.ChainStructures;
+using SpawnHouses.Types;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
+using BoundingBox = SpawnHouses.Types.BoundingBox;
 
 namespace SpawnHouses.Structures.Chains;
 
 public class MainBasement : StructureChain {
     private readonly float _shape;
 
-    public MainBasement(ushort x = 1000, ushort y = 1000, byte status = StructureStatus.NotGenerated,
-        Box[] startingBoundingBoxes = null) :
-        base((ushort)(58 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier),
-            (ushort)(80 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier),
-            (byte)Math.Round(ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementSize >= 15
-                ? 2.5
-                : 1 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier),
-            (byte)Math.Round(4 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier),
+    public MainBasement(ushort x = 1000, ushort y = 1000, byte status = StructureStatus.NotGenerated, BoundingBox[] startingBoundingBoxes = null) :
+        base((ushort)(58 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementSizeMultiplier),
+            (ushort)(80 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementSizeMultiplier),
+            (byte)Math.Round(ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementSize >= 15 ? 2.5 : 1 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementSizeMultiplier),
+            (byte)Math.Round(4 * ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementSizeMultiplier),
             x, y,
             [
-                new MainBasement_Room1(cost: 12, weight: 40),
-                new MainBasement_Room1_WithFloor(cost: 14, weight: 130),
-                new MainBasement_Room2(cost: 13, weight: 40),
-                new MainBasement_Room2_WithRoof(cost: 15, weight: 90),
-                new MainBasement_Room3(cost: 8, weight: 115),
-                new MainBasement_Room4(cost: 11, weight: 5),
-                new MainBasement_Room5(cost: 13, weight: 145),
-                new MainBasement_Room6(cost: 14, weight: 115),
-                new MainBasement_Room7(cost: 14, weight: 80),
-                new MainBasement_Hallway4(cost: 5, weight: 100),
-                new MainBasement_Hallway5(cost: 5, weight: 100),
-                new MainBasement_Hallway9(cost: 4, weight: 100)
+                new MainBasementRoom1(cost: 12, weight: 40),
+                new MainBasementRoom1WithFloor(cost: 14, weight: 130),
+                new MainBasementRoom2(cost: 13, weight: 40),
+                new MainBasementRoom2WithRoof(cost: 15, weight: 90),
+                new MainBasementRoom3(cost: 8, weight: 115),
+                new MainBasementRoom4(cost: 11, weight: 5),
+                new MainBasementRoom5(cost: 13, weight: 145),
+                new MainBasementRoom6(cost: 14, weight: 115),
+                new MainBasementRoom7(cost: 14, weight: 80),
+                new MainBasementRoom8(cost: 13, weight: 150),
+                new MainBasementHallway4(cost: 5, weight: 110),
+                new MainBasementHallway5(cost: 5, weight: 110),
+                new MainBasementHallway9(cost: 4, weight: 110)
             ],
             [
                 new SingleStructureBridge.MainBasementHallway1(),
@@ -66,19 +65,19 @@ public class MainBasement : StructureChain {
                 new SingleStructureBridge.MainBasementHallway8AltGen()
             ],
             [
-                new MainBasement_Entry2(cost: 10, weight: 100),
-                new MainBasement_Entry1(cost: 10, weight: 100)
+                new MainBasementEntry2(cost: 10, weight: 100),
+                new MainBasementEntry1(cost: 10, weight: 100)
             ],
             startingBoundingBoxes, status) {
-        _shape = ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementShape;
+        _shape = 0.5f; //ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementShape;
     }
 
 
     protected override bool IsChainComplete() {
-        if (ModHelper.IsMSEnabled && ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementMultiplier > 0.60) {
+        if (CompatabilityHelper.IsMSEnabled && ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementSizeMultiplier > 0.60) {
             bool found = false;
             ActionOnEachStructure(structure => {
-                if (structure.ID == (ushort)StructureID.MainBasement_Room5) found = true;
+                if (structure.Id is StructureType.MainBasementRoom5) found = true;
             });
             return found;
         }
@@ -89,27 +88,23 @@ public class MainBasement : StructureChain {
     protected override bool IsConnectPointValid(ChainConnectPoint connectPoint, ChainConnectPoint targetConnectPoint,
         CustomChainStructure targetStructure) {
         // clear root point
-        if (connectPoint.ParentStructure.ID is (ushort)StructureID.MainBasement_Entry1
-                or (ushort)StructureID.MainBasement_Entry2 &&
-            connectPoint.RootPoint)
-            return false;
+        if (connectPoint.ParentStructure.Id is StructureType.MainBasementEntry1 or StructureType.MainBasementEntry2 && connectPoint.RootPoint) return false;
 
         // ensure it's at/under the rootstructure
         bool valid = true;
         targetStructure.ActionOnEachConnectPoint(point => {
-            if (point.Y < RootStructure.Y + 10)
-                valid = false;
+            if (point.Y < RootStructure.Y + 10) valid = false;
         });
         if (!valid) return false;
 
         // change base direction chances based on desired shape
         if (connectPoint.ParentStructure != RootStructure)
             if (_shape <= 0.21f) {
-                int rootY = RootStructure.ConnectPoints[LegacyDirections.Left][0].Y;
+                int rootY = RootStructure.ConnectPoints[Directions.Left][0].Y;
                 if (connectPoint.Y == rootY || targetConnectPoint.Y == rootY)
                     return false;
             }
-
+        
         int maxDistance = 999;
         if (_shape <= 0.41f) {
             maxDistance = 120;
@@ -119,27 +114,19 @@ public class MainBasement : StructureChain {
                     maxDistance = 50;
                     if (_shape <= 0.11f && ModContent.GetInstance<SpawnHousesConfig>().SpawnPointBasementSize <= 14) {
                         maxDistance = 35;
-                        if (_shape <= 0.01f)
-                            maxDistance = 29;
+                        if (_shape <= 0.01f) maxDistance = 29;
                     }
                 }
             }
         }
-
+        
         byte direction = connectPoint.Direction;
-        if (direction == LegacyDirections.Down) direction = LegacyDirections.Left;
-
+        if (direction == Directions.Down) direction = Directions.Left;
+        
         int startX = RootStructure.ConnectPoints[direction][0].X;
-        if (Math.Abs(targetConnectPoint.X - startX) > maxDistance)
-            return false;
-        // targetStructure.ActionOnEachConnectPoint((point) =>
-        // {
-        //     if (Math.Abs(point.X - startX) > maxDistance * 1.18)
-        //         valid = false;
-        // });
-        if (!valid) return false;
+        if (Math.Abs(targetConnectPoint.X - startX) > maxDistance) return false;
 
-        return true;
+        return valid;
     }
 
     protected override CustomChainStructure GetNewStructure(ChainConnectPoint parentConnectPoint,
@@ -147,8 +134,7 @@ public class MainBasement : StructureChain {
         CustomChainStructure chosenStructure = null;
         for (int i = 0; i < 50; i++) {
             double randomValue = WorldGen.genRand.NextDouble() * structureWeightSum;
-            CustomChainStructure structure =
-                usableStructureList.Last(curStructure => curStructure.Weight <= randomValue).Clone();
+            CustomChainStructure structure = usableStructureList.Last(curStructure => curStructure.Weight <= randomValue).Clone();
 
             if (structure is null)
                 continue;
@@ -156,36 +142,36 @@ public class MainBasement : StructureChain {
             // don't generate a branching hallway right after another one :) but only if the shape isn't too vertical
             if (_shape > 0.31 && parentConnectPoint is not null &&
                 parentConnectPoint.GenerateChance == GenerateChances.Guaranteed &&
-                StructureIDUtils.IsBranchingHallway(structure))
+                StructureIdHelper.IsBranchingHallway(structure))
                 continue;
 
             // don't generate a branching hallway if it means going over the max branch count
-            if (closeToMaxBranchLength && StructureIDUtils.IsBranchingHallway(structure)) continue;
+            if (closeToMaxBranchLength && StructureIdHelper.IsBranchingHallway(structure)) continue;
 
-            if (_shape >= 0.89f && StructureIDUtils.IsBranchingHallway(structure)) continue;
+            if (_shape >= 0.89f && StructureIdHelper.IsBranchingHallway(structure)) continue;
 
             // if vertical shape, make the first left and right a branching hallway
             if (_shape <= 0.11 && parentConnectPoint is not null)
                 if (parentConnectPoint.ParentStructure == RootStructure &&
-                    !StructureIDUtils.IsBranchingHallway(structure))
+                    !StructureIdHelper.IsBranchingHallway(structure))
                     continue;
 
             // get some elevation changes
             if (_shape <= 0.41 && parentConnectPoint is not null) {
                 if (_shape <= 0.21) {
-                    if (!(StructureIDUtils.IsBranchingHallway(structure) ||
-                          StructureIDUtils.IsBranchingHallway(parentConnectPoint.ParentStructure)))
+                    if (!(StructureIdHelper.IsBranchingHallway(structure) ||
+                          StructureIdHelper.IsBranchingHallway(parentConnectPoint.ParentStructure)))
                         continue;
                 }
                 else {
                     if (parentConnectPoint.ParentStructure is not null) {
                         if (parentConnectPoint.ParentStructure.ParentChainConnectPoint is not null &&
-                            !(StructureIDUtils.IsBranchingHallway(structure) ||
-                              StructureIDUtils.IsBranchingHallway(parentConnectPoint.ParentStructure)))
+                            !(StructureIdHelper.IsBranchingHallway(structure) ||
+                              StructureIdHelper.IsBranchingHallway(parentConnectPoint.ParentStructure)))
                             continue;
                         if (parentConnectPoint.ParentStructure.ParentChainConnectPoint is not null
                             && parentConnectPoint.ParentStructure.ParentChainConnectPoint.ParentStructure is not null
-                            && StructureIDUtils.IsBranchingHallway(
+                            && StructureIdHelper.IsBranchingHallway(
                                 parentConnectPoint.ParentStructure.ParentChainConnectPoint!.ParentStructure))
                             continue;
                     }
@@ -199,11 +185,13 @@ public class MainBasement : StructureChain {
     }
 
     protected override void OnStructureGenerate(CustomChainStructure structure) {
-        if (structure.ID != (ushort)StructureID.MainBasement_Room5 || !ModHelper.IsMSEnabled)
-            foreach (Box boundingBox in structure.StructureBoundingBoxes)
-                StructureGenHelper.GenerateCobwebs(new Point(boundingBox.Point1.X, boundingBox.Point1.Y),
+        if ((structure.Id is not StructureType.MainBasementRoom5 || !CompatabilityHelper.IsMSEnabled) && structure.Id is not StructureType.MainBasementRoom8)
+            foreach (BoundingBox boundingBox in structure.StructureBoundingBoxes)
+                StructureGenHelper.GenerateCobwebs(
+                    new Point16(boundingBox.Point1.X, boundingBox.Point1.Y),
                     (ushort)(boundingBox.Point2.X - boundingBox.Point1.X + 1),
-                    (ushort)(boundingBox.Point2.Y - boundingBox.Point1.Y + 1));
+                    (ushort)(boundingBox.Point2.Y - boundingBox.Point1.Y + 1)
+                );
 
         int centerX = structure.X + structure.StructureXSize / 2;
         int centerY = structure.Y + structure.StructureYSize / 2;
@@ -221,8 +209,7 @@ public class MainBasement : StructureChain {
                     tile.Slope = SlopeType.Solid;
                     tile.IsHalfBlock = false;
 
-                    if (!tile.HasTile || tile.TileType is TileID.SmallPiles or TileID.Vines or TileID.Grass)
-                        tile.TileType = TileID.Dirt;
+                    if (!tile.HasTile || tile.TileType is TileID.SmallPiles or TileID.Vines or TileID.Grass) tile.TileType = TileID.Dirt;
                 }
 
                 return true;
@@ -242,7 +229,7 @@ public class MainBasement : StructureChain {
         if (!base.Generate()) return false;
 
         // clear the extra walls on top, if the basement generates directly on the surface
-        if (LegacyStructureManager.MainHouse is null)
+        if (StructureManager.MainHouse is null)
             for (int i = -6; i <= 6; i++)
                 WorldUtils.ClearWall(EntryPosX + i, EntryPosY);
 

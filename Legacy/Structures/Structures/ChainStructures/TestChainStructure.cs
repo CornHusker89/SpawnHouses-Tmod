@@ -1,12 +1,12 @@
-using SpawnHouses.Legacy.Structures;
-using SpawnHouses.Structures.StructureParts;
+using SpawnHouses.Helpers;
+using SpawnHouses.Types;
 
-namespace SpawnHouses.Structures.ChainStructures;
+namespace SpawnHouses.Structures.Structures.ChainStructures;
 
 public sealed class TestChainStructure : CustomChainStructure {
     public TestChainStructure(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
         ushort weight = 10) :
-        base("Structures/StructureFiles/chainTest",
+        base("Assets/StructureFiles/chainTest.shstruct",
             15,
             13,
             [
@@ -18,13 +18,13 @@ public sealed class TestChainStructure : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 6, LegacyDirections.Left, null, true)
+                    new ChainConnectPoint(0, 6, Directions.Left, null, true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(14, 6, LegacyDirections.Right),
-                    new ChainConnectPoint(14, 12, LegacyDirections.Right)
+                    new ChainConnectPoint(14, 6, Directions.Right),
+                    new ChainConnectPoint(14, 12, Directions.Right)
                 ]
             ],
             x, y, status, cost, weight) {

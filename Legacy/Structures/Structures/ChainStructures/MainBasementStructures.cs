@@ -1,25 +1,22 @@
-using Microsoft.Xna.Framework;
-using SpawnHouses.Legacy;
-using SpawnHouses.Legacy.Helpers;
-using SpawnHouses.Legacy.Structures;
-using SpawnHouses.Structures.StructureParts;
+using SpawnHouses.Helpers;
+using SpawnHouses.Types;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.ID;
+using BoundingBox = SpawnHouses.Types.BoundingBox;
 
 namespace SpawnHouses.Structures.Structures.ChainStructures;
 
 // ReSharper disable ConvertToPrimaryConstructor
-// ReSharper disable InconsistentNaming
-public class MainBasement_Entry1 : CustomChainStructure {
-    public MainBasement_Entry1(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
-        ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Entry1",
+public class MainBasementEntry1 : CustomChainStructure {
+    public MainBasementEntry1(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
+        base("Assets/StructureFiles/mainBasement/mainBasement_Entry1.shstruct",
             10,
             16,
             [
                 // top
                 [
-                    new ChainConnectPoint(4, 0, LegacyDirections.Up, null, true)
+                    new ChainConnectPoint(4, 0, Directions.Up, null, true)
                 ],
 
                 // bottom
@@ -27,28 +24,27 @@ public class MainBasement_Entry1 : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 15, LegacyDirections.Left, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(0, 15, Directions.Left, new Seal.MainBasement_SealWall())
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(9, 15, LegacyDirections.Right, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(9, 15, Directions.Right, new Seal.MainBasement_SealWall())
                 ]
             ],
             x, y, status, cost, weight) {
     }
 }
 
-public class MainBasement_Entry2 : CustomChainStructure {
-    public MainBasement_Entry2(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
-        ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Entry2",
+public class MainBasementEntry2 : CustomChainStructure {
+    public MainBasementEntry2(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
+        base("Assets/StructureFiles/mainBasement/mainBasement_Entry2.shstruct",
             15,
             15,
             [
                 // top
                 [
-                    new ChainConnectPoint(3, 0, LegacyDirections.Up, null, true)
+                    new ChainConnectPoint(3, 0, Directions.Up, null, true)
                 ],
 
                 // bottom
@@ -56,12 +52,12 @@ public class MainBasement_Entry2 : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 14, LegacyDirections.Left, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(0, 14, Directions.Left, new Seal.MainBasement_SealWall())
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(14, 14, LegacyDirections.Right, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(14, 14, Directions.Right, new Seal.MainBasement_SealWall())
                 ]
             ],
             x, y, status, cost, weight) {
@@ -71,23 +67,21 @@ public class MainBasement_Entry2 : CustomChainStructure {
         base.SetSubstructurePositions();
 
         StructureBoundingBoxes = [
-            new Box(X + 1, Y, X + 5, Y + 4),
-            new Box(X, Y + 5, X + StructureXSize - 1, Y + StructureYSize - 1)
+            new BoundingBox(X + 1, Y, X + 5, Y + 4),
+            new BoundingBox(X, Y + 5, X + StructureXSize - 1, Y + StructureYSize - 1)
         ];
     }
 }
 
-public class MainBasement_Hallway4 : CustomChainStructure {
-    public MainBasement_Hallway4(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated,
-        sbyte cost = -1, ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Hallway4",
+public class MainBasementHallway4 : CustomChainStructure {
+    public MainBasementHallway4(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
+        base("Assets/StructureFiles/mainBasement/mainBasement_Hallway4.shstruct",
             6,
             11,
             [
                 // top
                 [
-                    new ChainConnectPoint(2, 0, LegacyDirections.Down, new Seal.MainBasement_SealFloor(), true,
-                        GenerateChances.Guaranteed)
+                    new ChainConnectPoint(2, 0, Directions.Down, new Seal.MainBasement_SealFloor(), true, GenerateChances.Guaranteed)
                 ],
 
                 // bottom
@@ -95,24 +89,21 @@ public class MainBasement_Hallway4 : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 10, LegacyDirections.Left, new Seal.MainBasement_SealWall(), false,
-                        GenerateChances.Guaranteed)
+                    new ChainConnectPoint(0, 10, Directions.Left, new Seal.MainBasement_SealWall(), false, GenerateChances.Guaranteed)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(5, 10, LegacyDirections.Right, new Seal.MainBasement_SealWall(), false,
-                        GenerateChances.Guaranteed)
+                    new ChainConnectPoint(5, 10, Directions.Right, new Seal.MainBasement_SealWall(), false, GenerateChances.Guaranteed)
                 ]
             ],
             x, y, status, cost, weight) {
     }
 }
 
-public class MainBasement_Hallway5 : CustomChainStructure {
-    public MainBasement_Hallway5(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated,
-        sbyte cost = -1, ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Hallway5",
+public class MainBasementHallway5 : CustomChainStructure {
+    public MainBasementHallway5(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
+        base("Assets/StructureFiles/mainBasement/mainBasement_Hallway5.shstruct",
             8,
             22,
             [
@@ -124,18 +115,14 @@ public class MainBasement_Hallway5 : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 6, LegacyDirections.Left, new Seal.MainBasement_SealWall(), true,
-                        GenerateChances.Guaranteed),
-                    new ChainConnectPoint(1, 21, LegacyDirections.Left, new Seal.MainBasement_SealWall(), false,
-                        GenerateChances.Guaranteed)
+                    new ChainConnectPoint(0, 6, Directions.Left, new Seal.MainBasement_SealWall(), true, GenerateChances.Guaranteed),
+                    new ChainConnectPoint(1, 21, Directions.Left, new Seal.MainBasement_SealWall(), false, GenerateChances.Guaranteed)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(7, 6, LegacyDirections.Right, new Seal.MainBasement_SealWall(), false,
-                        GenerateChances.Guaranteed),
-                    new ChainConnectPoint(6, 21, LegacyDirections.Right, new Seal.MainBasement_SealWall(), false,
-                        GenerateChances.Guaranteed)
+                    new ChainConnectPoint(7, 6, Directions.Right, new Seal.MainBasement_SealWall(), false, GenerateChances.Guaranteed),
+                    new ChainConnectPoint(6, 21, Directions.Right, new Seal.MainBasement_SealWall(), false, GenerateChances.Guaranteed)
                 ]
             ],
             x, y, status, cost, weight) {
@@ -145,16 +132,15 @@ public class MainBasement_Hallway5 : CustomChainStructure {
         base.SetSubstructurePositions();
 
         StructureBoundingBoxes = [
-            new Box(X, Y, X + StructureXSize - 1, Y + 7 - 1),
-            new Box(X + 1, Y + 7, X - 1 + StructureXSize - 1, Y + StructureYSize - 1)
+            new BoundingBox(X, Y, X + StructureXSize - 1, Y + 7 - 1),
+            new BoundingBox(X + 1, Y + 7, X - 1 + StructureXSize - 1, Y + StructureYSize - 1)
         ];
     }
 }
 
-public class MainBasement_Hallway9 : CustomChainStructure {
-    public MainBasement_Hallway9(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated,
-        sbyte cost = -1, ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Hallway9",
+public class MainBasementHallway9 : CustomChainStructure {
+    public MainBasementHallway9(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
+        base("Assets/StructureFiles/mainBasement/mainBasement_Hallway9.shstruct",
             6,
             11,
             [
@@ -163,30 +149,26 @@ public class MainBasement_Hallway9 : CustomChainStructure {
 
                 // bottom
                 [
-                    new ChainConnectPoint(2, 10, LegacyDirections.Up, new Seal.MainBasement_SealFloor(), false,
-                        GenerateChances.Guaranteed)
+                    new ChainConnectPoint(2, 10, Directions.Up, new Seal.MainBasement_SealFloor(), false, GenerateChances.Guaranteed)
                 ],
 
                 // left
                 [
-                    new ChainConnectPoint(0, 5, LegacyDirections.Left, new Seal.MainBasement_SealWall(), true,
-                        GenerateChances.Guaranteed)
+                    new ChainConnectPoint(0, 5, Directions.Left, new Seal.MainBasement_SealWall(), true, GenerateChances.Guaranteed)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(5, 5, LegacyDirections.Right, new Seal.MainBasement_SealWall(), false,
-                        GenerateChances.Guaranteed)
+                    new ChainConnectPoint(5, 5, Directions.Right, new Seal.MainBasement_SealWall(), false, GenerateChances.Guaranteed)
                 ]
             ],
             x, y, status, cost, weight) {
     }
 }
 
-public class MainBasement_Room1 : CustomChainStructure {
-    public MainBasement_Room1(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
-        ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Room1",
+public class MainBasementRoom1 : CustomChainStructure {
+    public MainBasementRoom1(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
+        base("Assets/StructureFiles/mainBasement/mainBasement_Room1.shstruct",
             22,
             9,
             [
@@ -198,22 +180,21 @@ public class MainBasement_Room1 : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 8, LegacyDirections.Left, new Seal.MainBasement_SealWall(), true)
+                    new ChainConnectPoint(0, 8, Directions.Left, new Seal.MainBasement_SealWall(), true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(21, 8, LegacyDirections.Right, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(21, 8, Directions.Right, new Seal.MainBasement_SealWall())
                 ]
             ],
             x, y, status, cost, weight) {
     }
 }
 
-public class MainBasement_Room1_WithFloor : CustomChainStructure {
-    public MainBasement_Room1_WithFloor(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated,
-        sbyte cost = -1, ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Room1_WithFloor",
+public class MainBasementRoom1WithFloor : CustomChainStructure {
+    public MainBasementRoom1WithFloor(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
+        base("Assets/StructureFiles/mainBasement/mainBasement_Room1_WithFloor.shstruct",
             22,
             9,
             [
@@ -222,27 +203,26 @@ public class MainBasement_Room1_WithFloor : CustomChainStructure {
 
                 // bottom
                 [
-                    new ChainConnectPoint(10, 8, LegacyDirections.Down, new Seal.MainBasement_SealFloor())
+                    new ChainConnectPoint(10, 8, Directions.Down, new Seal.MainBasement_SealFloor())
                 ],
 
                 // left
                 [
-                    new ChainConnectPoint(0, 8, LegacyDirections.Left, new Seal.MainBasement_SealWall(), true)
+                    new ChainConnectPoint(0, 8, Directions.Left, new Seal.MainBasement_SealWall(), true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(21, 8, LegacyDirections.Right, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(21, 8, Directions.Right, new Seal.MainBasement_SealWall())
                 ]
             ],
             x, y, status, cost, weight) {
     }
 }
 
-public class MainBasement_Room2 : CustomChainStructure {
-    public MainBasement_Room2(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
-        ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Room2",
+public class MainBasementRoom2 : CustomChainStructure {
+    public MainBasementRoom2(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
+        base("Assets/StructureFiles/mainBasement/mainBasement_Room2.shstruct",
             23,
             7,
             [
@@ -254,28 +234,27 @@ public class MainBasement_Room2 : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 6, LegacyDirections.Left, new Seal.MainBasement_SealWall(), true)
+                    new ChainConnectPoint(0, 6, Directions.Left, new Seal.MainBasement_SealWall(), true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(22, 6, LegacyDirections.Right, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(22, 6, Directions.Right, new Seal.MainBasement_SealWall())
                 ]
             ],
             x, y, status, cost, weight) {
     }
 }
 
-public class MainBasement_Room2_WithRoof : CustomChainStructure {
-    public MainBasement_Room2_WithRoof(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated,
-        sbyte cost = -1, ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Room2_WithRoof",
+public class MainBasementRoom2WithRoof : CustomChainStructure {
+    public MainBasementRoom2WithRoof(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
+        base("Assets/StructureFiles/mainBasement/mainBasement_Room2_WithRoof.shstruct",
             23,
             7,
             [
                 // top
                 [
-                    new ChainConnectPoint(3, 0, LegacyDirections.Up, new Seal.MainBasement_SealRoof())
+                    new ChainConnectPoint(3, 0, Directions.Up, new Seal.MainBasement_SealRoof())
                 ],
 
                 // bottom
@@ -283,22 +262,21 @@ public class MainBasement_Room2_WithRoof : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 6, LegacyDirections.Left, new Seal.MainBasement_SealWall(), true)
+                    new ChainConnectPoint(0, 6, Directions.Left, new Seal.MainBasement_SealWall(), true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(22, 6, LegacyDirections.Right, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(22, 6, Directions.Right, new Seal.MainBasement_SealWall())
                 ]
             ],
             x, y, status, cost, weight) {
     }
 }
 
-public class MainBasement_Room3 : CustomChainStructure {
-    public MainBasement_Room3(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
-        ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Room3",
+public class MainBasementRoom3 : CustomChainStructure {
+    public MainBasementRoom3(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
+        base("Assets/StructureFiles/mainBasement/mainBasement_Room3.shstruct",
             10,
             7,
             [
@@ -310,22 +288,21 @@ public class MainBasement_Room3 : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 6, LegacyDirections.Left, new Seal.MainBasement_SealWall(), true)
+                    new ChainConnectPoint(0, 6, Directions.Left, new Seal.MainBasement_SealWall(), true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(9, 6, LegacyDirections.Right, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(9, 6, Directions.Right, new Seal.MainBasement_SealWall())
                 ]
             ],
             x, y, status, cost, weight) {
     }
 }
 
-public class MainBasement_Room4 : CustomChainStructure {
-    public MainBasement_Room4(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
-        ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Room4",
+public class MainBasementRoom4 : CustomChainStructure {
+    public MainBasementRoom4(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
+        base("Assets/StructureFiles/mainBasement/mainBasement_Room4.shstruct",
             13,
             11,
             [
@@ -337,25 +314,24 @@ public class MainBasement_Room4 : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 10, LegacyDirections.Left, new Seal.MainBasement_SealWall(), true)
+                    new ChainConnectPoint(0, 10, Directions.Left, new Seal.MainBasement_SealWall(), true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(12, 10, LegacyDirections.Right, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(12, 10, Directions.Right, new Seal.MainBasement_SealWall())
                 ]
             ],
             x, y, status, cost, weight) {
     }
 }
 
-public class MainBasement_Room5 : CustomChainStructure {
-    public MainBasement_Room5(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
-        ushort weight = 10) :
+public class MainBasementRoom5 : CustomChainStructure {
+    public MainBasementRoom5(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
         base(
-            ModHelper.IsMSEnabled
-                ? "Structures/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage"
-                : "Structures/StructureFiles/mainBasement/mainBasement_Room5",
+            CompatabilityHelper.IsMSEnabled
+                ? "Assets/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage.shstruct"
+                : "Assets/StructureFiles/mainBasement/mainBasement_Room5.shstruct",
             22,
             9,
             [
@@ -367,60 +343,42 @@ public class MainBasement_Room5 : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 8, LegacyDirections.Left, new Seal.MainBasement_SealWall(), true)
+                    new ChainConnectPoint(0, 8, Directions.Left, new Seal.MainBasement_SealWall(), true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(21, 8, LegacyDirections.Right, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(21, 8, Directions.Right, new Seal.MainBasement_SealWall())
                 ]
             ],
             x, y, status, cost, weight) {
     }
 
     public override void OnFound() {
-        if (ModHelper.IsMSEnabled &&
-            FilePath == "Structures/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage") {
-            WorldGen.PlaceTile(X + 11, Y + 7, ModHelper.RemoteAccessTileID);
-            TileEntity.PlaceEntityNet(X + 10, Y + 6, ModHelper.RemoteAccessTileEntityID);
+        if (CompatabilityHelper.IsMSEnabled && FilePath == "Assets/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage.shstruct") {
+            CompatabilityHelper.PlaceMSModule(X + 10, Y + 6, CompatabilityHelper.RemoteAccessTileID, CompatabilityHelper.RemoteAccessTileEntityID);
+            if (StructureManager.MainHouse is not null && StructureManager.MainHouse.Status != StructureStatus.NotGenerated) CompatabilityHelper.LinkRemoteStorage(new Point16(X + 10, Y + 6), StructureManager.MainHouse.StorageHeartPos);
 
-            if (LegacyStructureManager.MainHouse is not null &&
-                LegacyStructureManager.MainHouse.Status != StructureStatus.NotGenerated)
-                ModHelper.LinkRemoteStorage(
-                    new Point16(X + 10, Y + 6),
-                    LegacyStructureManager.MainHouse.StorageHeartPos
-                );
+            NetHelper.SendUpdateMagicStorage(X + 11, Y + 7);
+            CompatabilityHelper.UpdateStorageNetwork(X + 11, Y + 7);
 
-            WorldGen.PlaceTile(X + 9, Y + 4, ModHelper.StorageUnitTileID);
-            TileEntity.PlaceEntityNet(X + 8, Y + 3, ModHelper.StorageUnitTileEntityID);
+            CompatabilityHelper.PlaceMSModule(X + 8, Y + 3, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
+            CompatabilityHelper.PlaceMSModule(X + 12, Y + 3, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
+            CompatabilityHelper.PlaceMSModule(X + 14, Y + 3, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
+            CompatabilityHelper.PlaceMSModule(X + 6, Y + 6, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
+            CompatabilityHelper.PlaceMSModule(X + 8, Y + 6, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
+            CompatabilityHelper.PlaceMSModule(X + 12, Y + 6, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
 
-            WorldGen.PlaceTile(X + 13, Y + 4, ModHelper.StorageUnitTileID);
-            TileEntity.PlaceEntityNet(X + 12, Y + 3, ModHelper.StorageUnitTileEntityID);
-
-            WorldGen.PlaceTile(X + 15, Y + 4, ModHelper.StorageUnitTileID);
-            TileEntity.PlaceEntityNet(X + 14, Y + 3, ModHelper.StorageUnitTileEntityID);
-
-            WorldGen.PlaceTile(X + 7, Y + 7, ModHelper.StorageUnitTileID);
-            TileEntity.PlaceEntityNet(X + 6, Y + 6, ModHelper.StorageUnitTileEntityID);
-
-            WorldGen.PlaceTile(X + 9, Y + 7, ModHelper.StorageUnitTileID);
-            TileEntity.PlaceEntityNet(X + 8, Y + 6, ModHelper.StorageUnitTileEntityID);
-
-            WorldGen.PlaceTile(X + 13, Y + 7, ModHelper.StorageUnitTileID);
-            TileEntity.PlaceEntityNet(X + 12, Y + 6, ModHelper.StorageUnitTileEntityID);
-
-            StructureGenHelper.GenerateCobwebs(new Point(X, Y), StructureXSize, StructureYSize);
-            FrameTiles();
-
+            StructureGenHelper.GenerateCobwebs(new Point16(X, Y), StructureXSize, StructureYSize);
             NetMessage.SendTileSquare(-1, X, Y, StructureXSize, StructureYSize);
+            FrameTiles();
         }
     }
 }
 
-public class MainBasement_Room6 : CustomChainStructure {
-    public MainBasement_Room6(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
-        ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Room6",
+public class MainBasementRoom6 : CustomChainStructure {
+    public MainBasementRoom6(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
+        base("Assets/StructureFiles/mainBasement/mainBasement_Room6.shstruct",
             28,
             15,
             [
@@ -429,17 +387,17 @@ public class MainBasement_Room6 : CustomChainStructure {
 
                 // bottom
                 [
-                    new ChainConnectPoint(15, 14, LegacyDirections.Down, new Seal.MainBasement_SealFloor())
+                    new ChainConnectPoint(15, 14, Directions.Down, new Seal.MainBasement_SealFloor())
                 ],
 
                 // left
                 [
-                    new ChainConnectPoint(0, 6, LegacyDirections.Left, new Seal.MainBasement_SealWall(), true)
+                    new ChainConnectPoint(0, 6, Directions.Left, new Seal.MainBasement_SealWall(), true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(15, 6, LegacyDirections.Right, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(15, 6, Directions.Right, new Seal.MainBasement_SealWall())
                 ]
             ],
             x, y, status, cost, weight) {
@@ -449,16 +407,15 @@ public class MainBasement_Room6 : CustomChainStructure {
         base.SetSubstructurePositions();
 
         StructureBoundingBoxes = [
-            new Box(X, Y, X + 16 - 1, Y + 7 - 1),
-            new Box(X, Y + 8, X + StructureXSize - 1, Y + StructureYSize - 1)
+            new BoundingBox(X, Y, X + 16 - 1, Y + 7 - 1),
+            new BoundingBox(X, Y + 8, X + StructureXSize - 1, Y + StructureYSize - 1)
         ];
     }
 }
 
-public class MainBasement_Room7 : CustomChainStructure {
-    public MainBasement_Room7(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
-        ushort weight = 10) :
-        base("Structures/StructureFiles/mainBasement/mainBasement_Room7",
+public class MainBasementRoom7 : CustomChainStructure {
+    public MainBasementRoom7(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
+        base("Assets/StructureFiles/mainBasement/mainBasement_Room7.shstruct",
             27,
             12,
             [
@@ -470,14 +427,46 @@ public class MainBasement_Room7 : CustomChainStructure {
 
                 // left
                 [
-                    new ChainConnectPoint(0, 11, LegacyDirections.Left, new Seal.MainBasement_SealWall(), true)
+                    new ChainConnectPoint(0, 11, Directions.Left, new Seal.MainBasement_SealWall(), true)
                 ],
 
                 // right
                 [
-                    new ChainConnectPoint(26, 11, LegacyDirections.Right, new Seal.MainBasement_SealWall())
+                    new ChainConnectPoint(26, 11, Directions.Right, new Seal.MainBasement_SealWall())
                 ]
             ],
             x, y, status, cost, weight) {
+    }
+}
+
+public class MainBasementRoom8 : CustomChainStructure {
+    public MainBasementRoom8(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
+        base("Assets/StructureFiles/mainBasement/mainBasement_Room8.shstruct",
+            23,
+            9,
+            [
+                // top
+                [],
+
+                // bottom
+                [],
+
+                // left
+                [
+                    new ChainConnectPoint(0, 8, Directions.Left, new Seal.MainBasement_SealWall(), true)
+                ],
+
+                // right
+                [
+                    new ChainConnectPoint(22, 8, Directions.Right, new Seal.MainBasement_SealWall())
+                ]
+            ],
+            x, y, status, cost, weight) {
+    }
+
+    public override void OnFound() {
+        WorldGen.PlaceTile(X + 4, Y + 7, TileID.Furnaces, true, true);
+        StructureGenHelper.GenerateCobwebs(new Point16(X, Y), StructureXSize, StructureYSize);
+        NetMessage.SendTileSquare(-1, X, Y, StructureXSize, StructureYSize);
     }
 }

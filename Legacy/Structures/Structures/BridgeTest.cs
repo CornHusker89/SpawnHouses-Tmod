@@ -1,14 +1,13 @@
-using Microsoft.Xna.Framework;
-using SpawnHouses.Legacy.Helpers;
-using SpawnHouses.Legacy.Structures;
-using SpawnHouses.Structures.StructureParts;
+using SpawnHouses.Helpers;
+using SpawnHouses.Types;
+using Terraria.DataStructures;
 using Terraria.ID;
 
 namespace SpawnHouses.Structures.Structures;
 
 public sealed class BridgeTest : CustomStructure {
     // constants
-    public static readonly string _filePath = "Structures/StructureFiles/bridgeTest";
+    public static readonly string _filePath = "Assets/StructureFiles/bridgeTest.shstruct";
     public static readonly ushort _structureXSize = 8;
     public static readonly ushort _structureYSize = 9;
 
@@ -21,12 +20,12 @@ public sealed class BridgeTest : CustomStructure {
 
         // left
         [
-            new ConnectPoint(0, 0, LegacyDirections.Left)
+            new ConnectPoint(0, 0, Directions.Left)
         ],
 
         // right
         [
-            new ConnectPoint(7, 0, LegacyDirections.Right)
+            new ConnectPoint(7, 0, Directions.Right)
         ]
     ];
 
@@ -35,8 +34,8 @@ public sealed class BridgeTest : CustomStructure {
             CopyConnectPoints(_connectPoints), status, x, y) {
     }
 
-    public override void Generate() {
-        StructureGenHelper.GenerateFoundation(new Point(X, Y + 9), TileID.Dirt, 4);
+    public override void Generate(bool bare = false) {
+        StructureGenHelper.GenerateFoundation(new Point16(X, Y + 9), TileID.Dirt, 4);
 
         base.Generate();
     }

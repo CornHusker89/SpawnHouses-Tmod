@@ -1,19 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
-using SpawnHouses.Common;
-using SpawnHouses.Common.DataStructures;
-using SpawnHouses.Common.Debug;
-using SpawnHouses.Common.Modules;
-using SpawnHouses.Common.Tagging;
-using SpawnHouses.Common.Tiles;
-using SpawnHouses.Common.Types;
+using System.Linq;
 using SpawnHouses.Helpers;
-using SpawnHouses.Items.Debug;
-using SpawnHouses.Legacy.Structures;
-using SpawnHouses.Structures;
+using SpawnHouses.Structures.Chains;
 using SpawnHouses.Structures.Structures;
-using Terraria;
+using SpawnHouses.Types;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
@@ -21,180 +12,212 @@ namespace SpawnHouses;
 
 #nullable enable
 
-public class StructureManager : ModSystem {
-    private static int _debugDrawFrameCount;
-    private static Dictionary<DebugLabel, Point> _labels = [];
+internal class StructureManager : ModSystem {
+    public static Version WorldModVersion = SpawnHousesMod.Instance.Version;
 
-    private static readonly List<AdvStructure> AdvStructures = [];
+    public static MainHouse? MainHouse;
+    public static MainBasement? MainBasement;
+    public static Mineshaft? Mineshaft;
+    public static BeachHouse? BeachHouse;
 
-    public static List<CustomStructure> LegacyStructures = [];
-    
-    public static Version WorldVersion = new(ModInstance.Mod.Version.ToString());
-    
-    public static ushort GeneratableCount { get; private set; }
-
-    public static readonly DebugInfoLevel DefaultDebugInfoLevel = new();
-
-    /// <summary>
-    ///     shallow copies then exposes the internal structure list
-    /// </summary>
-    /// <returns></returns>
-    public static AdvStructure[] GetStructureList() => AdvStructures.ToArray();
-
-    /// <summary>
-    ///     returns the next component id, and advances the counter. begins at id 1
-    /// </summary>
-    /// <returns></returns>
-    public static ushort NextGeneratableId() {
-        GeneratableCount++;
-        return GeneratableCount;
-    }
-
-    /// <summary>
-    ///     <see cref="AdvStructure.ApplyLayoutMethod" /> and <see cref="AdvStructure.FillComponents" /> must be called before this
-    /// </summary>
-    /// <param name="structure"></param>
-    public static void RegisterAdvStructure(AdvStructure structure) {
-        if (structure.FailedLayoutGeneration)
-            return;
-        if (structure.StructureLayout == null) throw new ArgumentException("structure must have an initialized layout");
-        AdvStructures.Add(structure);
-    }
-
-    public override void Load() {
-        Tags.SetInternalTagNames();
-        GlobalGeneratorUtils.LoadGenerators();
-    }
+    public static List<BoundingBox> MainBasementBoundingBoxes = [];
 
     public override void SaveWorldData(TagCompound tag) {
-        tag["WorldVersion"] = WorldVersion;
-        for (int i = 0; i < LegacyStructures.Count; i++) tag["Structure" + i] = LegacyStructures[i];
-        tag["GeneratableCount"] = GeneratableCount;
+        tag["WorldModVersion"] = WorldModVersion;
+
+        tag["MainHouse"] = MainHouse;
+        tag["MainBasement"] = MainBasement;
+        tag["Mineshaft"] = Mineshaft;
+        tag["BeachHouse"] = BeachHouse;
     }
 
     public override void LoadWorldData(TagCompound tag) {
-        // "WorldModVersion" is the old name
-        if (tag.ContainsKey("WorldVersion"))
-            WorldVersion = new Version(tag.GetString("WorldVersion"));
-        else if (tag.ContainsKey("WorldModVersion"))
-            WorldVersion = new Version(tag.GetString("WorldVersion"));
-        else
-            WorldVersion = new Version("0.3.2");
+        // "WorldVersion" is the old name
+        WorldModVersion = tag.ContainsKey("WorldModVersion")
+            ? new Version(tag.GetString("WorldModVersion"))
+            : tag.ContainsKey("WorldVersion")
+                ? new Version(tag.GetString("WorldVersion"))
+                : new Version("0.3.2");
 
-        LegacyStructures.Clear();
+        if (WorldModVersion.Major < 1) {
+            // the rest are unrecoverable. mainhouse might use just 1 structure, basement uses seeds, mineshaft doesn't exist
+            BeachHouse = tag.ContainsKey("BeachHouse") ? tag.Get<BeachHouse>("BeachHouse") : null;
+        }
+        else {
+            MainHouse = tag.ContainsKey("MainHouse") ? tag.Get<MainHouse>("MainHouse") : null;
+            MainBasement = tag.ContainsKey("MainBasement") ? tag.Get<MainBasement>("MainBasement") : null;
+            Mineshaft = tag.ContainsKey("Mineshaft") ? tag.Get<Mineshaft>("Mineshaft") : null;
+            BeachHouse = tag.ContainsKey("BeachHouse") ? tag.Get<BeachHouse>("BeachHouse") : null;
 
-        if (WorldVersion.Major == 0) {
-            // the rest are unrecoverable. mainhouse might use just 1 structure file, basement uses seeds, mineshaft doesn't exist
-            if (tag.ContainsKey("BeachHouse"))
-                tag["Structure1"] = tag.Get<BeachHouse>("BeachHouse");
+            MainBasement?.ActionOnEachStructure(structure => { MainBasementBoundingBoxes.AddRange(structure.StructureBoundingBoxes); });
         }
-        else if (WorldVersion.Major == 1) {
-            if (tag.ContainsKey("MainHouse"))
-                LegacyStructures.Add(tag.Get<MainHouse>("MainHouse"));
-            if (tag.ContainsKey("MainBasement"))
-                LegacyStructures.Add(tag.Get<MainHouse>("MainBasement"));
-            if (tag.ContainsKey("Mineshaft"))
-                LegacyStructures.Add(tag.Get<MainHouse>("Mineshaft"));
-            if (tag.ContainsKey("BeachHouse"))
-                LegacyStructures.Add(tag.Get<MainHouse>("BeachHouse"));
-        }
-        else if (WorldVersion.Major == 2) {
-            int i = 0;
-            while (tag.ContainsKey("Structure" + i)) {
-                LegacyStructures.Add(tag.Get<CustomStructure>("Structure" + i));
-                i++;
-            }
-        }
-        
-        GeneratableCount = tag.ContainsKey("GeneratableCount") ? tag.Get<ushort>("GeneratableCount") : (ushort)0;
     }
 
     public override void ClearWorld() {
-        WorldVersion = ModContent.GetInstance<SpawnHouses>().Version;
-        LegacyStructures.Clear();
-        
-        GeneratableCount = 0;
-        DebugWand.SelectedStructure = null;
+        WorldModVersion = SpawnHousesMod.Instance.Version;
+        MainHouse = null;
+        MainBasement = null;
+        Mineshaft = null;
+        BeachHouse = null;
     }
+}
 
-    public override void PostDrawTiles() {
-        _debugDrawFrameCount++;
+internal static class ChainProcessor {
+    internal static Dictionary<string, object> SerializeChain(CustomChainStructure processingStructure) {
+        var dict = new Dictionary<string, object> {
+            ["ID"] = (ushort)processingStructure.Id,
+            ["X"] = processingStructure.X,
+            ["Y"] = processingStructure.Y,
+            ["Status"] = processingStructure.Status
+        };
 
-        DrawHelper.BeginWorldSpriteBatch();
-
-        if (_debugDrawFrameCount < 20) {
-            _debugDrawFrameCount = 0;
-            UpdateDebugLabelsAndDraw();
-        }
-        else {
-            foreach (AdvStructure structure in AdvStructures)
-                structure.DrawDebugGeometry();
-        }
-
-        foreach (DebugLabel label in _labels.Keys) {
-            Color color;
-            if (label.ParentObj is IComponent component)
-                color = DrawHelper.GetColor(component);
-            else if (label.ParentObj is IGeneratable generatable)
-                color = DrawHelper.GetColor(generatable.Id);
-            else if (label.ParentObj is StructureTilemap tilemap)
-                color = DrawHelper.GetColor(tilemap.Structure.StructureLayout.Id);
-            else
-                color = DrawHelper.GetColor((ushort)label.ParentObj.GetHashCode());
-            DrawHelper.DrawDebugLabel(label, _labels[label], DrawHelper.DebugDrawWidth, color);
-        }
-
-        Main.spriteBatch.End();
-    }
-
-    private static void UpdateDebugLabelsAndDraw() {
-        List<Rectangle> structureRects = [];
-        _labels.Clear();
-
-        foreach (AdvStructure structure in AdvStructures) {
-            foreach (DebugLabel label in structure.DrawDebugGeometry()) {
-                _labels.Add(label, label.Root.ToPoint() * new Point(16, 16));
-                TileBox structureGlobalTileBoundingBox = structure.Tilemap.ConvertToGlobal(structure.StructureLayout.BoundingBox);
-                structureRects.Add(structureGlobalTileBoundingBox.Scale(16));
+        int i = 0;
+        processingStructure.ActionOnEachConnectPoint(connectPoint => {
+            if (connectPoint.ChildStructure is not null) {
+                dict[$"Substructure{i}"] = SerializeChain(connectPoint.ChildStructure);
+                dict[$"Substructure{i}Bridge"] = new Dictionary<string, object> {
+                    ["ID"] = (ushort)connectPoint.ChildBridge.Id,
+                    ["X1"] = connectPoint.ChildBridge.Point1.X,
+                    ["Y1"] = connectPoint.ChildBridge.Point1.Y,
+                    ["X2"] = connectPoint.ChildBridge.Point2.X,
+                    ["Y2"] = connectPoint.ChildBridge.Point2.Y
+                };
             }
-        }
 
-        // move each label away from each other and the structure
-        for (int i = 0; i < 7; i++) {
-            foreach (var a in _labels) {
-                // gentle spring back to root
-                Vector2 deltaToRoot = (a.Value - a.Key.Root.ToPoint() * new Point(16, 16)).ToVector2();
-                _labels[a.Key] -= (deltaToRoot * 0.03f).ToPoint();
+            i++;
+        });
 
-                // label-structure
-                foreach (Rectangle box in structureRects) {
-                    Rectangle aRect = a.Key.GetTextBoundingBox(a.Value);
-                    if (aRect.Intersects(box)) {
-                        Vector2 delta = (aRect.Center - box.Center).ToVector2();
+        return dict;
+    }
 
-                        if (delta == Vector2.Zero)
-                            delta = Vector2.UnitY;
+    internal static CustomChainStructure DeserializeChain(StructureChain structureChain, TagCompound structureDict) {
+        CustomChainStructure? structure = (CustomChainStructure)StructureIdHelper.CreateStructure(
+            (ushort)(short)structureDict["ID"],
+            (ushort)(short)structureDict["X"],
+            (ushort)(short)structureDict["Y"],
+            (byte)structureDict["Status"]
+        );
 
-                        _labels[a.Key] += (Vector2.Normalize(delta) * 7).ToPoint();
-                    }
-                }
-                
-                // label-label
-                foreach (var b in _labels) {
-                    Rectangle aRect = a.Key.GetTextBoundingBox(a.Value);
-                    if (ReferenceEquals(a.Key, b.Key))
-                        continue;
-                    if (aRect.Intersects(a.Key.GetTextBoundingBox(b.Value))) {
-                        Vector2 delta = (a.Value - b.Value).ToVector2() * 0.65f;
-        
-                        if (delta == Vector2.Zero)
-                            delta = Vector2.UnitY;
+        int i = 0;
+        structure.ParentStructureChain = structureChain;
+        structure.ActionOnEachConnectPoint(point => {
+            if (structureDict.ContainsKey($"Substructure{i}")) {
+                point.ChildStructure = DeserializeChain(structureChain, (TagCompound)structureDict[$"Substructure{i}"]);
+                if (structureDict.ContainsKey($"Substructure{i}Bridge")) {
+                    TagCompound? bridgeDict = (TagCompound)structureDict[$"Substructure{i}Bridge"];
+                    Bridge? bridge = BridgeIdHelper.CreateBridge((ushort)(short)bridgeDict["ID"]);
 
-                        _labels[a.Key] += delta.ToPoint();
-                        _labels[b.Key] -= delta.ToPoint();
-                    }
+                    // get the child connect point
+                    ushort goalX = (ushort)(short)bridgeDict["X2"];
+                    ushort goalY = (ushort)(short)bridgeDict["Y2"];
+                    bool found = false;
+                    point.ChildStructure.ActionOnEachConnectPoint(nextPoint => {
+                        if (nextPoint.X == goalX && nextPoint.Y == goalY) {
+                            found = true;
+                            point.ChildConnectPoint = nextPoint;
+                            bridge.SetPoints(point, nextPoint);
+                        }
+                    });
+                    if (!found) throw new Exception("Bridge loading failed");
+
+                    point.ChildBridge = bridge;
                 }
             }
-        }
+
+            i++;
+        });
+
+        return structure;
     }
+}
+
+internal class DictionarySerializer : TagSerializer<Dictionary<string, object>, TagCompound> {
+    public override TagCompound Serialize(Dictionary<string, object> data) {
+        TagCompound tag = new();
+        foreach (var kvp in data)
+            tag[kvp.Key] = kvp.Value;
+        return tag;
+    }
+
+    public override Dictionary<string, object> Deserialize(TagCompound tag) => tag.ToDictionary();
+}
+
+internal class MainHouseSerializer : TagSerializer<MainHouse, TagCompound> {
+    public override TagCompound Serialize(MainHouse structure) =>
+        new() {
+            ["X"] = structure.X,
+            ["Y"] = structure.Y,
+            ["Status"] = structure.Status,
+            ["HasBasement"] = structure.HasBasement,
+            ["InUnderworld"] = structure.InUnderworld,
+            ["LeftType"] = structure.LeftType,
+            ["RightType"] = structure.RightType
+        };
+
+    public override MainHouse Deserialize(TagCompound tag) =>
+        new(
+            tag.Get<ushort>("X"),
+            tag.Get<ushort>("Y"),
+            tag.GetByte("Status"),
+            tag.GetBool("HasBasement"),
+            tag.GetBool("InUnderworld"),
+            tag.GetByte("LeftType") != 0 ? tag.GetByte("LeftType") : (byte)1, // if its 0 (which only happens if it's a <= v0.2.7 world) set to default (large)
+            tag.GetByte("RightType") != 0 ? tag.GetByte("RightType") : (byte)1
+        );
+}
+
+internal class MainBasementSerializer : TagSerializer<MainBasement, TagCompound> {
+    public override TagCompound Serialize(MainBasement chain) =>
+        new() {
+            ["X"] = chain.EntryPosX,
+            ["Y"] = chain.EntryPosY,
+            ["Status"] = chain.Status,
+            ["RootStructure"] = ChainProcessor.SerializeChain(chain.RootStructure)
+        };
+
+    public override MainBasement Deserialize(TagCompound tag) {
+        MainBasement basement = new(
+            (ushort)tag.Get<short>("X"),
+            (ushort)tag.Get<short>("Y"),
+            tag.GetByte("Status")
+        );
+        basement.RootStructure = ChainProcessor.DeserializeChain(basement, (TagCompound)tag["RootStructure"]);
+        return basement;
+    }
+}
+
+internal class MineshaftSerializer : TagSerializer<Mineshaft, TagCompound> {
+    public override TagCompound Serialize(Mineshaft structure) =>
+        new() {
+            ["X"] = structure.X,
+            ["Y"] = structure.Y,
+            ["Status"] = structure.Status
+        };
+
+    public override Mineshaft Deserialize(TagCompound tag) =>
+        new(
+            tag.Get<ushort>("X"),
+            tag.Get<ushort>("Y"),
+            tag.GetByte("Status")
+        );
+}
+
+internal class BeachHouseSerializer : TagSerializer<BeachHouse, TagCompound> {
+    public override TagCompound Serialize(BeachHouse structure) =>
+        new() {
+            ["X"] = structure.X,
+            ["Y"] = structure.Y,
+            ["Status"] = structure.Status,
+            ["Reverse"] = structure.Reverse,
+            ["HasDeck"] = structure.HasDeck
+        };
+
+    public override BeachHouse Deserialize(TagCompound tag) =>
+        new(
+            tag.Get<ushort>("X"),
+            tag.Get<ushort>("Y"),
+            tag.GetByte("Status"),
+            tag.GetBool("Reverse"),
+            tag.ContainsKey("HasDeck") && tag.GetBool("HasDeck")
+        );
 }

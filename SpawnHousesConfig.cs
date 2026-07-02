@@ -36,13 +36,13 @@ public class SpawnHousesConfig : ModConfig {
         get => _spawnPointBasementSize;
         set {
             _spawnPointBasementSize = value;
-            SpawnPointBasementMultiplier = value / 6f;
+            SpawnPointBasementSizeMultiplier = value / 6f;
             SetTotalNpcs();
         }
     }
 
     [JsonIgnore]
-    public float SpawnPointBasementMultiplier { get; set; } = 1;
+    public float SpawnPointBasementSizeMultiplier { get; set; } = 1;
 
     [DefaultValue(2)]
     [Range(2, 2)]
@@ -63,11 +63,12 @@ public class SpawnHousesConfig : ModConfig {
     [DefaultValue(true)]
     public bool SpawnPointHouseSetsSpawn { get; set; }
 
-    [DefaultValue(0.5f)]
-    [Slider]
-    [Range(0.1f, 1.0f)]
-    [Increment(0.1f)]
-    public float SpawnPointBasementShape { get; set; }
+    // [DefaultValue(0.5f)]
+    // [Slider]
+    // [Range(0.1f, 1.0f)]
+    // [Increment(0.1f)]
+    [JsonIgnore]
+    public float SpawnPointBasementShape { get; set; } = 0.5f;
 
     [Header("StructuresHeader")]
     [DefaultValue(true)]

@@ -1,7 +1,6 @@
 using Microsoft.Xna.Framework;
-using SpawnHouses.Legacy.Helpers;
-using SpawnHouses.Legacy.Structures;
-using SpawnHouses.Structures.StructureParts;
+using SpawnHouses.Helpers;
+using SpawnHouses.Types;
 using Terraria;
 using Terraria.ID;
 using Terraria.WorldBuilding;
@@ -10,7 +9,7 @@ namespace SpawnHouses.Structures.Structures;
 
 public sealed class Firepit : CustomStructure {
     // constants
-    public static readonly string _filePath = "Structures/StructureFiles/firepit";
+    public static readonly string _filePath = "Assets/StructureFiles/firepit.shstruct";
     public static readonly ushort _structureXSize = 7;
     public static readonly ushort _structureYSize = 3;
 
@@ -23,12 +22,12 @@ public sealed class Firepit : CustomStructure {
 
         // left
         [
-            new ConnectPoint(-1, 2, LegacyDirections.Left)
+            new ConnectPoint(-1, 2, Directions.Left)
         ],
 
         // right
         [
-            new ConnectPoint(7, 2, LegacyDirections.Right)
+            new ConnectPoint(7, 2, Directions.Right)
         ]
     ];
 
@@ -37,7 +36,7 @@ public sealed class Firepit : CustomStructure {
             CopyConnectPoints(_connectPoints), status, x, y) {
     }
 
-    public override void Generate() {
+    public override void Generate(bool bare = false) {
         WorldUtils.Gen(new Point(X, Y - 9), new Shapes.Rectangle(7, 9),
             new Actions.ClearTile());
 

@@ -1,17 +1,18 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Legacy.Structures;
-using SpawnHouses.StructureHelper;
-using SpawnHouses.Structures.StructureParts;
+using SpawnHouses.Helpers;
+using SpawnHouses.Types;
+using StructureHelper.API;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
+using BoundingBox = SpawnHouses.Types.BoundingBox;
 
 namespace SpawnHouses.Structures.Bridges;
 
 public class ParabolaBridge : Bridge {
-    private readonly Mod _mod = ModContent.GetInstance<SpawnHouses>();
+    private readonly Mod _mod = ModContent.GetInstance<SpawnHousesMod>();
     private readonly double AttemptSlope;
     private readonly byte BoundingBoxYMargin;
 
@@ -27,7 +28,7 @@ public class ParabolaBridge : Bridge {
         bool backwardsGeneration,
         ConnectPoint point1 = null, ConnectPoint point2 = null)
         :
-        base(backwardsGeneration ? [LegacyDirections.Left, LegacyDirections.Right] : [LegacyDirections.Right, LegacyDirections.Left],
+        base(backwardsGeneration ? [Directions.Left, Directions.Right] : [Directions.Right, Directions.Left],
             minDeltaX, maxDeltaX, minDeltaY, maxDeltaY, deltaXMultiple, deltaYMultiple, point1, point2) {
         StructureFilePath = structureFilePath;
         StructureLength = structureLength;
@@ -70,7 +71,7 @@ public class ParabolaBridge : Bridge {
         Point1 = point1;
         Point2 = point2;
 
-        var boundingBoxesList = new List<Box>();
+        var boundingBoxesList = new List<BoundingBox>();
         var parabola = _CalculateParabolaBridge(AttemptSlope);
         double a = parabola.Item1;
         double b = parabola.Item2;
@@ -89,7 +90,7 @@ public class ParabolaBridge : Bridge {
                 ushort bridgeStructureY = (ushort)(cumulativeBridgeStructureY / StructureLength);
 
                 boundingBoxesList.Add(
-                    new Box(
+                    new BoundingBox(
                         bridgeStructureX,
                         bridgeStructureY - BoundingBoxYMargin,
                         bridgeStructureX + StructureLength - 1,
@@ -154,26 +155,26 @@ public class ParabolaBridge : Bridge {
 
     // --- bridge presets --
     public class TestBridgeLarge : ParabolaBridge {
-        public TestBridgeLarge() : base("Structures/StructureFiles/woodBridge",
+        public TestBridgeLarge() : base("Assets/StructureFiles/woodBridge.shstruct",
             2, 3, -2, 0.4, 2, 40, 40, -27, 27, 2, 1, false) {
         }
     }
 
     public class TestBridgeLargeAltGen : ParabolaBridge {
-        public TestBridgeLargeAltGen() : base("Structures/StructureFiles/woodBridge",
+        public TestBridgeLargeAltGen() : base("Assets/StructureFiles/woodBridge.shstruct",
             2, 3, -2, 0.4, 2, -42, -42, -27, 27, 2, 1, true) {
         }
     }
 
 
     public class TestBridgeSmall : ParabolaBridge {
-        public TestBridgeSmall() : base("Structures/StructureFiles/woodBridge",
+        public TestBridgeSmall() : base("Assets/StructureFiles/woodBridge.shstruct",
             2, 3, -2, 0.4, 2, 35, 35, -27, 27, 2, 1, false) {
         }
     }
 
     public class TestBridgeSmallAltGen : ParabolaBridge {
-        public TestBridgeSmallAltGen() : base("Structures/StructureFiles/woodBridge",
+        public TestBridgeSmallAltGen() : base("Assets/StructureFiles/woodBridge.shstruct",
             2, 3, -2, 0.4, 2, -37, -37, -27, 27, 2, 1, true) {
         }
     }

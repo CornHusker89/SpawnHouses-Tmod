@@ -4,8 +4,12 @@ Mods: {
 
 		Items: {
 			SpawnMainHouse: {
-				DisplayName: Spawn Main House
-				Tooltip: Spawns the Main House (with current configs) on the ground underneath the cursor
+				DisplayName: Spawn Point House
+				Tooltip:
+					'''
+					Creates Generated Housing's Spawn Point House (with currently set configs) at the cursor.
+					When held, the yellow region represents the aboveground section, and blue is the floor
+					'''
 			}
 
 			SpawnTestHouse: {
@@ -20,7 +24,11 @@ Mods: {
 
 			SpawnBeachHouse: {
 				DisplayName: Spawn Beach House
-				Tooltip: --Testing item, no guarantees it won't crash the game--
+				Tooltip:
+					'''
+					Creates Generated Housing's Beach House at the cursor.
+					When held, the yellow region represents the aboveground section, and blue is the floor
+					'''
 			}
 
 			SpawnBridgeTest: {
@@ -55,12 +63,12 @@ Mods: {
 
 			FrameableBorealPlatform: {
 				DisplayName: Frameable Boreal Platform
-				Tooltip: A platform that can be hammered through all frames of vanilla platforms (some frames are invisible)
+				Tooltip: A Boreal platform that can be hammered through all frames of vanilla platforms (some frames are invisible)
 			}
 
 			FrameableBorealPlatformNoCollide: {
 				DisplayName: Frameable Boreal Platform No Collide
-				Tooltip: A platform that can be hammered through all frames of vanilla platforms (some frames are invisible), but has no collision
+				Tooltip: A Boreal platform that can be hammered through all frames of vanilla platforms (some frames are invisible), but has no collision
 			}
 
 			SpawnCaveTown1: {
@@ -111,12 +119,20 @@ Mods: {
 
 				MagicStorageIntegrations: {
 					Label: Magic Storage Integrations
-					Tooltip: If ON, a Magic Storage starter setup will spawn in the Spawn Point House. In order to work, Magic Storage (the mod) must be loaded
+					Tooltip:
+						'''
+						If ON, a Magic Storage starter setup will spawn in the Spawn Point House.
+						In order to work, Magic Storage (the mod) must be loaded
+						'''
 				}
 
 				SpawnPointHouseOffset: {
 					Label: Spawn Point House Offset
-					Tooltip: If ON, the Spawn Point House will generate ~120 tiles away from the spawn point. Useful for mod compatability
+					Tooltip:
+						'''
+						If ON, the Spawn Point House will generate away from the spawn point.
+						This can be useful for compatability with other mods that place tiles at the world spawn
+						'''
 				}
 
 				SpawnPointHouseSetsSpawn: {
@@ -126,7 +142,13 @@ Mods: {
 
 				SpawnPointBasementShape: {
 					Label: Spawn Point Basement Shape
-					Tooltip: 0.5 will not favor any direction. Values closer to 0 generate the basement more vertically, values closer to 1 generate the basement more horizontally. In upside-down seeds, value won't go below 0.4
+					Tooltip:
+						'''
+						A value of 0.5 will not favor any direction.
+						Values closer to 0 generate the basement more vertically,
+						values closer to 1 generate the basement more horizontally.
+						In upside-down seeds, value won't go below 0.4
+						'''
 				}
 
 				EnableSpawnPointHouse: {
@@ -136,7 +158,11 @@ Mods: {
 
 				EnableSpawnPointBasement: {
 					Label: Enable Spawn Point Basement
-					Tooltip: If ON, a random basement will generate under the spawn point house. If there isn't a house, it will generate in the ground.
+					Tooltip:
+						'''
+						If ON, a random basement will generate under the spawn point house.
+						If there isn't a spawn point house, it will generate in the ground.
+						'''
 				}
 
 				EnableBeachHouse: {
