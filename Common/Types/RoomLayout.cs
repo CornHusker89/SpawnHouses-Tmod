@@ -255,7 +255,7 @@ public class RoomLayout {
     /// </summary>
     /// <returns></returns>
     private void ResizeAndMoveGaps() {
-        int[] horizontalGapSizes = Gaps.Where(gap => !gap.IsHorizontal).Select(gap => gap.Geometry.BoundingBox.Width).ToArray();
+        short[] horizontalGapSizes = Gaps.Where(gap => !gap.IsHorizontal).Select(gap => gap.Geometry.BoundingBox.Width).ToArray();
         int maxFloorGapSize = horizontalGapSizes.Length != 0 ? horizontalGapSizes.Max() : 7;
 
         // filter out gaps which are too small and resize gaps

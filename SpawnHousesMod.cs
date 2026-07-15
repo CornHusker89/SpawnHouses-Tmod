@@ -6,7 +6,7 @@ namespace SpawnHouses;
 
 public class SpawnHousesMod : Mod {
     public static readonly Mod Instance = ModContent.GetInstance<SpawnHousesMod>();
-    public static readonly WebClient WebClient = new();
+    public static readonly SpawnHousesConfig Config = ModContent.GetInstance<SpawnHousesConfig>();
 
     public override void HandlePacket(BinaryReader reader, int whoAmI) {
         NetHelper.HandlePacket(reader, whoAmI);

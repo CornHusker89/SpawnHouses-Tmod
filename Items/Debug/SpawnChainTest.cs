@@ -1,4 +1,4 @@
-using SpawnHouses.Structures.Chains;
+using SpawnHouses.Legacy.Structures.ChainTypes;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;

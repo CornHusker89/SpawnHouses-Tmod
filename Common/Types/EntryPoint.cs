@@ -1,4 +1,4 @@
-using SpawnHouses.Legacy.Structures;
+using SpawnHouses.Common.Types.Geometry;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Common.Types;
@@ -6,9 +6,9 @@ namespace SpawnHouses.Common.Types;
 public class EntryPoint {
     /// <summary>the upper/left point, not offset</summary>
     private readonly Point16 _baseStart;
-    
-    /// <summary>the direction going into the structure. ex. if it's on the left wall, it should be Directions.Right</summary>
-    public readonly byte Direction;
+
+    /// <summary>the direction going into the structure. ex. if it's on the left wall, it should be LegacyDirections.Right</summary>
+    public readonly Direction EntryDirection;
     
     public readonly int Size;
     
@@ -17,17 +17,17 @@ public class EntryPoint {
     
     /// <param name="start"></param>
     /// <param name="size"></param>
-    /// <param name="direction">
-    ///     the direction going into the structure. ex. if it's on the left wall, it should be
-    ///     Directions.Right
+    /// <param name="entryDirection">
+    ///     the entryDirection going into the structure. ex. if it's on the left wall, it should be
+    ///     LegacyDirections.Right
     /// </param>
-    public EntryPoint(Point16 start, int size, byte direction) {
+    public EntryPoint(Point16 start, int size, Direction entryDirection) {
         _baseStart = start;
         Size = size;
-        Direction = direction;
+        EntryDirection = entryDirection;
     }
 
-    public bool IsHorizontal => Direction is LegacyDirections.Right or LegacyDirections.Left;
+    public bool IsHorizontal => EntryDirection is Direction.Right or Direction.Left;
     
     /// <summary>the upper/left point, with offset applied</summary>
     public Point16 Start => _baseStart + Offset;
@@ -49,12 +49,12 @@ public class EntryPoint {
     // /// <summary>
     // ///     the direction of the entry point, facing into the structure
     // /// </summary>
-    // public readonly byte Direction;
+    // public readonly byte EntryDirection;
     //
     // public EntryPoint(Point bottomRight, byte direction) {
     //     BottomRight = bottomRight;
-    //     Direction = direction;
+    //     EntryDirection = direction;
     // }
     //
-    // public bool IsHorizontal => Direction is Directions.Left or Directions.Right;
+    // public bool IsHorizontal => EntryDirection is LegacyDirections.Left or LegacyDirections.Right;
 }

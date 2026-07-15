@@ -7,7 +7,6 @@ using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types;
 using Terraria;
-using Terraria.ModLoader;
 using Terraria.Utilities;
 using IComponent = SpawnHouses.Common.Modules.IComponent;
 
@@ -109,7 +108,7 @@ public class AdvStructure : ICanDebugDraw {
         StructureLayout.ExecuteGenerator();
         if (StructureLayout == null || Tilemap == null) {
             FailedLayoutGeneration = true;
-            ModContent.GetInstance<SpawnHouses>().Logger.Warn($"structure with see {Seed} failed layout generation");
+            SpawnHousesMod.Instance.Logger.Warn($"structure with see {Seed} failed layout generation");
         }
     }
 
@@ -142,5 +141,5 @@ public class AdvStructure : ICanDebugDraw {
     /// <summary>
     ///     adds this structure to the global structure list and initializes some debug fields
     /// </summary>
-    public void Register() => StructureManager.RegisterAdvStructure(this);
+    public void Register() => StructureManager.RegisterStructure(this);
 }

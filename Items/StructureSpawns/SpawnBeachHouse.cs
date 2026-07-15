@@ -1,7 +1,8 @@
 using System;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Helpers;
-using SpawnHouses.Structures.Structures;
+using SpawnHouses.Legacy.Helpers;
+using SpawnHouses.Legacy.Structures.StructureTypes;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -42,7 +43,7 @@ public class SpawnBeachHouse : ModItem {
             house.Generate(true);
             house.OnFound();
 
-            NetMessage.SendTileSquare(-1, house.X, house.Y, house.StructureXSize, house.StructureYSize);
+            NetHelper.SendTileSquare(-1, house.BoundingBox);
         }
 
         return true;
@@ -66,6 +67,6 @@ public class SpawnBeachHouse : ModItem {
             Color.Yellow,
             Color.Cyan
         ];
-        DrawHelper.DrawRectangles(rectangles, colors, 3);
+        LegacyDrawHelper.DrawRectangles(rectangles, colors, 3);
     }
 }

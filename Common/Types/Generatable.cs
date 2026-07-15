@@ -4,7 +4,6 @@ using System.Linq;
 using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
-using SpawnHouses.Legacy.Structures;
 using Terraria;
 using Terraria.Utilities;
 
@@ -102,7 +101,7 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
         var validGenerators = validGeneratorsList.ToArray();
 
         if (validGenerators.Length == 0)
-            throw new Exception($"No instance generators were found that are compatible with given parameters. type: {GetType().FullName}, required tags: {EnumHelper.ToString(Params.TagsRequired.Keys)}");
+            throw new Exception($"No instance generators were found that are compatible with given parameters. type: {GetType().FullName}");
 
         return Params.Structure.LayoutRandom.NextFromList(validGenerators);
     }

@@ -6,7 +6,7 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 
-namespace SpawnHouses.Helpers;
+namespace SpawnHouses.Legacy.Helpers;
 
 public static class RaycastHelper {
     /// <summary>

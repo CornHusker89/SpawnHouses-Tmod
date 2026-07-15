@@ -45,8 +45,8 @@ public class SpawnTest2 : ModItem {
         // AdvStructure dummyStructure = new(
         //     "thing",
         //     new StructureLayoutParams(new TagMap(), [
-        //         new EntryPoint(new Point16(10, 10), 3, Directions.Right),
-        //         new EntryPoint(new Point16(15, 10), 3, Directions.Left)
+        //         new EntryPoint(new Point16(10, 10), 3, LegacyDirections.Right),
+        //         new EntryPoint(new Point16(15, 10), 3, LegacyDirections.Left)
         //     ], 100, false),
         //     PalettePresets.Medieval,
         //     generate: false

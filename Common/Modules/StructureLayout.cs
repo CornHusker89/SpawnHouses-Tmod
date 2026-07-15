@@ -7,7 +7,7 @@ using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types;
-using SpawnHouses.Common.Types.Geometry;
+using SpawnHouses.Common.Types.Interfaces;
 using SpawnHouses.Helpers;
 using Terraria.DataStructures;
 

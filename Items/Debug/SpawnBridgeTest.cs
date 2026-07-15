@@ -1,5 +1,5 @@
-using SpawnHouses.Structures.Bridges;
-using SpawnHouses.Structures.Structures;
+using SpawnHouses.Legacy.Structures.BridgeTypes;
+using SpawnHouses.Legacy.Structures.StructureTypes;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;

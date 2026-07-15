@@ -1,22 +1,22 @@
 #nullable enable
+using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types.Geometry;
-using Range = SpawnHouses.Legacy.Structures.Range;
 
 namespace SpawnHouses.Common.Parameters;
 
 public class RoomLayoutParams : IParams {
     public AdvStructure Structure { get; set; }
     public TagMap TagsRequired { get; init; }
-    
-    public readonly Range FloorWidth;
-    public readonly Range WallWidth;
-    public readonly Range RoomHeight;
-    public readonly Range RoomWidth;
+
+    public readonly NumRange FloorWidth;
+    public readonly NumRange WallWidth;
+    public readonly NumRange RoomHeight;
+    public readonly NumRange RoomWidth;
     public readonly int Attempts;
 
-    public RoomLayoutParams(AdvStructure structure, Range floorWidth,
-        Range wallWidth, Range roomHeight, Range roomWidth, TagMap? tagsRequired = null, float largeRoomChance = 0.2f, int attempts = 5) {
+    public RoomLayoutParams(AdvStructure structure, NumRange floorWidth,
+        NumRange wallWidth, NumRange roomHeight, NumRange roomWidth, TagMap? tagsRequired = null, float largeRoomChance = 0.2f, int attempts = 5) {
         Structure = structure;
         FloorWidth = floorWidth;
         WallWidth = wallWidth;

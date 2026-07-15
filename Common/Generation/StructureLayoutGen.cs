@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Palette;
@@ -8,13 +9,12 @@ using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types;
+using SpawnHouses.Common.Types.Geometry;
 using SpawnHouses.Helpers;
 using SpawnHouses.Helpers.Complex;
-using SpawnHouses.Legacy.Structures;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.Utilities;
-using Range = SpawnHouses.Legacy.Structures.Range;
 
 namespace SpawnHouses.Common.Generation;
 
@@ -50,7 +50,7 @@ public static class StructureLayoutGen {
                 upper = param.EntryPoints[0];
             }
 
-            return lower.Direction == LegacyDirections.Right && upper.Direction == LegacyDirections.Left;
+            return lower.EntryDirection == Direction.Right && upper.EntryDirection == Direction.Left;
         }
 
         public override bool Generate(StructureLayout structureLayout, StructureLayoutParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
@@ -62,8 +62,8 @@ public static class StructureLayoutGen {
             bool forceFlatRoof = param.TagsRequired.HasTag(Tags.HasOnlyRectangleRooms);
             int entryPointVerticalDistance = Math.Abs(param.EntryPoints[0].End.Y - param.EntryPoints[1].End.Y);
             bool hasBasement = param.Structure.OtherRandom.NextBool(3, 10) && param.Height - entryPointVerticalDistance > 12; //40% if conditions are met
-            Range externalFloorThicknessRange = new(1, 2);
-            Range externalWallThicknessRange = new(1, 2);
+            NumRange externalFloorThicknessRange = new(1, 2);
+            NumRange externalWallThicknessRange = new(1, 2);
             int externalFloorThickness = externalFloorThicknessRange.Max;
             int externalWallThickness = externalWallThicknessRange.Max;
 
@@ -149,10 +149,10 @@ public static class StructureLayoutGen {
 
             RoomLayoutParams roomLayoutParams = new(
                 param.Structure,
-                new Range(1, 1),
-                new Range(1, 1),
-                new Range(4, 13),
-                new Range(7, param.Length),
+                new NumRange(1, 1),
+                new NumRange(1, 1),
+                new NumRange(4, 13),
+                new NumRange(7, param.Length),
                 param.TagsRequired,
                 0.3f
             );

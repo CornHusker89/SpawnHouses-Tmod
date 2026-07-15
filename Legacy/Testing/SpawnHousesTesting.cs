@@ -1,11 +1,13 @@
 #nullable enable
 using Microsoft.Xna.Framework;
+using SpawnHouses.Legacy.Structures.ChainTypes;
+using SpawnHouses.Legacy.Structures.StructureTypes;
 using Terraria;
 using Terraria.ModLoader;
 using WorldGenTesting.Helpers;
 using WorldGenTesting.Types;
 
-namespace SpawnHouses.Testing;
+namespace SpawnHouses.Legacy.Testing;
 
 [JITWhenModsEnabled("WorldGenTesting")]
 public class SpawnHousesTesting {
@@ -62,15 +64,15 @@ public class SpawnHousesTesting {
     #region Test Helpers
 
     private static string? ScreenshotMainHouse() {
-        if (StructureManager.MainHouse is null)
+        if (StructureManager.LegacyStructures.Find(s => s is MainHouse) is not MainHouse mainHouse)
             return "No Main House";
 
         TestingHelper.TakeScreenshot(
             new Rectangle(
-                StructureManager.MainHouse.X - 30,
-                StructureManager.MainHouse.Y - 20,
-                StructureManager.MainHouse.StructureXSize + 60,
-                StructureManager.MainHouse.StructureYSize + 40
+                mainHouse.BoundingBox.Left - 30,
+                mainHouse.BoundingBox.Top - 20,
+                mainHouse.BoundingBox.Width + 60,
+                mainHouse.BoundingBox.Height + 40
             ),
             Main.ActiveWorldFileData.Seed + "_MainHouse"
         );
@@ -78,15 +80,15 @@ public class SpawnHousesTesting {
     }
 
     private static string? ScreenshotBeachHouse() {
-        if (StructureManager.BeachHouse is null)
+        if (StructureManager.LegacyStructures.Find(s => s is BeachHouse) is not BeachHouse beachHouse)
             return "No Beach House";
 
         TestingHelper.TakeScreenshot(
             new Rectangle(
-                StructureManager.BeachHouse.X - 30,
-                StructureManager.BeachHouse.Y - 30,
-                StructureManager.BeachHouse.StructureXSize + 60,
-                StructureManager.BeachHouse.StructureYSize + 60
+                beachHouse.BoundingBox.Left - 30,
+                beachHouse.BoundingBox.Top - 30,
+                beachHouse.BoundingBox.Width + 60,
+                beachHouse.BoundingBox.Height + 60
             ),
             Main.ActiveWorldFileData.Seed + "_BeachHouse"
         );
@@ -94,13 +96,13 @@ public class SpawnHousesTesting {
     }
 
     private static string? ScreenshotMainBasement() {
-        if (StructureManager.MainBasement is null)
+        if (StructureManager.LegacyStructureChains.Find(s => s is MainBasement) is not MainBasement mainBasement)
             return "No Main Basement";
 
         TestingHelper.TakeScreenshot(
             new Rectangle(
-                StructureManager.MainBasement.EntryPosX - 60,
-                StructureManager.MainBasement.EntryPosY - 20,
+                mainBasement.EntryPosX - 60,
+                mainBasement.EntryPosY - 20,
                 120,
                 200
             ),
@@ -110,14 +112,14 @@ public class SpawnHousesTesting {
     }
 
     private static string? ScreenshotMineshaft() {
-        if (StructureManager.Mineshaft is null)
+        if (StructureManager.LegacyStructures.Find(s => s is Mineshaft) is not Mineshaft mineshaft)
             return "No Mineshaft";
 
         TestingHelper.TakeScreenshot(
             new Rectangle(
-                StructureManager.Mineshaft.X - 10,
-                StructureManager.Mineshaft.Y - 6,
-                StructureManager.Mineshaft.StructureXSize + 20,
+                mineshaft.BoundingBox.Left - 10,
+                mineshaft.BoundingBox.Top - 6,
+                mineshaft.BoundingBox.Width + 20,
                 200
             ),
             Main.ActiveWorldFileData.Seed + "_Mineshaft"

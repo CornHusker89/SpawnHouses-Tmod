@@ -1,4 +1,4 @@
-using SpawnHouses.Structures.Structures;
+using SpawnHouses.Legacy.Structures.StructureTypes;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;

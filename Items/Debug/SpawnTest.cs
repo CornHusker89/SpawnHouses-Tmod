@@ -2,7 +2,6 @@ using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.WorldBuilding;
 
 namespace SpawnHouses.Items.Debug;
 
@@ -21,8 +20,7 @@ public class SpawnTest : ModItem {
         int y = (Main.MouseWorld / 16).ToPoint16().Y;
         
         Console.WriteLine(x + ", " + y);
-        Console.WriteLine($"is {GenVars.rightBeachStart}");
-
+        
         return true;
     }
 }

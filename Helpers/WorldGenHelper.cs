@@ -2,18 +2,24 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Structures.Chains;
-using SpawnHouses.Structures.Structures;
+using SpawnHouses.Common.DataStructures;
+using SpawnHouses.Legacy.Helpers;
+using SpawnHouses.Legacy.Structures.ChainTypes;
+using SpawnHouses.Legacy.Structures.StructureTypes;
 using Terraria;
 using Terraria.ID;
-using Terraria.ModLoader;
 using Terraria.WorldBuilding;
-using BoundingBox = SpawnHouses.Types.BoundingBox;
 
 namespace SpawnHouses.Helpers;
 
 public static class WorldGenHelper {
-    private static byte _mainHouseOffsetDirection = Directions.None;
+    // im trying to move away from relying on legacy and assumptions about what sturctures there are, these are okay
+    // because they're private and just shortcuts to the actual list in the structure manager
+    private static MainHouse _mainHouse;
+    private static Mineshaft _mineshaft;
+
+
+    private static byte _mainHouseOffsetDirection = LegacyDirections.None;
 
     public static void GenerateMainHouse() {
         bool spawnUnderworld =
@@ -46,7 +52,7 @@ public static class WorldGenHelper {
             }
 
             try {
-                if (CompatabilityHelper.IsRemnantsEnabled || ModContent.GetInstance<SpawnHousesConfig>().SpawnPointHouseOffset) {
+                if (CompatabilityHelper.IsRemnantsEnabled || SpawnHousesMod.Config.SpawnPointHouseOffset) {
                     List<((double average, double sd) raycast, int offset)> positions = [
                         ((0, 0), -200),
                         ((0, 0), -150),
@@ -58,23 +64,23 @@ public static class WorldGenHelper {
 
                     for (int i = 0; i < positions.Count; i++) {
                         int offset = positions[i].offset;
-                        positions[i] = (StructureGenHelper.GetSurfaceLevel(initialX + offset - 42, initialX + offset + 42, initialY, maxCastDistance: 400), offset);
+                        positions[i] = (RaycastHelper.GetSurfaceLevel(initialX + offset - 42, initialX + offset + 42, initialY, maxCastDistance: 400), offset);
                     }
 
                     ((double average, double sd) raycast, int offset) selectedPosition = positions.MinBy(tuple => tuple.raycast.sd);
 
                     initialX += selectedPosition.offset;
                     initialY = (int)selectedPosition.raycast.average;
-                    _mainHouseOffsetDirection = selectedPosition.offset > 0 ? Directions.Right : Directions.Left;
+                    _mainHouseOffsetDirection = selectedPosition.offset > 0 ? LegacyDirections.Right : LegacyDirections.Left;
                 }
                 else {
-                    (double average, double sd) surface = StructureGenHelper.GetSurfaceLevel(initialX - 42, initialX + 42, initialY,
+                    (double average, double sd) surface = RaycastHelper.GetSurfaceLevel(initialX - 42, initialX + 42, initialY,
                         maxCastDistance: 400);
                     initialY = (int)surface.average;
                 }
             }
             catch (Exception e) {
-                ModContent.GetInstance<SpawnHousesMod>().Logger.Error($"Main house failed to generate:\n{e}");
+                SpawnHousesMod.Instance.Logger.Error($"Main house failed to generate:\n{e}");
                 return;
             }
 
@@ -93,19 +99,20 @@ public static class WorldGenHelper {
 
         // just in case something above got fucked up
         if (!foundValidSpot) {
-            ModContent.GetInstance<SpawnHousesMod>().Logger
+            SpawnHousesMod.Instance.Logger
                 .Error(
                     "Failed to generate SpawnPointHouse. Please report this world seed and your client.log to the mod's author");
             return;
         }
 
         try {
-            MainHouse house = new((ushort)(initialX - 31), (ushort)(initialY - 26), hasBasement: ModContent.GetInstance<SpawnHousesConfig>().EnableSpawnPointBasement, inUnderworld: spawnUnderworld);
+            MainHouse house = new((ushort)(initialX - 31), (ushort)(initialY - 26), hasBasement: SpawnHousesMod.Config.EnableSpawnPointBasement, inUnderworld: spawnUnderworld);
             house.Generate();
-            StructureManager.MainHouse = house;
+            StructureManager.LegacyStructures.Add(house);
+            _mainHouse = house;
 
             // move the spawn point to the upper floor of the house
-            if (ModContent.GetInstance<SpawnHousesConfig>().SpawnPointHouseSetsSpawn) {
+            if (SpawnHousesMod.Config.SpawnPointHouseSetsSpawn) {
                 Main.spawnTileX = initialX + house.LeftSize - 1 - 31;
                 Main.spawnTileY = initialY + 5 - 15;
             }
@@ -129,7 +136,7 @@ public static class WorldGenHelper {
                 ));
         }
         catch (Exception e) {
-            ModContent.GetInstance<SpawnHousesMod>().Logger.Error($"Main house failed to generate:\n{e}");
+            SpawnHousesMod.Instance.Logger.Error($"Main house failed to generate:\n{e}");
         }
     }
 
@@ -137,8 +144,8 @@ public static class WorldGenHelper {
         int x, y;
         try {
             bool FindValidLocation(bool left = true) {
-                if (StructureManager.MainHouse != null) {
-                    int centerHouse = StructureManager.MainHouse.X + StructureManager.MainHouse.StructureXSize / 2;
+                if (_mainHouse != null) {
+                    int centerHouse = _mainHouse.BoundingBox.Left + _mainHouse.BoundingBox.Width / 2;
                     if (left)
                         x = centerHouse - WorldGen.genRand.Next(18, 38) - 35;
                     else
@@ -151,43 +158,44 @@ public static class WorldGenHelper {
                         x = Main.spawnTileX + WorldGen.genRand.Next(18, 34) + 35;
                 }
 
-                (double average, double sd) surfaceLevel = StructureGenHelper.GetSurfaceLevel(x - 10, x + 11, Main.spawnTileY - 24);
+                (double average, double sd) surfaceLevel = RaycastHelper.GetSurfaceLevel(x - 10, x + 11, Main.spawnTileY - 24);
                 y = (int)surfaceLevel.average;
 
                 return surfaceLevel.sd <= 2.8;
             }
 
             bool startLeftSide;
-            if (_mainHouseOffsetDirection == Directions.None)
+            if (_mainHouseOffsetDirection == LegacyDirections.None)
                 startLeftSide = WorldGen.genRand.NextBool();
             else
-                startLeftSide = _mainHouseOffsetDirection == Directions.Left;
+                startLeftSide = _mainHouseOffsetDirection == LegacyDirections.Left;
 
             if (FindValidLocation(startLeftSide) || FindValidLocation(!startLeftSide)) {
                 Mineshaft mineshaft = new((ushort)(x - 13), (ushort)(y - 13));
                 mineshaft.Generate();
-                StructureManager.Mineshaft = mineshaft;
+                StructureManager.LegacyStructures.Add(mineshaft);
+                _mineshaft = mineshaft;
             }
         }
         catch (Exception e) {
-            ModContent.GetInstance<SpawnHousesMod>().Logger.Error($"Mineshaft failed to generate:\n{e}");
+            SpawnHousesMod.Instance.Logger.Error($"Mineshaft failed to generate:\n{e}");
         }
     }
 
 
     public static void GenerateMainBasement() {
-        BoundingBox[] mineshaftBoundingBox = [];
-        if (StructureManager.Mineshaft is not null) {
-            Mineshaft structure = StructureManager.Mineshaft;
-            BoundingBox structureBox = new(structure.X - 8, structure.Y,
-                structure.X + structure.StructureXSize + 8, structure.Y + 200);
+        TileBox[] mineshaftBoundingBox = [];
+        if (_mineshaft is not null) {
+            Mineshaft structure = _mineshaft;
+            TileBox structureBox = new(structure.BoundingBox.Left - 8, structure.BoundingBox.Top,
+                structure.BoundingBox.Left + structure.BoundingBox.Width + 8, structure.BoundingBox.Top + 200);
             mineshaftBoundingBox = [structureBox];
         }
 
         MainBasement chain;
-        if (StructureManager.MainHouse is not null)
-            chain = new MainBasement((ushort)StructureManager.MainHouse.BasementEntryPos.X,
-                (ushort)StructureManager.MainHouse.BasementEntryPos.Y,
+        if (_mainHouse is not null)
+            chain = new MainBasement((ushort)_mainHouse.BasementEntryPos.X,
+                (ushort)_mainHouse.BasementEntryPos.Y,
                 startingBoundingBoxes: mineshaftBoundingBox);
         else
             chain = new MainBasement((ushort)Main.spawnTileX, (ushort)Main.spawnTileY,
@@ -197,10 +205,10 @@ public static class WorldGenHelper {
             try {
                 chain.CalculateChain();
                 chain.Generate();
-                StructureManager.MainBasement = chain;
+                StructureManager.LegacyStructureChains.Add(chain);
             }
             catch (Exception e) {
-                ModContent.GetInstance<SpawnHousesMod>().Logger.Error($"Main basement failed to generate:\n{e}");
+                SpawnHousesMod.Instance.Logger.Error($"Main basement failed to generate:\n{e}");
             }
     }
 
@@ -230,7 +238,7 @@ public static class WorldGenHelper {
                 ? new BeachHouse((ushort)(tileX - 9), (ushort)(tileY - 32))
                 : new BeachHouse((ushort)(tileX - 23), (ushort)(tileY - 32), reverse: true);
             beachHouse.Generate();
-            StructureManager.BeachHouse = beachHouse;
+            StructureManager.LegacyStructures.Add(beachHouse);
 
             // firepit generation
             if (WorldGen.genRand.Next(0, 3) == 0) // 1/3 chance
@@ -271,7 +279,7 @@ public static class WorldGenHelper {
                 ));
         }
         catch (Exception e) {
-            ModContent.GetInstance<SpawnHousesMod>().Logger.Error($"Beach house failed to generate:\n{e}");
+            SpawnHousesMod.Instance.Logger.Error($"Beach house failed to generate:\n{e}");
         }
     }
 }

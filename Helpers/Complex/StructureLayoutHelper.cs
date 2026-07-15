@@ -12,12 +12,10 @@ using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Common.Types.Geometry;
-using SpawnHouses.Legacy.Structures;
+using SpawnHouses.Legacy.Helpers;
 using Terraria;
 using Terraria.DataStructures;
-using Terraria.ModLoader;
 using Terraria.Utilities.Terraria.Utilities;
-using Range = SpawnHouses.Legacy.Structures.Range;
 
 namespace SpawnHouses.Helpers.Complex;
 
@@ -104,7 +102,7 @@ public static class StructureLayoutHelper {
         /// <param name="validCutRange"></param>
         /// <returns></returns>
         private static HashSet<int> GetValidSplits(Shape roomVolume, PriorityCollection<PartialPoint> prioritySplits, bool splitAlongX, int splitWidth,
-            HashSet<int> verticalGapXs, HashSet<int> horizontalGapYs, Range validCutRange) {
+            HashSet<int> verticalGapXs, HashSet<int> horizontalGapYs, NumRange validCutRange) {
             // ensure that, taking blocklisted coordinates into account, there is valid places for the split
             HashSet<int> validSplitStarts = [];
             foreach (var tuple in prioritySplits.ToSortedHashSetArray()) {
@@ -161,10 +159,10 @@ public static class StructureLayoutHelper {
         /// <remarks>fully clears blocklist before returning</remarks>
         private static RoomLayout SplitBsp(RoomLayoutParams param, Room room, PriorityCollection<PartialPoint> prioritySplits, bool prioritizeSplitsOnGapFloors, int targetRoomCount) {
             if (param.RoomHeight.Max < param.FloorWidth.Max + 2 * param.RoomHeight.Min)
-                ModContent.GetInstance<SpawnHouses>().Logger.Warn(
+                SpawnHousesMod.Instance.Logger.Warn(
                     $"a max room height of {param.RoomHeight.Max} was given, but at least {param.FloorWidth.Max + 2 * param.RoomHeight.Min} is required");
             if (param.RoomWidth.Max < param.WallWidth.Max + 2 * param.RoomWidth.Min)
-                ModContent.GetInstance<SpawnHouses>().Logger.Warn(
+                SpawnHousesMod.Instance.Logger.Warn(
                     $"a max room height of {param.RoomWidth.Max} was given, but at least {param.WallWidth.Max + 2 * param.RoomWidth.Min} is required");
 
             List<(Shape volume, string name)> floorVolumes = [], wallVolumes = [], finishedRoomVolumes = [];
@@ -212,7 +210,7 @@ public static class StructureLayoutHelper {
 
                 int iterationSplitWidth = splitAlongX ? iterationFloorWidth : iterationWallWidth;
                 int outerBoundaryWidth = splitAlongX ? param.RoomHeight.Min : param.RoomWidth.Min;
-                Range validCutRange = new((splitAlongX ? roomVolume.BoundingBox.Top : roomVolume.BoundingBox.Left) + outerBoundaryWidth,
+                NumRange validCutRange = new((splitAlongX ? roomVolume.BoundingBox.Top : roomVolume.BoundingBox.Left) + outerBoundaryWidth,
                     (splitAlongX ? roomVolume.BoundingBox.Bottom : roomVolume.BoundingBox.Right) - outerBoundaryWidth - iterationSplitWidth
                 );
 
@@ -393,13 +391,13 @@ public static class StructureLayoutHelper {
                         structure,
                         new Shape(
                             true,
-                            entryPoint.Start + new Point16(entryPoint.Direction is LegacyDirections.Right ? -wallWidth + 1 : wallWidth - 1, 0),
-                            entryPoint.End + new Point16(entryPoint.Direction is LegacyDirections.Right ? -wallWidth + 1 : wallWidth - 1, 0)
+                            entryPoint.Start + new Point16(entryPoint.EntryDirection is Direction.Right ? -wallWidth + 1 : wallWidth - 1, 0),
+                            entryPoint.End + new Point16(entryPoint.EntryDirection is Direction.Right ? -wallWidth + 1 : wallWidth - 1, 0)
                         ),
                         null!,
                         null,
                         true,
-                        entryPoint.Direction is LegacyDirections.Left ? $"EP_Left_GenOrder{i}" : $"EP_Right_GenOrder{i}"
+                        entryPoint.EntryDirection is Direction.Left ? $"EP_Left_GenOrder{i}" : $"EP_Right_GenOrder{i}"
                     );
                 else
                     gaps[i] = new Gap(
@@ -407,12 +405,12 @@ public static class StructureLayoutHelper {
                         new Shape(
                             true,
                             entryPoint.Start,
-                            entryPoint.End + new Point16(0, entryPoint.Direction is LegacyDirections.Down ? floorWidth - 1 : -floorWidth + 1)
+                            entryPoint.End + new Point16(0, entryPoint.EntryDirection is Direction.Down ? floorWidth - 1 : -floorWidth + 1)
                         ),
                         null!,
                         null,
                         false,
-                        entryPoint.Direction is LegacyDirections.Up ? $"EntryPoint_Up_GenOrder{i}" : $"EntryPoint_Down_GenOrder{i}"
+                        entryPoint.EntryDirection is LegacyDirections.Up ? $"EntryPoint_Up_GenOrder{i}" : $"EntryPoint_Down_GenOrder{i}"
                     );
             }
 
