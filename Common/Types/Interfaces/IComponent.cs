@@ -5,6 +5,7 @@ using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Common.Types.Geometry;
+using SpawnHouses.Common.Types.Interfaces;
 using SpawnHouses.Helpers;
 using Terraria;
 using Terraria.DataStructures;
@@ -12,7 +13,7 @@ using Terraria.Utilities;
 
 namespace SpawnHouses.Common.Modules;
 
-public interface IComponent : IGeneratable {
+public interface IComponent : IAdvGeneratable {
     /// <summary>
     ///     geometry that this component will occupy. set by the shape in the params at the time of component generation
     /// </summary>
@@ -32,7 +33,7 @@ public interface IComponent<out TGeometry> : IComponent
     public new TGeometry Geometry { get; }
 }
 
-public abstract class VolumeComponent : Generatable<VolumeComponent, VolumeComponentParams, VolumeComponentGenerator>, IComponent<Shape> {
+public abstract class VolumeComponent : AdvGeneratable<VolumeComponent, VolumeComponentParams, VolumeComponentAdvGenerator>, IComponent<Shape> {
     private readonly DebugLabel _label;
     public Shape Geometry { get; set; }
 
@@ -65,7 +66,7 @@ public abstract class VolumeComponent : Generatable<VolumeComponent, VolumeCompo
     }
 }
 
-public abstract class PathComponent : Generatable<PathComponent, PathComponentParams, PathComponentGenerator>, IComponent<Path> {
+public abstract class PathComponent : AdvGeneratable<PathComponent, PathComponentParams, PathComponentAdvGenerator>, IComponent<Path> {
     private readonly DebugLabel _label;
     public Path Geometry { get; set; }
 

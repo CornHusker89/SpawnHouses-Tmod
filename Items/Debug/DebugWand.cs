@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Common;
+using SpawnHouses.Common.Types.StructureTypes;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;

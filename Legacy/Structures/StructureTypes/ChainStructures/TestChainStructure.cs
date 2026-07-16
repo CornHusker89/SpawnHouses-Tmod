@@ -6,7 +6,7 @@ namespace SpawnHouses.Legacy.Structures.StructureTypes.ChainStructures;
 public sealed class TestChainStructure : LegacyChainStructure {
     public TestChainStructure(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
         ushort weight = 10) :
-        base("Assets/StructureFiles/chainTest.shstruct",
+        base("Common/Assets/StructureFiles/chainTest.shstruct",
             15,
             13,
             [

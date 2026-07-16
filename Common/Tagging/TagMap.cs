@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SpawnHouses.Common.Types;
+using SpawnHouses.Common.Types.Interfaces;
 
 namespace SpawnHouses.Common.Tagging;
 
@@ -37,23 +37,23 @@ public sealed class TagMap {
     }
 
     /// <summary>
-    ///     adds the given tag to the <see cref="IGeneratable.Params.TagsRequired" /> of each generatable
+    ///     adds the given tag to the <see cref="IAdvGeneratable.Params.TagsRequired" /> of each advGeneratable
     /// </summary>
     /// <param name="generatables"></param>
     /// <param name="tag"></param>
     /// <param name="value"></param>
     /// <typeparam name="T"></typeparam>
-    public static void AddRequiredToEach<T>(IEnumerable<IGeneratable> generatables, Tag<T> tag, T? value) {
-        foreach (IGeneratable generatable in generatables) generatable.Params.TagsRequired.Add(tag, value);
+    public static void AddRequiredToEach<T>(IEnumerable<IAdvGeneratable> generatables, Tag<T> tag, T? value) {
+        foreach (IAdvGeneratable generatable in generatables) generatable.Params.TagsRequired.Add(tag, value);
     }
 
     /// <summary>
-    ///     adds the given tag to the <see cref="IGeneratable.Params.TagsRequired" /> of each generatable
+    ///     adds the given tag to the <see cref="IAdvGeneratable.Params.TagsRequired" /> of each advGeneratable
     /// </summary>
     /// <param name="generatables"></param>
     /// <param name="tag"></param>
-    public static void AddRequiredToEach(IEnumerable<IGeneratable> generatables, Tag tag) {
-        foreach (IGeneratable generatable in generatables) generatable.Params.TagsRequired.Add(tag);
+    public static void AddRequiredToEach(IEnumerable<IAdvGeneratable> generatables, Tag tag) {
+        foreach (IAdvGeneratable generatable in generatables) generatable.Params.TagsRequired.Add(tag);
     }
 
     private readonly Dictionary<Tag, object?> _data = new();

@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SpawnHouses.Common;
 using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types.Geometry;
+using SpawnHouses.Common.Types.StructureTypes;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Helpers;
@@ -92,7 +92,7 @@ public static class ExternalLayoutHelper {
     ///     creates floor and walls as needed to fulfill the given path. intended to create structure roofs
     /// </summary>
     /// <param name="structure"></param>
-    /// <param name="path">name represents the name of the generatable created by that point and the one before it. the component type and path index are already added</param>
+    /// <param name="path">name represents the name of the advGeneratable created by that point and the one before it. the component type and path index are already added</param>
     /// <param name="floorWidth"></param>
     /// <param name="extendWallsHigher"></param>
     /// <param name="wallWidth"></param>

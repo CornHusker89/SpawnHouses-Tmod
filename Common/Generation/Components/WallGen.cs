@@ -16,7 +16,7 @@ public static class WallGen {
     ///     Fills the volume with primary walls
     /// </summary>
     [ModuleGenerator(typeof(Wall))]
-    public class WallGenerator1 : VolumeComponentGenerator {
+    public class WallGenerator1 : VolumeComponentAdvGenerator {
         public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
                 Tags.External
@@ -39,7 +39,7 @@ public static class WallGen {
     ///     Fills a volume with random wall blocks, with special vertical blocks at the first and last x position of every other row
     /// </summary>
     [ModuleGenerator(typeof(Wall))]
-    public class WallGenerator2 : VolumeComponentGenerator {
+    public class WallGenerator2 : VolumeComponentAdvGenerator {
         public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
                 Tags.External

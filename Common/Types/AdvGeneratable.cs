@@ -4,67 +4,19 @@ using System.Linq;
 using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tagging;
+using SpawnHouses.Common.Types.Interfaces;
 using Terraria;
 using Terraria.Utilities;
 
 namespace SpawnHouses.Common.Types;
 
-public interface IGeneratable : ICanDebugDraw {
-    /// <summary>
-    ///     if the generatable instance has had a generator run on it at least once
-    /// </summary>
-    public bool HasGenerated { get; protected set; }
-    
-    /// <summary>
-    ///     unique number given to each generatable instance in the world. automatically assigned on instance creation, 
-    /// </summary>
-    public ushort Id { get; }
-    
-    /// <summary>
-    ///     generation parameters for this generatable object
-    /// </summary>
-    public IParams Params { get; }
-    
-    /// <summary>
-    ///      tags that this instance currently has
-    /// </summary>
-    public TagMap TagsCurrent { get; }
-
-    /// <summary>
-    ///     creates and executes a component's generator, unlocks it's current tags, and marks the component as generated. correct way to generate modules
-    /// </summary>
-    public void ExecuteGenerator();
-
-    /// <summary>
-    ///     gets the hashcode of a generator's name and namespace. <see cref="ExecuteGenerator"/> must have been called, and <see cref="HasGenerated"/> must be true
-    /// </summary>
-    /// <returns></returns>
-    public int GetGeneratorHash();
-
-    /// <summary>
-    ///     gets the name of the generator
-    /// </summary>
-    /// <returns></returns>
-    public string GetGeneratorName();
-}
-
-public interface IGeneratable<TSelf, TParams, TGenerator> : IGeneratable
-    where TSelf : IGeneratable<TSelf, TParams, TGenerator>
+public abstract class AdvGeneratable<TSelf, TParams, TGenerator> : IAdvGeneratable<TSelf, TParams, TGenerator>
+    where TSelf : AdvGeneratable<TSelf, TParams, TGenerator>
     where TParams : IParams
-    where TGenerator : IGenerator<TParams, TSelf> {
-    
-    IParams IGeneratable.Params => Params;
-    /// <inheritdoc cref="IGeneratable.Params" />
-    public new TParams Params { get; }
-}
-
-public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSelf, TParams, TGenerator>
-    where TSelf : Generatable<TSelf, TParams, TGenerator>
-    where TParams : IParams
-    where TGenerator : IGenerator<TParams, TSelf> {
+    where TGenerator : IAdvGenerator<TParams, TSelf> {
     public DebugInfoLevel DebugInfoVisibility { get; set; }
 
-    /// (ideally) a unique identifier. during assignment, any "#" get replaced with generatable's id
+    /// (ideally) a unique identifier. during assignment, any "#" get replaced with advGeneratable's id
     public string Name { get; }
     
     public bool HasGenerated { get; set; }
@@ -74,7 +26,7 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
 
     protected TGenerator Generator;
 
-    protected Generatable(TParams param, TagMap tagsCurrent, string name) {
+    protected AdvGeneratable(TParams param, TagMap tagsCurrent, string name) {
         Id = StructureManager.NextGeneratableId();
         Params = param;
         TagsCurrent = tagsCurrent;
@@ -86,15 +38,15 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
     public abstract List<DebugLabel> DrawDebugGeometry();
 
     /// <summary>
-    ///     gets a generator for this module
+    ///     gets a advGenerator for this module
     /// </summary>
     /// <param name="generators"></param>
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
-    private IGenerator FindValidGenerator(IGenerator[] generators) {
+    private IAdvGenerator FindValidGenerator(IAdvGenerator[] generators) {
         TagsCurrent.ValidateRequiredTags();
-        List<IGenerator> validGeneratorsList = [];
-        foreach (IGenerator gen in generators)
+        List<IAdvGenerator> validGeneratorsList = [];
+        foreach (IAdvGenerator gen in generators)
             if (gen.CanGenerate(this, Params, new UnifiedRandom(Id)) && Params.TagsRequired.KeysSet.IsSubsetOf(gen.PossibleTags))
                 validGeneratorsList.Add(gen);
 
@@ -112,17 +64,17 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
     private void ValidateTagGeneration() {
         foreach (Tag tag in Params.TagsRequired.Keys)
             if (!TagsCurrent.HasTag(tag))
-                throw new Exception($"missing generatable {this} current tag \"{tag}\" which was required in params");
+                throw new Exception($"missing advGeneratable {this} current tag \"{tag}\" which was required in params");
     }
 
     /// <summary>
-    ///     sets this module's generator
+    ///     sets this module's advGenerator
     /// </summary>
     /// <exception cref="Exception"></exception>
     protected void SetGenerator() {
         Type instanceType = GetType();
         if (!GlobalGeneratorUtils.InstanceGenerators.TryGetValue(instanceType, out var generators)) throw new Exception($"instance type {GetType().FullName} generators not found");
-        var typedGenerators = generators.Cast<IGenerator>().ToArray();
+        var typedGenerators = generators.Cast<IAdvGenerator>().ToArray();
 
         int generatorIndex = 0;
         if (!Params.Structure.InstanceGeneratorQueue.TryGetValue(instanceType, out var generatorList)) {
@@ -147,7 +99,7 @@ public abstract class Generatable<TSelf, TParams, TGenerator> : IGeneratable<TSe
 
         TagsCurrent.IsLocked = false;
         if (!Generator!.Generate(this, Params, new UnifiedRandom(Id), Params.Structure.Palette, Params.Structure.Tilemap))
-            throw new Exception($"generator execution failed on module {ToString()}");
+            throw new Exception($"advGenerator execution failed on module {ToString()}");
         ValidateTagGeneration();
         TagsCurrent.ValidateCurrentTags();
         TagsCurrent.IsLocked = true;

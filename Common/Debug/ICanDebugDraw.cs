@@ -4,7 +4,14 @@ using Terraria;
 namespace SpawnHouses.Common.Debug;
 
 public interface ICanDebugDraw {
+    /// <summary>
+    ///     what this instance is called, used mostly for debug and better identification
+    /// </summary>
     public string Name { get; }
+
+    /// <summary>
+    ///     the current debug visibility level of this instance
+    /// </summary>
     public DebugInfoLevel DebugInfoVisibility { get; set; }
 
     /// <summary>

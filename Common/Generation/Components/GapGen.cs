@@ -16,7 +16,7 @@ public class GapGen {
     ///     A gap floor, places platforms and places walls if external
     /// </summary>
     [ModuleGenerator(typeof(Gap))]
-    public class FloorGapGenerator1 : VolumeComponentGenerator {
+    public class FloorGapGenerator1 : VolumeComponentAdvGenerator {
         public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
                 Tags.External
@@ -64,7 +64,7 @@ public class GapGen {
     ///     gap wall, places door and places walls if external
     /// </summary>
     [ModuleGenerator(typeof(Gap))]
-    public class WallGapGenerator1 : VolumeComponentGenerator {
+    public class WallGapGenerator1 : VolumeComponentAdvGenerator {
         public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
                 Tags.External

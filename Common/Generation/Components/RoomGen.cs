@@ -17,7 +17,7 @@ public static class RoomGen {
     ///     Fills in sections of 3-wide primary tiles, with accents and beams
     /// </summary>
     [ModuleGenerator(typeof(Room))]
-    public class RoomGenerator2 : VolumeComponentGenerator {
+    public class RoomGenerator2 : VolumeComponentAdvGenerator {
         public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
                 Tags.RoomTypeBedroom
@@ -53,7 +53,7 @@ public static class RoomGen {
     ///     Fills in sections of 3-wide primary tiles, with accents and beams
     /// </summary>
     [ModuleGenerator(typeof(Room))]
-    public class RoomGenerator3 : VolumeComponentGenerator {
+    public class RoomGenerator3 : VolumeComponentAdvGenerator {
         public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
                 Tags.RoomTypeLiving,

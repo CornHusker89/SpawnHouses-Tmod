@@ -1,6 +1,5 @@
 using Microsoft.Xna.Framework;
 using SpawnHouses.Legacy.Helpers;
-using SpawnHouses.Legacy.Structures;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
@@ -20,13 +19,13 @@ public class SpawnHousesPlayer : ModPlayer {
             _frameCounter = 0;
             Point16 pos = Player.Center.ToTileCoordinates16();
 
-            foreach (LegacyStructure structure in StructureManager.LegacyStructures)
-                if (structure.Status == StructureStatus.GeneratedButNotFound && structure.IsFound(pos))
-                    structure.OnFound();
-
-            foreach (LegacyStructureChain structure in StructureManager.LegacyStructureChains) {
-                if (structure.Status == StructureStatus.GeneratedButNotFound && structure.IsFound(pos)) structure.OnFound();
-            }
+            // foreach (LegacyStructure structure in StructureManager.LegacyStructures)
+            //     if (structure.Status == StructureStatus.GeneratedButNotFound && structure.IsFound(pos))
+            //         structure.OnFound();
+            //
+            // foreach (LegacyStructureChain structure in StructureManager.LegacyStructureChains) {
+            //     if (structure.Status == StructureStatus.GeneratedButNotFound && structure.IsFound(pos)) structure.OnFound();
+            // }
         }
     }
 }

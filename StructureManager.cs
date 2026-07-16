@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Common;
 using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types;
+using SpawnHouses.Common.Types.Interfaces;
+using SpawnHouses.Common.Types.StructureTypes;
 using SpawnHouses.Helpers;
 using SpawnHouses.Items.Debug;
 using SpawnHouses.Legacy.Helpers;
@@ -16,7 +17,6 @@ using SpawnHouses.Legacy.Structures;
 using SpawnHouses.Legacy.Structures.ChainTypes;
 using SpawnHouses.Legacy.Structures.StructureTypes;
 using Terraria;
-using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
@@ -44,7 +44,7 @@ internal class StructureManager : ModSystem {
     public static readonly List<LegacyStructureChain> LegacyStructureChains = [];
 
     /// <summary>
-    ///     the number of generatable components (exclusive to AdvStructures) that have been generated in this world. used to assign unique ids to components
+    ///     the number of advGeneratable components (exclusive to AdvStructures) that have been generated in this world. used to assign unique ids to components
     /// </summary>
     public static ushort GeneratableCount { get; private set; }
 
@@ -163,7 +163,7 @@ internal class StructureManager : ModSystem {
             Color color;
             if (label.ParentObj is IComponent component)
                 color = DrawHelper.GetColor(component);
-            else if (label.ParentObj is IGeneratable generatable)
+            else if (label.ParentObj is IAdvGeneratable generatable)
                 color = DrawHelper.GetColor(generatable.Id);
             else if (label.ParentObj is StructureTilemap tilemap)
                 color = DrawHelper.GetColor(tilemap.Structure.StructureLayout.Id);
@@ -223,17 +223,6 @@ internal class StructureManager : ModSystem {
                 }
             }
     }
-}
-
-internal class Point16Serializer : TagSerializer<Point16, TagCompound> {
-    public override TagCompound Serialize(Point16 data) {
-        TagCompound tag = [];
-        tag["X"] = data.X;
-        tag["Y"] = data.Y;
-        return tag;
-    }
-
-    public override Point16 Deserialize(TagCompound tag) => new(tag.Get<short>("X"), tag.Get<short>("Y"));
 }
 
 internal class DictionarySerializer : TagSerializer<Dictionary<string, object>, TagCompound> {

@@ -7,6 +7,7 @@ using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Palette;
 using SpawnHouses.Common.Types.Interfaces;
+using SpawnHouses.Common.Types.StructureTypes;
 using SpawnHouses.Helpers;
 using Terraria;
 using Terraria.DataStructures;

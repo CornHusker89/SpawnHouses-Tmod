@@ -7,12 +7,12 @@ using Terraria.ID;
 namespace SpawnHouses.Legacy.Structures.StructureTypes;
 
 public sealed class BeachHouse : LegacyStructure {
-    public static readonly string _filePath = "Assets/StructureFiles/beachHouse/beachHouse_v2.shstruct";
-    public static readonly string _filePath_r = "Assets/StructureFiles/beachHouse/beachHouse_v2_r.shstruct";
+    public static readonly string _filePath = "Common/Assets/StructureFiles/beachHouse/beachHouse_v2.shstruct";
+    public static readonly string _filePath_r = "Common/Assets/StructureFiles/beachHouse/beachHouse_v2_r.shstruct";
     public static readonly ushort _structureXSize = 35;
     public static readonly ushort _structureYSize = 26;
 
-    public static readonly string _filePathNoDeck = "Assets/StructureFiles/beachHouse/beachHouse_v2_NoDeck.shstruct";
+    public static readonly string _filePathNoDeck = "Common/Assets/StructureFiles/beachHouse/beachHouse_v2_NoDeck.shstruct";
     public static readonly ushort _structureXSizeNoDeck = 24;
     public static readonly ushort _structureYSizeNoDeck = 34;
 

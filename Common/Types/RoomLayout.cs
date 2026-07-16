@@ -4,6 +4,7 @@ using System.Linq;
 using SpawnHouses.Common.Modules.Components;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Types.Geometry;
+using SpawnHouses.Common.Types.StructureTypes;
 using SpawnHouses.Helpers;
 using Terraria.DataStructures;
 

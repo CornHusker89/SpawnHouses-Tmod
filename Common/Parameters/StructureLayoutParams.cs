@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types;
+using SpawnHouses.Common.Types.StructureTypes;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Common.Parameters;

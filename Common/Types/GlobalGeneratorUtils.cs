@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using SpawnHouses.Common.Types.Interfaces;
 
 namespace SpawnHouses.Common.Types;
 
 public static class GlobalGeneratorUtils {
     /// <summary>type corresponds to the final component's type</summary>
-    public static readonly Dictionary<Type, List<IGenerator>> InstanceGenerators = new();
+    public static readonly Dictionary<Type, List<IAdvGenerator>> InstanceGenerators = new();
 
 
     public static void LoadGenerators(Assembly assembly) {
@@ -17,7 +18,7 @@ public static class GlobalGeneratorUtils {
             if (moduleInfo != null) {
                 if (!InstanceGenerators.TryGetValue(moduleInfo.ModuleType, out var generatorList))
                     InstanceGenerators[moduleInfo.ModuleType] = generatorList = [];
-                generatorList.Add((IGenerator)Activator.CreateInstance(type));
+                generatorList.Add((IAdvGenerator)Activator.CreateInstance(type));
             }
         }
     }

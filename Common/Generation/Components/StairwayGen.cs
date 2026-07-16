@@ -16,7 +16,7 @@ public class StairwayGen {
     /// <summary>
     /// </summary>
     [ModuleGenerator(typeof(Stairway))]
-    public class StairwayGenerator1 : PathComponentGenerator {
+    public class StairwayGenerator1 : PathComponentAdvGenerator {
         public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
                 Tags.StairwayToHorizontalGap

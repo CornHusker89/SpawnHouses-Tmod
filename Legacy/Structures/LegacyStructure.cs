@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework;
 using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Types.Interfaces;
 using SpawnHouses.Enums;
-using SpawnHouses.Legacy.Helpers;
 using SpawnHouses.Legacy.Structures.StructureParts;
 using StructureHelper.API;
 using Terraria;
@@ -13,7 +12,7 @@ using Terraria.WorldBuilding;
 
 namespace SpawnHouses.Legacy.Structures;
 
-public abstract class LegacyStructure : IBoundingBox, IFindable {
+public abstract class LegacyStructure : IBoundingBox, IStructureRoot {
     public TileBox BoundingBox { get; protected set; }
     
     public ConnectPoint[][] ConnectPoints;

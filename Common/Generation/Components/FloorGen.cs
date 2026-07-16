@@ -17,7 +17,7 @@ public static class FloorGen {
     ///     Fills a volume floor blocks
     /// </summary>
     [ModuleGenerator(typeof(Floor))]
-    public class FloorGenerator1 : VolumeComponentGenerator {
+    public class FloorGenerator1 : VolumeComponentAdvGenerator {
         public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
                 Tags.External
@@ -41,7 +41,7 @@ public static class FloorGen {
     // ///     Fills a volume with random blocks, but the top block consistent
     // /// </summary>
     // [ComponentGenerator(typeof(Floor))]
-    // public class FloorGenerator3 : VolumeComponentGenerator {
+    // public class FloorGenerator3 : VolumeComponentAdvGenerator {
     //     public override HashSet<ComponentTag> GetPossibleTags() {
     //         return [
     //             ComponentTag.FloorSolid,
@@ -88,7 +88,7 @@ public static class FloorGen {
     ///     Fills top and bottom of volume, adds support struts in the middle
     /// </summary>
     [ModuleGenerator(typeof(Floor))]
-    public class FloorGenerator4 : VolumeComponentGenerator {
+    public class FloorGenerator4 : VolumeComponentAdvGenerator {
         public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
                 Tags.FloorHollow

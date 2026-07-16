@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework;
 using SpawnHouses.Common.DataStructures;
-using SpawnHouses.Common.Types;
+using SpawnHouses.Common.Types.Interfaces;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent;
@@ -38,9 +38,9 @@ public class DebugLabel {
             str += $"{ParentObj.Name}\n";
         if (debugLevel.DisplayType)
             str += $"{ParentObj.GetType().Name}\n";
-        if (debugLevel.DisplayId && ParentObj is IGeneratable generatable)
+        if (debugLevel.DisplayId && ParentObj is IAdvGeneratable generatable)
             str += $"Id: {generatable.Id}\n";
-        if (debugLevel.DisplayGenerator && ParentObj is IGeneratable generatable2)
+        if (debugLevel.DisplayGenerator && ParentObj is IAdvGeneratable generatable2)
             str += $"{generatable2.GetGeneratorName()}\n";
 
         // prune trailing newline

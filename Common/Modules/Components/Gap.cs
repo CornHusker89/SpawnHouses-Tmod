@@ -1,6 +1,7 @@
 #nullable enable
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Types.Geometry;
+using SpawnHouses.Common.Types.StructureTypes;
 
 namespace SpawnHouses.Common.Modules.Components;
 

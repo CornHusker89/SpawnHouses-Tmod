@@ -1,4 +1,5 @@
 using SpawnHouses.Common.Tagging;
+using SpawnHouses.Common.Types.StructureTypes;
 
 namespace SpawnHouses.Common.Parameters;
 

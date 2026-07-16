@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SpawnHouses.Common;
 using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Modules.Components;
@@ -12,6 +11,7 @@ using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types;
 using SpawnHouses.Common.Types.Geometry;
+using SpawnHouses.Common.Types.StructureTypes;
 using SpawnHouses.Legacy.Helpers;
 using Terraria;
 using Terraria.DataStructures;

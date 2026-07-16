@@ -15,12 +15,6 @@ public static class LegacyDirections {
     }
 }
 
-public static class StructureStatus {
-    public const byte NotGenerated = 0;
-    public const byte GeneratedButNotFound = 1;
-    public const byte GeneratedAndFound = 2;
-}
-
 public static class GenerateChances {
     public const byte Rejected = 0;
     public const byte Neutral = 1;

@@ -5,30 +5,36 @@ using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Palette;
 using SpawnHouses.Common.Parameters;
 using SpawnHouses.Common.Tiles;
-using SpawnHouses.Common.Types;
+using SpawnHouses.Common.Types.Interfaces;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.Utilities;
 using IComponent = SpawnHouses.Common.Modules.IComponent;
 
-namespace SpawnHouses.Common;
+namespace SpawnHouses.Common.Types.StructureTypes;
 
 /// <summary>
 ///     the central object that everything for adv. structures revolve around
 /// </summary>
-public class AdvStructure : ICanDebugDraw {
-    
+public class AdvStructure : ICanDebugDraw, IStructureRoot {
+    // ICanDebugDraw
     public DebugInfoLevel DebugInfoVisibility { get; set; }
     public string Name { get; init; }
-    
-    public readonly Dictionary<Type, List<IGenerator>> InstanceGeneratorQueue = [];
+
+    // IStructureRoot
+    public StructureTilemap Tilemap { get; set; }
+    public bool IsTilesPlaced { get; private set; }
+    public bool HasBeenFound { get; set; }
+
+    public readonly Dictionary<Type, List<IAdvGenerator>> InstanceGeneratorQueue = [];
 
     /// <summary>
-    ///     this random generator should only be used for things that ARE related to layouts
+    ///     this random advGenerator should only be used for things that ARE related to layouts
     /// </summary>
     public readonly UnifiedRandom LayoutRandom;
 
     /// <summary>
-    ///     this random generator should only be used for things that are NOT related to layouts
+    ///     this random advGenerator should only be used for things that are NOT related to layouts
     /// </summary>
     public readonly UnifiedRandom OtherRandom;
     
@@ -36,7 +42,6 @@ public class AdvStructure : ICanDebugDraw {
     public StructureLayout StructureLayout;
     public StructureLayoutParams LayoutParam;
     public TilePalette Palette;
-    public StructureTilemap Tilemap;
     public bool FailedLayoutGeneration;
 
     /// <summary>
@@ -44,7 +49,7 @@ public class AdvStructure : ICanDebugDraw {
     /// <param name="name"></param>
     /// <param name="layoutParam"></param>
     /// <param name="palette"></param>
-    /// <param name="seed">if -1, creates a new random seed from the normal terraria random generator</param>
+    /// <param name="seed">if -1, creates a new random seed from the normal terraria random advGenerator</param>
     /// <param name="generate">
     ///     if true, will call <see cref="ApplyLayoutMethod" />, <see cref="FillComponents" />,
     ///     <see cref="Register"/>, and <see cref="PlaceTilemap" /> 
@@ -100,8 +105,8 @@ public class AdvStructure : ICanDebugDraw {
     /// <summary>
     ///     calculates a structure's layout but does not apply component generators
     /// </summary>
-    /// <param name="generator">layout generator to be used. leave null for a random method</param>
-    public void ApplyLayoutMethod(StructureLayoutGenerator generator = null) {
+    /// <param name="advGenerator">layout advGenerator to be used. leave null for a random method</param>
+    public void ApplyLayoutMethod(StructureLayoutAdvGenerator advGenerator = null) {
         if (StructureLayout != null) throw new Exception("this AdvStructure already has a layout set");
 
         StructureLayout = new StructureLayout(LayoutParam, "Layout_Type");
@@ -134,12 +139,25 @@ public class AdvStructure : ICanDebugDraw {
             throw new Exception("No layout has been set");
         if (FailedLayoutGeneration)
             throw new Exception("layout generation was called but failed, aborting placing tilemap");
-
+        
         Tilemap.ApplyTilemap();
+        IsTilesPlaced = true;
     }
 
     /// <summary>
     ///     adds this structure to the global structure list and initializes some debug fields
     /// </summary>
     public void Register() => StructureManager.RegisterStructure(this);
+
+    public bool IsFound(Point16 playerPos) {
+        if (HasBeenFound || !IsTilesPlaced)
+            return false;
+        return playerPos.X > StructureLayout.BoundingBox.Left - 20 &&
+               playerPos.X < StructureLayout.BoundingBox.Right + 20 &&
+               playerPos.X > StructureLayout.BoundingBox.Top - 20 &&
+               playerPos.X < StructureLayout.BoundingBox.Bottom + 20;
+    }
+
+    public void OnFound() {
+    }
 }

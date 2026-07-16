@@ -2,6 +2,7 @@
 using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types.Geometry;
+using SpawnHouses.Common.Types.StructureTypes;
 
 namespace SpawnHouses.Common.Parameters;
 

@@ -13,7 +13,7 @@ using Terraria.DataStructures;
 
 namespace SpawnHouses.Common.Modules;
 
-public class StructureLayout : Generatable<StructureLayout, StructureLayoutParams, StructureLayoutGenerator>, IBoundingBox {
+public class StructureLayout : AdvGeneratable<StructureLayout, StructureLayoutParams, StructureLayoutAdvGenerator>, IBoundingBox {
     private readonly DebugLabel _label;
     
     public string Name => Params.Structure.Name + "_Layout";
