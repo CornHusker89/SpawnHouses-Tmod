@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Types.Interfaces;
 using SpawnHouses.Enums;
+using SpawnHouses.Legacy.Helpers;
 using SpawnHouses.Legacy.Structures.StructureParts;
 using StructureHelper.API;
 using Terraria;

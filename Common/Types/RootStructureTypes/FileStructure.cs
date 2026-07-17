@@ -1,7 +1,8 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using JetBrains.Annotations;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Tiles;
 using SpawnHouses.Common.Types.Enums;
@@ -15,62 +16,65 @@ namespace SpawnHouses.Common.Types.RootStructureTypes;
 /// </summary>
 public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags {
     // IGeneratable
-    public ushort Id { get; private set; }
+    public ushort Id { get; init; }
 
     // IStructureRoot
     public StructureTilemap Tilemap { get; }
     public EntryPoint[] EntryPoints { get; }
     public bool HasBeenFound { get; }
-    public bool IsFound(Point16 playerPos) => _isFound?.Invoke(playerPos) ?? true;
-    public void OnFound() => _onFound?.Invoke();
+    public bool IsFound(Point16 playerPos) => _isFound?.Invoke(this, playerPos) ?? true;
+    public void OnFound() => _onFound?.Invoke(this);
 
     // IStructureTags
     public TagMap TagsCurrent { get; }
 
 
-    /// <summary>called to see if structure should now be considered "found"</summary>
-    [CanBeNull]
-    private readonly Func<Point16, bool> _isFound;
+    /// <inheritdoc cref="IStructureRoot.IsFound" />
+    private readonly Func<FileStructure, Point16, bool>? _isFound;
 
-    /// <summary>called when structure is found</summary>
-    [CanBeNull]
-    private readonly Action _onFound;
+    /// <inheritdoc cref="IStructureRoot.OnFound" />
+    private readonly Action<FileStructure>? _onFound;
 
-    /// <summary>called just after the structure files are loaded into the tilemap</summary>
-    [CanBeNull]
-    private readonly Action _onFilesLoaded;
+    /// <inheritdoc cref="OnTilemapLoaded" />
+    private readonly Action<FileStructure>? _onTilemapLoaded;
 
     public readonly string Name;
 
-    public int TilemapPadding;
+    /// <summary>any special data this structure needs to store</summary>
+    public readonly Dictionary<string, object> Data = [];
 
-    /// <summary> map of the substructures with each of their root (top-left) positions</summary>
-    public readonly Dictionary<string, (string positionID, Point16 position)> Substructures = [];
+    /// <summary>map of the substructures with each positionID being associated with a filename</summary>
+    public readonly Dictionary<string, string> PositionIdToFilename = [];
 
-    public bool HasMultipleSubstructures => Substructures.Keys.Count > 1;
-    public Point16 Size => new(Tilemap.Width - 2 * TilemapPadding, Tilemap.Height - 2 * TilemapPadding);
-    public Point16 Position => Tilemap.GlobalTileOffset + new Point16(TilemapPadding, TilemapPadding);
+    /// <summary>map of the substructures with each positionID being associated with a position</summary>
+    public readonly Dictionary<string, Point16> PositionIdToPosition = [];
 
-    public FileStructure(string name, Point16 size, EntryPoint[] entryPoints, TagMap tagMap, Func<Point16, bool> isFound,
-        Action onFound, Action onTilemapApplied, int tilemapPadding = 1) {
+    public bool HasMultipleSubstructures => PositionIdToFilename.Keys.Count > 1;
+    public Point16 Size => new(Tilemap.Width, Tilemap.Height);
+    public Point16 Position => Tilemap.GlobalTileOffset;
+
+    public FileStructure(string name, Point16 size, EntryPoint[] entryPoints, TagMap tagMap, Func<FileStructure, Point16, bool>? isFound = null,
+        Action<FileStructure>? onFound = null, Action<FileStructure>? onTilemapLoaded = null) {
         if (EntryPoints.Count(entryPoint => entryPoint.Purpose is EntryPointPurpose.GroundLevel) > 2)
             throw new ArgumentException("Cannot have more than 2 ground-level entry points");
 
         Id = StructureManager.NextGeneratableId();
-        Tilemap = new StructureTilemap(this, (ushort)(size.X + 2 * tilemapPadding), (ushort)(size.Y + 2 * tilemapPadding));
+        Tilemap = new StructureTilemap(this, (ushort)size.X, (ushort)size.Y);
         EntryPoints = entryPoints;
         TagsCurrent = tagMap;
         _isFound = isFound;
         _onFound = onFound;
-        _onFilesLoaded = onTilemapApplied;
+        _onTilemapLoaded = onTilemapLoaded;
         Name = name;
-        TilemapPadding = tilemapPadding;
     }
 
-    public void LoadTilemap() {
-        Tilemap.loadfiles();
+    /// <summary>called just after the structure files are loaded into the tilemap</summary>
+    public void OnTilemapLoaded() => _onTilemapLoaded?.Invoke(this);
 
-        _onFilesLoaded?.Invoke();
+    public void LoadTilemap() {
+        foreach (var substructure in PositionIdToFilename) Tilemap.PlaceFile(PositionIdToPosition[substructure.Key], substructure.Value);
+
+        _onTilemapLoaded?.Invoke(this);
     }
 
     public void ApplyTilemap() {
@@ -82,7 +86,7 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
     /// </summary>
     /// <param name="position"></param>
     public void SetPosition(Point16 position) {
-        Tilemap.GlobalTileOffset = position - new Point16(TilemapPadding, TilemapPadding);
+        Tilemap.GlobalTileOffset = position;
         foreach (EntryPoint entryPoint in EntryPoints) entryPoint.SetOffset(position);
     }
 }

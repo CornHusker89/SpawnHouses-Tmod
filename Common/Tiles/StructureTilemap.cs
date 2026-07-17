@@ -239,6 +239,15 @@ public class StructureTilemap : ICanDebugDraw, IBoundingBox {
     }
 
     /// <summary>
+    ///     places a structure helper file into the tilemap (not world) at a specific position
+    /// </summary>
+    /// <param name="topLeftPos"></param>
+    /// <param name="filepath"></param>
+    public void PlaceFile(Point16 topLeftPos, string filepath) {
+        ahhhhhhh
+    }
+
+    /// <summary>
     ///     applies this tilemap (with it's offset) onto main game tilemap
     /// </summary>
     public void ApplyTilemap() {

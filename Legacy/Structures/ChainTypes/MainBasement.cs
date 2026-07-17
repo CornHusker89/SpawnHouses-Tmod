@@ -250,6 +250,6 @@ public class MainBasement : LegacyStructureChain {
         base.OnFound();
 
         Wiring.TripWire(EntryPosX + 2, EntryPosY + 11, 1, 1);
-        Status = StructureStatus.GeneratedAndFound;
+        //Status = StructureStatus.GeneratedAndFound;
     }
 }

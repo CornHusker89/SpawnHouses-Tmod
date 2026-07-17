@@ -8,6 +8,7 @@ using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Tiles;
+using SpawnHouses.Common.Types.Attributes;
 using SpawnHouses.Common.Types.Interfaces;
 using SpawnHouses.Common.Types.StructureTypes;
 using SpawnHouses.Helpers;
@@ -85,13 +86,13 @@ public class StructureManager : ModSystem {
     }
 
     /// <summary>
-    ///     loads all types in the given assembly with <see cref="AdvGeneratorLoadable" /> and <see cref="StructureTemplateLoadable" /> attributes
+    ///     loads all types in the given assembly with <see cref="SpawnHouses.Common.Types.Attributes.AdvGeneratorLoadable" /> and <see cref="StructureTemplateLoadable" /> attributes
     /// </summary>
     /// <param name="assembly"></param>
     public static void LoadGenerators(Assembly assembly) {
         var pluginTypes = assembly.GetTypes();
         foreach (Type type in pluginTypes) {
-            if (type.GetCustomAttribute<StructureTemplateLoadable>() is { } advGeneratorInfo) {
+            if (type.GetCustomAttribute<StructureTemplateLoadable>() is { } structureTemplateInfo) {
             }
 
             // adv generator loading
