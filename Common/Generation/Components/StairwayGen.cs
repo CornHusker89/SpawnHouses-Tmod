@@ -15,7 +15,7 @@ namespace SpawnHouses.Common.Generation.Components;
 public class StairwayGen {
     /// <summary>
     /// </summary>
-    [ModuleGenerator(typeof(Stairway))]
+    [AdvGeneratorLoadable(typeof(Stairway))]
     public class StairwayGenerator1 : PathComponentAdvGenerator {
         public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [

@@ -23,7 +23,7 @@ public class AdvStructure : ICanDebugDraw, IStructureRoot {
 
     // IStructureRoot
     public StructureTilemap Tilemap { get; set; }
-    public bool IsTilesPlaced { get; private set; }
+    public EntryPoint[] EntryPoints => LayoutParam.EntryPoints;
     public bool HasBeenFound { get; set; }
 
     public readonly Dictionary<Type, List<IAdvGenerator>> InstanceGeneratorQueue = [];
@@ -40,7 +40,7 @@ public class AdvStructure : ICanDebugDraw, IStructureRoot {
     
     public readonly int Seed;
     public StructureLayout StructureLayout;
-    public StructureLayoutParams LayoutParam;
+    public readonly StructureLayoutParams LayoutParam;
     public TilePalette Palette;
     public bool FailedLayoutGeneration;
 
@@ -141,7 +141,6 @@ public class AdvStructure : ICanDebugDraw, IStructureRoot {
             throw new Exception("layout generation was called but failed, aborting placing tilemap");
         
         Tilemap.ApplyTilemap();
-        IsTilesPlaced = true;
     }
 
     /// <summary>

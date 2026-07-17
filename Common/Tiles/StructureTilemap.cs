@@ -7,7 +7,6 @@ using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Palette;
 using SpawnHouses.Common.Types.Interfaces;
-using SpawnHouses.Common.Types.StructureTypes;
 using SpawnHouses.Helpers;
 using Terraria;
 using Terraria.DataStructures;
@@ -17,22 +16,32 @@ namespace SpawnHouses.Common.Tiles;
 
 public class StructureTilemap : ICanDebugDraw, IBoundingBox {
     private readonly DebugLabel _label;
-    public DebugInfoLevel DebugInfoVisibility { get; set; }
-    public string Name => Structure.Name + "_Tilemap";
-
-    public TileBox BoundingBox { get; }
-
     private readonly StructureTile[,] _tiles;
-    public readonly AdvStructure Structure;
+    
+    public DebugInfoLevel DebugInfoVisibility { get; set; }
+    public TileBox BoundingBox { get; }
+    public readonly IStructureRoot Structure;
     public List<MultiTile> MultiTiles;
+
+    /// <summary>
+    ///     if there is a full structure loaded into the tilemap. not set by the tilemap itself, set outside the tilemap
+    /// </summary>
+    public bool IsAllTilesLoaded;
+
+    /// <summary>
+    ///     if the tilemap has been placed into the world. set by <see cref="ApplyTilemap" />
+    /// </summary>
+    public bool IsTilesPlaced { get; private set; }
     
     /// <summary>the actual global tile coordinates of the top left tile in this tilemap</summary>
     public Point16 GlobalTileOffset;
 
+    public string Name => Structure.Name + "_Tilemap";
+
     public int Width => BoundingBox.Width;
     public int Height => BoundingBox.Height;
 
-    public StructureTilemap(AdvStructure structure, ushort width, ushort height, Point16? globalTileOffset = null) {
+    public StructureTilemap(IStructureRoot structure, ushort width, ushort height, Point16? globalTileOffset = null) {
         Structure = structure;
         _tiles = new StructureTile[width, height];
         GlobalTileOffset = globalTileOffset ?? new Point16(0, 0);
@@ -285,6 +294,8 @@ public class StructureTilemap : ICanDebugDraw, IBoundingBox {
         for (int x = 0; x < Width; x++)
         for (int y = 0; y < Height; y++)
             StructureTile.SetFrames(ConvertToGlobal(x, y));
+
+        IsTilesPlaced = true;
     }
 
     /// <summary>

@@ -22,7 +22,7 @@ public static class StructureLayoutGen {
     /// <summary>
     ///     a square, possibly with square vertical extrusions. can only have 2 entry points
     /// </summary>
-    [ModuleGenerator(typeof(StructureLayout))]
+    [AdvGeneratorLoadable(typeof(StructureLayout))]
     public class StructureLayoutAdvGenerator1 : StructureLayoutAdvGenerator {
         public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [

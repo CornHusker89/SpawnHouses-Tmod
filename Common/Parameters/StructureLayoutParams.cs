@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Types;
+using SpawnHouses.Common.Types.Enums;
 using SpawnHouses.Common.Types.StructureTypes;
 using Terraria.DataStructures;
 
@@ -20,6 +21,9 @@ public class StructureLayoutParams : IParams {
         EntryPoints = entryPoints;
         Size = size;
         CanAddEntryPoints = canAddEntryPoints;
+
+        if (EntryPoints.Count(entryPoint => entryPoint.Purpose is EntryPointPurpose.GroundLevel) > 2)
+            throw new ArgumentException("Cannot have more than 2 ground-level entry points");
 
         if (EntryPoints.Select(entryPoint => entryPoint.Start.Y).Max() - EntryPoints.Select(entryPoint => entryPoint.Start.Y).Min() + 4 > Size / Length)
             throw new ArgumentException($"Entry points are too far away vertically for a minimum height of {Size / Length} (determined by min volume / length)");

@@ -112,7 +112,7 @@ public sealed class MainHouse : LegacyStructure {
     private readonly bool generatedBasement;
 
     public MainHouse(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, bool hasBasement = false, bool inUnderworld = false, byte leftType = _type_not_generated, byte rightType = _type_not_generated) :
-        base("StructureTypes/", _structureXSize, _structureYSize, CopyConnectPoints(_connectPoints), status, x, y) {
+        base("RootStructureTypes/", _structureXSize, _structureYSize, CopyConnectPoints(_connectPoints), status, x, y) {
         InUnderworld = inUnderworld;
         HasBasement = hasBasement;
         BoundingBox = new TileBox(x, y, _structureXSize, _structureYSize);

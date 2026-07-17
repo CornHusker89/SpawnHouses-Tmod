@@ -1,13 +1,12 @@
 using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Parameters;
-using SpawnHouses.Common.Tagging;
 
 namespace SpawnHouses.Common.Types.Interfaces;
 
 /// <summary>
 ///     a more complex version of the <see cref="IGeneratable" />, supporting debug drawing and dynamic tag-based generation. intended for AdvStructures
 /// </summary>
-public interface IAdvGeneratable : IGeneratable, ICanDebugDraw {
+public interface IAdvGeneratable : IGeneratable, ICanDebugDraw, IStructureTags {
     /// <summary>
     ///     if the advGeneratable instance has had a advGenerator run on it at least once
     /// </summary>
@@ -17,11 +16,6 @@ public interface IAdvGeneratable : IGeneratable, ICanDebugDraw {
     ///     generation parameters for this advGeneratable object
     /// </summary>
     public IParams Params { get; }
-
-    /// <summary>
-    ///     tags that this instance currently has
-    /// </summary>
-    public TagMap TagsCurrent { get; }
 
     /// <summary>
     ///     creates and executes a component's advGenerator, unlocks it's current tags, and marks the component as generated. correct way to generate modules

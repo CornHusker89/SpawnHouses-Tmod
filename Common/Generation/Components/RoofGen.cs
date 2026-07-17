@@ -20,7 +20,7 @@ public static class RoofGen {
     /// <summary>
     ///     generic, simple roof with optional gap on the bottom
     /// </summary>
-    [ModuleGenerator(typeof(Roof))]
+    [AdvGeneratorLoadable(typeof(Roof))]
     public class RoofGenerator2 : PathComponentAdvGenerator {
         public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [

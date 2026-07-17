@@ -1,3 +1,4 @@
+using SpawnHouses.Common.Types.Enums;
 using SpawnHouses.Common.Types.Geometry;
 using Terraria.DataStructures;
 
@@ -9,22 +10,32 @@ public class EntryPoint {
 
     /// <summary>the direction going into the structure. ex. if it's on the left wall, it should be LegacyDirections.Right</summary>
     public readonly Direction EntryDirection;
-    
+
+    public readonly EntryPointPurpose Purpose;
+
+    /// <summary>
+    ///     the size of the entry point, in tiles. ex. if it's a 2W x 3H horizontal-passage door, this would be 3
+    /// </summary>
     public readonly int Size;
-    
-    /// <summary>optional offset, applied to <see cref="Start" /> and <see cref="End" /></summary>
+
+    /// <summary>
+    ///     optional offset, applied to <see cref="Start" /> and <see cref="End" />
+    ///     used to change position of entry point after creation, typically represents the world position of the parent structure
+    /// </summary>
     public Point16 Offset = Point16.Zero;
     
     /// <param name="start"></param>
     /// <param name="size"></param>
     /// <param name="entryDirection">
     ///     the entryDirection going into the structure. ex. if it's on the left wall, it should be
-    ///     LegacyDirections.Right
+    ///     <see cref="Direction.Right"/>
     /// </param>
-    public EntryPoint(Point16 start, int size, Direction entryDirection) {
+    /// <param name="purpose"></param>
+    public EntryPoint(Point16 start, int size, Direction entryDirection, EntryPointPurpose purpose) {
         _baseStart = start;
         Size = size;
         EntryDirection = entryDirection;
+        Purpose = purpose;
     }
 
     public bool IsHorizontal => EntryDirection is Direction.Right or Direction.Left;

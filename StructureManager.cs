@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Common.Debug;
 using SpawnHouses.Common.Modules;
 using SpawnHouses.Common.Tagging;
 using SpawnHouses.Common.Tiles;
-using SpawnHouses.Common.Types;
 using SpawnHouses.Common.Types.Interfaces;
 using SpawnHouses.Common.Types.StructureTypes;
 using SpawnHouses.Helpers;
@@ -27,35 +27,37 @@ namespace SpawnHouses;
 /// <summary>
 ///     provides, saves, and loads the global structure lists. calls debug drawing
 /// </summary>
-internal class StructureManager : ModSystem {
+public class StructureManager : ModSystem {
     private static int _debugDrawFrameCount;
 
     private static Dictionary<DebugLabel, Point> _labels = [];
 
-    private static readonly List<AdvStructure> AdvStructures = [];
+    private static readonly List<AdvStructure> _advStructures = [];
 
     /// <summary>
     ///     the version of the mod that generated this world. used for backwards compatibility
     /// </summary>
     public static Version WorldVersion = SpawnHousesMod.Instance.Version;
 
-    public static readonly List<LegacyStructure> LegacyStructures = [];
-
-    public static readonly List<LegacyStructureChain> LegacyStructureChains = [];
-
+    /// <summary>type corresponds to the final component's type</summary>
+    public static readonly Dictionary<Type, List<IAdvGenerator>> AdvInstanceGenerators = new();
+    
     /// <summary>
-    ///     the number of advGeneratable components (exclusive to AdvStructures) that have been generated in this world. used to assign unique ids to components
+    ///     the number of generatable instances that have been made in this world. used to assign unique ids to components
     /// </summary>
     public static ushort GeneratableCount { get; private set; }
 
     public static readonly DebugInfoLevel DefaultDebugInfoLevel = new();
 
+    public static readonly List<LegacyStructure> LegacyStructures = [];
+
+    public static readonly List<LegacyStructureChain> LegacyStructureChains = [];
 
     /// <summary>
     ///     shallow copies then exposes the internal structure list
     /// </summary>
     /// <returns></returns>
-    public static AdvStructure[] GetStructureList() => AdvStructures.ToArray();
+    public static AdvStructure[] GetStructureList() => _advStructures.ToArray();
 
     /// <summary>
     ///     returns the next component id, and advances the counter. begins at id 1
@@ -74,12 +76,31 @@ internal class StructureManager : ModSystem {
         if (structure.FailedLayoutGeneration)
             return;
         if (structure.StructureLayout == null) throw new ArgumentException("structure must have an initialized layout");
-        AdvStructures.Add(structure);
+        _advStructures.Add(structure);
     }
 
     public override void Load() {
         Tags.SetInternalTagNames();
-        GlobalGeneratorUtils.LoadGenerators();
+        LoadGenerators(Assembly.GetExecutingAssembly());
+    }
+
+    /// <summary>
+    ///     loads all types in the given assembly with <see cref="AdvGeneratorLoadable" /> and <see cref="StructureTemplateLoadable" /> attributes
+    /// </summary>
+    /// <param name="assembly"></param>
+    public static void LoadGenerators(Assembly assembly) {
+        var pluginTypes = assembly.GetTypes();
+        foreach (Type type in pluginTypes) {
+            if (type.GetCustomAttribute<StructureTemplateLoadable>() is { } advGeneratorInfo) {
+            }
+
+            // adv generator loading
+            if (type.GetCustomAttribute<AdvGeneratorLoadable>() is { } advGeneratorInfo) {
+                if (!AdvInstanceGenerators.TryGetValue(advGeneratorInfo.ModuleType, out var generatorList))
+                    AdvInstanceGenerators[advGeneratorInfo.ModuleType] = generatorList = [];
+                generatorList.Add((IAdvGenerator)Activator.CreateInstance(type)!);
+            }
+        }
     }
 
     public override void SaveWorldData(TagCompound tag) {
@@ -155,7 +176,7 @@ internal class StructureManager : ModSystem {
             UpdateLabelPositionsAndDraw();
         }
         else {
-            foreach (AdvStructure structure in AdvStructures)
+            foreach (AdvStructure structure in _advStructures)
                 structure.DrawDebugGeometry();
         }
 
@@ -179,7 +200,7 @@ internal class StructureManager : ModSystem {
         List<Rectangle> structureRects = [];
         _labels.Clear();
 
-        foreach (AdvStructure structure in AdvStructures)
+        foreach (AdvStructure structure in _advStructures)
         foreach (DebugLabel label in structure.DrawDebugGeometry()) {
             _labels.Add(label, label.Root.ToPoint() * new Point(16, 16));
             TileBox structureGlobalTileBoundingBox = structure.Tilemap.ConvertToGlobal(structure.StructureLayout.BoundingBox);
@@ -187,7 +208,7 @@ internal class StructureManager : ModSystem {
         }
 
         // move each label away from each other and the structure
-        for (int i = 0; i < 7; i++)
+        for (int i = 0; i < 7; i++) {
             foreach (var a in _labels) {
                 // gentle spring back to root
                 Vector2 deltaToRoot = (a.Value - a.Key.Root.ToPoint() * new Point(16, 16)).ToVector2();
@@ -222,6 +243,7 @@ internal class StructureManager : ModSystem {
                     }
                 }
             }
+        }
     }
 }
 

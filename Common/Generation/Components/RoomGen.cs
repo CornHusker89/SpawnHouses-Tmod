@@ -16,7 +16,7 @@ public static class RoomGen {
     /// <summary>
     ///     Fills in sections of 3-wide primary tiles, with accents and beams
     /// </summary>
-    [ModuleGenerator(typeof(Room))]
+    [AdvGeneratorLoadable(typeof(Room))]
     public class RoomGenerator2 : VolumeComponentAdvGenerator {
         public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
@@ -52,7 +52,7 @@ public static class RoomGen {
     /// <summary>
     ///     Fills in sections of 3-wide primary tiles, with accents and beams
     /// </summary>
-    [ModuleGenerator(typeof(Room))]
+    [AdvGeneratorLoadable(typeof(Room))]
     public class RoomGenerator3 : VolumeComponentAdvGenerator {
         public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
