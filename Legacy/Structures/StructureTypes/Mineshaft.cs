@@ -10,7 +10,7 @@ namespace SpawnHouses.Legacy.Structures.StructureTypes;
 
 public sealed class Mineshaft : LegacyStructure {
     // constants
-    public static readonly string _filePath = "Common/Assets/StructureFiles/mineshaft.shstruct";
+    public static readonly string _filePath = "StructureCommon/Assets/StructureFiles/mineshaft.shstruct";
     public static readonly ushort _structureXSize = 21;
     public static readonly ushort _structureYSize = 22;
 
@@ -37,8 +37,8 @@ public sealed class Mineshaft : LegacyStructure {
     public Mineshaft(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated) :
         base(_filePath, _structureXSize, _structureYSize,
             CopyConnectPoints(_connectPoints), status, x, y) {
-        if (StructureManager.LegacyStructures.Find(s => s is MainHouse) is MainHouse mainHouse && mainHouse.BoundingBox.Left > BoundingBox.Left)
-            IsLeftSide = true;
+        // if (StructureManager.LegacyStructures.Find(s => s is MainHouse) is MainHouse mainHouse && mainHouse.BoundingBox.Left > BoundingBox.Left)
+        //     IsLeftSide = true;
     }
 
     public override void Generate(bool bare = false) {

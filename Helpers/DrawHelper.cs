@@ -2,16 +2,16 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
-using SpawnHouses.Common.Debug;
-using SpawnHouses.Common.Modules;
-using SpawnHouses.Common.Modules.Components;
+using SpawnHouses.StructureCommon.Debug;
+using SpawnHouses.StructureCommon.Modules.Components;
+using SpawnHouses.StructureCommon.Types.Interfaces;
 using Terraria;
 using Terraria.ModLoader;
 
 namespace SpawnHouses.Helpers;
 
 public static class DrawHelper {
-    private static readonly Asset<Texture2D> PixelTexture = ModContent.Request<Texture2D>("SpawnHouses/Common/Assets/Pixel");
+    private static readonly Asset<Texture2D> PixelTexture = ModContent.Request<Texture2D>("SpawnHouses/StructureCommon/Assets/Pixel");
 
     public static int DebugDrawWidth { get; private set; } = 3;
 

@@ -1,4 +1,4 @@
-namespace SpawnHouses.Enums;
+namespace SpawnHouses.Legacy;
 
 // NOTE: keep numbers consistent for backwards compatability
 public enum StructureType : ushort {

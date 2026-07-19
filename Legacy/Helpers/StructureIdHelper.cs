@@ -1,7 +1,6 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
-using SpawnHouses.Enums;
 using SpawnHouses.Legacy.Structures;
 using SpawnHouses.Legacy.Structures.StructureTypes;
 using SpawnHouses.Legacy.Structures.StructureTypes.ChainStructures;
@@ -93,5 +92,5 @@ public static class StructureIdHelper {
         return structure;
     }
 
-    public static bool IsBranchingHallway(LegacyChainStructure structure) => BranchingHallwayIds.Contains(structure.Id);
+    public static bool IsBranchingHallway(LegacyChainStructure structure) => BranchingHallwayIds.Contains(structure.Id2);
 }

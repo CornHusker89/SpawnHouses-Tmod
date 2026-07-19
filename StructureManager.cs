@@ -3,21 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Common.DataStructures;
-using SpawnHouses.Common.Debug;
-using SpawnHouses.Common.Modules;
-using SpawnHouses.Common.Tagging;
-using SpawnHouses.Common.Tiles;
-using SpawnHouses.Common.Types.Attributes;
-using SpawnHouses.Common.Types.Interfaces;
-using SpawnHouses.Common.Types.StructureTypes;
 using SpawnHouses.Helpers;
 using SpawnHouses.Items.Debug;
-using SpawnHouses.Legacy.Helpers;
-using SpawnHouses.Legacy.Structures;
-using SpawnHouses.Legacy.Structures.ChainTypes;
-using SpawnHouses.Legacy.Structures.StructureTypes;
+using SpawnHouses.StructureCommon.Debug;
+using SpawnHouses.StructureCommon.Tagging;
+using SpawnHouses.StructureCommon.Types;
+using SpawnHouses.StructureCommon.Types.Attributes;
+using SpawnHouses.StructureCommon.Types.DataStructures;
+using SpawnHouses.StructureCommon.Types.Interfaces;
+using SpawnHouses.StructureCommon.Types.RootStructureTypes;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
@@ -33,12 +29,19 @@ public class StructureManager : ModSystem {
 
     private static Dictionary<DebugLabel, Point> _labels = [];
 
-    private static readonly List<AdvStructure> _advStructures = [];
+    private static List<FileStructure> _fileStructures = [];
+
+    private static List<AdvStructure> _advStructures = [];
 
     /// <summary>
     ///     the version of the mod that generated this world. used for backwards compatibility
     /// </summary>
     public static Version WorldVersion = SpawnHousesMod.Instance.Version;
+
+    /// <summary>
+    ///     contains every possible variation as an individual object
+    /// </summary>
+    public static readonly List<FileStructure> AllFileStructureVariations = [];
 
     /// <summary>type corresponds to the final component's type</summary>
     public static readonly Dictionary<Type, List<IAdvGenerator>> AdvInstanceGenerators = new();
@@ -50,15 +53,17 @@ public class StructureManager : ModSystem {
 
     public static readonly DebugInfoLevel DefaultDebugInfoLevel = new();
 
-    public static readonly List<LegacyStructure> LegacyStructures = [];
-
-    public static readonly List<LegacyStructureChain> LegacyStructureChains = [];
-
     /// <summary>
-    ///     shallow copies then exposes the internal structure list
+    ///     gets a shallow copy of the internal structure list. use <see cref="RegisterFileStructure" /> to add to the list
     /// </summary>
     /// <returns></returns>
-    public static AdvStructure[] GetStructureList() => _advStructures.ToArray();
+    public static FileStructure[] GetFileStructureList() => _fileStructures.ToArray();
+
+    /// <summary>
+    ///     gets a shallow copy of the internal structure list. use <see cref="RegisterAdvStructure"/> to add to the list
+    /// </summary>
+    /// <returns></returns>
+    public static AdvStructure[] GetAdvStructureList() => _advStructures.ToArray();
 
     /// <summary>
     ///     returns the next component id, and advances the counter. begins at id 1
@@ -69,39 +74,120 @@ public class StructureManager : ModSystem {
         return GeneratableCount;
     }
 
+
+    public static void RegisterFileStructure(FileStructure structure) {
+        _fileStructures.Add(structure);
+    }
+    
     /// <summary>
-    ///     <see cref="AdvStructure.ApplyLayoutMethod" /> and <see cref="AdvStructure.FillComponents" /> must be called before this
+    ///     <see cref="AdvStructure.ApplyLayoutMethod" /> and <see cref="AdvStructure.LoadTilemap" /> must be called before this
     /// </summary>
     /// <param name="structure"></param>
-    public static void RegisterStructure(AdvStructure structure) {
+    public static void RegisterAdvStructure(AdvStructure structure) {
         if (structure.FailedLayoutGeneration)
             return;
         if (structure.StructureLayout == null) throw new ArgumentException("structure must have an initialized layout");
         _advStructures.Add(structure);
     }
 
-    public override void Load() {
-        Tags.SetInternalTagNames();
-        LoadGenerators(Assembly.GetExecutingAssembly());
-    }
-
     /// <summary>
-    ///     loads all types in the given assembly with <see cref="SpawnHouses.Common.Types.Attributes.AdvGeneratorLoadable" /> and <see cref="StructureTemplateLoadable" /> attributes
+    ///     loads all types in the given assembly with <see cref="AdvGeneratorLoadable" /> and <see cref="StructureTemplateLoadable" /> attributes
     /// </summary>
     /// <param name="assembly"></param>
-    public static void LoadGenerators(Assembly assembly) {
-        var pluginTypes = assembly.GetTypes();
-        foreach (Type type in pluginTypes) {
-            if (type.GetCustomAttribute<StructureTemplateLoadable>() is { } structureTemplateInfo) {
+    public static void LoadStructureTypes(Assembly assembly) {
+        var types = assembly.GetTypes();
+        foreach (Type type in types) {
+            // file structure loading 
+            if (type.GetCustomAttribute<StructureTemplateLoadable>() is { } fileStructureInfo) {
+                if (Activator.CreateInstance(type) is not FileStructureTemplate template) throw new Exception("the \"StructureTemplateLoadable\" attribute can only be applied to a class that inherits from \"FileStructureTemplate\"");
+
+                string[] positionIds = template.PositionIds;
+                var substructures = template.Substructures;
+
+                // which substructures are legal at each position id (empty ValidPositionIds = wildcard)
+                var optionsPerPosition = positionIds
+                    .Select(id => substructures
+                        .Where(s => s.ValidPositionIds.Length == 0 || s.ValidPositionIds.Contains(id))
+                        .ToArray())
+                    .ToArray();
+
+                for (int i = 0; i < positionIds.Length; i++)
+                    if (optionsPerPosition[i].Length == 0)
+                        throw new InvalidOperationException($"{template.GetType().Name}: position id '{positionIds[i]}' is not assigned to any substructure");
+
+                HashSet<string> seen = []; // guards against dupes when a slot gets skipped (-1,-1) regardless of which substructure was chosen for it
+
+                foreach (var combo in CombinationHelper.CartesianProduct(optionsPerPosition)) {
+                    var positionIdsToNames = new Dictionary<string, string>();
+                    var namesToSubstructures = new Dictionary<string, FileSubstructureData>();
+                    for (int i = 0; i < positionIds.Length; i++) {
+                        positionIdsToNames[positionIds[i]] = combo[i].Name;
+                        namesToSubstructures[combo[i].Name] = combo[i];
+                    }
+
+                    var structureInfo = template.GetStructureInfo(positionIdsToNames);
+
+                    // build a signature from what actually gets generated (post (-1,-1) filtering) to dedupe
+                    string[] effectivePositionIds = positionIds
+                        .Where(id => structureInfo.positionIdsToPositions.TryGetValue(id, out Point16 p) && !(p.X == -1 && p.Y == -1))
+                        .ToArray();
+                    string signature = string.Join("|", effectivePositionIds.Select(id => $"{id}={positionIdsToNames[id]}"));
+
+                    if (!seen.Add(signature)) continue;
+
+                    // evaluate size
+                    short maxRight = 0, maxBottom = 0;
+                    foreach (string id in effectivePositionIds) {
+                        Point16 pos = structureInfo.positionIdsToPositions[id];
+                        if (pos.X < 0 || pos.Y < 0)
+                            throw new InvalidOperationException(
+                                $"{template.GetType().Name}: position id '{id}' has a negative relative position {pos}. " +
+                                "Structure-relative positions must be normalized so the top-left of the structure is (0,0).");
+
+                        FileSubstructureData sub = namesToSubstructures[positionIdsToNames[id]];
+                        short right = (short)(pos.X + sub.Size.X);
+                        short bottom = (short)(pos.Y + sub.Size.Y);
+
+                        if (right > maxRight) maxRight = right;
+                        if (bottom > maxBottom) maxBottom = bottom;
+                    }
+
+                    Point16 size = new(maxRight, maxBottom);
+
+                    FileStructure structure = new(
+                        $"{template.GetType().Name}_{signature}",
+                        size,
+                        structureInfo.entryPoints,
+                        structureInfo.tags,
+                        template.IsFound,
+                        template.OnFound,
+                        template.OnTilemapLoaded);
+
+                    foreach (string id in effectivePositionIds) {
+                        structure.PositionIdToFilename[id] = namesToSubstructures[positionIdsToNames[id]].FilePath;
+                        structure.PositionIdToPosition[id] = structureInfo.positionIdsToPositions[id];
+                    }
+
+                    structure.Standalone = fileStructureInfo.Standalone;
+                    structure.Depreciated = fileStructureInfo.Depreciated;
+                    AllFileStructureVariations.Add(structure);
+                }
             }
 
             // adv generator loading
             if (type.GetCustomAttribute<AdvGeneratorLoadable>() is { } advGeneratorInfo) {
                 if (!AdvInstanceGenerators.TryGetValue(advGeneratorInfo.ModuleType, out var generatorList))
                     AdvInstanceGenerators[advGeneratorInfo.ModuleType] = generatorList = [];
-                generatorList.Add((IAdvGenerator)Activator.CreateInstance(type)!);
+                IAdvGenerator advGenerator = (IAdvGenerator)Activator.CreateInstance(type)!;
+                advGenerator.Depreciated = advGeneratorInfo.Depreciated;
+                generatorList.Add(advGenerator);
             }
         }
+    }
+
+    public override void Load() {
+        Tags.SetInternalTagNames();
+        LoadStructureTypes(Assembly.GetExecutingAssembly());
     }
 
     public override void SaveWorldData(TagCompound tag) {
@@ -110,45 +196,29 @@ public class StructureManager : ModSystem {
     }
 
     public override void LoadWorldData(TagCompound tag) {
-        LegacyStructures.Clear();
-        LegacyStructureChains.Clear();
-
         if (tag.ContainsKey("WorldVersion"))
             WorldVersion = new Version(tag.GetString("WorldVersion"));
-        else if (tag.ContainsKey("WorldModVersion")) // "WorldVersion" is the old name
-            WorldVersion = new Version(tag.GetString("WorldModVersion"));
         else
-            WorldVersion = new Version("0.3.2");
+            WorldVersion = new Version("0.0.1");
 
 
         if (WorldVersion.Major == 0) {
-            // the rest are unrecoverable. mainhouse might use just 1 structure file, basement uses seeds, mineshaft doesn't exist
-            LegacyStructures.Add(tag.Get<BeachHouse>("BeachHouse"));
+            // whats a legacy support
         }
         else if (WorldVersion.Major == 1) {
-            if (tag.ContainsKey("MainHouse")) LegacyStructures.Add(tag.Get<MainHouse>("MainHouse"));
-            if (tag.ContainsKey("Mineshaft")) LegacyStructures.Add(tag.Get<Mineshaft>("Mineshaft"));
-            if (tag.ContainsKey("Mineshaft")) LegacyStructures.Add(tag.Get<Mineshaft>("Mineshaft"));
-            if (tag.ContainsKey("MainBasement")) {
-                MainBasement basement = tag.Get<MainBasement>("MainBasement");
-                LegacyStructureChains.Add(basement);
-            }
+            // never heard of it
         }
         else if (WorldVersion.Major == 2) {
             int i = 0;
-            while (tag.ContainsKey("AdvStructure" + i))
-                //AdvStructures.Add(tag.Get<AdvStructure>("AdvStructure" + i));
-                i++;
 
-            i = 0;
-            while (tag.ContainsKey("LegacyStructure" + i)) {
-                LegacyStructures.Add(tag.Get<LegacyStructure>("LegacyStructure" + i));
+            while (tag.ContainsKey("FileStructure" + i)) {
+                RegisterFileStructure(tag.Get<FileStructure>("FileStructure" + i));
                 i++;
             }
-
+            
             i = 0;
-            while (tag.ContainsKey("LegacyStructureChain" + i)) {
-                LegacyStructureChains.Add(tag.Get<LegacyStructureChain>("LegacyStructureChain" + i));
+            while (tag.ContainsKey("AdvStructure" + i)) {
+                RegisterAdvStructure(tag.Get<AdvStructure>("AdvStructure" + i));
                 i++;
             }
         }
@@ -158,10 +228,7 @@ public class StructureManager : ModSystem {
 
     public override void ClearWorld() {
         WorldVersion = SpawnHousesMod.Instance.Version;
-
-        LegacyStructures.Clear();
-        LegacyStructureChains.Clear();
-
+        
         GeneratableCount = 0;
 
         DebugWand.SelectedStructure = null;
@@ -182,16 +249,7 @@ public class StructureManager : ModSystem {
         }
 
         foreach (DebugLabel label in _labels.Keys) {
-            Color color;
-            if (label.ParentObj is IComponent component)
-                color = DrawHelper.GetColor(component);
-            else if (label.ParentObj is IAdvGeneratable generatable)
-                color = DrawHelper.GetColor(generatable.Id);
-            else if (label.ParentObj is StructureTilemap tilemap)
-                color = DrawHelper.GetColor(tilemap.Structure.StructureLayout.Id);
-            else
-                color = DrawHelper.GetColor((ushort)label.ParentObj.GetHashCode());
-            DrawHelper.DrawDebugLabel(label, _labels[label], DrawHelper.DebugDrawWidth, color);
+            DrawHelper.DrawDebugLabel(label, _labels[label], DrawHelper.DebugDrawWidth, label.ParentObj.GetDrawColor());
         }
 
         Main.spriteBatch.End();
@@ -259,147 +317,8 @@ internal class DictionarySerializer : TagSerializer<Dictionary<string, object>, 
     public override Dictionary<string, object> Deserialize(TagCompound tag) => tag.ToDictionary();
 }
 
-internal static class ChainProcessor {
-    internal static Dictionary<string, object> SerializeChain(LegacyChainStructure processingStructure) {
-        var dict = new Dictionary<string, object> {
-            ["ID"] = (ushort)processingStructure.Id,
-            ["Pos"] = processingStructure.BoundingBox.TopLeftPoint16,
-            ["Status"] = processingStructure.Status
-        };
+internal class FileStructureSerializer : TagSerializer<FileStructure, TagCompound> {
+    public override TagCompound Serialize(FileStructure value) => throw new NotImplementedException();
 
-        int i = 0;
-        processingStructure.ActionOnEachChainConnectPoint(connectPoint => {
-            if (connectPoint.ChildStructure is not null) {
-                dict[$"Substructure{i}"] = SerializeChain(connectPoint.ChildStructure);
-                dict[$"Substructure{i}Bridge"] = new Dictionary<string, object> {
-                    ["ID"] = (ushort)connectPoint.ChildBridge.Id,
-                    ["X1"] = connectPoint.ChildBridge.Point1.X,
-                    ["Y1"] = connectPoint.ChildBridge.Point1.Y,
-                    ["X2"] = connectPoint.ChildBridge.Point2.X,
-                    ["Y2"] = connectPoint.ChildBridge.Point2.Y
-                };
-            }
-
-            i++;
-        });
-
-        return dict;
-    }
-
-    internal static LegacyChainStructure DeserializeChain(LegacyStructureChain legacyStructureChain, TagCompound structureDict) {
-        LegacyChainStructure? structure = (LegacyChainStructure)StructureIdHelper.CreateStructure(
-            (ushort)(short)structureDict["ID"],
-            (ushort)(short)structureDict["X"],
-            (ushort)(short)structureDict["Y"],
-            (byte)structureDict["Status"]
-        );
-
-        int i = 0;
-        structure.ParentLegacyStructureChain = legacyStructureChain;
-        structure.ActionOnEachChainConnectPoint(point => {
-            if (structureDict.ContainsKey($"Substructure{i}")) {
-                point.ChildStructure = DeserializeChain(legacyStructureChain, (TagCompound)structureDict[$"Substructure{i}"]);
-                if (structureDict.ContainsKey($"Substructure{i}Bridge")) {
-                    TagCompound? bridgeDict = (TagCompound)structureDict[$"Substructure{i}Bridge"];
-                    Bridge? bridge = BridgeIdHelper.CreateBridge((ushort)(short)bridgeDict["ID"]);
-
-                    // get the child connect point
-                    ushort goalX = (ushort)(short)bridgeDict["X2"];
-                    ushort goalY = (ushort)(short)bridgeDict["Y2"];
-                    bool found = false;
-                    point.ChildStructure.ActionOnEachChainConnectPoint(nextPoint => {
-                        if (nextPoint.X == goalX && nextPoint.Y == goalY) {
-                            found = true;
-                            point.ChildConnectPoint = nextPoint;
-                            bridge.SetPoints(point, nextPoint);
-                        }
-                    });
-                    if (!found) throw new Exception("Bridge loading failed");
-
-                    point.ChildBridge = bridge;
-                }
-            }
-
-            i++;
-        });
-
-        return structure;
-    }
-}
-
-internal class MainHouseSerializer : TagSerializer<MainHouse, TagCompound> {
-    public override TagCompound Serialize(MainHouse structure) =>
-        new() {
-            ["Pos"] = structure.BoundingBox.TopLeftPoint16,
-            ["Status"] = structure.Status,
-            ["HasBasement"] = structure.HasBasement,
-            ["InUnderworld"] = structure.InUnderworld,
-            ["LeftType"] = structure.LeftType,
-            ["RightType"] = structure.RightType
-        };
-
-    public override MainHouse Deserialize(TagCompound tag) =>
-        new(
-            tag.Get<ushort>("X"),
-            tag.Get<ushort>("Y"),
-            tag.GetByte("Status"),
-            tag.GetBool("HasBasement"),
-            tag.GetBool("InUnderworld"),
-            tag.GetByte("LeftType") != 0 ? tag.GetByte("LeftType") : (byte)1, // if its 0 (which only happens if it's a <= v0.2.7 world) set to default (large)
-            tag.GetByte("RightType") != 0 ? tag.GetByte("RightType") : (byte)1
-        );
-}
-
-internal class MainBasementSerializer : TagSerializer<MainBasement, TagCompound> {
-    public override TagCompound Serialize(MainBasement chain) =>
-        new() {
-            ["X"] = chain.EntryPosX,
-            ["Y"] = chain.EntryPosY,
-            ["Status"] = chain.Status,
-            ["RootStructure"] = ChainProcessor.SerializeChain(chain.RootStructure)
-        };
-
-    public override MainBasement Deserialize(TagCompound tag) {
-        MainBasement basement = new(
-            (ushort)tag.Get<short>("X"),
-            (ushort)tag.Get<short>("Y"),
-            tag.GetByte("Status")
-        );
-        basement.RootStructure = ChainProcessor.DeserializeChain(basement, (TagCompound)tag["RootStructure"]);
-        return basement;
-    }
-}
-
-internal class MineshaftSerializer : TagSerializer<Mineshaft, TagCompound> {
-    public override TagCompound Serialize(Mineshaft structure) =>
-        new() {
-            ["Pos"] = structure.BoundingBox.TopLeftPoint16,
-            ["Status"] = structure.Status
-        };
-
-    public override Mineshaft Deserialize(TagCompound tag) =>
-        new(
-            tag.Get<ushort>("X"),
-            tag.Get<ushort>("Y"),
-            tag.GetByte("Status")
-        );
-}
-
-internal class BeachHouseSerializer : TagSerializer<BeachHouse, TagCompound> {
-    public override TagCompound Serialize(BeachHouse structure) =>
-        new() {
-            ["Pos"] = structure.BoundingBox.TopLeftPoint16,
-            ["Status"] = structure.Status,
-            ["Reverse"] = structure.Reverse,
-            ["HasDeck"] = structure.HasDeck
-        };
-
-    public override BeachHouse Deserialize(TagCompound tag) =>
-        new(
-            tag.Get<ushort>("X"),
-            tag.Get<ushort>("Y"),
-            tag.GetByte("Status"),
-            tag.GetBool("Reverse"),
-            tag.ContainsKey("HasDeck") && tag.GetBool("HasDeck")
-        );
+    public override FileStructure Deserialize(TagCompound tag) => throw new NotImplementedException();
 }

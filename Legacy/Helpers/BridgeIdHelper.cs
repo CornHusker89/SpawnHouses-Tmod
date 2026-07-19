@@ -1,6 +1,5 @@
 using System;
 using System.ComponentModel;
-using SpawnHouses.Enums;
 using SpawnHouses.Legacy.Structures;
 using SpawnHouses.Legacy.Structures.BridgeTypes;
 

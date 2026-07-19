@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Legacy.Helpers;
 using SpawnHouses.Legacy.Structures.StructureParts;
+using SpawnHouses.StructureCommon.Types.DataStructures;
 using StructureHelper.API;
 using Terraria;
 using Terraria.DataStructures;
@@ -23,53 +23,53 @@ public sealed class MainHouse : LegacyStructure {
     private const byte _type_not_generated = 0;
 
 
-    public static readonly string _filePath_left = "Common/Assets/StructureFiles/mainHouse/mainHouse_Left_v4.shstruct";
+    public static readonly string _filePath_left = "StructureCommon/Assets/StructureFiles/mainHouse/mainHouse_Left_v4.shstruct";
     private const byte _type_left = 1;
 
-    public static readonly string _filePath_small_left = "Common/Assets/StructureFiles/mainHouse/mainHouse_Small_Left_v4.shstruct";
+    public static readonly string _filePath_small_left = "StructureCommon/Assets/StructureFiles/mainHouse/mainHouse_Small_Left_v4.shstruct";
     private const byte _type_small_left = 2;
 
     public static readonly string _filePath_small_basement_left =
-        "Common/Assets/StructureFiles/mainHouse/mainHouse_Small_Basement_Left_v4.shstruct";
+        "StructureCommon/Assets/StructureFiles/mainHouse/mainHouse_Small_Basement_Left_v4.shstruct";
 
     private const byte _type_small_basement_left = 3;
 
     public static readonly string _filePath_magicstorage_left =
-        "Common/Assets/StructureFiles/mainHouse/mainHouse_MagicStorage_Left_v4.shstruct";
+        "StructureCommon/Assets/StructureFiles/mainHouse/mainHouse_MagicStorage_Left_v4.shstruct";
 
     private const byte _type_magicstorage_left = 4;
 
     public static readonly string _filePath_basement_left =
-        "Common/Assets/StructureFiles/mainHouse/mainHouse_Basement_Left_v4.shstruct";
+        "StructureCommon/Assets/StructureFiles/mainHouse/mainHouse_Basement_Left_v4.shstruct";
 
     private const byte _type_basement_left = 5;
 
 
-    public static readonly string _filePath_right = "Common/Assets/StructureFiles/mainHouse/mainHouse_Right_v4.shstruct";
+    public static readonly string _filePath_right = "StructureCommon/Assets/StructureFiles/mainHouse/mainHouse_Right_v4.shstruct";
     private const byte _type_right = 1;
 
     public static readonly string _filePath_basement_right =
-        "Common/Assets/StructureFiles/mainHouse/mainHouse_Basement_Right_v4.shstruct";
+        "StructureCommon/Assets/StructureFiles/mainHouse/mainHouse_Basement_Right_v4.shstruct";
 
     private const byte _type_basement_right = 2;
 
     public static readonly string _filePath_small_right =
-        "Common/Assets/StructureFiles/mainHouse/mainHouse_Small_Right_v4.shstruct";
+        "StructureCommon/Assets/StructureFiles/mainHouse/mainHouse_Small_Right_v4.shstruct";
 
     private const byte _type_small_right = 3;
 
     public static readonly string _filePath_small_magicstorage_right =
-        "Common/Assets/StructureFiles/mainHouse/mainHouse_Small_MagicStorage_Right_v4.shstruct";
+        "StructureCommon/Assets/StructureFiles/mainHouse/mainHouse_Small_MagicStorage_Right_v4.shstruct";
 
     private const byte _type_small_magicstorage_right = 4;
 
     public static readonly string _filePath_magicstorage_right =
-        "Common/Assets/StructureFiles/mainHouse/mainHouse_MagicStorage_Right_v4.shstruct";
+        "StructureCommon/Assets/StructureFiles/mainHouse/mainHouse_MagicStorage_Right_v4.shstruct";
 
     private const byte _type_magicstorage_right = 5;
 
 
-    public static readonly string _filePath_top = "Common/Assets/StructureFiles/mainHouse/mainHouse_Top_v4.shstruct"; // 1
+    public static readonly string _filePath_top = "StructureCommon/Assets/StructureFiles/mainHouse/mainHouse_Top_v4.shstruct"; // 1
 
     public static readonly ushort _structureXSize = 63;
     public static readonly ushort _structureYSize = 36;
@@ -284,7 +284,7 @@ public sealed class MainHouse : LegacyStructure {
             Sign.TextSign(signIndex, signString);
 
         Terraria.WorldGen.PlaceTile(BoundingBox.Left + LeftSize - 1, BoundingBox.Top + 24, TileID.WorkBenches, true, true, style: 0);
-        Generator.GenerateStructure("Common/Assets/StructureFiles/mainHouse/mainHouse_Rose.shstruct",
+        Generator.GenerateStructure("StructureCommon/Assets/StructureFiles/mainHouse/mainHouse_Rose.shstruct",
             new Point16(BoundingBox.Left + LeftSize - 1, BoundingBox.Top + 18), SpawnHousesMod.Instance);
 
         // bushes

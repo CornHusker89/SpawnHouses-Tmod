@@ -1,13 +1,11 @@
 using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Common.DataStructures;
-using SpawnHouses.Enums;
 using SpawnHouses.Legacy.Helpers;
 using SpawnHouses.Legacy.Structures.BridgeTypes;
 using SpawnHouses.Legacy.Structures.StructureParts;
-using SpawnHouses.Legacy.Structures.StructureTypes;
 using SpawnHouses.Legacy.Structures.StructureTypes.ChainStructures;
+using SpawnHouses.StructureCommon.Types.DataStructures;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -78,7 +76,7 @@ public class MainBasement : LegacyStructureChain {
         if (CompatabilityHelper.IsMSEnabled && SpawnHousesMod.Config.SpawnPointBasementSizeMultiplier > 0.60) {
             bool found = false;
             ActionOnEachStructure(structure => {
-                if (structure.Id is StructureType.MainBasementRoom5) found = true;
+                if (structure.Id2 is StructureType.MainBasementRoom5) found = true;
             });
             return found;
         }
@@ -89,7 +87,7 @@ public class MainBasement : LegacyStructureChain {
     protected override bool IsConnectPointValid(ChainConnectPoint connectPoint, ChainConnectPoint targetConnectPoint,
         LegacyChainStructure targetStructure) {
         // clear root point
-        if (connectPoint.ParentStructure.Id is StructureType.MainBasementEntry1 or StructureType.MainBasementEntry2 && connectPoint.RootPoint) return false;
+        if (connectPoint.ParentStructure.Id2 is StructureType.MainBasementEntry1 or StructureType.MainBasementEntry2 && connectPoint.RootPoint) return false;
 
         // ensure it's at/under the rootstructure
         bool valid = true;
@@ -186,7 +184,7 @@ public class MainBasement : LegacyStructureChain {
     }
 
     protected override void OnStructureGenerate(LegacyChainStructure structure) {
-        if ((structure.Id is not StructureType.MainBasementRoom5 || !CompatabilityHelper.IsMSEnabled) && structure.Id is not StructureType.MainBasementRoom8)
+        if ((structure.Id2 is not StructureType.MainBasementRoom5 || !CompatabilityHelper.IsMSEnabled) && structure.Id2 is not StructureType.MainBasementRoom8)
             foreach (TileBox boundingBox in structure.DetailedBoundingBoxes)
                 StructureGenHelper.GenerateCobwebs(
                     boundingBox.TopLeftPoint16,
@@ -230,9 +228,9 @@ public class MainBasement : LegacyStructureChain {
         if (!base.Generate()) return false;
 
         // clear the extra walls on top, if the basement generates directly on the surface
-        if (StructureManager.LegacyStructures.Find(structure => structure is MainHouse) is not null)
-            for (int i = -6; i <= 6; i++)
-                WorldUtils.ClearWall(EntryPosX + i, EntryPosY);
+        // if (StructureManager.LegacyStructures.Find(structure => structure is MainHouse) is not null)
+        //     for (int i = -6; i <= 6; i++)
+        //         WorldUtils.ClearWall(EntryPosX + i, EntryPosY);
 
         return true;
     }

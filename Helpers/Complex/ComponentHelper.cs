@@ -2,13 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SpawnHouses.Common.Modules;
-using SpawnHouses.Common.Modules.Components;
-using SpawnHouses.Common.Palette;
-using SpawnHouses.Common.Tagging;
-using SpawnHouses.Common.Tiles;
-using SpawnHouses.Common.Types.Geometry;
-using SpawnHouses.Common.Types.StructureTypes;
+using SpawnHouses.StructureCommon.Modules.Components;
+using SpawnHouses.StructureCommon.Palette;
+using SpawnHouses.StructureCommon.Tagging;
+using SpawnHouses.StructureCommon.Tiles;
+using SpawnHouses.StructureCommon.Types.Geometry;
+using SpawnHouses.StructureCommon.Types.Interfaces;
+using SpawnHouses.StructureCommon.Types.RootStructureTypes;
 
 namespace SpawnHouses.Helpers.Complex;
 

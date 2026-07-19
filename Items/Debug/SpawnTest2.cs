@@ -1,6 +1,8 @@
+#if SPAWNHOUSES_DEBUG
+
 #nullable enable
-using SpawnHouses.Common.Modules;
-using SpawnHouses.Common.Types.Geometry;
+using SpawnHouses.StructureCommon.Types.Geometry;
+using SpawnHouses.StructureCommon.Types.Interfaces;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -68,3 +70,5 @@ public class SpawnTest2 : ModItem {
         return true;
     }
 }
+
+#endif

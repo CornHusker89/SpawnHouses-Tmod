@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Helpers;
-using SpawnHouses.Legacy.Structures.StructureTypes;
 using Terraria;
-using Terraria.ID;
 using Terraria.IO;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -47,23 +44,23 @@ public class WorldGenPasses : ModSystem {
     }
 
     public override void PostWorldGen() {
-        // move guide into the main house (if it's there)
-        if (StructureManager.LegacyStructures.Find(s => s is MainHouse) is MainHouse mainHouse)
-            foreach (NPC npc in Main.npc)
-                // 688 is magic storage's automaton
-                if (npc.type is NPCID.Guide or NPCID.TaxCollector or 688) {
-                    npc.position.X = (mainHouse.BoundingBox.Left + mainHouse.LeftSize - 1 + Terraria.WorldGen.genRand.Next(-8, 9)) * 16; // tiles to pixels
-                    npc.position.Y = (mainHouse.BoundingBox.Top + 13) * 16;
-                }
-
-        if (Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "").Replace("'", "") == "dontdigup" ||
-            Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "") == "getfixedboi")
-            //so that it won't go out of bounds
-            SpawnHousesMod.Config.SpawnPointBasementShape =
-                float.Max(SpawnHousesMod.Config.SpawnPointBasementShape, 0.4f);
-
-        if (SpawnHousesMod.Config.EnableSpawnPointBasement)
-            WorldGenHelper.GenerateMainBasement();
+        // // move guide into the main house (if it's there)
+        // if (StructureManager.LegacyStructures.Find(s => s is MainHouse) is MainHouse mainHouse)
+        //     foreach (NPC npc in Main.npc)
+        //         // 688 is magic storage's automaton
+        //         if (npc.type is NPCID.Guide or NPCID.TaxCollector or 688) {
+        //             npc.position.X = (mainHouse.BoundingBox.Left + mainHouse.LeftSize - 1 + Terraria.WorldGen.genRand.Next(-8, 9)) * 16; // tiles to pixels
+        //             npc.position.Y = (mainHouse.BoundingBox.Top + 13) * 16;
+        //         }
+        //
+        // if (Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "").Replace("'", "") == "dontdigup" ||
+        //     Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "") == "getfixedboi")
+        //     //so that it won't go out of bounds
+        //     SpawnHousesMod.Config.SpawnPointBasementShape =
+        //         float.Max(SpawnHousesMod.Config.SpawnPointBasementShape, 0.4f);
+        //
+        // if (SpawnHousesMod.Config.EnableSpawnPointBasement)
+        //     WorldGenHelper.GenerateMainBasement();
     }
 }
 
@@ -117,11 +114,11 @@ public class MainHousePass : GenPass {
             Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "").Replace("'", "") == "dontdigup" ||
             Main.ActiveWorldFileData.SeedText.ToLower().Replace(" ", "") == "getfixedboi";
 
-        if (SpawnHousesMod.Config.EnableSpawnPointHouse)
-            WorldGenHelper.GenerateMainHouse();
-
-        if (!spawnUnderworld && SpawnHousesMod.Config.EnableMineshaft)
-            WorldGenHelper.GenerateMineshaft();
+        // if (SpawnHousesMod.Config.EnableSpawnPointHouse)
+        //     WorldGenHelper.GenerateMainHouse();
+        //
+        // if (!spawnUnderworld && SpawnHousesMod.Config.EnableMineshaft)
+        //     WorldGenHelper.GenerateMineshaft();
     }
 }
 
@@ -133,7 +130,7 @@ public class BeachHousePass : GenPass {
     protected override void ApplyPass(GenerationProgress progress, GameConfiguration configuration) {
         // 9. Finally, we do the actual world generation code.
 
-        if (SpawnHousesMod.Config.EnableBeachHouse)
-            WorldGenHelper.GenerateBeachHouse();
+        // if (SpawnHousesMod.Config.EnableBeachHouse)
+        //     WorldGenHelper.GenerateBeachHouse();
     }
 }

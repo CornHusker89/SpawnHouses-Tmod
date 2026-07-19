@@ -1,4 +1,3 @@
-using SpawnHouses.Enums;
 using SpawnHouses.Legacy.Helpers;
 using SpawnHouses.Legacy.Structures.BridgeTypes;
 using SpawnHouses.Legacy.Structures.StructureParts;
@@ -42,7 +41,7 @@ public class CaveTown1 : LegacyStructureChain {
 
     protected override Bridge GetBridgeOfDirection(Bridge[] bridges, byte direction, LegacyChainStructure structure) {
         Bridge[] newBridgeList;
-        newBridgeList = structure.Id is StructureType.CaveTown1Test1 ? _bridgeListSmall : _bridgeListLarge;
+        newBridgeList = structure.Id2 is StructureType.CaveTown1Test1 ? _bridgeListSmall : _bridgeListLarge;
 
         for (ushort i = 0; i < 5000; i++) {
             int index = Terraria.WorldGen.genRand.Next(0, newBridgeList.Length);

@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Legacy.Helpers;
 using SpawnHouses.Legacy.Structures.StructureParts;
+using SpawnHouses.StructureCommon.Types.DataStructures;
 
 namespace SpawnHouses.Legacy.Structures;
 

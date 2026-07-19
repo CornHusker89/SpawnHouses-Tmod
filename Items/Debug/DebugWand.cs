@@ -1,14 +1,18 @@
+#if SPAWNHOUSES_DEBUG
+
 #nullable enable
+
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Common.Types.StructureTypes;
+using SpawnHouses.StructureCommon.Types.RootStructureTypes;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace SpawnHouses.Items.Debug;
+
 
 public class DebugWand : ModItem {
     private static Dictionary<int, string> _itemModes = new([
@@ -47,7 +51,7 @@ public class DebugWand : ModItem {
         // structure select mode
         if (_itemMode == 0) {
             Point16 worldMousePos = (Main.MouseWorld / 16).ToPoint16();
-            var structureList = StructureManager.GetStructureList();
+            var structureList = StructureManager.GetAdvStructureList();
 
             // if multiple structures are within bounds, select the next structure index after the current one
             List<int> selectedStructureIndexes = [];
@@ -98,3 +102,5 @@ public class DebugWand : ModItem {
         return true;
     }
 }
+
+#endif

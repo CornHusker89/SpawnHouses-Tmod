@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Common.DataStructures;
 using SpawnHouses.Legacy.Helpers;
 using SpawnHouses.Legacy.Structures.StructureParts;
+using SpawnHouses.StructureCommon.Types.DataStructures;
 using StructureHelper.API;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
@@ -155,26 +155,26 @@ public class ParabolaBridge : Bridge {
 
     // --- bridge presets --
     public class TestBridgeLarge : ParabolaBridge {
-        public TestBridgeLarge() : base("Common/Assets/StructureFiles/woodBridge.shstruct",
+        public TestBridgeLarge() : base("StructureCommon/Assets/StructureFiles/woodBridge.shstruct",
             2, 3, -2, 0.4, 2, 40, 40, -27, 27, 2, 1, false) {
         }
     }
 
     public class TestBridgeLargeAltGen : ParabolaBridge {
-        public TestBridgeLargeAltGen() : base("Common/Assets/StructureFiles/woodBridge.shstruct",
+        public TestBridgeLargeAltGen() : base("StructureCommon/Assets/StructureFiles/woodBridge.shstruct",
             2, 3, -2, 0.4, 2, -42, -42, -27, 27, 2, 1, true) {
         }
     }
 
 
     public class TestBridgeSmall : ParabolaBridge {
-        public TestBridgeSmall() : base("Common/Assets/StructureFiles/woodBridge.shstruct",
+        public TestBridgeSmall() : base("StructureCommon/Assets/StructureFiles/woodBridge.shstruct",
             2, 3, -2, 0.4, 2, 35, 35, -27, 27, 2, 1, false) {
         }
     }
 
     public class TestBridgeSmallAltGen : ParabolaBridge {
-        public TestBridgeSmallAltGen() : base("Common/Assets/StructureFiles/woodBridge.shstruct",
+        public TestBridgeSmallAltGen() : base("StructureCommon/Assets/StructureFiles/woodBridge.shstruct",
             2, 3, -2, 0.4, 2, -37, -37, -27, 27, 2, 1, true) {
         }
     }

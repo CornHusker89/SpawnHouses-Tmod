@@ -1,3 +1,5 @@
+#if SPAWNHOUSES_DEBUG
+
 using System;
 using Terraria;
 using Terraria.ID;
@@ -24,3 +26,5 @@ public class SpawnTest : ModItem {
         return true;
     }
 }
+
+#endif

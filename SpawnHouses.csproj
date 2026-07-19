@@ -8,6 +8,7 @@
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <DebugType>portable</DebugType>
         <Optimize>false</Optimize>
+        <DefineConstants>$(DefineConstants);SPAWNHOUSES_DEBUG</DefineConstants>
     </PropertyGroup>
     <ItemGroup>
         <Reference Include="StructureHelper">
@@ -21,7 +22,8 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
-        <Folder Include="Common\Generation\FileStructureTemplates\"/>
+        <Folder Include="StructureCommon\Drawing\"/>
+        <Folder Include="StructureCommon\Generation\FileStructureTemplates\"/>
     </ItemGroup>
     <!--  <ItemGroup>-->
     <!--    <PackageReference Include="tModLoader.CodeAssist" Version="0.1.*" />-->

@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SpawnHouses.Common.DataStructures;
-using SpawnHouses.Common.Types.Interfaces;
 using SpawnHouses.Legacy.Helpers;
 using SpawnHouses.Legacy.Structures.StructureParts;
+using SpawnHouses.StructureCommon.Tiles;
+using SpawnHouses.StructureCommon.Types;
+using SpawnHouses.StructureCommon.Types.DataStructures;
+using SpawnHouses.StructureCommon.Types.Interfaces;
 using Terraria;
 using Terraria.DataStructures;
 using Main = Terraria.Main;
@@ -291,7 +293,7 @@ public abstract class LegacyStructureChain : IStructureRoot {
         _currentCost += newStructure.Cost;
 
         // reduce the weighting of the chosen structure so that we don't get 5 in a row
-        _copiedStructureList.First(curStructure => curStructure.Id == newStructure.Id).Weight /= 2;
+        _copiedStructureList.First(curStructure => curStructure.Id2 == newStructure.Id2).Weight /= 2;
         CalculateWeights();
 
         for (byte direction = 0; direction < 4; direction++)
@@ -341,6 +343,12 @@ public abstract class LegacyStructureChain : IStructureRoot {
         return true;
     }
 
+    public string Name { get; }
+    public ushort Id { get; }
+    public StructureTilemap Tilemap { get; }
+    public EntryPoint[] EntryPoints { get; }
+    public bool HasBeenFound { get; }
+
     /// <summary>
     ///     Should return true when the player is close to the structure, whatever that means for each structure
     /// </summary>
@@ -353,6 +361,14 @@ public abstract class LegacyStructureChain : IStructureRoot {
     /// </summary>
     public virtual void OnFound() {
         ActionOnEachStructure(structure => { structure.OnFound(); });
+    }
+
+    public void LoadTilemap() {
+        throw new NotImplementedException();
+    }
+
+    public void ApplyTilemap() {
+        throw new NotImplementedException();
     }
 
     /// <summary>

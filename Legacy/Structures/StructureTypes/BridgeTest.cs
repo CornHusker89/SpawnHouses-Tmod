@@ -7,7 +7,7 @@ namespace SpawnHouses.Legacy.Structures.StructureTypes;
 
 public sealed class BridgeTest : LegacyStructure {
     // constants
-    public static readonly string _filePath = "Common/Assets/StructureFiles/bridgeTest.shstruct";
+    public static readonly string _filePath = "StructureCommon/Assets/StructureFiles/bridgeTest.shstruct";
     public static readonly ushort _structureXSize = 8;
     public static readonly ushort _structureYSize = 9;
 

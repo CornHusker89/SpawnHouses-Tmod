@@ -1,10 +1,11 @@
 using System;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Common.DataStructures;
-using SpawnHouses.Common.Types.Interfaces;
-using SpawnHouses.Enums;
 using SpawnHouses.Legacy.Helpers;
 using SpawnHouses.Legacy.Structures.StructureParts;
+using SpawnHouses.StructureCommon.Tiles;
+using SpawnHouses.StructureCommon.Types;
+using SpawnHouses.StructureCommon.Types.DataStructures;
+using SpawnHouses.StructureCommon.Types.Interfaces;
 using StructureHelper.API;
 using Terraria;
 using Terraria.DataStructures;
@@ -18,7 +19,7 @@ public abstract class LegacyStructure : IBoundingBox, IStructureRoot {
     
     public ConnectPoint[][] ConnectPoints;
     public string FilePath;
-    public StructureType Id;
+    public StructureType Id2;
     public byte Status;
 
     protected LegacyStructure(string filePath, ushort structureXSize, ushort structureYSize,
@@ -29,7 +30,7 @@ public abstract class LegacyStructure : IBoundingBox, IStructureRoot {
         Status = status;
 
         if (Enum.TryParse(GetType().Name, out StructureType result))
-            Id = result;
+            Id2 = result;
         else
             throw new Exception($"StructureId of {ToString()} not found");
 
@@ -91,6 +92,12 @@ public abstract class LegacyStructure : IBoundingBox, IStructureRoot {
         Status = StructureStatus.GeneratedButNotFound;
     }
 
+    public string Name { get; }
+    public ushort Id { get; }
+    public StructureTilemap Tilemap { get; }
+    public EntryPoint[] EntryPoints { get; }
+    public bool HasBeenFound { get; }
+
     /// <summary>
     ///     Should return true when the player is close to the structure, whatever that means for each structure
     /// </summary>
@@ -103,6 +110,14 @@ public abstract class LegacyStructure : IBoundingBox, IStructureRoot {
     /// </summary>
     public virtual void OnFound() {
         Status = StructureStatus.GeneratedAndFound;
+    }
+
+    public void LoadTilemap() {
+        throw new NotImplementedException();
+    }
+
+    public void ApplyTilemap() {
+        throw new NotImplementedException();
     }
 
     /// <summary>

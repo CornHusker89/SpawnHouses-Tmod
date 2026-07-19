@@ -1,7 +1,6 @@
 using System;
-using SpawnHouses.Common.DataStructures;
-using SpawnHouses.Enums;
 using SpawnHouses.Legacy.Structures.StructureParts;
+using SpawnHouses.StructureCommon.Types.DataStructures;
 using Terraria;
 using Terraria.ID;
 
