@@ -22,8 +22,8 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
-        <Folder Include="StructureCommon\Drawing\"/>
-        <Folder Include="StructureCommon\Generation\FileStructureTemplates\"/>
+        <Folder Include="Content\Drawing\"/>
+        <Folder Include="Content\Generation\FileStructureTemplates\"/>
     </ItemGroup>
     <!--  <ItemGroup>-->
     <!--    <PackageReference Include="tModLoader.CodeAssist" Version="0.1.*" />-->

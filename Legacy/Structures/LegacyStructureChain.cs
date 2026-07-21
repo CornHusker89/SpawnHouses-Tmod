@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SpawnHouses.Content.Tiles;
+using SpawnHouses.Content.Types;
+using SpawnHouses.Content.Types.DataStructures;
+using SpawnHouses.Content.Types.Interfaces;
 using SpawnHouses.Legacy.Helpers;
 using SpawnHouses.Legacy.Structures.StructureParts;
-using SpawnHouses.StructureCommon.Tiles;
-using SpawnHouses.StructureCommon.Types;
-using SpawnHouses.StructureCommon.Types.DataStructures;
-using SpawnHouses.StructureCommon.Types.Interfaces;
 using Terraria;
 using Terraria.DataStructures;
 using Main = Terraria.Main;

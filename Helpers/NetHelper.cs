@@ -1,7 +1,7 @@
 using System.IO;
+using SpawnHouses.Content.Types.DataStructures;
+using SpawnHouses.Content.Types.Enums;
 using SpawnHouses.Legacy.Helpers;
-using SpawnHouses.StructureCommon.Types.DataStructures;
-using SpawnHouses.StructureCommon.Types.Enums;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;

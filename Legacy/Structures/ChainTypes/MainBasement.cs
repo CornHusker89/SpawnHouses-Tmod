@@ -1,11 +1,11 @@
 using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Content.Types.DataStructures;
 using SpawnHouses.Legacy.Helpers;
 using SpawnHouses.Legacy.Structures.BridgeTypes;
 using SpawnHouses.Legacy.Structures.StructureParts;
 using SpawnHouses.Legacy.Structures.StructureTypes.ChainStructures;
-using SpawnHouses.StructureCommon.Types.DataStructures;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;

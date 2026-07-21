@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
+using SpawnHouses.Content.Types.DataStructures;
 using SpawnHouses.Legacy.Helpers;
 using SpawnHouses.Legacy.Structures.StructureParts;
-using SpawnHouses.StructureCommon.Types.DataStructures;
 
 namespace SpawnHouses.Legacy.Structures;
 
@@ -48,7 +48,7 @@ public class LegacyChainStructure : LegacyStructure {
     }
 
     public override void SetPosition(int x, int y) {
-        BoundingBox = BoundingBox.Move(x, y);
+        BoundingBox = BoundingBox.SetPosition(x, y);
         SetSubstructurePositions();
     }
 

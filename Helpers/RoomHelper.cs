@@ -1,11 +1,11 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using SpawnHouses.StructureCommon.Modules.Components;
-using SpawnHouses.StructureCommon.Types;
-using SpawnHouses.StructureCommon.Types.Geometry;
+using SpawnHouses.Content.Modules.Components;
+using SpawnHouses.Content.Types;
+using SpawnHouses.Content.Types.Geometry;
 using Terraria.DataStructures;
-using Gap = SpawnHouses.StructureCommon.Modules.Components.Gap;
+using Gap = SpawnHouses.Content.Modules.Components.Gap;
 
 namespace SpawnHouses.Helpers;
 

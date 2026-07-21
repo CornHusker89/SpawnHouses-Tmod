@@ -1,11 +1,11 @@
 using System;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Content.Tiles;
+using SpawnHouses.Content.Types;
+using SpawnHouses.Content.Types.DataStructures;
+using SpawnHouses.Content.Types.Interfaces;
 using SpawnHouses.Legacy.Helpers;
 using SpawnHouses.Legacy.Structures.StructureParts;
-using SpawnHouses.StructureCommon.Tiles;
-using SpawnHouses.StructureCommon.Types;
-using SpawnHouses.StructureCommon.Types.DataStructures;
-using SpawnHouses.StructureCommon.Types.Interfaces;
 using StructureHelper.API;
 using Terraria;
 using Terraria.DataStructures;
@@ -47,7 +47,7 @@ public abstract class LegacyStructure : IBoundingBox, IStructureRoot {
     }
 
     public virtual void SetPosition(int x, int y) {
-        BoundingBox = BoundingBox.Move(x, y);
+        BoundingBox = BoundingBox.SetPosition(x, y);
         SetSubstructurePositions();
     }
 

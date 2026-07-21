@@ -1,8 +1,8 @@
 #if SPAWNHOUSES_DEBUG
 
 #nullable enable
-using SpawnHouses.StructureCommon.Types.Geometry;
-using SpawnHouses.StructureCommon.Types.Interfaces;
+using SpawnHouses.Content.Types.Geometry;
+using SpawnHouses.Content.Types.Interfaces;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;

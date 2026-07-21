@@ -15,17 +15,17 @@ public class Seal {
     // -- Seal Presets --
 
     public class MainBasement_SealWall : Seal {
-        public MainBasement_SealWall() : base("StructureCommon/Assets/StructureFiles/mainBasement/mainBasement_SealWall.shstruct", 0, -4) {
+        public MainBasement_SealWall() : base("Content/Assets/StructureFiles/mainBasement/mainBasement_SealWall.shstruct", 0, -4) {
         }
     }
 
     public class MainBasement_SealFloor : Seal {
-        public MainBasement_SealFloor() : base("StructureCommon/Assets/StructureFiles/mainBasement/mainBasement_SealFloor.shstruct", 0, 0) {
+        public MainBasement_SealFloor() : base("Content/Assets/StructureFiles/mainBasement/mainBasement_SealFloor.shstruct", 0, 0) {
         }
     }
 
     public class MainBasement_SealRoof : Seal {
-        public MainBasement_SealRoof() : base("StructureCommon/Assets/StructureFiles/mainBasement/mainBasement_SealRoof.shstruct", 0, 0) {
+        public MainBasement_SealRoof() : base("Content/Assets/StructureFiles/mainBasement/mainBasement_SealRoof.shstruct", 0, 0) {
         }
     }
 }

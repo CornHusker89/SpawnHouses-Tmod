@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using SpawnHouses.StructureCommon.Types.Enums;
+using SpawnHouses.Content.Types.Enums;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Helpers;

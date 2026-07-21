@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Content.Debug;
+using SpawnHouses.Content.Tagging;
+using SpawnHouses.Content.Types;
+using SpawnHouses.Content.Types.Attributes;
+using SpawnHouses.Content.Types.DataStructures;
+using SpawnHouses.Content.Types.Interfaces;
+using SpawnHouses.Content.Types.RootStructureTypes;
 using SpawnHouses.Helpers;
 using SpawnHouses.Items.Debug;
-using SpawnHouses.StructureCommon.Debug;
-using SpawnHouses.StructureCommon.Tagging;
-using SpawnHouses.StructureCommon.Types;
-using SpawnHouses.StructureCommon.Types.Attributes;
-using SpawnHouses.StructureCommon.Types.DataStructures;
-using SpawnHouses.StructureCommon.Types.Interfaces;
-using SpawnHouses.StructureCommon.Types.RootStructureTypes;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
@@ -52,6 +52,8 @@ public class StructureManager : ModSystem {
     public static ushort GeneratableCount { get; private set; }
 
     public static readonly DebugInfoLevel DefaultDebugInfoLevel = new();
+
+    private static IEnumerable<IStructureRoot> _allStructures => _advStructures.Concat(_fileStructures.Cast<IStructureRoot>());
 
     /// <summary>
     ///     gets a shallow copy of the internal structure list. use <see cref="RegisterFileStructure" /> to add to the list
@@ -234,6 +236,7 @@ public class StructureManager : ModSystem {
         DebugWand.SelectedStructure = null;
     }
 
+#if SPAWNHOUSES_DEBUG
     public override void PostDrawTiles() {
         _debugDrawFrameCount++;
 
@@ -244,26 +247,31 @@ public class StructureManager : ModSystem {
             UpdateLabelPositionsAndDraw();
         }
         else {
-            foreach (AdvStructure structure in _advStructures)
+            foreach (IStructureRoot structure in _allStructures)
                 structure.DrawDebugGeometry();
         }
 
         foreach (DebugLabel label in _labels.Keys) {
-            DrawHelper.DrawDebugLabel(label, _labels[label], DrawHelper.DebugDrawWidth, label.ParentObj.GetDrawColor());
+            DrawHelper.DrawDebugLabel(label, _labels[label], DrawHelper.DebugDrawWidth, label.DrawColor);
         }
 
         Main.spriteBatch.End();
     }
+#endif
 
     private static void UpdateLabelPositionsAndDraw() {
         List<Rectangle> structureRects = [];
         _labels.Clear();
 
-        foreach (AdvStructure structure in _advStructures)
-        foreach (DebugLabel label in structure.DrawDebugGeometry()) {
-            _labels.Add(label, label.Root.ToPoint() * new Point(16, 16));
-            TileBox structureGlobalTileBoundingBox = structure.Tilemap.ConvertToGlobal(structure.StructureLayout.BoundingBox);
-            structureRects.Add(structureGlobalTileBoundingBox.Scale(16));
+        foreach (IStructureRoot structure in _allStructures) {
+            foreach (DebugLabel label in structure.DrawDebugGeometry()) {
+                _labels.Add(label, label.Root.ToPoint() * new Point(16, 16));
+
+                if (structure is AdvStructure advStructure) {
+                    TileBox structureGlobalTileBoundingBox = structure.Tilemap.ConvertToGlobal(advStructure.StructureLayout.BoundingBox);
+                    structureRects.Add(structureGlobalTileBoundingBox.Scale(16));
+                }
+            }
         }
 
         // move each label away from each other and the structure

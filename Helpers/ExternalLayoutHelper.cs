@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SpawnHouses.StructureCommon.Modules.Components;
-using SpawnHouses.StructureCommon.Tagging;
-using SpawnHouses.StructureCommon.Types.DataStructures;
-using SpawnHouses.StructureCommon.Types.Geometry;
-using SpawnHouses.StructureCommon.Types.RootStructureTypes;
+using SpawnHouses.Content.Modules.Components;
+using SpawnHouses.Content.Tagging;
+using SpawnHouses.Content.Types.DataStructures;
+using SpawnHouses.Content.Types.Geometry;
+using SpawnHouses.Content.Types.RootStructureTypes;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Helpers;
