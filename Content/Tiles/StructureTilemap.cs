@@ -255,13 +255,11 @@ public class StructureTilemap : IDebugDraw, IBoundingBox {
     }
 
     /// <summary>
-    ///     places a structure helper file into the tilemap (not world) at a specific position
+    ///     places a structure helper file into the tilemap (not world) at a specific LOCAL position
     /// </summary>
-    /// <param name="topLeftPos"></param>
+    /// <param name="pos">top left of placed structure</param>
     /// <param name="filepath"></param>
-    public void PlaceFile(Point16 topLeftPos, string filepath) {
-        ahhhhhhh
-    }
+    public void PlaceFile(Point16 pos, string filepath) => CompatabilityHelper.PlaceShStructure(this, filepath, pos);
 
     /// <summary>
     ///     applies this tilemap (with it's offset) onto main game tilemap
@@ -315,10 +313,18 @@ public class StructureTilemap : IDebugDraw, IBoundingBox {
             });
         }
 
-        // set frames
-        for (int x = 0; x < Width; x++)
-        for (int y = 0; y < Height; y++)
-            StructureTile.SetFrames(ConvertToGlobal(x, y));
+        // If we're not in worldgen, set frames
+        // and then sync if we're in multiplayer
+        if (!WorldGen.generatingWorld) {
+            for (int x = BoundingBox.Left; x < BoundingBox.Left + Width; x++)
+            for (int y = BoundingBox.Top; y < BoundingBox.Top + Height; y++) {
+                WorldGen.TileFrame(x, y);
+                WorldGen.SquareWallFrame(x, y);
+            }
+
+            if (Main.netMode != NetmodeID.SinglePlayer)
+                NetMessage.SendTileSquare(-1, BoundingBox.Left, BoundingBox.Top, BoundingBox.Left + Width, BoundingBox.Top + Height);
+        }
 
         IsTilesPlaced = true;
     }

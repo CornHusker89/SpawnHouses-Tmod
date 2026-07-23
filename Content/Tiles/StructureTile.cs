@@ -11,14 +11,6 @@ namespace SpawnHouses.Content.Tiles;
 ///     has many of the same properties as the tML Tile, but uses direct references and has a few more properties
 /// </summary>
 public class StructureTile {
-    public static void SetFrames(int x, int y) {
-        WorldUtils.TileFrame(x, y);
-        Framing.WallFrame(x, y);
-    }
-
-    public static void SetFrames(Point16 point) {
-        SetFrames(point.X, point.Y);
-    }
     
     /// <summary>
     ///     Resets the tile data at this position.<br />

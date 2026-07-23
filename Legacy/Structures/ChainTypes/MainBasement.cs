@@ -73,13 +73,13 @@ public class MainBasement : LegacyStructureChain {
 
 
     protected override bool IsChainComplete() {
-        if (CompatabilityHelper.IsMSEnabled && SpawnHousesMod.Config.SpawnPointBasementSizeMultiplier > 0.60) {
-            bool found = false;
-            ActionOnEachStructure(structure => {
-                if (structure.Id2 is StructureType.MainBasementRoom5) found = true;
-            });
-            return found;
-        }
+        // if (CompatabilityHelper.IsMsEnabled && SpawnHousesMod.Config.SpawnPointBasementSizeMultiplier > 0.60) {
+        //     bool found = false;
+        //     ActionOnEachStructure(structure => {
+        //         if (structure.Id2 is StructureType.MainBasementRoom5) found = true;
+        //     });
+        //     return found;
+        // }
 
         return true;
     }
@@ -184,13 +184,13 @@ public class MainBasement : LegacyStructureChain {
     }
 
     protected override void OnStructureGenerate(LegacyChainStructure structure) {
-        if ((structure.Id2 is not StructureType.MainBasementRoom5 || !CompatabilityHelper.IsMSEnabled) && structure.Id2 is not StructureType.MainBasementRoom8)
-            foreach (TileBox boundingBox in structure.DetailedBoundingBoxes)
-                StructureGenHelper.GenerateCobwebs(
-                    boundingBox.TopLeftPoint16,
-                    (ushort)boundingBox.Width,
-                    (ushort)boundingBox.Height
-                );
+        // if ((structure.Id2 is not StructureType.MainBasementRoom5 || !CompatabilityHelper.IsMsEnabled) && structure.Id2 is not StructureType.MainBasementRoom8)
+        //     foreach (TileBox boundingBox in structure.DetailedBoundingBoxes)
+        //         StructureGenHelper.GenerateCobwebs(
+        //             boundingBox.TopLeftPoint16,
+        //             (ushort)boundingBox.Width,
+        //             (ushort)boundingBox.Height
+        //         );
 
         int centerX = structure.BoundingBox.Left + structure.BoundingBox.Width / 2;
         int centerY = structure.BoundingBox.Top + structure.BoundingBox.Height / 2;

@@ -143,20 +143,20 @@ public sealed class MainHouse : LegacyStructure {
                     LeftType = _type_small_basement_left;
                     generatedBasement = true;
                 }
-                else if (hasBasement && CompatabilityHelper.IsMSEnabled && !RightSmall) {
-                    LeftType = _type_small_basement_left;
-                    generatedBasement = true;
-                }
+                // else if (hasBasement && CompatabilityHelper.IsMsEnabled && !RightSmall) {
+                //     LeftType = _type_small_basement_left;
+                //     generatedBasement = true;
+                // }
                 else {
                     LeftType = _type_small_left;
                 }
             }
-            else if (CompatabilityHelper.IsMSEnabled && RightSmall) {
-                LeftType = _type_basement_left;
-            }
-            else if (CompatabilityHelper.IsMSEnabled) {
-                LeftType = _type_magicstorage_left;
-            }
+            // else if (CompatabilityHelper.IsMsEnabled && RightSmall) {
+            //     LeftType = _type_basement_left;
+            // }
+            // else if (CompatabilityHelper.IsMsEnabled) {
+            //     LeftType = _type_magicstorage_left;
+            // }
             else if (hasBasement && (RightSmall || Terraria.WorldGen.genRand.NextBool())) {
                 LeftType = _type_basement_left;
                 generatedBasement = true;
@@ -205,19 +205,19 @@ public sealed class MainHouse : LegacyStructure {
         }
         else {
             if (RightSmall) {
-                if (CompatabilityHelper.IsMSEnabled && LeftType != _type_magicstorage_left)
-                    RightType = _type_small_magicstorage_right;
-                else
-                    RightType = _type_small_right;
+                // if (CompatabilityHelper.IsMsEnabled && LeftType != _type_magicstorage_left)
+                //     RightType = _type_small_magicstorage_right;
+                // else
+                //     RightType = _type_small_right;
             }
 
             else if (hasBasement && !generatedBasement) {
                 RightType = _type_basement_right;
                 generatedBasement = true;
             }
-            else if (CompatabilityHelper.IsMSEnabled && LeftSmall) {
-                RightType = _type_magicstorage_right;
-            }
+            // else if (CompatabilityHelper.IsMsEnabled && LeftSmall) {
+            //     RightType = _type_magicstorage_right;
+            // }
             else {
                 RightType = _type_right;
             }

@@ -329,9 +329,10 @@ public class MainBasementRoom4 : LegacyChainStructure {
 public class MainBasementRoom5 : LegacyChainStructure {
     public MainBasementRoom5(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
         base(
-            CompatabilityHelper.IsMSEnabled
-                ? "Content/Assets/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage.shstruct"
-                : "Content/Assets/StructureFiles/mainBasement/mainBasement_Room5.shstruct",
+            //CompatabilityHelper.IsMsEnabled
+            //? "Content/Assets/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage.shstruct"
+            // : 
+            "Content/Assets/StructureFiles/mainBasement/mainBasement_Room5.shstruct",
             22,
             9,
             [
@@ -357,18 +358,18 @@ public class MainBasementRoom5 : LegacyChainStructure {
     public override void OnFound() {
         // MainHouse mainHouse = StructureManager.LegacyStructures.Find(s => s is MainHouse) as MainHouse;
         // if (CompatabilityHelper.IsMSEnabled && FilePath == "Content/Assets/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage.shstruct") {
-        //     CompatabilityHelper.PlaceMSModule(BoundingBox.Left + 10, BoundingBox.Top + 6, CompatabilityHelper.RemoteAccessTileID, CompatabilityHelper.RemoteAccessTileEntityID);
+        //     CompatabilityHelper.PlaceMsModule(BoundingBox.Left + 10, BoundingBox.Top + 6, CompatabilityHelper.RemoteAccessTileID, CompatabilityHelper.RemoteAccessTileEntityID);
         //     if (mainHouse is not null && mainHouse.Status != StructureStatus.NotGenerated) CompatabilityHelper.LinkRemoteStorage(new Point16(BoundingBox.Left + 10, BoundingBox.Top + 6), mainHouse.StorageHeartPos);
         //
-        //     NetHelper.SendUpdateMagicStorage(BoundingBox.Left + 11, BoundingBox.Top + 7);
-        //     CompatabilityHelper.UpdateStorageNetwork(BoundingBox.Left + 11, BoundingBox.Top + 7);
+        //     NetHelper.SendUpdateMs(BoundingBox.Left + 11, BoundingBox.Top + 7);
+        //     CompatabilityHelper.UpdateMsNetwork(BoundingBox.Left + 11, BoundingBox.Top + 7);
         //
-        //     CompatabilityHelper.PlaceMSModule(BoundingBox.Left + 8, BoundingBox.Top + 3, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
-        //     CompatabilityHelper.PlaceMSModule(BoundingBox.Left + 12, BoundingBox.Top + 3, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
-        //     CompatabilityHelper.PlaceMSModule(BoundingBox.Left + 14, BoundingBox.Top + 3, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
-        //     CompatabilityHelper.PlaceMSModule(BoundingBox.Left + 6, BoundingBox.Top + 6, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
-        //     CompatabilityHelper.PlaceMSModule(BoundingBox.Left + 8, BoundingBox.Top + 6, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
-        //     CompatabilityHelper.PlaceMSModule(BoundingBox.Left + 12, BoundingBox.Top + 6, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
+        //     CompatabilityHelper.PlaceMsModule(BoundingBox.Left + 8, BoundingBox.Top + 3, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
+        //     CompatabilityHelper.PlaceMsModule(BoundingBox.Left + 12, BoundingBox.Top + 3, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
+        //     CompatabilityHelper.PlaceMsModule(BoundingBox.Left + 14, BoundingBox.Top + 3, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
+        //     CompatabilityHelper.PlaceMsModule(BoundingBox.Left + 6, BoundingBox.Top + 6, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
+        //     CompatabilityHelper.PlaceMsModule(BoundingBox.Left + 8, BoundingBox.Top + 6, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
+        //     CompatabilityHelper.PlaceMsModule(BoundingBox.Left + 12, BoundingBox.Top + 6, CompatabilityHelper.StorageUnitTileID, CompatabilityHelper.StorageUnitTileEntityID);
         //
         //     StructureGenHelper.GenerateCobwebs(new Point16(BoundingBox.Left, BoundingBox.Top), (ushort)BoundingBox.Width, (ushort)BoundingBox.Height);
         //     NetMessage.SendTileSquare(-1, BoundingBox.Left, BoundingBox.Top, BoundingBox.Width, BoundingBox.Height);

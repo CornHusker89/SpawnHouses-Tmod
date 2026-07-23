@@ -4,7 +4,6 @@ using System.Linq;
 using SpawnHouses.Content.Tiles;
 using SpawnHouses.Content.Types;
 using SpawnHouses.Content.Types.DataStructures;
-using SpawnHouses.Content.Types.Interfaces;
 using SpawnHouses.Legacy.Helpers;
 using SpawnHouses.Legacy.Structures.StructureParts;
 using Terraria;
@@ -13,7 +12,7 @@ using Main = Terraria.Main;
 
 namespace SpawnHouses.Legacy.Structures;
 
-public abstract class LegacyStructureChain : IStructureRoot {
+public abstract class LegacyStructureChain { // : IStructureRoot {
     private readonly Bridge[] _bridges;
     private readonly LegacyChainStructure[] _originalStructureList;
     private readonly LegacyChainStructure[] _rootStructureList;
