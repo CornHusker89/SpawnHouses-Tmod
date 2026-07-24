@@ -21,4 +21,10 @@ public readonly struct FileSubstructureData {
     public readonly string[] ValidPositionIds;
 
     public Point16 Size => Generator.GetStructureDimensions(FilePath, SpawnHousesMod.Instance);
+
+    public FileSubstructureData(string name, string filePath, string[] validPositionIds) {
+        Name = name;
+        FilePath = filePath;
+        ValidPositionIds = validPositionIds;
+    }
 }

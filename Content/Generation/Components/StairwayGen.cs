@@ -20,7 +20,7 @@ public class StairwayGen {
     public class StairwayGenerator1 : PathComponentAdvGenerator {
         public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
-                Tags.StairwayToHorizontalGap
+                Tags.Stairway_ToHorizontalGap
             ]
         );
 

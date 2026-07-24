@@ -16,8 +16,8 @@ public sealed record Tag<TValue>(string? Name = null) : Tag(Name);
 
 public sealed class TagMap {
     private static readonly HashSet<Tag>[] ExclusiveTagsRequired = [
-        [Tags.HasCustomSloping, Tags.SlopingAlgorithm],
-        [Tags.HasCustomSloping, Tags.SlopeGrouping]
+        [Tags.Component_HasCustomSloping, Tags.Component_SlopingAlgorithm],
+        [Tags.Component_HasCustomSloping, Tags.Component_SlopeGrouping]
     ];
 
     private static readonly HashSet<Tag>[] ExclusiveTagsCurrent = [
@@ -56,7 +56,7 @@ public sealed class TagMap {
         foreach (IAdvGeneratable generatable in generatables) generatable.Params.TagsRequired.Add(tag);
     }
 
-    private readonly Dictionary<Tag, object?> _data = new();
+    private readonly Dictionary<Tag, object?> _data;
 
     /// <summary>
     ///     if true, this TagMap cannot be modified but can be accessed. initialized as false
@@ -65,6 +65,15 @@ public sealed class TagMap {
 
     public Tag[] Keys => _data.Keys.ToArray();
     public HashSet<Tag> KeysSet => _data.Keys.ToHashSet();
+
+    public TagMap() {
+        _data = new Dictionary<Tag, object?>();
+    }
+
+    public TagMap(HashSet<Tag> tags) {
+        _data = new Dictionary<Tag, object?>();
+        foreach (Tag tag in tags) _data.Add(tag, null);
+    }
 
     /// <summary>
     ///     set the value for a specific untyped tag
@@ -153,7 +162,7 @@ public sealed class TagMap {
     }
 
     /// <summary>
-    ///     internal method to check this map's tags against a specific mutually exclusive tag set
+    ///     internal method to check this map's tags against mutually exclusive tag sets
     /// </summary>
     /// <param name="exclusiveSets"></param>
     /// <exception cref="Exception"></exception>

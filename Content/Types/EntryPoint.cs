@@ -46,25 +46,10 @@ public class EntryPoint {
     public Point16 End => Start + (IsHorizontal ? new Point16(0, Size - 1) : new Point16(Size - 1, 0));
     
     public Point16 Center => (Start + End) / new Point16(2, 2);
-    
+
+    public Point16 LowerOutside => Point16.NegativeOne;
+
     public void SetOffset(Point16 offset) {
         Offset += offset;
     }
-
-    // /// <summary>
-    // ///     the bottom/right point of this entry point, depending on the direction. 
-    // /// </summary>
-    // public Point BottomRight;
-    //
-    // /// <summary>
-    // ///     the direction of the entry point, facing into the structure
-    // /// </summary>
-    // public readonly byte EntryDirection;
-    //
-    // public EntryPoint(Point bottomRight, byte direction) {
-    //     BottomRight = bottomRight;
-    //     EntryDirection = direction;
-    // }
-    //
-    // public bool IsHorizontal => EntryDirection is LegacyDirections.Left or LegacyDirections.Right;
 }

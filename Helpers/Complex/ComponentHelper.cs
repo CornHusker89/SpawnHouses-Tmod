@@ -31,8 +31,8 @@ public static class ComponentHelper {
     /// </summary>
     public abstract class FillShapeTiles : IComponentHelper {
         public static HashSet<Tag> PossibleTags => [
-            Tags.SlopingAlgorithm,
-            Tags.SlopeGrouping
+            Tags.Component_SlopingAlgorithm,
+            Tags.Component_SlopeGrouping
         ];
 
         /// <summary>
@@ -47,8 +47,8 @@ public static class ComponentHelper {
         /// <remarks>supports ApplySloping and SlopingModifier component tags</remarks>
         public static void Action(IComponent component, Shape shape, TilePaletteCondition paletteCondition) {
             StructureTilemap t = component.Params.Structure.Tilemap;
-            bool hasSloping = component.Params.TagsRequired.GetValueSafe(Tags.SlopingAlgorithm, out SlopingAlgorithm slopingAlgorithm);
-            component.Params.TagsRequired.GetValueSafe(Tags.SlopeGrouping, out SlopeGrouping slopeGrouping);
+            bool hasSloping = component.Params.TagsRequired.GetValueSafe(Tags.Component_SlopingAlgorithm, out SlopingAlgorithm slopingAlgorithm);
+            component.Params.TagsRequired.GetValueSafe(Tags.Component_SlopeGrouping, out SlopeGrouping slopeGrouping);
 
             if (!hasSloping) {
                 shape.ExecuteInArea((x, y) => {
@@ -76,8 +76,8 @@ public static class ComponentHelper {
                 });
             }
 
-            component.TagsCurrent.Add(Tags.SlopingAlgorithm, slopingAlgorithm);
-            component.TagsCurrent.Add(Tags.SlopeGrouping, slopeGrouping);
+            component.TagsCurrent.Add(Tags.Component_SlopingAlgorithm, slopingAlgorithm);
+            component.TagsCurrent.Add(Tags.Component_SlopeGrouping, slopeGrouping);
         }
     }
 
@@ -138,10 +138,10 @@ public static class ComponentHelper {
     public abstract class PlaceBeams : IComponentHelper {
         public static HashSet<Tag> PossibleTags => TagMap.NewTagSet(
             [
-                Tags.RoomHasBeams,
-                Tags.RoomHasSpecificBeams,
-                Tags.RoomBeamsAreTiles,
-                Tags.RoomBeamsAreWalls
+                Tags.Room_HasBeams,
+                Tags.Room_HasSpecificBeams,
+                Tags.Room_BeamsAreTiles,
+                Tags.Room_BeamsAreWalls
             ],
             FillShapeWalls.PossibleTags
         );
@@ -155,11 +155,11 @@ public static class ComponentHelper {
         /// <param name="roomPaletteSet"></param>
         /// <param name="fillCondition"></param>
         public static void Action(Shape shape, IComponent component, int targetDistance, PaintedTypeRoomSet roomPaletteSet, Condition2D? fillCondition = null) {
-            bool placeTiles = component.Params.TagsRequired.HasTag(Tags.RoomBeamsAreTiles);
-            bool placeWalls = component.Params.TagsRequired.HasTag(Tags.RoomBeamsAreWalls);
-            bool hasSpecificBeams = component.Params.TagsRequired.GetValueSafe(Tags.RoomHasSpecificBeams, out int[] requiredBeams);
+            bool placeTiles = component.Params.TagsRequired.HasTag(Tags.Room_BeamsAreTiles);
+            bool placeWalls = component.Params.TagsRequired.HasTag(Tags.Room_BeamsAreWalls);
+            bool hasSpecificBeams = component.Params.TagsRequired.GetValueSafe(Tags.Room_HasSpecificBeams, out int[] requiredBeams);
             if (!placeTiles && !placeWalls)
-                throw new Exception("PlaceBeams was called but tags don't contain either \"RoomBeamsAreTiles\" or \"RoomBeamsAreWalls\"");
+                throw new Exception("PlaceBeams was called but tags don't contain either \"Room_BeamsAreTiles\" or \"Room_BeamsAreWalls\"");
 
             StructureTilemap tilemap = component.Params.Structure.Tilemap;
 
@@ -179,13 +179,13 @@ public static class ComponentHelper {
             });
 
             int[] beamsArray = beams.ToArray();
-            component.TagsCurrent.Add(Tags.RoomHasBeams, beamsArray);
+            component.TagsCurrent.Add(Tags.Room_HasBeams, beamsArray);
             if (hasSpecificBeams)
-                component.TagsCurrent.Add(Tags.RoomHasSpecificBeams, beamsArray);
+                component.TagsCurrent.Add(Tags.Room_HasSpecificBeams, beamsArray);
             if (placeTiles)
-                component.TagsCurrent.Add(Tags.RoomBeamsAreTiles);
+                component.TagsCurrent.Add(Tags.Room_BeamsAreTiles);
             if (placeWalls)
-                component.TagsCurrent.Add(Tags.RoomBeamsAreWalls);
+                component.TagsCurrent.Add(Tags.Room_BeamsAreWalls);
         }
     }
 
@@ -194,8 +194,8 @@ public static class ComponentHelper {
     /// </summary>
     public abstract class PlaceWindowAreas : IComponentHelper {
         public static HashSet<Tag> PossibleTags => [
-            Tags.RoomHasWindows,
-            Tags.RoomHasSpecificWindows
+            Tags.Room_HasWindows,
+            Tags.Room_HasSpecificWindows
         ];
 
         /// <summary>
@@ -210,7 +210,7 @@ public static class ComponentHelper {
         /// <exception cref="Exception"></exception>
         public static void Action(Shape shape, IComponent component, int windowLength, int windowSpacing, int roomEdgeSpacing, WallPaletteCondition fillCondition) {
             List<Shape> windowVolumes;
-            bool hasSpecificWindows = component.Params.TagsRequired.GetValueSafe(Tags.RoomHasSpecificWindows, out var requiredWindowVolumes);
+            bool hasSpecificWindows = component.Params.TagsRequired.GetValueSafe(Tags.Room_HasSpecificWindows, out var requiredWindowVolumes);
             if (hasSpecificWindows)
                 windowVolumes = requiredWindowVolumes.ToList();
             else {
@@ -239,19 +239,19 @@ public static class ComponentHelper {
             }
 
             var windowVolumesArray = windowVolumes.ToArray();
-            component.TagsCurrent.Add(Tags.RoomHasWindows, windowVolumesArray);
+            component.TagsCurrent.Add(Tags.Room_HasWindows, windowVolumesArray);
             if (hasSpecificWindows)
-                component.TagsCurrent.Add(Tags.RoomHasSpecificWindows, windowVolumesArray);
+                component.TagsCurrent.Add(Tags.Room_HasSpecificWindows, windowVolumesArray);
         }
     }
 
     public abstract class FurnishRooms : IComponentHelper {
         public static HashSet<Tag> PossibleTags => [
-            Tags.HasHousing
+            Tags.Structure_HasHousing
         ];
 
         public static void Action(Room component) {
-            component.TagsCurrent.Add(Tags.RoomHousingValid);
+            component.TagsCurrent.Add(Tags.Room_HousingValid);
         }
     }
 }

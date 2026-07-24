@@ -5,7 +5,7 @@ using SpawnHouses.Helpers;
 
 namespace SpawnHouses.Content.Tagging;
 
-#pragma warning disable CA2211
+// ReSharper disable InconsistentNaming
 
 /// <summary>
 ///     Tag saving/loading is based on the tag's identifier, so don't change them once implemented
@@ -14,49 +14,52 @@ public static class Tags {
     
     #region Structure
 
-    public static Tag IsSymmetric = new();
+    public static Tag Structure_IsSymmetric = new();
 
-    public static Tag<int> HasRooms = new();
+    public static Tag<int> Structure_HasRooms = new();
 
-    public static Tag<int> HasHousing = new();
+    public static Tag<int> Structure_HasHousing = new();
 
-    public static Tag HasOnlyRectangleRooms = new();
+    public static Tag Structure_HasOnlyRectangleRooms = new();
 
-    public static Tag HasNoRectangleRooms = new();
+    public static Tag Structure_HasNoRectangleRooms = new();
 
     /// has both rectangular and non-uniform rooms
-    public static Tag HasSomeRectangleRooms = new();
+    public static Tag Structure_HasSomeRectangleRooms = new();
 
     /// there are a number of convenient large rooms intended for general use
-    public static Tag<int> HasLargeRoom = new();
+    public static Tag<int> Structure_HasLargeRoom = new();
 
     /// there is a convenient large room intended for storage
-    public static Tag HasStorage = new();
+    public static Tag Structure_HasStorage = new();
 
     /// the structure is NOT made of materials that have potential to significantly screw up progression (ex hard mode ores)
-    public static Tag ProgressionSafe = new();
+    public static Tag Structure_ProgressionSafe = new();
 
     /// the structure is made of materials that have potential to significantly screw up progression (ex hard mode ores)
-    public static Tag NotProgressionSafe = new();
+    public static Tag Structure_NotProgressionSafe = new();
 
-    public static Tag HasRoof = new();
+    public static Tag Structure_HasRoof = new();
 
-    public static Tag HasNoRoof = new();
+    public static Tag Structure_HasNoRoof = new();
+
+    /// if the structure's entry points don't represent the outer bounds of the structure. value represents the furthest extension from an entry point
+    public static Tag<int> Structure_ExtendsPastEntryPoints = new();
 
     /// structure is categorized as having an overall forest theme
-    public static Tag ForestTheme = new();
+    public static Tag Structure_ForestTheme = new();
 
     /// structure is categorized as having an overall icy/cold theme
-    public static Tag IceTheme = new();
+    public static Tag Structure_IceTheme = new();
 
     /// structure is categorized as having an overall beach theme
-    public static Tag BeachTheme = new();
+    public static Tag Structure_BeachTheme = new();
 
     /// structure is categorized as having an overall jungle theme
-    public static Tag JungleTheme = new();
+    public static Tag Structure_JungleTheme = new();
 
     /// structure is categorized as having an overall cavern/underground theme
-    public static Tag CavernTheme = new();
+    public static Tag Structure_CavernTheme = new();
 
     #endregion
 
@@ -65,23 +68,24 @@ public static class Tags {
     public static Tag External = new();
 
     /// use a specific predetermined sloping algorithm when filling volumes
-    public static readonly Tag<SlopingAlgorithm> SlopingAlgorithm = new();
+    public static readonly Tag<SlopingAlgorithm> Component_SlopingAlgorithm = new();
 
     /// apply sloping algorithm with different specific predetermined contexts
-    public static readonly Tag<SlopeGrouping> SlopeGrouping = new();
+    public static readonly Tag<SlopeGrouping> Component_SlopeGrouping = new();
 
-    public static readonly Tag HasCustomSloping = new();
+    public static readonly Tag Component_HasCustomSloping = new();
 
-    public static Tag HasDebris = new();
+    /// applied primarily to rooms, but could also go to hollow walls/floors
+    public static Tag Component_HasDebris = new();
 
     #endregion
 
     #region Floor
 
     /// floor is not hollow
-    public static readonly Tag FloorSolid = new();
+    public static readonly Tag Floor_Solid = new();
 
-    public static readonly Tag FloorHollow = new();
+    public static readonly Tag Floor_Hollow = new();
 
     #endregion
 
@@ -92,102 +96,104 @@ public static class Tags {
     #region Gap
 
     /// door of a horizontal gap is on the "outside" side of the gap. typically defaults to the middle of the gap, only affects wider gaps
-    public static readonly Tag GapDoorOutside = new();
+    public static readonly Tag Gap_DoorOutside = new();
 
     /// door of a horizontal gap is on the "inside" side of the gap. typically defaults to the middle of the gap, only affects wider gaps
-    public static readonly Tag GapDoorInside = new();
+    public static readonly Tag Gap_DoorInside = new();
 
     #endregion
 
     #region Room
 
-    public static readonly Tag RoomTypeStorage = new();
+    public static readonly Tag Room_TypeStorage = new();
 
-    public static readonly Tag RoomTypeLiving = new();
+    public static readonly Tag Room_TypeLiving = new();
 
-    public static readonly Tag RoomTypeBedroom = new();
+    public static readonly Tag Room_TypeBedroom = new();
 
-    public static readonly Tag RoomTypeBathroom = new();
+    public static readonly Tag Room_TypeBathroom = new();
 
-    public static readonly Tag RoomTypeStudy = new();
+    public static readonly Tag Room_TypeStudy = new();
 
-    public static readonly Tag RoomTypeWorkshop = new();
+    public static readonly Tag Room_TypeWorkshop = new();
 
     /// if a room has windows that are spaced out by that room's own geometry, and the shapes that make them up
-    public static readonly Tag<Shape[]> RoomHasWindows = new();
+    public static readonly Tag<Shape[]> Room_HasWindows = new();
 
     /// if exact placement is required, the required window volumes in a room
-    public static readonly Tag<Shape[]> RoomHasSpecificWindows = new();
+    public static readonly Tag<Shape[]> Room_HasSpecificWindows = new();
 
-    public static readonly Tag RoomHousingNotValid = new();
+    public static readonly Tag Room_HousingNotValid = new();
 
-    public static readonly Tag RoomHousingValid = new();
+    public static readonly Tag Room_HousingValid = new();
 
     /// if a room has beams, what x-positions they are
-    public static readonly Tag<int[]> RoomHasBeams = new();
+    public static readonly Tag<int[]> Room_HasBeams = new();
 
     /// if exact placement is required, these are those beam x-positions in a room
-    public static readonly Tag<int[]> RoomHasSpecificBeams = new();
+    public static readonly Tag<int[]> Room_HasSpecificBeams = new();
 
-    public static readonly Tag RoomBeamsAreTiles = new();
+    public static readonly Tag Room_BeamsAreTiles = new();
 
-    public static readonly Tag RoomBeamsAreWalls = new();
+    public static readonly Tag Room_BeamsAreWalls = new();
 
     #endregion
 
     #region Stairway
 
-    public static readonly Tag StairwayTilesLowerX = new();
+    public static readonly Tag Stairway_TilesLowerX = new();
 
-    public static readonly Tag StairwayTilesHigherX = new();
+    public static readonly Tag Stairway_TilesHigherX = new();
 
-    public static readonly Tag StairwayRequiresJumping = new();
+    public static readonly Tag Stairway_RequiresJumping = new();
 
-    public static readonly Tag StairwayNotRequiresJumping = new();
+    public static readonly Tag Stairway_NotRequiresJumping = new();
 
-    public static readonly Tag StairwayToHorizontalGap = new();
+    public static readonly Tag Stairway_ToHorizontalGap = new();
 
-    public static readonly Tag StairwayToVerticalGap = new();
+    public static readonly Tag Stairway_ToVerticalGap = new();
 
     #endregion
 
     #region Roof
 
-    public static readonly Tag RoofFlat = new();
+    public static readonly Tag Roof_Flat = new();
     
     /// roof is tall enough that it doesn't follow the full contour of the tiles it is placed on
-    public static readonly Tag RoofTall = new();
+    public static readonly Tag Roof_Tall = new();
 
     /// roof is short enough to generally follow the contour of the path
-    public static readonly Tag RoofShort = new();
+    public static readonly Tag Roof_Short = new();
 
-    public static readonly Tag<int[]> RoofHasChimney = new();
+    public static readonly Tag<int[]> Roof_HasChimney = new();
 
-    public static readonly Tag<(int leftOverhang, int rightOverhang)> RoofHasOverhang = new();
+    public static readonly Tag<int> Roof_HasLeftOverhang = new();
+
+    public static readonly Tag<int> Roof_HasRightOverhang = new();
 
     #endregion
 
     #region Palette
 
-    public static readonly Tag PaletteWood = new();
+    public static readonly Tag Palette_Wood = new();
 
-    public static readonly Tag PaletteStone = new();
+    public static readonly Tag Palette_Stone = new();
 
-    public static readonly Tag PaletteDarkGrey = new();
+    public static readonly Tag Palette_DarkGrey = new();
 
-    public static readonly Tag PaletteLightGrey = new();
+    public static readonly Tag Palette_LightGrey = new();
 
-    public static readonly Tag PaletteMediumGrey = new();
+    public static readonly Tag Palette_MediumGrey = new();
 
-    public static readonly Tag PaletteDarkBrown = new();
+    public static readonly Tag Palette_DarkBrown = new();
 
-    public static readonly Tag PaletteLightBrown = new();
+    public static readonly Tag Palette_LightBrown = new();
 
-    public static readonly Tag PaletteMediumBrown = new();
+    public static readonly Tag Palette_MediumBrown = new();
 
-    public static readonly Tag PaletteRed = new();
+    public static readonly Tag Palette_Red = new();
 
-    public static readonly Tag PaletteTurquoise = new();
+    public static readonly Tag Palette_Turquoise = new();
 
     #endregion
 

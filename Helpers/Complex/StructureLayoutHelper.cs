@@ -30,10 +30,10 @@ public static class StructureLayoutHelper {
     /// </summary>
     public abstract class SubdivideRoom : IStructureLayoutHelper {
         public static HashSet<Tag> PossibleTags => [
-            Tags.HasRooms,
-            Tags.HasOnlyRectangleRooms,
-            Tags.HasSomeRectangleRooms,
-            Tags.HasLargeRoom
+            Tags.Structure_HasRooms,
+            Tags.Structure_HasOnlyRectangleRooms,
+            Tags.Structure_HasSomeRectangleRooms,
+            Tags.Structure_HasLargeRoom
         ];
 
         /// <summary>
@@ -169,7 +169,7 @@ public static class StructureLayoutHelper {
             List<(Shape volume, string name)> floorVolumes = [], wallVolumes = [], finishedRoomVolumes = [];
             var roomQueue = new Queue<Shape>([room.Geometry]);
             int extraCuts = 0, curLargeRoomCount = 0, xCutCount = 0, yCutCount = 0;
-            bool hasLargeRooms = param.TagsRequired.GetValueSafe(Tags.HasLargeRoom, out int targetLargeRoomCount);
+            bool hasLargeRooms = param.TagsRequired.GetValueSafe(Tags.Structure_HasLargeRoom, out int targetLargeRoomCount);
             float largeRoomChance = hasLargeRooms ? (float)targetLargeRoomCount / targetRoomCount : 0;
             int maxLargeRooms = (int)Math.Ceiling(largeRoomChance * targetRoomCount);
             for (int curHousing = 1; curHousing < targetRoomCount + extraCuts; curHousing++) {
@@ -292,7 +292,7 @@ public static class StructureLayoutHelper {
             foreach (PartialPoint corner in room.Geometry.GetCorners())
                 prioritySplits.AddItem(corner, 1);
 
-            int targetRoomCount = p.TagsRequired.GetValue(Tags.HasRooms);
+            int targetRoomCount = p.TagsRequired.GetValue(Tags.Structure_HasRooms);
 
             for (int attempt = 0; attempt < p.Attempts; attempt++) {
                 RoomLayout volumes = SplitBsp(p, room, prioritySplits, prioritizeSplitsOnGapFloors, targetRoomCount);
@@ -322,10 +322,10 @@ public static class StructureLayoutHelper {
                     gap.InteriorRoom = RoomHelper.GetClosestRoom(pickedLayout.Rooms, gap.Geometry.BoundingBox.CenterPoint16);
             }
 
-            p.Structure.StructureLayout.TagsCurrent.Add(Tags.HasRooms, pickedLayout.Rooms.Count);
-            p.Structure.StructureLayout.TagsCurrent.Add(room.Geometry.IsBox ? Tags.HasOnlyRectangleRooms : Tags.HasSomeRectangleRooms);
-            if (p.TagsRequired.HasTag(Tags.HasLargeRoom))
-                p.Structure.StructureLayout.TagsCurrent.Add(Tags.HasLargeRoom);
+            p.Structure.StructureLayout.TagsCurrent.Add(Tags.Structure_HasRooms, pickedLayout.Rooms.Count);
+            p.Structure.StructureLayout.TagsCurrent.Add(room.Geometry.IsBox ? Tags.Structure_HasOnlyRectangleRooms : Tags.Structure_HasSomeRectangleRooms);
+            if (p.TagsRequired.HasTag(Tags.Structure_HasLargeRoom))
+                p.Structure.StructureLayout.TagsCurrent.Add(Tags.Structure_HasLargeRoom);
             
             return pickedLayout;
         }
@@ -789,7 +789,7 @@ public static class StructureLayoutHelper {
         /// <param name="wallThickness"></param>
         /// <returns></returns>
         public static (List<Floor> floors, List<Wall> walls, List<Roof> roofs) Action(StructureLayoutParams param, Point16 left, Point16 right, int floorThickness, int wallThickness) {
-            bool forceFlat = param.TagsRequired.HasTag(Tags.HasOnlyRectangleRooms);
+            bool forceFlat = param.TagsRequired.HasTag(Tags.Structure_HasOnlyRectangleRooms);
             bool isFlat = left.Y == right.Y;
             int fullLength = right.X - left.X - 2 + 2 * wallThickness;
 
@@ -810,8 +810,8 @@ public static class StructureLayoutHelper {
             // }
 
             var result = ExternalLayoutHelper.CreateTopFloorsWallsRoofs(param.Structure, path, floorThickness, true, wallThickness);
-            TagMap.AddRequiredToEach(result.floors, Tags.SlopingAlgorithm, SlopeHelper.SimpleSlopes);
-            TagMap.AddRequiredToEach(result.floors, Tags.SlopeGrouping, SlopeGrouping.GlobalOnlySloping);
+            TagMap.AddRequiredToEach(result.floors, Tags.Component_SlopingAlgorithm, SlopeHelper.SimpleSlopes);
+            TagMap.AddRequiredToEach(result.floors, Tags.Component_SlopeGrouping, SlopeGrouping.GlobalOnlySloping);
             return result;
         }
     }

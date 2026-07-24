@@ -100,6 +100,8 @@ public class CompatabilityHelper : ModSystem {
         for (int i = 0; i < data.height; i++) {
             int fileDataOffset = collDx * data.height * dataSingleSize;
             byte[] dataSingle = fileData[new Range(fileDataOffset + i * dataSingleSize, fileDataOffset + (i + 1) * dataSingleSize)];
+
+            // interpret data
             StructureTile tile = tilemap[x, y + i];
             switch (typeof(TType).Name) {
                 case nameof(TileTypeData):

@@ -76,8 +76,13 @@ public class StructureManager : ModSystem {
         return GeneratableCount;
     }
 
-
+    /// <summary>
+    ///     <see cref="FileStructure.LoadTilemap" /> must be called before this
+    /// </summary>
+    /// <param name="structure"></param>
     public static void RegisterFileStructure(FileStructure structure) {
+        if (!structure.Tilemap.IsAllTilesLoaded)
+            throw new ArgumentException("structure must have an initialized tilemap");
         _fileStructures.Add(structure);
     }
     
@@ -89,6 +94,8 @@ public class StructureManager : ModSystem {
         if (structure.FailedLayoutGeneration)
             return;
         if (structure.StructureLayout == null) throw new ArgumentException("structure must have an initialized layout");
+        if (!structure.Tilemap.IsAllTilesLoaded)
+            throw new ArgumentException("structure must have an initialized tilemap");
         _advStructures.Add(structure);
     }
 
@@ -133,7 +140,7 @@ public class StructureManager : ModSystem {
                     string[] effectivePositionIds = positionIds
                         .Where(id => structureInfo.positionIdsToPositions.TryGetValue(id, out Point16 p) && !(p.X == -1 && p.Y == -1))
                         .ToArray();
-                    string signature = string.Join("|", effectivePositionIds.Select(id => $"{id}={positionIdsToNames[id]}"));
+                    string signature = string.Join(":", effectivePositionIds.Select(id => $"{id}={positionIdsToNames[id]}"));
 
                     if (!seen.Add(signature)) continue;
 

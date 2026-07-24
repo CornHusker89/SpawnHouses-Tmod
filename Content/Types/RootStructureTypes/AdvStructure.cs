@@ -27,8 +27,6 @@ public class AdvStructure : IStructureRoot {
     public EntryPoint[] EntryPoints => LayoutParam.EntryPoints;
     public bool HasBeenFound { get; set; }
     
-    
-
     public readonly Dictionary<Type, List<IAdvGenerator>> InstanceGeneratorQueue = [];
 
     /// <summary>
@@ -52,12 +50,12 @@ public class AdvStructure : IStructureRoot {
     /// <param name="name"></param>
     /// <param name="layoutParam"></param>
     /// <param name="palette"></param>
-    /// <param name="seed">if -1, creates a new random seed from the normal terraria random advGenerator</param>
+    /// <param name="seed">if -1, creates a new random seed from the normal terraria random generator</param>
     /// <param name="generate">
-    ///     if true, will call <see cref="ApplyLayoutMethod" />, <see cref="LoadTilemap" />,
-    ///     <see cref="Register"/>, and <see cref="ApplyTilemap" /> 
+    ///     if true, will call <see cref="LoadTilemap" />, <see cref="StructureManager.RegisterAdvStructure"/>, and <see cref="ApplyTilemap" /> 
     /// </param>
-    public AdvStructure(string name, StructureLayoutParams layoutParam, TilePalette palette, int seed = -1, bool generate = true) {
+    // ReSharper disable once NotNullOrRequiredMemberIsNotInitialized
+    public AdvStructure(string name, StructureLayoutParams layoutParam, TilePalette palette, int seed = -1, bool generate = false) {
         Name = name;
         Id = StructureManager.NextGeneratableId();
         Seed = seed == -1 ? WorldGen.genRand.Next() : seed;
@@ -66,11 +64,11 @@ public class AdvStructure : IStructureRoot {
         LayoutParam = layoutParam;
         LayoutParam.Structure = this;
         Palette = palette;
-        
+
+        ApplyLayoutMethod();
         if (generate) {
-            ApplyLayoutMethod();
             LoadTilemap();
-            Register();
+            StructureManager.RegisterAdvStructure(this);
             ApplyTilemap();
         }
 
@@ -104,11 +102,6 @@ public class AdvStructure : IStructureRoot {
         Tilemap.ApplyTilemap();
     }
 
-    /// <summary>
-    ///     adds this structure to the global structure list and initializes some debug fields
-    /// </summary>
-    public void Register() => StructureManager.RegisterAdvStructure(this);
-
     public bool IsFound(Point16 playerPos) {
         if (!Tilemap.IsTilesPlaced)
             return false;
@@ -128,11 +121,20 @@ public class AdvStructure : IStructureRoot {
             return [];
 
         List<DebugLabel> labels = [];
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
         if (Tilemap != null)
             labels.AddRange(Tilemap.DrawDebugGeometry());
         if (StructureLayout != null)
             labels.AddRange(StructureLayout.DrawDebugGeometry());
         return labels;
+    }
+
+    public void SetPosition(Point16 position) {
+        Point16 delta = position - StructureLayout.BoundingBox.TopLeftPoint16;
+
+        Tilemap.SetPosition(Tilemap.BoundingBox.TopLeftPoint16 + delta);
+        StructureLayout.Offset(delta);
+        foreach (EntryPoint entryPoint in LayoutParam.EntryPoints) entryPoint.SetOffset(position);
     }
 
     /// <summary>
@@ -159,6 +161,7 @@ public class AdvStructure : IStructureRoot {
 
         StructureLayout = new StructureLayout(LayoutParam, "Layout_Type");
         StructureLayout.ExecuteGenerator();
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
         if (StructureLayout == null || Tilemap == null) {
             FailedLayoutGeneration = true;
             SpawnHousesMod.Instance.Logger.Warn($"structure with see {Seed} failed layout generation");

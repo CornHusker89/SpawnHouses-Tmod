@@ -47,8 +47,8 @@ public class StructureTilemap : IDebugDraw, IBoundingBox {
 
     private UnifiedRandom OtherRandom => Structure is AdvStructure advStructure ? advStructure.OtherRandom : WorldGen._genRand;
 
-    public int Width => BoundingBox.Width;
-    public int Height => BoundingBox.Height;
+    public short Width => BoundingBox.Width;
+    public short Height => BoundingBox.Height;
 
     public StructureTilemap(IStructureRoot structure, ushort width, ushort height, Point16? globalTileOffset = null) {
         Structure = structure;

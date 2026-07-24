@@ -1,4 +1,8 @@
+#nullable enable
+
+using System;
 using SpawnHouses.Content.Tiles;
+using SpawnHouses.Content.Types.Enums;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Content.Types.Interfaces;
@@ -48,4 +52,45 @@ public interface IStructureRoot : IDebugDraw {
     ///     paste tiles from the structure's tilemap into game tilemap
     /// </summary>
     public void ApplyTilemap();
+
+    /// <summary>
+    ///     sets top left position of the structure in the world
+    /// </summary>
+    /// <param name="position"></param>
+    public void SetPosition(Point16 position);
+
+    /// <summary>
+    ///     moves the structure to align the entry points with the specified ground positions
+    /// </summary>
+    /// <param name="entry1"></param>
+    /// <param name="groundEntryTarget1"></param>
+    /// <param name="entry2"></param>
+    /// <param name="groundEntryTarget2"></param>
+    /// <param name="entryPointAnchor"> </param>
+    public void AlignEntryPoints(EntryPoint entry1, Point16 groundEntryTarget1, EntryPoint? entry2, Point16? groundEntryTarget2 = null, EntryPointPositionAnchor entryPointAnchor = EntryPointPositionAnchor.Neutral) {
+        if (entryPointAnchor is EntryPointPositionAnchor.Point2 && entry2 is null)
+            throw new ArgumentException("entry point anchor cannon be on point 2 if point 2 is null");
+
+        Point16 positionOffset;
+
+        if (entryPointAnchor is EntryPointPositionAnchor.Point1 || entry2 is null) {
+            positionOffset = groundEntryTarget1 - entry1.LowerOutside;
+        }
+        else if (entryPointAnchor is EntryPointPositionAnchor.Point2) {
+            positionOffset = groundEntryTarget1 - entry2.LowerOutside;
+        }
+        else if (entryPointAnchor is EntryPointPositionAnchor.Neutral) {
+            Point16 offset1 = groundEntryTarget1 - entry1.LowerOutside;
+            Point16 offset2 = groundEntryTarget2!.Value - entry2.LowerOutside;
+            positionOffset = new Point16(
+                (short)((offset1.X + offset2.X) / 2),
+                (short)((offset1.Y + offset2.Y) / 2)
+            );
+        }
+        else {
+            throw new Exception("unexpected value for entry point anchor");
+        }
+
+        SetPosition(positionOffset);
+    }
 }

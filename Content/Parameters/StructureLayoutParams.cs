@@ -31,10 +31,10 @@ public class StructureLayoutParams : IParams {
         if (Height <= 4)
             throw new ArgumentException($"Volume ({Size}) is too small compared to the length ({Length}) of the structure, resulting in a too-low total height of {Height}");
 
-        bool hasHousing = TagsRequired.GetValueSafe(Tags.HasHousing, out int housingCount);
+        bool hasHousing = TagsRequired.GetValueSafe(Tags.Structure_HasHousing, out int housingCount);
 
         if (hasHousing) {
-            bool hasRooms = TagsRequired.GetValueSafe(Tags.HasRooms, out int roomCount);
+            bool hasRooms = TagsRequired.GetValueSafe(Tags.Structure_HasRooms, out int roomCount);
             if (!hasRooms) throw new ArgumentException("Must have rooms tag to have housing");
 
             if (Size / housingCount < 60)

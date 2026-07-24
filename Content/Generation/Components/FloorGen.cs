@@ -45,7 +45,7 @@ public static class FloorGen {
     // public class FloorGenerator3 : VolumeComponentAdvGenerator {
     //     public override HashSet<ComponentTag> GetPossibleTags() {
     //         return [
-    //             ComponentTag.FloorSolid,
+    //             ComponentTag.Floor_Solid,
     //             ComponentTag.External,
     //             ComponentTag.Elevated,
     //             ComponentTag.GroundLevel,
@@ -92,11 +92,11 @@ public static class FloorGen {
     public class FloorGenerator4 : VolumeComponentAdvGenerator {
         public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
-                Tags.FloorHollow
+                Tags.Floor_Hollow
             ]
         );
 
-        public override bool CanGenerate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random) => component.Geometry.GetDetailedAxisSizes(false).average >= 3 && param.TagsRequired.HasTag(Tags.FloorHollow);
+        public override bool CanGenerate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random) => component.Geometry.GetDetailedAxisSizes(false).average >= 3 && param.TagsRequired.HasTag(Tags.Floor_Hollow);
 
         public override bool Generate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
             int xStart = component.Geometry.BoundingBox.Left;
@@ -131,7 +131,7 @@ public static class FloorGen {
                 tilemap.PlaceTile(xStart + index, bottomY[index], palette.InternalFloor.Primary);
             }
 
-            component.TagsCurrent.Add(Tags.FloorHollow);
+            component.TagsCurrent.Add(Tags.Floor_Hollow);
             
             ComponentHelper.FillShapeRedundantWalls.Action(component.Geometry, param.Structure, palette.InternalFloor.PrimaryBackground);
 

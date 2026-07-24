@@ -27,11 +27,11 @@ public static class StructureLayoutGen {
     public class StructureLayoutAdvGenerator1 : StructureLayoutAdvGenerator {
         public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
-                Tags.HasRooms,
-                Tags.HasHousing,
-                Tags.HasStorage,
-                Tags.HasRoof,
-                Tags.HasOnlyRectangleRooms
+                Tags.Structure_HasRooms,
+                Tags.Structure_HasHousing,
+                Tags.Structure_HasStorage,
+                Tags.Structure_HasRoof,
+                Tags.Structure_HasOnlyRectangleRooms
             ],
             StructureLayoutHelper.SubdivideRoom.PossibleTags,
             StructureLayoutHelper.CreateStairways.PossibleTags,
@@ -60,7 +60,7 @@ public static class StructureLayoutGen {
             // TODO: compensate structure volume and roofMargin for the non-square volume at the top
 
             // structure parameters that aren't dependent on tilemap position
-            bool forceFlatRoof = param.TagsRequired.HasTag(Tags.HasOnlyRectangleRooms);
+            bool forceFlatRoof = param.TagsRequired.HasTag(Tags.Structure_HasOnlyRectangleRooms);
             int entryPointVerticalDistance = Math.Abs(param.EntryPoints[0].End.Y - param.EntryPoints[1].End.Y);
             bool hasBasement = param.Structure.OtherRandom.NextBool(3, 10) && param.Height - entryPointVerticalDistance > 12; //40% if conditions are met
             NumRange externalFloorThicknessRange = new(1, 2);
@@ -159,14 +159,14 @@ public static class StructureLayoutGen {
             );
 
             RoomLayout roomLayout = StructureLayoutHelper.SubdivideRoom.Action(internalRoom, roomLayoutParams);
-            param.TagsRequired.GetValueSafe(Tags.HasHousing, out int housingCount);
-            structureLayout.TagsCurrent.Add(Tags.HasHousing, housingCount);
-            structureLayout.TagsCurrent.Add(Tags.HasRooms, roomLayout.Rooms.Count);
+            param.TagsRequired.GetValueSafe(Tags.Structure_HasHousing, out int housingCount);
+            structureLayout.TagsCurrent.Add(Tags.Structure_HasHousing, housingCount);
+            structureLayout.TagsCurrent.Add(Tags.Structure_HasRooms, roomLayout.Rooms.Count);
             structureLayout.SetInternalComponents([roomLayout]);
             
             foreach (Room room in param.Structure.StructureLayout.Rooms) {
                 //StructureLayoutHelper.CreateStairways.Action(param, room);
-                room.Params.TagsRequired.Add(param.Structure.LayoutRandom.NextBool() ? Tags.RoomTypeLiving : Tags.RoomTypeBedroom);
+                room.Params.TagsRequired.Add(param.Structure.LayoutRandom.NextBool() ? Tags.Room_TypeLiving : Tags.Room_TypeBedroom);
             }
 
             return true;

@@ -1,7 +1,10 @@
 #if SPAWNHOUSES_DEBUG
 
 using System;
+using SpawnHouses.Content.Tagging;
+using SpawnHouses.Content.Types.RootStructureTypes;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -22,9 +25,11 @@ public class SpawnTest : ModItem {
         int y = (Main.MouseWorld / 16).ToPoint16().Y;
         
         Console.WriteLine(x + ", " + y);
+
+        FileStructure thing = new("Test Structure", new Point16(10, 10), [], new TagMap());
         
         return true;
     }
 }
 
-#endif
+#endif  

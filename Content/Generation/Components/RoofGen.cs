@@ -26,9 +26,10 @@ public static class RoofGen {
         public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
                 Tags.External,
-                Tags.RoofShort,
-                Tags.RoofTall,
-                Tags.RoofHasOverhang,
+                Tags.Roof_Short,
+                Tags.Roof_Tall,
+                Tags.Roof_HasLeftOverhang,
+                Tags.Roof_HasRightOverhang
             ],
             ComponentHelper.FillShapeTiles.PossibleTags,
             ComponentHelper.FillShapeWalls.PossibleTags
@@ -49,12 +50,12 @@ public static class RoofGen {
             roofTopPath.Reverse(); // so that it can form a shape with the other path
 
             Shape offsetShape = roofLowerPath.ToShape(roofTopPath);
-            param.TagsRequired.Add(Tags.SlopingAlgorithm, SlopeHelper.SharpTopCorners);
-            param.TagsRequired.Add(Tags.SlopeGrouping, SlopeGrouping.LocalSloping);
+            param.TagsRequired.Add(Tags.Component_SlopingAlgorithm, SlopeHelper.SharpTopCorners);
+            param.TagsRequired.Add(Tags.Component_SlopeGrouping, SlopeGrouping.LocalSloping);
             ComponentHelper.FillShapeTiles.Action(roofComponent, offsetShape, (_, _) => palette.Roof.Primary);
 
             // add large roof parts if necessary
-            if (param.TagsRequired.HasTag(Tags.RoofTall)) {
+            if (param.TagsRequired.HasTag(Tags.Roof_Tall)) {
                 bool tallLeftSide = random.NextBool(3, 4);
                 bool tallRightSide = !tallLeftSide || random.NextBool(3, 4);
 
@@ -81,17 +82,19 @@ public static class RoofGen {
                     }
                 }
 
-                component.TagsCurrent.Add(Tags.RoofTall);
+                component.TagsCurrent.Add(Tags.Roof_Tall);
 
                 // TODO: add the little window things when filling
             }
-            else if (param.TagsRequired.HasTag(Tags.RoofShort))
-                component.TagsCurrent.Add(Tags.RoofShort);
+            else if (param.TagsRequired.HasTag(Tags.Roof_Short))
+                component.TagsCurrent.Add(Tags.Roof_Short);
 
             // create endcaps
             // TODO: make endcaps work
-            if (param.TagsRequired.HasTag(Tags.RoofHasOverhang))
-                component.TagsCurrent.Add(Tags.RoofHasOverhang);
+            if (param.TagsRequired.HasTag(Tags.Roof_HasLeftOverhang))
+                component.TagsCurrent.Add(Tags.Roof_HasLeftOverhang);
+            if (param.TagsRequired.HasTag(Tags.Roof_HasRightOverhang))
+                component.TagsCurrent.Add(Tags.Roof_HasRightOverhang);
             if (!roofComponent.LowerXExtendable) {
             }
 
@@ -118,12 +121,13 @@ public static class RoofGen {
         public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
                 Tags.External,
-                Tags.RoofShort,
-                Tags.RoofHasOverhang,
-                Tags.HasCustomSloping
+                Tags.Roof_Short,
+                Tags.Roof_HasLeftOverhang,
+                Tags.Roof_HasRightOverhang,
+                Tags.Component_HasCustomSloping
             ],
             [
-                [Tags.SlopingAlgorithm, Tags.SlopeGrouping]
+                [Tags.Component_SlopingAlgorithm, Tags.Component_SlopeGrouping]
             ],
             ComponentHelper.FillShapeTiles.PossibleTags
         );

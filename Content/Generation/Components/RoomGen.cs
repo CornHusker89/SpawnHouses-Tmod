@@ -21,14 +21,14 @@ public static class RoomGen {
     public class RoomGenerator2 : VolumeComponentAdvGenerator {
         public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
-                Tags.RoomTypeBedroom
+                Tags.Room_TypeBedroom
             ],
             ComponentHelper.PlaceBeams.PossibleTags,
             ComponentHelper.FillShapeWalls.PossibleTags,
             ComponentHelper.FurnishRooms.PossibleTags
         );
 
-        public override bool CanGenerate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random) => param.TagsRequired.HasTag(Tags.RoomTypeBedroom);
+        public override bool CanGenerate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random) => param.TagsRequired.HasTag(Tags.Room_TypeBedroom);
 
         public override bool Generate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
             int endY = component.Geometry.BoundingBox.Bottom;
@@ -41,9 +41,9 @@ public static class RoomGen {
                 return palette.BedroomRoom.Primary;
             });
 
-            component.TagsCurrent.Add(Tags.RoomTypeBedroom);
+            component.TagsCurrent.Add(Tags.Room_TypeBedroom);
 
-            if (param.TagsRequired.HasTag(Tags.RoomHasBeams))
+            if (param.TagsRequired.HasTag(Tags.Room_HasBeams))
                 ComponentHelper.PlaceBeams.Action(component.Geometry, component, 4, palette.BedroomRoom);
             ComponentHelper.FurnishRooms.Action((Room)component);
             return true;
@@ -57,20 +57,20 @@ public static class RoomGen {
     public class RoomGenerator3 : VolumeComponentAdvGenerator {
         public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
             [
-                Tags.RoomTypeLiving,
+                Tags.Room_TypeLiving
             ],
             ComponentHelper.FillShapeWalls.PossibleTags,
             ComponentHelper.FurnishRooms.PossibleTags
         );
 
-        public override bool CanGenerate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random) => param.TagsRequired.HasTag(Tags.RoomTypeLiving);
+        public override bool CanGenerate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random) => param.TagsRequired.HasTag(Tags.Room_TypeLiving);
 
         public override bool Generate(VolumeComponent component, VolumeComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
             int endY = component.Geometry.BoundingBox.Bottom;
             int mainTopY = component.Geometry.BoundingBox.Top;
             int mainBottomY = endY - 1;
 
-            component.TagsCurrent.Add(Tags.RoomTypeLiving);
+            component.TagsCurrent.Add(Tags.Room_TypeLiving);
             
             ComponentHelper.FillShapeWalls.Action(component.Geometry, param.Structure, (x, y) => {
                 if (y == endY) return palette.LivingRoom.BottomBackgroundAccent;
