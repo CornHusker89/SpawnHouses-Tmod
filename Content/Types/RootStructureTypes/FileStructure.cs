@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using SpawnHouses.Content.Debug;
 using SpawnHouses.Content.Tagging;
 using SpawnHouses.Content.Tiles;
+using SpawnHouses.Content.Types.DataStructures;
 using SpawnHouses.Content.Types.Enums;
 using SpawnHouses.Content.Types.Interfaces;
 using SpawnHouses.Helpers;
@@ -26,6 +27,12 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
 
     // IStructureRoot
     public DebugInfoLevel DebugInfoVisibility { get; set; }
+
+    /// <inheritdoc cref="IDebugDraw.Name" />
+    /// . is formatted as follows for
+    /// <see cref="FileStructure" />
+    /// s:
+    /// {template name}_{position id}={substructure name}
     public string Name { get; private set; }
     public StructureTilemap Tilemap { get; private set; }
     public EntryPoint[] EntryPoints { get; private set; }
@@ -47,14 +54,14 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
 
     public bool Depreciated { get; internal set; }
 
-    /// <summary>any special data this structure needs to store</summary>
-    public readonly Dictionary<string, object> Data = [];
+    /// <summary>any special data this specific structure needs to store</summary>
+    public Dictionary<string, object> Data;
 
     /// <summary>map of the substructures with each positionID being associated with a filename</summary>
-    public readonly Dictionary<string, string> PositionIdToFilename = [];
+    public Dictionary<string, string> PositionIdToFilename;
 
     /// <summary>map of the substructures with each positionID being associated with a position</summary>
-    public readonly Dictionary<string, Point16> PositionIdToPosition = [];
+    public Dictionary<string, Point16> PositionIdToPosition;
 
     public bool HasMultipleSubstructures => PositionIdToFilename.Keys.Count > 1;
     public Point16 Size => new(Tilemap.Width, Tilemap.Height);
@@ -70,7 +77,7 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
     /// <param name="tagsNotAllowed"></param>
     /// <param name="weightingStrength">higher means it will be more likely to pick a structure that fits closer</param>
     /// <returns></returns>
-    public static List<WeightedStructure> CreateCandidateList(Point16 groundEntryTarget1, Point16 groundEntryTarget2, (int min, int max) entryPointDistDiff, TagMap tagsRequired, HashSet<Tag>? tagsNotAllowed = null, double weightingStrength = 1.0) {
+    public static List<WeightedStructure> CreateCandidateList(Point16 groundEntryTarget1, Point16 groundEntryTarget2, NumRange entryPointDistDiff, TagMap tagsRequired, HashSet<Tag>? tagsNotAllowed = null, double weightingStrength = 1.0) {
         List<WeightedStructure> candidates = [];
 
         // calculate the distance between the two provided entry points
@@ -104,7 +111,7 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
                 }
             }
 
-            if (bestDistanceDifference >= entryPointDistDiff.max || bestDistanceDifference < entryPointDistDiff.min)
+            if (bestDistanceDifference >= entryPointDistDiff.Max || bestDistanceDifference < entryPointDistDiff.Min)
                 continue;
             double baseWeight = 1.0 / (bestDistanceDifference + 1.0);
             double weight = Math.Pow(baseWeight, weightingStrength);
@@ -154,12 +161,15 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
     /// <param name="size"></param>
     /// <param name="entryPoints"></param>
     /// <param name="tagMap"></param>
+    /// <param name="positionIdToFilename"></param>
+    /// <param name="positionIdToPosition"></param>
     /// <param name="isFound"></param>
     /// <param name="onFound"></param>
     /// <param name="onTilemapLoaded"></param>
     /// <exception cref="ArgumentException"></exception>
-    internal FileStructure(string name, Point16 size, EntryPoint[] entryPoints, TagMap tagMap, Func<FileStructure, Point16, bool>? isFound = null,
-        Action<FileStructure>? onFound = null, Action<FileStructure>? onTilemapLoaded = null) {
+    internal FileStructure(string name, Point16 size, EntryPoint[] entryPoints, TagMap tagMap,
+        Dictionary<string, string> positionIdToFilename, Dictionary<string, Point16> positionIdToPosition,
+        Func<FileStructure, Point16, bool>? isFound = null, Action<FileStructure>? onFound = null, Action<FileStructure>? onTilemapLoaded = null) {
         if (entryPoints.Count(entryPoint => entryPoint.Purpose is EntryPointPurpose.GroundLevel) > 2)
             throw new ArgumentException("Cannot have more than 2 ground-level entry points");
 
@@ -172,6 +182,10 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
         EntryPoints = entryPoints;
         TagsCurrent = tagMap;
         Name = name;
+
+        Data = [];
+        PositionIdToFilename = positionIdToFilename;
+        PositionIdToPosition = positionIdToPosition;
     }
 
     /// <summary>
@@ -188,13 +202,25 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
     ///     creates a new structure based with the name and specific substructures at each position IDs
     /// </summary>
     /// <param name="pos"></param>
-    /// <param name="name"></param>
-    /// <param name="positionIdToName"></param>
+    /// <param name="name">template's class name or full variation name, depending on <paramref name="fullname"/></param>
+    /// <param name="positionIdToName">if <paramref name="fullname"/> is true, leave null</param>
+    /// <param name="fullname">
+    ///     if true, expects <paramref name="name"/> to be full structure variation name.
+    ///     otherwise <paramref name="name"/> should just be the template's class name
+    /// </param>
+    /// <param name="generate"></param>
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-    public FileStructure(Point16 pos, string name, Dictionary<string, string> positionIdToName, bool generate = false) {
-        FileStructure? referenceStructure = StructureManager.AllFileStructureVariations.FirstOrDefault(s =>
-            s.Name == name && positionIdToName.All(kvp => s.PositionIdToFilename.TryGetValue(kvp.Key, out string? filename) && filename == kvp.Value));
-
+    public FileStructure(Point16 pos, string name, Dictionary<string, string> positionIdToName, bool fullname = false, bool generate = false) {
+        FileStructure? referenceStructure;
+        if (fullname) {
+            referenceStructure = StructureManager.AllFileStructureVariations.FirstOrDefault(s => s.Name == name);
+        }
+        else {
+            string searchString = name + "_";
+            foreach (var kvp in positionIdToName) searchString += kvp.Key + "=" + kvp.Value;
+            referenceStructure = StructureManager.AllFileStructureVariations.FirstOrDefault(s => s.Name == searchString);
+        }
+        
         if (referenceStructure == null)
             throw new ArgumentException($"No matching structure found for name '{name}' with the specified substructures");
 
@@ -223,7 +249,7 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     public FileStructure(Point16 groundEntryTarget1, Point16 groundEntryTarget2, TagMap tagsRequired, HashSet<Tag>? tagsNotAllowed = null, int maxEntryPointDistDiff = 5,
         double weightingStrength = 1.0, EntryPointPositionAnchor entryPointAnchor = EntryPointPositionAnchor.Neutral, bool generate = false) {
-        var candidates = CreateCandidateList(groundEntryTarget1, groundEntryTarget2, (0, maxEntryPointDistDiff),
+        var candidates = CreateCandidateList(groundEntryTarget1, groundEntryTarget2, new NumRange(0, maxEntryPointDistDiff),
             tagsRequired, tagsNotAllowed, weightingStrength);
 
         if (candidates.Count == 0)
@@ -265,6 +291,14 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
         TagsCurrent.AddRange(referenceFileStructure.TagsCurrent);
 
         Name = referenceFileStructure.Name;
+
+        Data = [];
+        PositionIdToFilename = [];
+        foreach (var kvp in referenceFileStructure.PositionIdToFilename)
+            PositionIdToFilename[kvp.Key] = kvp.Value;
+        PositionIdToPosition = [];
+        foreach (var kvp in referenceFileStructure.PositionIdToPosition)
+            PositionIdToPosition[kvp.Key] = kvp.Value;
     }
 
     public Color GetDrawColor() => DrawHelper.GetColor(Id);
@@ -315,6 +349,7 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
         foreach (var substructure in PositionIdToFilename) Tilemap.PlaceFile(PositionIdToPosition[substructure.Key], substructure.Value);
 
         _onTilemapLoaded?.Invoke(this);
+        Tilemap.IsAllTilesLoaded = true;
     }
 
     public void ApplyTilemap() {

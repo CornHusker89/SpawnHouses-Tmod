@@ -82,6 +82,38 @@ public class CompatabilityHelper : ModSystem {
         MagicStorage.NetHelper.SendSearchAndRefresh(x, y);
     }
 
+    private static void ExportShSingleData(StructureTilemap tilemap, string type, byte[] data, int x, int y) {
+        StructureTile tile = tilemap[x, y];
+        switch (type) {
+            case nameof(TileTypeData):
+                tile.TileType = (ushort)((data[1] << 8) + data[0]);
+                break;
+
+            case nameof(WallTypeData):
+                tile.WallType = (ushort)((data[1] << 8) + data[0]);
+                break;
+
+            case nameof(TileWallWireStateData):
+                int bitPack = (data[7] << 24) + (data[6] << 16) + (data[5] << 8) + data[4];
+                tile.HasTile = TileDataPacking.GetBit(bitPack, 0);
+                tile.IsActuated = TileDataPacking.GetBit(bitPack, 1);
+                tile.HasActuator = TileDataPacking.GetBit(bitPack, 2);
+                tile.TileColor = (byte)TileDataPacking.Unpack(bitPack, 3, 5);
+                tile.WallColor = (byte)TileDataPacking.Unpack(bitPack, 8, 5);
+                if (TileDataPacking.GetBit(bitPack, 24)) // isHalfBlock
+                    tile.BlockType = BlockType.HalfBlock;
+                else
+                    tile.BlockType = TileDataPacking.Unpack(bitPack, 25, 3) switch {
+                        1 => BlockType.SlopeDownLeft,
+                        2 => BlockType.SlopeDownRight,
+                        3 => BlockType.SlopeUpLeft,
+                        4 => BlockType.SlopeUpRight,
+                        0 => BlockType.Solid
+                    };
+                break;
+        }
+    }
+
     /// <summary>
     /// </summary>
     /// <param name="data"></param>
@@ -89,51 +121,54 @@ public class CompatabilityHelper : ModSystem {
     /// <param name="x">tilemap x</param>
     /// <param name="y">tilemap top y pos</param>
     /// <param name="collDx">column number in the data file</param>
-    /// <typeparam name="TType"></typeparam>
-    private static void ExportShDataColumn<TType>(StructureData data, StructureTilemap tilemap, int x, int y, int collDx)
-        where TType : unmanaged, ITileData {
-        ITileDataEntry dataEntry = data.dataEntries[$"Terraria/{typeof(TType).Name}"];
+    /// <typeparam name="T"></typeparam>
+    private static void ExportShDataColumn<T>(StructureData data, StructureTilemap tilemap, int x, int y, int collDx)
+        where T : unmanaged, ITileData {
+        ITileDataEntry dataEntry = data.dataEntries[$"Terraria/{typeof(T).Name}"];
 
         byte[] fileData = dataEntry.GetData();
         int dataSingleSize = dataEntry.GetSingleSize();
 
-        for (int i = 0; i < data.height; i++) {
+        for (int rowIdx = 0; rowIdx < data.height; rowIdx++) {
             int fileDataOffset = collDx * data.height * dataSingleSize;
-            byte[] dataSingle = fileData[new Range(fileDataOffset + i * dataSingleSize, fileDataOffset + (i + 1) * dataSingleSize)];
-
-            // interpret data
-            StructureTile tile = tilemap[x, y + i];
-            switch (typeof(TType).Name) {
-                case nameof(TileTypeData):
-                    tile.TileType = (ushort)((dataSingle[1] << 8) + dataSingle[0]);
-                    break;
-
-                case nameof(WallTypeData):
-                    tile.WallType = (ushort)((dataSingle[1] << 8) + dataSingle[0]);
-                    break;
-
-                case nameof(TileWallWireStateData):
-                    int bitPack = (dataSingle[3] << 24) + (dataSingle[2] << 16) + (dataSingle[1] << 8) + dataSingle[0];
-                    tile.HasTile = TileDataPacking.GetBit(bitPack, 0);
-                    tile.IsActuated = TileDataPacking.GetBit(bitPack, 1);
-                    tile.HasActuator = TileDataPacking.GetBit(bitPack, 2);
-                    tile.TileColor = (byte)TileDataPacking.Unpack(bitPack, 3, 5);
-                    tile.WallColor = (byte)TileDataPacking.Unpack(bitPack, 8, 5);
-                    if (TileDataPacking.GetBit(bitPack, 24)) // isHalfBlock
-                        tile.BlockType = BlockType.HalfBlock;
-                    else
-                        tile.BlockType = TileDataPacking.Unpack(bitPack, 25, 3) switch {
-                            1 => BlockType.SlopeDownLeft,
-                            2 => BlockType.SlopeDownRight,
-                            3 => BlockType.SlopeUpLeft,
-                            4 => BlockType.SlopeUpRight,
-                            0 => BlockType.Solid
-                        };
-                    break;
-            }
+            byte[] dataSingle = fileData[new Range(fileDataOffset + rowIdx * dataSingleSize, fileDataOffset + (rowIdx + 1) * dataSingleSize)];
+            ExportShSingleData(tilemap, typeof(T).Name, dataSingle, x, y + rowIdx);
         }
+    }
 
-        
+    private static void ExportShDataColumnSlow<T>(StructureData data, StructureTilemap tilemap, int x, int y, int collDx) {
+        string key = $"Terraria/{typeof(T).Name}";
+
+        byte[] fileData = data.dataEntries[key].GetData();
+        int dataSingleSize = data.dataEntries[key].GetSingleSize();
+        int fileDataOffset = collDx * data.height * dataSingleSize;
+
+        byte[] tileTypeData = data.dataEntries["Terraria/TileTypeData"].GetData();
+        int tileTypeSingleSize = data.dataEntries["Terraria/TileTypeData"].GetSingleSize();
+        int tileTypeOffset = collDx * data.height * tileTypeSingleSize;
+
+        byte[] wallTypeData = data.dataEntries["Terraria/WallTypeData"].GetData();
+        int wallTypeSingleSize = data.dataEntries["Terraria/TileTypeData"].GetSingleSize();
+        int wallTypeOffset = collDx * data.height * wallTypeSingleSize;
+
+        if (key != "Terraria/WallTypeData")
+            for (int rowIdx = 0; rowIdx < data.height; rowIdx++) {
+                byte[] dataSingle = fileData[new Range(fileDataOffset + rowIdx * dataSingleSize, fileDataOffset + (rowIdx + 1) * dataSingleSize)];
+                byte[] tileTypeDataSingle = tileTypeData[new Range(tileTypeOffset + rowIdx * tileTypeSingleSize, tileTypeOffset + (rowIdx + 1) * tileTypeSingleSize)];
+                if ((ushort)((tileTypeDataSingle[1] << 8) + tileTypeDataSingle[0]) != StructureHelper.StructureHelper.NULL_IDENTIFIER)
+                    ExportShSingleData(tilemap, typeof(T).Name, dataSingle, x, y + rowIdx);
+                else
+                    tilemap[x, y + rowIdx].IsNullTile = true;
+            }
+        else
+            for (int rowIdx = 0; rowIdx < data.height; rowIdx++) {
+                byte[] dataSingle = fileData[new Range(fileDataOffset + rowIdx * dataSingleSize, fileDataOffset + (rowIdx + 1) * dataSingleSize)];
+                byte[] wallTypeDataSingle = wallTypeData[new Range(wallTypeOffset + rowIdx * wallTypeSingleSize, wallTypeOffset + (rowIdx + 1) * wallTypeSingleSize)];
+                if ((ushort)((wallTypeDataSingle[1] << 8) + wallTypeDataSingle[0]) != StructureHelper.StructureHelper.NULL_IDENTIFIER)
+                    ExportShSingleData(tilemap, typeof(T).Name, dataSingle, x, y + rowIdx);
+                else
+                    tilemap[x, y + rowIdx].IsNullWall = true;
+            }
     }
 
     /// <summary>
@@ -146,16 +181,17 @@ public class CompatabilityHelper : ModSystem {
     public static void PlaceShStructure(StructureTilemap tilemap, string filepath, Point16 offset) {
         StructureData data = Generator.GetStructureData(filepath, SpawnHousesMod.Instance);
 
-        for (int k = 0; k < data.width; k++)
+        for (int k = 0; k < data.width; k++) {
             if (!data.slowColumns[k]) {
                 ExportShDataColumn<TileTypeData>(data, tilemap, offset.X + k, offset.Y, k);
                 ExportShDataColumn<WallTypeData>(data, tilemap, offset.X + k, offset.Y, k);
                 ExportShDataColumn<TileWallWireStateData>(data, tilemap, offset.X + k, offset.Y, k);
             }
-        // data.ExportDataColumnSlow<TileTypeData>(offset.X + k, offset.Y, k, null);
-        // data.ExportDataColumnSlow<WallTypeData>(offset.X + k, offset.Y, k, null);
-        // data.ExportDataColumnSlow<LiquidData>(offset.X + k, offset.Y, k, null);
-        // data.ExportDataColumnSlow<TileWallBrightnessInvisibilityData>(offset.X + k, offset.Y, k, null);
-        // data.ExportDataColumnSlow<TileWallWireStateData>(offset.X + k, offset.Y, k, null);
+            else {
+                ExportShDataColumnSlow<TileTypeData>(data, tilemap, offset.X + k, offset.Y, k);
+                ExportShDataColumnSlow<WallTypeData>(data, tilemap, offset.X + k, offset.Y, k);
+                ExportShDataColumnSlow<TileWallWireStateData>(data, tilemap, offset.X + k, offset.Y, k);
+            }
+        }
     }
 }

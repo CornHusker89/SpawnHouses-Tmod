@@ -166,7 +166,7 @@ public readonly struct TileBox {
     /// <param name="y"></param>
     /// <returns></returns>
     [Pure]
-    public TileBox SetPosition(int x, int y) => new(X, Y, Width, Height);
+    public TileBox SetPosition(int x, int y) => new(x, y, Width, Height);
 
     [Pure]
     public bool Intersects(TileBox value) =>

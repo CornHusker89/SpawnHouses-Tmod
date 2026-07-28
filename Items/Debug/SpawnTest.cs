@@ -1,7 +1,7 @@
 #if SPAWNHOUSES_DEBUG
 
 using System;
-using SpawnHouses.Content.Tagging;
+using System.Collections.Generic;
 using SpawnHouses.Content.Types.RootStructureTypes;
 using Terraria;
 using Terraria.DataStructures;
@@ -26,7 +26,14 @@ public class SpawnTest : ModItem {
         
         Console.WriteLine(x + ", " + y);
 
-        FileStructure thing = new("Test Structure", new Point16(10, 10), [], new TagMap());
+        FileStructure thing = new(
+            new Point16(x, y),
+            "WoodHouse1",
+            new Dictionary<string, string>([
+                new KeyValuePair<string, string>("Main", "RightLarge")
+            ]),
+            generate: true
+        );
         
         return true;
     }

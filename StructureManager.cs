@@ -128,9 +128,11 @@ public class StructureManager : ModSystem {
 
                 foreach (var combo in CombinationHelper.CartesianProduct(optionsPerPosition)) {
                     var positionIdsToNames = new Dictionary<string, string>();
+                    var positionIdsToFilenames = new Dictionary<string, string>();
                     var namesToSubstructures = new Dictionary<string, FileSubstructureData>();
                     for (int i = 0; i < positionIds.Length; i++) {
                         positionIdsToNames[positionIds[i]] = combo[i].Name;
+                        positionIdsToFilenames[positionIds[i]] = combo[i].FilePath;
                         namesToSubstructures[combo[i].Name] = combo[i];
                     }
 
@@ -168,6 +170,8 @@ public class StructureManager : ModSystem {
                         size,
                         structureInfo.entryPoints,
                         structureInfo.tags,
+                        positionIdsToFilenames,
+                        structureInfo.positionIdsToPositions,
                         template.IsFound,
                         template.OnFound,
                         template.OnTilemapLoaded);

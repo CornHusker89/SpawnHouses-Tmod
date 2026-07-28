@@ -11,22 +11,22 @@ using StructureInfo = (System.Collections.Generic.Dictionary<string, Terraria.Da
 namespace SpawnHouses.Content.Generation.FileStructureTemplates;
 
 [StructureTemplateLoadable(true, false)]
-public class WoodHouse1Template : FileStructureTemplate {
+public class WoodHouse1 : FileStructureTemplate {
     public override FileSubstructureData[] Substructures => [
         new(
             "RightLarge",
             "Content/Assets/StructureFiles/mainHouse/mainHouse_Right_v4.shstruct",
-            ["main"]
+            ["Main"]
         )
     ];
 
     public override string[] PositionIds => [
-        "main"
+        "Main"
     ];
 
     public override StructureInfo GetStructureInfo(Dictionary<string, string> positionIdsToNames) {
         Dictionary<string, Point16> positionIdsToPositions = new([
-            new KeyValuePair<string, Point16>("main", new Point16(0, 0))
+            new KeyValuePair<string, Point16>("Main", new Point16(0, 0))
         ]);
 
         EntryPoint[] entryPoints = [
