@@ -3,7 +3,6 @@ using SpawnHouses.Helpers;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
-using Terraria.WorldBuilding;
 
 namespace SpawnHouses.Content.Tiles;
 
@@ -48,6 +47,10 @@ public class StructureTile {
             tile.IsActuated = IsActuated;
             tile.HasActuator = HasActuator;
             tile.TileColor = TileColor;
+
+            if (TileFrameX != -1) tile.TileFrameX = TileFrameX;
+
+            if (TileFrameY != -1) tile.TileFrameY = TileFrameY;
         }
 
         if (!IsNullWall) {
@@ -163,6 +166,32 @@ public class StructureTile {
     ///     Actuated tiles are <strong>not</strong> solid.
     /// </remarks>
     public bool IsActuated;
+
+    /// <summary>
+    ///     The X coordinate of the top left corner of the area in the spritesheet for the <see cref="TileType" /> to be used to draw the tile at this position.
+    ///     <para />
+    ///     For a Framed tile, this value is set automatically according to the framing logic as the world loads or other tiles are placed or mined nearby. See <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#framed-vs-frameimportant-tiles">Framed vs FrameImportant</see> for more info. For <see cref="Main.tileFrameImportant" /> tiles, this value will not change due to tile framing and will be saved and synced in Multiplayer. In either case, <see cref="TileFrameX" /> and
+    ///     <see cref="TileFrameY" /> correspond to the coordinates of the top left corner of the area in the spritesheet corresponding to the <see cref="TileType" /> that should be drawn at this position. Custom drawing logic can adjust these values.
+    ///     <para />
+    ///     Some tiles such as Christmas Tree and Weapon Rack use the higher bits of these fields to do tile-specific behaviors. Modders should not attempt to do similar approaches, but should use <see cref="ModLoader.ModTileEntity" />s.
+    ///     <para />
+    ///     Legacy/vanilla equivalent is <see cref="frameX" />.
+    /// </summary>
+    /// <remarks>-1 means it is not set</remarks>
+    public short TileFrameX = -1;
+
+    /// <summary>
+    ///     The Y coordinate of the top left corner of the area in the spritesheet for the <see cref="TileType" /> to be used to draw the tile at this position.
+    ///     <para />
+    ///     For a Framed tile, this value is set automatically according to the framing logic as the world loads or other tiles are placed or mined nearby. See <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#framed-vs-frameimportant-tiles">Framed vs FrameImportant</see> for more info. For <see cref="Main.tileFrameImportant" /> tiles, this value will not change due to tile framing and will be saved and synced in Multiplayer. In either case, <see cref="TileFrameX" /> and
+    ///     <see cref="TileFrameY" /> correspond to the coordinates of the top left corner of the area in the spritesheet corresponding to the <see cref="TileType" /> that should be drawn at this position. Custom drawing logic can adjust these values.
+    ///     <para />
+    ///     Some tiles such as Christmas Tree and Weapon Rack use the higher bits of these fields to do tile-specific behaviors. Modders should not attempt to do similar approaches, but should use <see cref="ModLoader.ModTileEntity" />s.
+    ///     <para />
+    ///     Legacy/vanilla equivalent is <see cref="frameY" />.
+    /// </summary>
+    /// <remarks>-1 means it is not set</remarks>
+    public short TileFrameY = -1;
 
 
     // Colors

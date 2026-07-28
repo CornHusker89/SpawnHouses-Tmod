@@ -1,14 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using MagicStorage.Components;
 using SpawnHouses.Content.Tiles;
 using SpawnHouses.Content.Types.Enums;
-using StructureHelper.API;
 using StructureHelper.Models;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Generator = StructureHelper.API.Generator;
 
 namespace SpawnHouses.Helpers;
 
@@ -94,16 +95,22 @@ public class CompatabilityHelper : ModSystem {
                 break;
 
             case nameof(TileWallWireStateData):
-                int bitPack = (data[7] << 24) + (data[6] << 16) + (data[5] << 8) + data[4];
-                tile.HasTile = TileDataPacking.GetBit(bitPack, 0);
-                tile.IsActuated = TileDataPacking.GetBit(bitPack, 1);
-                tile.HasActuator = TileDataPacking.GetBit(bitPack, 2);
-                tile.TileColor = (byte)TileDataPacking.Unpack(bitPack, 3, 5);
-                tile.WallColor = (byte)TileDataPacking.Unpack(bitPack, 8, 5);
-                if (TileDataPacking.GetBit(bitPack, 24)) // isHalfBlock
+                int tileFrameXBitPack = (data[1] << 8) + data[0];
+                tile.TileFrameX = (short)tileFrameXBitPack;
+
+                int tileFrameYBitPack = (data[3] << 8) + data[2];
+                tile.TileFrameY = (short)tileFrameYBitPack;
+
+                int tileDataBitPack = (data[7] << 24) + (data[6] << 16) + (data[5] << 8) + data[4];
+                tile.HasTile = TileDataPacking.GetBit(tileDataBitPack, 0);
+                tile.IsActuated = TileDataPacking.GetBit(tileDataBitPack, 1);
+                tile.HasActuator = TileDataPacking.GetBit(tileDataBitPack, 2);
+                tile.TileColor = (byte)TileDataPacking.Unpack(tileDataBitPack, 3, 5);
+                tile.WallColor = (byte)TileDataPacking.Unpack(tileDataBitPack, 8, 5);
+                if (TileDataPacking.GetBit(tileDataBitPack, 24)) // isHalfBlock
                     tile.BlockType = BlockType.HalfBlock;
                 else
-                    tile.BlockType = TileDataPacking.Unpack(bitPack, 25, 3) switch {
+                    tile.BlockType = TileDataPacking.Unpack(tileDataBitPack, 25, 3) switch {
                         1 => BlockType.SlopeDownLeft,
                         2 => BlockType.SlopeDownRight,
                         3 => BlockType.SlopeUpLeft,
@@ -178,7 +185,7 @@ public class CompatabilityHelper : ModSystem {
     /// <param name="filepath"></param>
     /// <param name="offset"></param>
     // note: don't need conditional JIT because structurehelper is required
-    public static void PlaceShStructure(StructureTilemap tilemap, string filepath, Point16 offset) {
+    public static List<StructureNBTEntry> PlaceShStructure(StructureTilemap tilemap, string filepath, Point16 offset) {
         StructureData data = Generator.GetStructureData(filepath, SpawnHousesMod.Instance);
 
         for (int k = 0; k < data.width; k++) {
@@ -193,5 +200,15 @@ public class CompatabilityHelper : ModSystem {
                 ExportShDataColumnSlow<TileWallWireStateData>(data, tilemap, offset.X + k, offset.Y, k);
             }
         }
+
+        if (!data.containsNbt)
+            return [];
+
+        foreach (StructureNBTEntry nbt in data.nbtData) {
+            nbt.x -= offset.X;
+            nbt.y -= offset.Y;
+        }
+
+        return data.nbtData;
     }
 }

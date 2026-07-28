@@ -8,6 +8,8 @@ using SpawnHouses.Content.Types.DataStructures;
 using SpawnHouses.Content.Types.Interfaces;
 using SpawnHouses.Content.Types.RootStructureTypes;
 using SpawnHouses.Helpers;
+using StructureHelper;
+using StructureHelper.Models;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -30,8 +32,9 @@ public class StructureTilemap : IDebugDraw, IBoundingBox {
     private readonly StructureTile[,] _tiles;
     
     public readonly IStructureRoot Structure;
-    public List<MultiTile> MultiTiles;
-
+    public readonly List<MultiTile> MultiTiles;
+    public readonly List<StructureNBTEntry> NBTData;
+    
     /// <summary>
     ///     if there is a full structure loaded into the tilemap. not set by the tilemap itself, set outside the tilemap
     /// </summary>
@@ -53,10 +56,12 @@ public class StructureTilemap : IDebugDraw, IBoundingBox {
     public StructureTilemap(IStructureRoot structure, ushort width, ushort height, Point16? globalTileOffset = null) {
         Structure = structure;
         _tiles = new StructureTile[width, height];
-        BoundingBox = new TileBox(GlobalTileOffset.X, GlobalTileOffset.Y, width, height);
+        Point16 pos = globalTileOffset ?? new Point16(0, 0);
+        BoundingBox = new TileBox(pos.X, pos.Y, width, height);
         MultiTiles = [];
+        NBTData = [];
 
-        _label = new DebugLabel(GlobalTileOffset, this);
+        _label = new DebugLabel(pos, this);
         DebugInfoVisibility = new DebugInfoLevel();
     }
 
@@ -259,7 +264,7 @@ public class StructureTilemap : IDebugDraw, IBoundingBox {
     /// </summary>
     /// <param name="pos">top left of placed structure</param>
     /// <param name="filepath"></param>
-    public void PlaceFile(Point16 pos, string filepath) => CompatabilityHelper.PlaceShStructure(this, filepath, pos);
+    public void PlaceFile(Point16 pos, string filepath) => NBTData.AddRange(CompatabilityHelper.PlaceShStructure(this, filepath, pos));
 
     /// <summary>
     ///     applies this tilemap (with it's offset) onto main game tilemap
@@ -303,6 +308,9 @@ public class StructureTilemap : IDebugDraw, IBoundingBox {
                 tile.ApplySlopes(ConvertToGlobal(x, y));
         }
 
+        // place any NBT data
+        foreach (StructureNBTEntry nbt in NBTData) nbt.OnGenerate(ConvertToGlobal(new Point16(nbt.x, nbt.y)), false, GenFlags.None);
+
         // place MultiTiles
         foreach (MultiTile multiTile in MultiTiles) {
             Point16 originPoint = ConvertToGlobal(multiTile.Volume.BoundingBox.TopLeftPoint16 + multiTile.Origin);
@@ -314,7 +322,7 @@ public class StructureTilemap : IDebugDraw, IBoundingBox {
         }
 
         // If we're not in worldgen, set frames
-        // and then sync if we're in multiplayer
+        // and sync if we're in multiplayer
         if (!WorldGen.generatingWorld) {
             for (int x = BoundingBox.Left; x < BoundingBox.Left + Width; x++)
             for (int y = BoundingBox.Top; y < BoundingBox.Top + Height; y++) {

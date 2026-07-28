@@ -1,7 +1,6 @@
 #if SPAWNHOUSES_DEBUG
 
 using System;
-using System.Collections.Generic;
 using SpawnHouses.Content.Types.RootStructureTypes;
 using Terraria;
 using Terraria.DataStructures;
@@ -28,10 +27,9 @@ public class SpawnTest : ModItem {
 
         FileStructure thing = new(
             new Point16(x, y),
-            "WoodHouse1",
-            new Dictionary<string, string>([
-                new KeyValuePair<string, string>("Main", "RightLarge")
-            ]),
+            "WoodHouse1_Main=RightLarge",
+            null!,
+            true,
             generate: true
         );
         

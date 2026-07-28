@@ -210,12 +210,13 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
     /// </param>
     /// <param name="generate"></param>
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-    public FileStructure(Point16 pos, string name, Dictionary<string, string> positionIdToName, bool fullname = false, bool generate = false) {
+    public FileStructure(Point16 pos, string name, Dictionary<string, string>? positionIdToName, bool fullname = false, bool generate = false) {
         FileStructure? referenceStructure;
         if (fullname) {
             referenceStructure = StructureManager.AllFileStructureVariations.FirstOrDefault(s => s.Name == name);
         }
         else {
+            if (positionIdToName == null) throw new ArgumentNullException(nameof(positionIdToName), $"{nameof(positionIdToName)} cannot be null if {nameof(fullname)} is false");
             string searchString = name + "_";
             foreach (var kvp in positionIdToName) searchString += kvp.Key + "=" + kvp.Value;
             referenceStructure = StructureManager.AllFileStructureVariations.FirstOrDefault(s => s.Name == searchString);

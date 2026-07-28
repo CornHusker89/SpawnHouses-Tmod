@@ -53,7 +53,7 @@ public class StructureManager : ModSystem {
 
     public static readonly DebugInfoLevel DefaultDebugInfoLevel = new();
 
-    private static IEnumerable<IStructureRoot> _allStructures => _advStructures.Concat(_fileStructures.Cast<IStructureRoot>());
+    private static IEnumerable<IStructureRoot> AllStructures => _advStructures.Concat(_fileStructures.Cast<IStructureRoot>());
 
     /// <summary>
     ///     gets a shallow copy of the internal structure list. use <see cref="RegisterFileStructure" /> to add to the list
@@ -258,7 +258,7 @@ public class StructureManager : ModSystem {
             UpdateLabelPositionsAndDraw();
         }
         else {
-            foreach (IStructureRoot structure in _allStructures)
+            foreach (IStructureRoot structure in AllStructures)
                 structure.DrawDebugGeometry();
         }
 
@@ -274,7 +274,7 @@ public class StructureManager : ModSystem {
         List<Rectangle> structureRects = [];
         _labels.Clear();
 
-        foreach (IStructureRoot structure in _allStructures) {
+        foreach (IStructureRoot structure in AllStructures) {
             foreach (DebugLabel label in structure.DrawDebugGeometry()) {
                 _labels.Add(label, label.Root.ToPoint() * new Point(16, 16));
 
