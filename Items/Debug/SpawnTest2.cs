@@ -1,10 +1,9 @@
 #if SPAWNHOUSES_DEBUG
 
 #nullable enable
-using SpawnHouses.Content.Types.Geometry;
+using System;
 using SpawnHouses.Content.Types.Interfaces;
 using Terraria;
-using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -26,47 +25,8 @@ public class SpawnTest2 : ModItem {
         int x = (Main.MouseWorld / 16).ToPoint16().X;
         int y = (Main.MouseWorld / 16).ToPoint16().Y;
 
-        Path original = new(
-            new Point16(x - 15, y + 5),
-            new Point16(x - 10, y + 10),
-            new Point16(x, y - 10)
-            // new Point16(x + 8, y + 8),
-            // new Point16(x + 12, y + 8),
-            // new Point16(x + 20, y + 8),
-            // new Point16(x + 30, y - 12)
-        );
-
-        Shape originalShape = original.ToShape(6);
+        Console.WriteLine(x + ", " + y);
         
-        originalShape.ExecuteInArea((x2, y2) => {
-            WorldGen.PlaceTile(x2, y2, TileID.EmeraldGemspark);
-        });
-
-        originalShape.ExecuteOnPerimeter((x3, y3, _) => { WorldGen.PlaceTile(x3, y3, TileID.AmberGemspark); });
-
-        // AdvStructure dummyStructure = new(
-        //     "thing",
-        //     new StructureLayoutParams(new TagMap(), [
-        //         new EntryPoint(new Point16(10, 10), 3, LegacyDirections.Right),
-        //         new EntryPoint(new Point16(15, 10), 3, LegacyDirections.Left)
-        //     ], 100, false),
-        //     PalettePresets.Medieval,
-        //     generate: false
-        // );
-        // dummyStructure.FailedLayoutGeneration = true;
-        // dummyStructure.Tilemap = new StructureTilemap(
-        //     dummyStructure,
-        //     100,
-        //     100,
-        //     (Main.MouseWorld / 16).ToPoint16()
-        // );
-        //
-        // Floor floor = new(new VolumeComponentParams(dummyStructure, new TagMap()), originalShape.GetMovedShape((-Main.MouseWorld / 16).ToPoint16()), "floor1");
-        // floor.DebugInfoVisibility.AddBounds();
-        // floor.DebugInfoVisibility.AddName();
-        // floor.DebugInfoVisibility.AddPoints();
-
-        // Component = floor;
         return true;
     }
 }

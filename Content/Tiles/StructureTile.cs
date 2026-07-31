@@ -41,6 +41,7 @@ public class StructureTile {
                 tile.HasTile = HasTile;
             }
             else {
+                tile.HasTile = HasTile;
                 WorldGen.PlaceTile(x, y, TileType, true, style: Style);
             }
 
@@ -49,7 +50,6 @@ public class StructureTile {
             tile.TileColor = TileColor;
 
             if (TileFrameX != -1) tile.TileFrameX = TileFrameX;
-
             if (TileFrameY != -1) tile.TileFrameY = TileFrameY;
         }
 
@@ -112,17 +112,17 @@ public class StructureTile {
     public bool IsFurniture;
 
     /// <summary>
-    ///     If true, when the tilemap is pasted, the original tile here will remain
+    ///     if true, when the tilemap is pasted, the original tile here will remain. true by default
     /// </summary>
-    public bool IsNullTile;
+    public bool IsNullTile = true;
 
     /// <summary>
-    ///     If true, when the tilemap is pasted, the original wall here will remain
+    ///     if true, when the tilemap is pasted, the original wall here will remain. true by default
     /// </summary>
-    public bool IsNullWall;
+    public bool IsNullWall = true;
 
     /// <summary>
-    ///     if true, tile will be pasted like normal; otherwise it is considered a placeholder block, and will not be pasted.
+    ///     if false, tile will be pasted like normal; otherwise it is considered a placeholder block, and will not be pasted.
     ///     used to create placeholders when making <see cref="MultiTile" />s
     /// </summary>
     public bool IsFakeTile;

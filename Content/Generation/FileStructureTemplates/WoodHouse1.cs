@@ -14,19 +14,40 @@ namespace SpawnHouses.Content.Generation.FileStructureTemplates;
 public class WoodHouse1 : FileStructureTemplate {
     public override FileSubstructureData[] Substructures => [
         new(
-            "RightLarge",
+            "Left_Normal",
+            "Content/Assets/StructureFiles/mainHouse/mainHouse_Left_v4.shstruct",
+            ["Left"]
+        ),
+        new(
+            "Right_Normal",
             "Content/Assets/StructureFiles/mainHouse/mainHouse_Right_v4.shstruct",
-            ["Main"]
+            ["Right"]
+        ),
+        new(
+            "Top_Normal",
+            "Content/Assets/StructureFiles/mainHouse/mainHouse_Top_v4.shstruct",
+            ["Top"]
+        ),
+        new(
+            "Rose",
+            "Content/Assets/StructureFiles/mainHouse/mainHouse_Rose.shstruct",
+            ["Rose"]
         )
     ];
 
     public override string[] PositionIds => [
-        "Main"
+        "Left",
+        "Right",
+        "Top",
+        "Rose"
     ];
 
-    public override StructureInfo GetStructureInfo(Dictionary<string, string> positionIdsToNames) {
+    public override StructureInfo GetStructureInfo(Dictionary<string, FileSubstructureData> posIdsToStruct) {
         Dictionary<string, Point16> positionIdsToPositions = new([
-            new KeyValuePair<string, Point16>("Main", new Point16(0, 0))
+            new KeyValuePair<string, Point16>("Left", new Point16(0, 10)),
+            new KeyValuePair<string, Point16>("Right", new Point16((int)posIdsToStruct["Left"].Size.X, 10)),
+            new KeyValuePair<string, Point16>("Top", new Point16(posIdsToStruct["Left"].Size.X - 14, 0)),
+            new KeyValuePair<string, Point16>("Rose", new Point16(posIdsToStruct["Left"].Size.X - 1, 18))
         ]);
 
         EntryPoint[] entryPoints = [
@@ -35,7 +56,7 @@ public class WoodHouse1 : FileStructureTemplate {
         ];
 
         TagMap tags = new();
-        tags.Add(Tags.Structure_ForestTheme);
+        tags.Add(Tags.Theme_Forest);
         tags.Add(Tags.Structure_HasHousing, 1);
         tags.Add(Tags.Structure_HasRoof);
         tags.Add(Tags.Structure_HasStorage);

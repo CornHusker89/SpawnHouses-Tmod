@@ -62,10 +62,10 @@ public readonly struct TileBox {
     public Point16 SizePoint16 => new(Width, Height);
 
     public Point TopLeftPoint => new(X, Y);
-    public Point TopRightPoint => new(X, Y);
-    public Point BottomLeftPoint => new(X, Y);
-    public Point BottomRightPoint => new(X, Y);
-    public Point CenterPoint => new(X + Width - 1, Y + Height - 1);
+    public Point TopRightPoint => new(X + Width - 1, Y);
+    public Point BottomLeftPoint => new(X, Y + Height - 1);
+    public Point BottomRightPoint => new(X + Width - 1, Y + Height - 1);
+    public Point CenterPoint => new(X + (Width - 1) / 2, Y + (Height - 1) / 2);
 
 
     public bool Contains(Point16 point) => !(Left > point.X || Right < point.X || Top > point.Y || Bottom < point.Y);

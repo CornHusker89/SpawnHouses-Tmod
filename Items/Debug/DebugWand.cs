@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Content.Types.Interfaces;
 using SpawnHouses.Content.Types.RootStructureTypes;
 using Terraria;
 using Terraria.DataStructures;
@@ -22,7 +23,7 @@ public class DebugWand : ModItem {
 
     private static int _itemMode;
 
-    public static AdvStructure? SelectedStructure;
+    public static IStructureRoot? SelectedStructure;
 
     public override void SetDefaults() {
         Item.useStyle = ItemUseStyleID.Swing;
@@ -51,13 +52,13 @@ public class DebugWand : ModItem {
         // structure select mode
         if (_itemMode == 0) {
             Point16 worldMousePos = (Main.MouseWorld / 16).ToPoint16();
-            var structureList = StructureManager.GetAdvStructureList();
+            var structureList = StructureManager.GetAllStructuresList();
 
             // if multiple structures are within bounds, select the next structure index after the current one
             List<int> selectedStructureIndexes = [];
             int curSelectedStructureIndex = -1;
             for (int i = 0; i < structureList.Length; i++) {
-                AdvStructure structure = structureList[i];
+                IStructureRoot structure = structureList[i];
                 if (structure == SelectedStructure)
                     curSelectedStructureIndex = i;
 
@@ -82,7 +83,7 @@ public class DebugWand : ModItem {
                     SelectedStructure = structureList[selectedStructureIndexes.First(index => index > curSelectedStructureIndex)];
             }
 
-            Main.NewText($"selected structure (layout) id {SelectedStructure.StructureLayout.Id}, name: {SelectedStructure.Name}", Color.Yellow);
+            Main.NewText($"selected structure id {SelectedStructure.Id}, name: {SelectedStructure.Name}", Color.Yellow);
         }
 
         // cycle structure debug info mode
@@ -95,8 +96,9 @@ public class DebugWand : ModItem {
             }
 
             SelectedStructure.DebugInfoVisibility.EnableNext();
-            SelectedStructure.UpdateDebugVisibility();
-            Main.NewText($"set structure (layout) id {SelectedStructure.StructureLayout.Id}'s DebugInfoVisibility to {SelectedStructure.DebugInfoVisibility.GetDetailedString()}", Color.Yellow);
+            if (SelectedStructure is AdvStructure advStructure)
+                advStructure.UpdateDebugVisibility();
+            Main.NewText($"set structure id {SelectedStructure.Id}'s DebugInfoVisibility to {SelectedStructure.DebugInfoVisibility.GetDetailedString()}", Color.Yellow);
         }
 
         return true;

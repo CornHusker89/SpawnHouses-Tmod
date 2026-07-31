@@ -81,7 +81,7 @@ public class DebugLabel {
 
         // prune trailing newline
         if (str.Length >= 2)
-            str = str[..^2];
+            str = str[..^1];
         return str;
     }
 

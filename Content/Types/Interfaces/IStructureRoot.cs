@@ -8,8 +8,7 @@ using Terraria.DataStructures;
 namespace SpawnHouses.Content.Types.Interfaces;
 
 public interface IStructureRoot : IDebugDraw {
-    public string Name { get; }
-
+    
     /// <summary>
     ///     unique id for this instance. automatically assigned on instance creation
     /// </summary>

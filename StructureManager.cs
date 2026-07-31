@@ -53,8 +53,6 @@ public class StructureManager : ModSystem {
 
     public static readonly DebugInfoLevel DefaultDebugInfoLevel = new();
 
-    private static IEnumerable<IStructureRoot> AllStructures => _advStructures.Concat(_fileStructures.Cast<IStructureRoot>());
-
     /// <summary>
     ///     gets a shallow copy of the internal structure list. use <see cref="RegisterFileStructure" /> to add to the list
     /// </summary>
@@ -66,6 +64,11 @@ public class StructureManager : ModSystem {
     /// </summary>
     /// <returns></returns>
     public static AdvStructure[] GetAdvStructureList() => _advStructures.ToArray();
+
+    /// <summary>
+    ///     gets a shallow copy of all internal structure lists.
+    /// </summary>
+    public static IStructureRoot[] GetAllStructuresList() => _advStructures.Concat(_fileStructures.Cast<IStructureRoot>()).ToArray();
 
     /// <summary>
     ///     returns the next component id, and advances the counter. begins at id 1
@@ -127,22 +130,20 @@ public class StructureManager : ModSystem {
                 HashSet<string> seen = []; // guards against dupes when a slot gets skipped (-1,-1) regardless of which substructure was chosen for it
 
                 foreach (var combo in CombinationHelper.CartesianProduct(optionsPerPosition)) {
-                    var positionIdsToNames = new Dictionary<string, string>();
-                    var positionIdsToFilenames = new Dictionary<string, string>();
+                    var positionIdsToSubStructures = new Dictionary<string, FileSubstructureData>();
                     var namesToSubstructures = new Dictionary<string, FileSubstructureData>();
                     for (int i = 0; i < positionIds.Length; i++) {
-                        positionIdsToNames[positionIds[i]] = combo[i].Name;
-                        positionIdsToFilenames[positionIds[i]] = combo[i].FilePath;
+                        positionIdsToSubStructures[positionIds[i]] = combo[i];
                         namesToSubstructures[combo[i].Name] = combo[i];
                     }
 
-                    var structureInfo = template.GetStructureInfo(positionIdsToNames);
+                    var structureInfo = template.GetStructureInfo(positionIdsToSubStructures);
 
                     // build a signature from what actually gets generated (post (-1,-1) filtering) to dedupe
                     string[] effectivePositionIds = positionIds
                         .Where(id => structureInfo.positionIdsToPositions.TryGetValue(id, out Point16 p) && !(p.X == -1 && p.Y == -1))
                         .ToArray();
-                    string signature = string.Join(":", effectivePositionIds.Select(id => $"{id}={positionIdsToNames[id]}"));
+                    string signature = string.Join(":", effectivePositionIds.Select(id => $"{id}={positionIdsToSubStructures[id].Name}"));
 
                     if (!seen.Add(signature)) continue;
 
@@ -151,11 +152,11 @@ public class StructureManager : ModSystem {
                     foreach (string id in effectivePositionIds) {
                         Point16 pos = structureInfo.positionIdsToPositions[id];
                         if (pos.X < 0 || pos.Y < 0)
-                            throw new InvalidOperationException(
+                            throw new Exception(
                                 $"{template.GetType().Name}: position id '{id}' has a negative relative position {pos}. " +
-                                "Structure-relative positions must be normalized so the top-left of the structure is (0,0).");
+                                "structure-relative positions must be normalized so the top-left of the structure is (0,0).");
 
-                        FileSubstructureData sub = namesToSubstructures[positionIdsToNames[id]];
+                        FileSubstructureData sub = namesToSubstructures[positionIdsToSubStructures[id].Name];
                         short right = (short)(pos.X + sub.Size.X);
                         short bottom = (short)(pos.Y + sub.Size.Y);
 
@@ -164,9 +165,11 @@ public class StructureManager : ModSystem {
                     }
 
                     Point16 size = new(maxRight, maxBottom);
+                    var positionIdsToFilenames = new Dictionary<string, string>();
+                    foreach (var kvp in positionIdsToSubStructures) positionIdsToFilenames[kvp.Key] = kvp.Value.FilePath;
 
                     FileStructure structure = new(
-                        $"{template.GetType().Name}_{signature}",
+                        $"{template.GetType().Name}@{signature}",
                         size,
                         structureInfo.entryPoints,
                         structureInfo.tags,
@@ -177,7 +180,7 @@ public class StructureManager : ModSystem {
                         template.OnTilemapLoaded);
 
                     foreach (string id in effectivePositionIds) {
-                        structure.PositionIdToFilename[id] = namesToSubstructures[positionIdsToNames[id]].FilePath;
+                        structure.PositionIdToFilename[id] = positionIdsToSubStructures[id].FilePath;
                         structure.PositionIdToPosition[id] = structureInfo.positionIdsToPositions[id];
                     }
 
@@ -199,13 +202,17 @@ public class StructureManager : ModSystem {
     }
 
     public override void Load() {
-        Tags.SetInternalTagNames();
+        Tags.SetTagNameFields();
         LoadStructureTypes(Assembly.GetExecutingAssembly());
     }
 
     public override void SaveWorldData(TagCompound tag) {
         tag["WorldVersion"] = WorldVersion;
         tag["GeneratableCount"] = GeneratableCount;
+
+        for (int i = 0; i < _fileStructures.Count; i++) tag["FileStructure" + i] = _fileStructures[i];
+
+        for (int i = 0; i < _advStructures.Count; i++) tag["AdvStructure" + i] = _advStructures[i];
     }
 
     public override void LoadWorldData(TagCompound tag) {
@@ -258,7 +265,7 @@ public class StructureManager : ModSystem {
             UpdateLabelPositionsAndDraw();
         }
         else {
-            foreach (IStructureRoot structure in AllStructures)
+            foreach (IStructureRoot structure in GetAllStructuresList())
                 structure.DrawDebugGeometry();
         }
 
@@ -274,14 +281,19 @@ public class StructureManager : ModSystem {
         List<Rectangle> structureRects = [];
         _labels.Clear();
 
-        foreach (IStructureRoot structure in AllStructures) {
+        foreach (IStructureRoot structure in GetAllStructuresList()) {
+            TileBox structureGlobalTileBoundingBox;
+            if (structure is FileStructure fileStructure)
+                structureGlobalTileBoundingBox = structure.Tilemap.ConvertToGlobal(fileStructure.Tilemap.BoundingBox);
+            else if (structure is AdvStructure advStructure)
+                structureGlobalTileBoundingBox = structure.Tilemap.ConvertToGlobal(advStructure.StructureLayout.BoundingBox);
+            else
+                throw new Exception("unknown structure type");
+
+            structureRects.Add(structureGlobalTileBoundingBox.Scale(16));
+            
             foreach (DebugLabel label in structure.DrawDebugGeometry()) {
                 _labels.Add(label, label.Root.ToPoint() * new Point(16, 16));
-
-                if (structure is AdvStructure advStructure) {
-                    TileBox structureGlobalTileBoundingBox = structure.Tilemap.ConvertToGlobal(advStructure.StructureLayout.BoundingBox);
-                    structureRects.Add(structureGlobalTileBoundingBox.Scale(16));
-                }
             }
         }
 
@@ -337,7 +349,24 @@ internal class DictionarySerializer : TagSerializer<Dictionary<string, object>, 
 }
 
 internal class FileStructureSerializer : TagSerializer<FileStructure, TagCompound> {
-    public override TagCompound Serialize(FileStructure value) => throw new NotImplementedException();
+    public override TagCompound Serialize(FileStructure value) {
+        TagCompound tag = [];
+        tag["Name"] = value.Name;
+        tag["Id"] = value.Id;
+        tag["Position"] = value.Position;
+        tag["Found"] = value.HasBeenFound;
+        tag["Data"] = value.Data;
+        return tag;
+    }
 
-    public override FileStructure Deserialize(TagCompound tag) => throw new NotImplementedException();
+    public override FileStructure Deserialize(TagCompound tag) {
+        FileStructure structure = new(
+            tag.Get<Point16>("Position"),
+            tag.Get<string>("Name"),
+            null,
+            tag.Get<ushort>("Id"));
+        structure.HasBeenFound = tag.GetBool("Found");
+        structure.Data = tag.Get<Dictionary<string, object>>("Data");
+        return structure;
+    }
 }

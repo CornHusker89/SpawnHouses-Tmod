@@ -22,9 +22,9 @@ public abstract class FileStructureTemplate {
     ///     gets the relative positions associated with each position ID, the entry points, and tags for a given variant of substructures.
     ///     if a position ID's position is (-1, -1), that position ID will not be generated
     /// </summary>
-    /// <param name="positionIdsToNames">mapping of position IDs to friendly substructure names</param>
+    /// <param name="posIdsToStruct">mapping of position IDs to friendly substructure names</param>
     /// <returns></returns>
-    public abstract StructureInfo GetStructureInfo(Dictionary<string, string> positionIdsToNames);
+    public abstract StructureInfo GetStructureInfo(Dictionary<string, FileSubstructureData> posIdsToStruct);
 
     /// <inheritdoc cref="IStructureRoot.IsFound" />
     public virtual bool IsFound(FileStructure structure, Point16 playerPos) => true;

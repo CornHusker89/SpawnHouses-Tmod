@@ -1,6 +1,5 @@
 #if SPAWNHOUSES_DEBUG
 
-using System;
 using SpawnHouses.Content.Types.RootStructureTypes;
 using Terraria;
 using Terraria.DataStructures;
@@ -22,14 +21,11 @@ public class SpawnTest : ModItem {
     public override bool? UseItem(Player player) {
         int x = (Main.MouseWorld / 16).ToPoint16().X;
         int y = (Main.MouseWorld / 16).ToPoint16().Y;
-        
-        Console.WriteLine(x + ", " + y);
 
         FileStructure thing = new(
             new Point16(x, y),
-            "WoodHouse1_Main=RightLarge",
-            null!,
-            true,
+            "WoodHouse1@Left=Left_Normal:Right=Right_Normal:Top=Top_Normal:Rose=Rose",
+            null,
             generate: true
         );
         

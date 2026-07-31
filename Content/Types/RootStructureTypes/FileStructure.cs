@@ -12,6 +12,7 @@ using SpawnHouses.Content.Types.Enums;
 using SpawnHouses.Content.Types.Interfaces;
 using SpawnHouses.Helpers;
 using StructureHelper.API;
+using StructureHelper.Models;
 using Terraria;
 using Terraria.DataStructures;
 using WeightedStructure = (SpawnHouses.Content.Types.RootStructureTypes.FileStructure structure, int entryPoint1Index, int entryPoint2Index, double weight);
@@ -28,11 +29,10 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
     // IStructureRoot
     public DebugInfoLevel DebugInfoVisibility { get; set; }
 
-    /// <inheritdoc cref="IDebugDraw.Name" />
-    /// . is formatted as follows for
-    /// <see cref="FileStructure" />
-    /// s:
-    /// {template name}_{position id}={substructure name}
+    /// <summary>
+    ///     <inheritdoc cref="IDebugDraw.Name" />. is formatted as follows for <see cref="FileStructure" />s:
+    ///     {template name}@{position id}={substructure name}:{position id}={substructure name}...
+    /// </summary>
     public string Name { get; private set; }
     public StructureTilemap Tilemap { get; private set; }
     public EntryPoint[] EntryPoints { get; private set; }
@@ -47,7 +47,9 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
     /// <inheritdoc cref="IStructureRoot.OnFound" />
     private Action<FileStructure>? _onFound;
 
-    /// <inheritdoc cref="OnTilemapLoaded" />
+    /// <summary>
+    ///     called just after all files are loaded into the tilemap
+    /// </summary>
     private Action<FileStructure>? _onTilemapLoaded;
 
     public bool Standalone { get; internal set; }
@@ -63,10 +65,30 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
     /// <summary>map of the substructures with each positionID being associated with a position</summary>
     public Dictionary<string, Point16> PositionIdToPosition;
 
+    /// <summary>
+    ///     same as <see cref="Name" /> but only contains the template name (everything before the @)
+    /// </summary>
+    public string TemplateName => Name[..Name.IndexOf('@')];
     public bool HasMultipleSubstructures => PositionIdToFilename.Keys.Count > 1;
     public Point16 Size => new(Tilemap.Width, Tilemap.Height);
     public Point16 Position => Tilemap.GlobalTileOffset;
 
+    /// <summary>
+    ///     gets a mapping of position ids to names with a given fullname
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    public static Dictionary<string, string> GetPositionIdsToNames(string name) {
+        var positionIdsToNames = new Dictionary<string, string>();
+        string[] kvps = name[name.IndexOf('@')..].Split(':');
+        foreach (string kvp in kvps) {
+            string[] keyAndValue = kvp.Split('=');
+            positionIdsToNames.Add(keyAndValue[0], keyAndValue[1]);
+        }
+
+        return positionIdsToNames;
+    }
+    
     /// <summary>
     ///     gets a weighted list of all <see cref="FileStructure" />s that fulfill the parameters, weighted on how close the match is.
     /// </summary>
@@ -177,7 +199,7 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
         _onFound += onFound;
         _onTilemapLoaded += onTilemapLoaded;
         DebugInfoVisibility = StructureManager.DefaultDebugInfoLevel.Clone();
-        Id = StructureManager.NextGeneratableId();
+        Id = 0;
         Tilemap = new StructureTilemap(this, (ushort)size.X, (ushort)size.Y);
         EntryPoints = entryPoints;
         TagsCurrent = tagMap;
@@ -202,30 +224,35 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
     ///     creates a new structure based with the name and specific substructures at each position IDs
     /// </summary>
     /// <param name="pos"></param>
-    /// <param name="name">template's class name or full variation name, depending on <paramref name="fullname"/></param>
-    /// <param name="positionIdToName">if <paramref name="fullname"/> is true, leave null</param>
-    /// <param name="fullname">
-    ///     if true, expects <paramref name="name"/> to be full structure variation name.
-    ///     otherwise <paramref name="name"/> should just be the template's class name
+    /// <param name="name">
+    ///     template's class name or full variation name, depending on if <paramref name="targetPositionIdToName"/>
+    ///     is passed. full variation names are created in this format:
+    ///     {template name}@{position id}={substructure name}:{position id}={substructure name}...
     /// </param>
+    /// <param name="targetPositionIdToName">if <paramref name="name"/> is the full variation name, leave null</param>
+    /// <param name="id">if -1, creates a new random seed from the normal terraria random generator</param>
     /// <param name="generate"></param>
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-    public FileStructure(Point16 pos, string name, Dictionary<string, string>? positionIdToName, bool fullname = false, bool generate = false) {
-        FileStructure? referenceStructure;
-        if (fullname) {
-            referenceStructure = StructureManager.AllFileStructureVariations.FirstOrDefault(s => s.Name == name);
-        }
-        else {
-            if (positionIdToName == null) throw new ArgumentNullException(nameof(positionIdToName), $"{nameof(positionIdToName)} cannot be null if {nameof(fullname)} is false");
-            string searchString = name + "_";
-            foreach (var kvp in positionIdToName) searchString += kvp.Key + "=" + kvp.Value;
-            referenceStructure = StructureManager.AllFileStructureVariations.FirstOrDefault(s => s.Name == searchString);
-        }
+    public FileStructure(Point16 pos, string name, Dictionary<string, string>? targetPositionIdToName, int id = -1, bool generate = false) {
+        string templateName = name[..name.IndexOf('@')];
+        targetPositionIdToName ??= GetPositionIdsToNames(name);
+        FileStructure? referenceStructure = StructureManager.AllFileStructureVariations.FirstOrDefault(s => {
+            if (templateName != s.TemplateName)
+                return false;
+
+            var positionIdToName = GetPositionIdsToNames(s.Name);
+            foreach (var kvp in targetPositionIdToName)
+                if (!positionIdToName.ContainsKey(kvp.Key))
+                    return false;
+
+            return true;
+        });
+        
         
         if (referenceStructure == null)
             throw new ArgumentException($"No matching structure found for name '{name}' with the specified substructures");
 
-        InitFromFileStructure(referenceStructure);
+        InitFromFileStructure(referenceStructure, id);
         SetPosition(pos);
 
         if (generate) {
@@ -276,12 +303,13 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
     ///     fills fields with deepcopies from the reference <see cref="FileStructure" />
     /// </summary>
     /// <param name="referenceFileStructure"></param>
-    private void InitFromFileStructure(FileStructure referenceFileStructure) {
+    /// <param name="id">if -1, creates a new random seed from the normal terraria random generator</param>
+    private void InitFromFileStructure(FileStructure referenceFileStructure, int id = -1) {
         _isFound += referenceFileStructure._isFound;
         _onFound += referenceFileStructure._onFound;
         _onTilemapLoaded += referenceFileStructure._onTilemapLoaded;
         DebugInfoVisibility = StructureManager.DefaultDebugInfoLevel.Clone();
-        Id = StructureManager.NextGeneratableId();
+        Id = id == -1 ? StructureManager.NextGeneratableId() : (ushort)id;
         Tilemap = new StructureTilemap(this, (ushort)referenceFileStructure.Tilemap.Width, (ushort)referenceFileStructure.Tilemap.Height);
 
         List<EntryPoint> entryPoints = [];
@@ -309,7 +337,7 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
         if (DebugInfoVisibility.DisplayBounds) {
             DrawHelper.DrawWorldBasedRectangularPath(Tilemap.BoundingBox.GetDrawPath(), GetDrawColor(), DrawHelper.DebugDrawWidth);
 
-            if (HasMultipleSubstructures)
+            if (HasMultipleSubstructures) {
                 foreach (string positionId in PositionIdToFilename.Keys) {
                     Point worldPos = PositionIdToPosition[positionId].ToPoint() * new Point(16, 16);
                     Point worldSize = Generator.GetStructureDimensions(PositionIdToFilename[positionId], SpawnHousesMod.Instance).ToPoint();
@@ -321,14 +349,25 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
                     ];
                     DrawHelper.DrawWorldBasedRectangularPath(path, DrawHelper.GetColor((ushort)PositionIdToFilename[positionId].GetHashCode()), DrawHelper.DebugDrawWidth);
                 }
+            }
+        }
+
+        if (DebugInfoVisibility.DisplayPoints) {
+            for (int i = 0; i < Tilemap.NbtData.Count; i++) {
+                (StructureNBTEntry nbt, Point16 localPos) = Tilemap.NbtData[i];
+                DrawHelper.DrawWorldBasedPoint(
+                    Tilemap.ConvertToGlobal(localPos).ToPoint() * new Point(16, 16) + new Point(8, 8),
+                    DrawHelper.GetColor((ushort)(Id + 1 + i)),
+                    DrawHelper.DebugDrawWidth * 3);
+            }
         }
 
         // create labels
         DebugLabel mainLabel = new(Tilemap.GlobalTileOffset, this);
         if (mainLabel.IsVisible(Tilemap.BoundingBox)) {
             List<DebugLabel> labels = [mainLabel];
-            if (HasMultipleSubstructures)
-                foreach (string positionId in PositionIdToFilename.Keys)
+            if (HasMultipleSubstructures) {
+                foreach (string positionId in PositionIdToFilename.Keys) {
                     labels.Add(new DebugLabel(
                         PositionIdToPosition[positionId],
                         DebugInfoVisibility,
@@ -336,6 +375,20 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
                         positionId,
                         PositionIdToFilename[positionId].Replace("Content/Assets/StructureFiles/", "")
                     ));
+                }
+            }
+
+            for (int i = 0; i < Tilemap.NbtData.Count; i++) {
+                (StructureNBTEntry nbt, Point16 localPos) = Tilemap.NbtData[i];
+                labels.Add(new DebugLabel(
+                    Tilemap.ConvertToGlobal(localPos),
+                    DebugInfoVisibility,
+                    DrawHelper.GetColor((ushort)(Id + 1 + i)),
+                    TemplateName + $"_NBT_{i}",
+                    nbt.GetType().Name
+                ));
+            }
+            
 
             return labels;
         }
@@ -347,15 +400,16 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
     public void OnFound() => _onFound?.Invoke(this);
 
     public void LoadTilemap() {
+        if (Tilemap.IsAllTilesLoaded)
+            return;
+        
         foreach (var substructure in PositionIdToFilename) Tilemap.PlaceFile(PositionIdToPosition[substructure.Key], substructure.Value);
 
         _onTilemapLoaded?.Invoke(this);
         Tilemap.IsAllTilesLoaded = true;
     }
 
-    public void ApplyTilemap() {
-        Tilemap.ApplyTilemap();
-    }
+    public void ApplyTilemap() => Tilemap.ApplyTilemap();
 
     /// <summary>
     ///     set the position of the structure in the world. this is the inclusive top-left corner of the structure
@@ -365,7 +419,4 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
         Tilemap.SetPosition(position);
         foreach (EntryPoint entryPoint in EntryPoints) entryPoint.SetOffset(position);
     }
-
-    /// <summary>called just after the structure files are loaded into the tilemap</summary>
-    public void OnTilemapLoaded() => _onTilemapLoaded?.Invoke(this);
 }

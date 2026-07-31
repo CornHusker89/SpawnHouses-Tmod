@@ -162,19 +162,21 @@ public class CompatabilityHelper : ModSystem {
             for (int rowIdx = 0; rowIdx < data.height; rowIdx++) {
                 byte[] dataSingle = fileData[new Range(fileDataOffset + rowIdx * dataSingleSize, fileDataOffset + (rowIdx + 1) * dataSingleSize)];
                 byte[] tileTypeDataSingle = tileTypeData[new Range(tileTypeOffset + rowIdx * tileTypeSingleSize, tileTypeOffset + (rowIdx + 1) * tileTypeSingleSize)];
-                if ((ushort)((tileTypeDataSingle[1] << 8) + tileTypeDataSingle[0]) != StructureHelper.StructureHelper.NULL_IDENTIFIER)
+
+                if ((ushort)((tileTypeDataSingle[1] << 8) + tileTypeDataSingle[0]) != StructureHelper.StructureHelper.NULL_IDENTIFIER) {
                     ExportShSingleData(tilemap, typeof(T).Name, dataSingle, x, y + rowIdx);
-                else
-                    tilemap[x, y + rowIdx].IsNullTile = true;
+                    tilemap[x, y + rowIdx].IsNullTile = false;
+                }
             }
         else
             for (int rowIdx = 0; rowIdx < data.height; rowIdx++) {
                 byte[] dataSingle = fileData[new Range(fileDataOffset + rowIdx * dataSingleSize, fileDataOffset + (rowIdx + 1) * dataSingleSize)];
                 byte[] wallTypeDataSingle = wallTypeData[new Range(wallTypeOffset + rowIdx * wallTypeSingleSize, wallTypeOffset + (rowIdx + 1) * wallTypeSingleSize)];
-                if ((ushort)((wallTypeDataSingle[1] << 8) + wallTypeDataSingle[0]) != StructureHelper.StructureHelper.NULL_IDENTIFIER)
+
+                if ((ushort)((wallTypeDataSingle[1] << 8) + wallTypeDataSingle[0]) != StructureHelper.StructureHelper.NULL_IDENTIFIER) {
                     ExportShSingleData(tilemap, typeof(T).Name, dataSingle, x, y + rowIdx);
-                else
-                    tilemap[x, y + rowIdx].IsNullWall = true;
+                    tilemap[x, y + rowIdx].IsNullWall = false;
+                }
             }
     }
 
@@ -185,7 +187,7 @@ public class CompatabilityHelper : ModSystem {
     /// <param name="filepath"></param>
     /// <param name="offset"></param>
     // note: don't need conditional JIT because structurehelper is required
-    public static List<StructureNBTEntry> PlaceShStructure(StructureTilemap tilemap, string filepath, Point16 offset) {
+    public static List<(StructureNBTEntry nbt, Point16 localPos)> PlaceShStructure(StructureTilemap tilemap, string filepath, Point16 offset) {
         StructureData data = Generator.GetStructureData(filepath, SpawnHousesMod.Instance);
 
         for (int k = 0; k < data.width; k++) {
@@ -204,11 +206,11 @@ public class CompatabilityHelper : ModSystem {
         if (!data.containsNbt)
             return [];
 
+        List<(StructureNBTEntry nbt, Point16 localPos)> result = [];
         foreach (StructureNBTEntry nbt in data.nbtData) {
-            nbt.x -= offset.X;
-            nbt.y -= offset.Y;
+            result.Add((nbt, new Point16(nbt.x + offset.X, nbt.y + offset.Y)));
         }
 
-        return data.nbtData;
+        return result;
     }
 }

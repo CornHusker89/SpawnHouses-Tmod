@@ -33,7 +33,7 @@ public class StructureTilemap : IDebugDraw, IBoundingBox {
     
     public readonly IStructureRoot Structure;
     public readonly List<MultiTile> MultiTiles;
-    public readonly List<StructureNBTEntry> NBTData;
+    public readonly List<(StructureNBTEntry nbt, Point16 localPos)> NbtData;
     
     /// <summary>
     ///     if there is a full structure loaded into the tilemap. not set by the tilemap itself, set outside the tilemap
@@ -59,7 +59,7 @@ public class StructureTilemap : IDebugDraw, IBoundingBox {
         Point16 pos = globalTileOffset ?? new Point16(0, 0);
         BoundingBox = new TileBox(pos.X, pos.Y, width, height);
         MultiTiles = [];
-        NBTData = [];
+        NbtData = [];
 
         _label = new DebugLabel(pos, this);
         DebugInfoVisibility = new DebugInfoLevel();
@@ -264,7 +264,7 @@ public class StructureTilemap : IDebugDraw, IBoundingBox {
     /// </summary>
     /// <param name="pos">top left of placed structure</param>
     /// <param name="filepath"></param>
-    public void PlaceFile(Point16 pos, string filepath) => NBTData.AddRange(CompatabilityHelper.PlaceShStructure(this, filepath, pos));
+    public void PlaceFile(Point16 pos, string filepath) => NbtData.AddRange(CompatabilityHelper.PlaceShStructure(this, filepath, pos));
 
     /// <summary>
     ///     applies this tilemap (with it's offset) onto main game tilemap
@@ -309,7 +309,12 @@ public class StructureTilemap : IDebugDraw, IBoundingBox {
         }
 
         // place any NBT data
-        foreach (StructureNBTEntry nbt in NBTData) nbt.OnGenerate(ConvertToGlobal(new Point16(nbt.x, nbt.y)), false, GenFlags.None);
+        foreach ((StructureNBTEntry nbt, Point16 localPos) in NbtData)
+            nbt.OnGenerate(
+                ConvertToGlobal(localPos),
+                false,
+                GenFlags.None
+            );
 
         // place MultiTiles
         foreach (MultiTile multiTile in MultiTiles) {

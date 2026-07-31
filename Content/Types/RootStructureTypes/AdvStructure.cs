@@ -85,6 +85,8 @@ public class AdvStructure : IStructureRoot {
             throw new Exception("no layout has been set");
         if (FailedLayoutGeneration)
             throw new Exception("layout generation was called but failed, aborting filling components");
+        if (Tilemap.IsAllTilesLoaded)
+            return;
 
         foreach (IComponent component in StructureLayout.AllComponents!)
             component.ExecuteGenerator();

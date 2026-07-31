@@ -1,5 +1,6 @@
 #nullable enable
 using System.Reflection;
+using SpawnHouses.Content.Types;
 using SpawnHouses.Content.Types.Geometry;
 using SpawnHouses.Helpers;
 
@@ -8,8 +9,9 @@ namespace SpawnHouses.Content.Tagging;
 // ReSharper disable InconsistentNaming
 
 /// <summary>
-///     Tag saving/loading is based on the tag's identifier, so don't change them once implemented
+///     contains all tags used in generated housing
 /// </summary>
+/// <remarks>Tag saving/loading is based on the tag's identifier, so don't change them once implemented</remarks>
 public static class Tags {
     
     #region Structure
@@ -33,10 +35,10 @@ public static class Tags {
     /// there is a convenient large room intended for storage
     public static Tag Structure_HasStorage = new();
 
-    /// the structure is NOT made of materials that have potential to significantly screw up progression (ex hard mode ores)
+    /// structure does NOT have materials that have potential to screw up progression (ex hard mode ores)
     public static Tag Structure_ProgressionSafe = new();
 
-    /// the structure is made of materials that have potential to significantly screw up progression (ex hard mode ores)
+    /// structure has materials that have potential to screw up progression (ex hard mode ores)
     public static Tag Structure_NotProgressionSafe = new();
 
     public static Tag Structure_HasRoof = new();
@@ -46,21 +48,28 @@ public static class Tags {
     /// if the structure's entry points don't represent the outer bounds of the structure. value represents the furthest extension from an entry point
     public static Tag<int> Structure_ExtendsPastEntryPoints = new();
 
+    /// if the structure has landscaping built into the tilemap. value is the entry points that have landscaping attached to them, and any entry points to add in replacement
+    public static Tag<(EntryPoint[] landscapedEntryPoints, EntryPoint[] newEntryPoints)> Structure_BuiltInLandscaping = new();
+
+    #endregion
+
+    #region Theme
+    
     /// structure is categorized as having an overall forest theme
-    public static Tag Structure_ForestTheme = new();
+    public static Tag Theme_Forest = new();
 
     /// structure is categorized as having an overall icy/cold theme
-    public static Tag Structure_IceTheme = new();
+    public static Tag Theme_Ice = new();
 
     /// structure is categorized as having an overall beach theme
-    public static Tag Structure_BeachTheme = new();
+    public static Tag Theme_Beach = new();
 
     /// structure is categorized as having an overall jungle theme
-    public static Tag Structure_JungleTheme = new();
+    public static Tag Theme_Jungle = new();
 
     /// structure is categorized as having an overall cavern/underground theme
-    public static Tag Structure_CavernTheme = new();
-
+    public static Tag Theme_Cavern = new();
+    
     #endregion
 
     #region Component General
@@ -197,7 +206,10 @@ public static class Tags {
 
     #endregion
 
-    public static void SetInternalTagNames() {
+    /// <summary>
+    ///     sets the <see cref="Tag.Name" /> field for all tags in <see cref="Tags" />
+    /// </summary>
+    public static void SetTagNameFields() {
         foreach (FieldInfo fieldInfo in typeof(Tags).GetFields(BindingFlags.Static | BindingFlags.Public)) ((Tag)fieldInfo.GetValue(null)!).Name = fieldInfo.Name;
     }
 }
