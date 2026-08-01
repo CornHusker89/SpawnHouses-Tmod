@@ -13,7 +13,7 @@ using Terraria.WorldBuilding;
 
 namespace SpawnHouses.Legacy.Structures;
 
-public abstract class LegacyStructure { //: IBoundingBox, IStructureRoot {
+public abstract class LegacyStructure { //: IBoundingBox, StructureRoot {
     public TileBox BoundingBox { get; protected set; }
     
     public ConnectPoint[][] ConnectPoints;

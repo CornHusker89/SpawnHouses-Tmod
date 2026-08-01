@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Content.Debug;
 using SpawnHouses.Content.Palette;
+using SpawnHouses.Content.Types;
 using SpawnHouses.Content.Types.DataStructures;
 using SpawnHouses.Content.Types.Interfaces;
 using SpawnHouses.Content.Types.RootStructureTypes;
@@ -30,8 +31,8 @@ public class StructureTilemap : IDebugDraw, IBoundingBox {
     
     private readonly DebugLabel _label;
     private readonly StructureTile[,] _tiles;
-    
-    public readonly IStructureRoot Structure;
+
+    public readonly StructureRoot Structure;
     public readonly List<MultiTile> MultiTiles;
     public readonly List<(StructureNBTEntry nbt, Point16 localPos)> NbtData;
     
@@ -53,7 +54,7 @@ public class StructureTilemap : IDebugDraw, IBoundingBox {
     public short Width => BoundingBox.Width;
     public short Height => BoundingBox.Height;
 
-    public StructureTilemap(IStructureRoot structure, ushort width, ushort height, Point16? globalTileOffset = null) {
+    public StructureTilemap(StructureRoot structure, ushort width, ushort height, Point16? globalTileOffset = null) {
         Structure = structure;
         _tiles = new StructureTile[width, height];
         Point16 pos = globalTileOffset ?? new Point16(0, 0);

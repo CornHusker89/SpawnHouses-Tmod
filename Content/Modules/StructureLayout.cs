@@ -16,8 +16,6 @@ namespace SpawnHouses.Content.Modules;
 
 public class StructureLayout : AdvGeneratable<StructureLayout, StructureLayoutParams, StructureLayoutAdvGenerator>, IBoundingBox {
     private readonly DebugLabel _label;
-    
-    public string Name => Params.Structure.Name + "_Layout";
 
     public TileBox BoundingBox { get; private set; }
 
@@ -56,6 +54,7 @@ public class StructureLayout : AdvGeneratable<StructureLayout, StructureLayoutPa
     }
 
     public StructureLayout(StructureLayoutParams param, string name) : base(param, new TagMap(), name) {
+        Name = Params.Structure.Name + "_Layout";
         _label = new DebugLabel(BoundingBox.TopLeftPoint16, this);
     }
 

@@ -1,33 +1,63 @@
 #nullable enable
 
 using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
+using SpawnHouses.Content.Debug;
+using SpawnHouses.Content.Tagging;
 using SpawnHouses.Content.Tiles;
 using SpawnHouses.Content.Types.Enums;
+using SpawnHouses.Content.Types.Interfaces;
+using SpawnHouses.Helpers;
 using Terraria.DataStructures;
 
-namespace SpawnHouses.Content.Types.Interfaces;
+namespace SpawnHouses.Content.Types;
 
-public interface IStructureRoot : IDebugDraw {
-    
+/// <summary>
+///     the root of any generatable structure. all structures must have one, and only one
+/// </summary>
+public abstract class StructureRoot : IGeneratable, IStructureTags, IDebugDraw {
+    // IGeneratable
+
+    public ushort Id { get; protected set; }
+
+    // IStructureTags
+
+    public abstract TagMap TagsCurrent { get; protected set; }
+
+    // IDebugDraw
+
+    public abstract string Name { get; protected set; }
+
     /// <summary>
-    ///     unique id for this instance. automatically assigned on instance creation
+    ///     <inheritdoc cref="IDebugDraw.DebugInfoVisibility" />. is cloned from <see cref="StructureManager.DefaultDebugInfoLevel" /> on instance creation
     /// </summary>
-    public ushort Id { get; }
+    public DebugInfoLevel DebugInfoVisibility { get; set; } = StructureManager.DefaultDebugInfoLevel.Clone();
+
+
+    /// <summary>
+    ///     the container for this structure root, if there is one
+    /// </summary>
+    public IStructureContainer? Container { get; set; } = null;
     
     /// <summary>
     ///     full tilemap of the structure. can be set anytime before being placed in the world
     /// </summary>
-    public StructureTilemap Tilemap { get; }
+    public StructureTilemap Tilemap { get; set; }
 
     /// <summary>
     ///     the ways in/out of a structure
     /// </summary>
-    public EntryPoint[] EntryPoints { get; }
+    public EntryPoint[] EntryPoints { get; protected set; }
 
     /// <summary>
-    ///     if the structure has been "found" by a player. not affected inside <see cref="IsFound"/> or <see cref="OnFound"/>
+    ///     if the structure has been "found" by a player. not set inside <see cref="IsFound"/> or <see cref="OnFound"/>
     /// </summary>
-    public bool HasBeenFound { get; }
+    public bool HasBeenFound { get; set; }
+
+    public Color GetDrawColor() => DrawHelper.GetColor(Id);
+
+    public abstract List<DebugLabel> DrawDebugGeometry();
 
     /// <summary>
     ///     returns true if the player is close enough to "find" the structure.
@@ -35,28 +65,28 @@ public interface IStructureRoot : IDebugDraw {
     /// </summary>
     /// <param name="playerPos"></param>
     /// <returns></returns>
-    public bool IsFound(Point16 playerPos);
+    public abstract bool IsFound(Point16 playerPos);
 
     /// <summary>
     ///     called when a structure is "found". <see cref="IsFound" /> is set to true before this method is called
     /// </summary>
-    public void OnFound();
+    public abstract void OnFound();
 
     /// <summary>
     ///     puts tiles into the structure's tilemap
     /// </summary>
-    public void LoadTilemap();
+    public abstract void LoadTilemap();
 
     /// <summary>
     ///     paste tiles from the structure's tilemap into game tilemap
     /// </summary>
-    public void ApplyTilemap();
+    public abstract void ApplyTilemap();
 
     /// <summary>
     ///     sets top left position of the structure in the world
     /// </summary>
     /// <param name="position"></param>
-    public void SetPosition(Point16 position);
+    public abstract void SetPosition(Point16 position);
 
     /// <summary>
     ///     moves the structure to align the entry points with the specified ground positions
@@ -92,4 +122,6 @@ public interface IStructureRoot : IDebugDraw {
 
         SetPosition(positionOffset);
     }
+
+    public int GetUpgradePriority() => 0;
 }

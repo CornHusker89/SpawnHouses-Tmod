@@ -14,9 +14,19 @@ namespace SpawnHouses.Content.Generation.FileStructureTemplates;
 public class WoodHouse1 : FileStructureTemplate {
     public override FileSubstructureData[] Substructures => [
         new(
+            "Left_Small",
+            "Content/Assets/StructureFiles/mainHouse/mainHouse_Small_Left_v4.shstruct",
+            ["Left"]
+        ),
+        new(
             "Left_Normal",
             "Content/Assets/StructureFiles/mainHouse/mainHouse_Left_v4.shstruct",
             ["Left"]
+        ),
+        new(
+            "Right_Small",
+            "Content/Assets/StructureFiles/mainHouse/mainHouse_Small_Right_v4.shstruct",
+            ["Right"]
         ),
         new(
             "Right_Normal",
@@ -60,12 +70,15 @@ public class WoodHouse1 : FileStructureTemplate {
         tags.Add(Tags.Structure_HasHousing, 1);
         tags.Add(Tags.Structure_HasRoof);
         tags.Add(Tags.Structure_HasStorage);
+        tags.Add(Tags.Structure_HasSomeRectangleRooms);
+        tags.Add(Tags.Structure_RoofExtendsPastEntryPoints, 5);
+        tags.Add(Tags.Structure_ProgressionSafe);
         tags.Add(Tags.Palette_MediumGrey);
         tags.Add(Tags.Palette_MediumBrown);
         tags.Add(Tags.Palette_Stone);
         tags.Add(Tags.Palette_Wood);
         tags.Add(Tags.Roof_Short);
-
+        
         return (positionIdsToPositions, entryPoints, tags);
     }
 

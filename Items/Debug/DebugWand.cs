@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Content.Types.Interfaces;
+using SpawnHouses.Content.Types;
 using SpawnHouses.Content.Types.RootStructureTypes;
 using Terraria;
 using Terraria.DataStructures;
@@ -23,7 +23,7 @@ public class DebugWand : ModItem {
 
     private static int _itemMode;
 
-    public static IStructureRoot? SelectedStructure;
+    public static StructureRoot? SelectedStructure;
 
     public override void SetDefaults() {
         Item.useStyle = ItemUseStyleID.Swing;
@@ -58,7 +58,7 @@ public class DebugWand : ModItem {
             List<int> selectedStructureIndexes = [];
             int curSelectedStructureIndex = -1;
             for (int i = 0; i < structureList.Length; i++) {
-                IStructureRoot structure = structureList[i];
+                StructureRoot structure = structureList[i];
                 if (structure == SelectedStructure)
                     curSelectedStructureIndex = i;
 

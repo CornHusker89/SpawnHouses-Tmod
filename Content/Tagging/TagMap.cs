@@ -66,6 +66,11 @@ public sealed class TagMap {
     public Tag[] Keys => _data.Keys.ToArray();
     public HashSet<Tag> KeysSet => _data.Keys.ToHashSet();
 
+    /// <summary>
+    ///     enumerates the tag entries in this map as pairs of Tag -> value.
+    /// </summary>
+    public IEnumerable<KeyValuePair<Tag, object?>> GetEntries() => _data.ToArray();
+
     public TagMap() {
         _data = new Dictionary<Tag, object?>();
     }
@@ -159,6 +164,30 @@ public sealed class TagMap {
                 throw new Exception($"this TagMap already contains key {tag}");
             Add(tag, tagMap._data[tag]);
         }
+    }
+
+    /// <summary>
+    ///     gets the delta between two TagMaps.
+    ///     "additions" will contain tags present in otherMap but not in the original map.
+    ///     "removals" will contain tags present in the original map but not in otherMap.
+    /// </summary>
+    /// <param name="otherMap"></param>
+    /// <param name="additions">output TagMap containing added tags</param>
+    /// <param name="removals">output TagMap containing removed tags</param>
+    public void GetDelta(TagMap otherMap, out TagMap additions, out TagMap removals) {
+        additions = new TagMap();
+        removals = new TagMap();
+
+        // tags present in otherMap but not in oldMap
+        foreach (Tag tag in otherMap.Keys)
+            if (!HasTag(tag))
+                // preserve associated value if any
+                additions._data[tag] = otherMap._data[tag];
+
+        // tags present in oldMap but not in otherMap
+        foreach (Tag tag in Keys)
+            if (!otherMap.HasTag(tag))
+                removals._data[tag] = _data[tag];
     }
 
     /// <summary>

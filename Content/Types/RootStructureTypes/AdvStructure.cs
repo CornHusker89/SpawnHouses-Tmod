@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
 using SpawnHouses.Content.Debug;
 using SpawnHouses.Content.Modules;
 using SpawnHouses.Content.Palette;
 using SpawnHouses.Content.Parameters;
-using SpawnHouses.Content.Tiles;
+using SpawnHouses.Content.Tagging;
 using SpawnHouses.Content.Types.Interfaces;
-using SpawnHouses.Helpers;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.Utilities;
@@ -18,15 +16,17 @@ namespace SpawnHouses.Content.Types.RootStructureTypes;
 /// <summary>
 ///     the central object that everything for adv. structures revolve around
 /// </summary>
-public class AdvStructure : IStructureRoot {
-    // IStructureRoot
-    public DebugInfoLevel DebugInfoVisibility { get; set; }
-    public string Name { get; init; }
-    public ushort Id { get; init; }
-    public StructureTilemap Tilemap { get; set; }
-    public EntryPoint[] EntryPoints => LayoutParam.EntryPoints;
-    public bool HasBeenFound { get; set; }
-    
+public sealed class AdvStructure : StructureRoot {
+    public override string Name { get; protected set; }
+
+    /// <summary>
+    ///     same instance as the <see cref="StructureLayout" />'s <see cref="Modules.StructureLayout.TagsCurrent" />
+    /// </summary>
+    public override TagMap TagsCurrent {
+        get => StructureLayout.TagsCurrent;
+        protected set => StructureLayout.TagsCurrent = value;
+    }
+
     public readonly Dictionary<Type, List<IAdvGenerator>> InstanceGeneratorQueue = [];
 
     /// <summary>
@@ -56,8 +56,12 @@ public class AdvStructure : IStructureRoot {
     /// </param>
     // ReSharper disable once NotNullOrRequiredMemberIsNotInitialized
     public AdvStructure(string name, StructureLayoutParams layoutParam, TilePalette palette, int seed = -1, bool generate = false) {
+        // StructureRoot
         Name = name;
         Id = StructureManager.NextGeneratableId();
+        EntryPoints = layoutParam.EntryPoints;
+        HasBeenFound = false;
+        
         Seed = seed == -1 ? WorldGen.genRand.Next() : seed;
         LayoutRandom = new UnifiedRandom(Seed);
         OtherRandom = new UnifiedRandom(Seed + 1);
@@ -66,13 +70,13 @@ public class AdvStructure : IStructureRoot {
         Palette = palette;
 
         ApplyLayoutMethod();
+        
         if (generate) {
             LoadTilemap();
             StructureManager.RegisterAdvStructure(this);
             ApplyTilemap();
         }
-
-        DebugInfoVisibility = StructureManager.DefaultDebugInfoLevel.Clone();
+        
         UpdateDebugVisibility();
     }
 
@@ -80,7 +84,7 @@ public class AdvStructure : IStructureRoot {
     ///     fills current layout with tiles/walls
     /// </summary>
     /// <exception cref="Exception">Throws when no layout has been set</exception>
-    public void LoadTilemap() {
+    public override void LoadTilemap() {
         if (StructureLayout == null)
             throw new Exception("no layout has been set");
         if (FailedLayoutGeneration)
@@ -95,7 +99,7 @@ public class AdvStructure : IStructureRoot {
     /// <summary>
     ///     paste tiles from adv structure's tilemap into game tilemap
     /// </summary>
-    public void ApplyTilemap() {
+    public override void ApplyTilemap() {
         if (StructureLayout == null)
             throw new Exception("No layout has been set");
         if (FailedLayoutGeneration)
@@ -104,7 +108,7 @@ public class AdvStructure : IStructureRoot {
         Tilemap.ApplyTilemap();
     }
 
-    public bool IsFound(Point16 playerPos) {
+    public override bool IsFound(Point16 playerPos) {
         if (!Tilemap.IsTilesPlaced)
             return false;
         return playerPos.X > StructureLayout.BoundingBox.Left - 20 &&
@@ -113,12 +117,10 @@ public class AdvStructure : IStructureRoot {
                playerPos.X < StructureLayout.BoundingBox.Bottom + 20;
     }
 
-    public void OnFound() {
+    public override void OnFound() {
     }
 
-    public Color GetDrawColor() => DrawHelper.GetColor((ushort)GetHashCode());
-
-    public List<DebugLabel> DrawDebugGeometry() {
+    public override List<DebugLabel> DrawDebugGeometry() {
         if (FailedLayoutGeneration)
             return [];
 
@@ -131,7 +133,7 @@ public class AdvStructure : IStructureRoot {
         return labels;
     }
 
-    public void SetPosition(Point16 position) {
+    public override void SetPosition(Point16 position) {
         Point16 delta = position - StructureLayout.BoundingBox.TopLeftPoint16;
 
         Tilemap.SetPosition(Tilemap.BoundingBox.TopLeftPoint16 + delta);

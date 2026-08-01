@@ -12,7 +12,7 @@ using Main = Terraria.Main;
 
 namespace SpawnHouses.Legacy.Structures;
 
-public abstract class LegacyStructureChain { // : IStructureRoot {
+public abstract class LegacyStructureChain { // : StructureRoot {
     private readonly Bridge[] _bridges;
     private readonly LegacyChainStructure[] _originalStructureList;
     private readonly LegacyChainStructure[] _rootStructureList;

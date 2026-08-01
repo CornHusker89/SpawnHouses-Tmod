@@ -22,29 +22,20 @@ namespace SpawnHouses.Content.Types.RootStructureTypes;
 /// <summary>
 ///     placeable instance of a structure. not to be created directly, structure manager handles the creation of these instances
 /// </summary>
-public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags {
-    // IGeneratable
-    public ushort Id { get; private set; }
-
-    // IStructureRoot
-    public DebugInfoLevel DebugInfoVisibility { get; set; }
-
+public sealed class FileStructure : StructureRoot {
+    
     /// <summary>
     ///     <inheritdoc cref="IDebugDraw.Name" />. is formatted as follows for <see cref="FileStructure" />s:
     ///     {template name}@{position id}={substructure name}:{position id}={substructure name}...
     /// </summary>
-    public string Name { get; private set; }
-    public StructureTilemap Tilemap { get; private set; }
-    public EntryPoint[] EntryPoints { get; private set; }
-    public bool HasBeenFound { get; set; }
+    public override string Name { get; protected set; }
 
-    // IStructureTags
-    public TagMap TagsCurrent { get; private set; }
+    public override TagMap TagsCurrent { get; protected set; }
 
-    /// <inheritdoc cref="IStructureRoot.IsFound" />
+    /// <inheritdoc cref="StructureRoot.IsFound" />
     private Func<FileStructure, Point16, bool>? _isFound;
 
-    /// <inheritdoc cref="IStructureRoot.OnFound" />
+    /// <inheritdoc cref="StructureRoot.OnFound" />
     private Action<FileStructure>? _onFound;
 
     /// <summary>
@@ -105,7 +96,7 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
         // calculate the distance between the two provided entry points
         double providedDistance = Vector2.Distance(groundEntryTarget1.ToVector2(), groundEntryTarget2.ToVector2());
         var allVariations = StructureManager.AllFileStructureVariations.Where(s => s is { Depreciated: false, Standalone: true });
-        foreach (FileStructure variation in StructureManager.AllFileStructureVariations) {
+        foreach (FileStructure variation in allVariations) {
             var groundEntryPoints = variation.EntryPoints
                 .Where(ep => ep.Purpose is EntryPointPurpose.GroundLevel)
                 .ToArray();
@@ -198,7 +189,6 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
         _isFound += isFound;
         _onFound += onFound;
         _onTilemapLoaded += onTilemapLoaded;
-        DebugInfoVisibility = StructureManager.DefaultDebugInfoLevel.Clone();
         Id = 0;
         Tilemap = new StructureTilemap(this, (ushort)size.X, (ushort)size.Y);
         EntryPoints = entryPoints;
@@ -289,7 +279,7 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
         var selectedGroundEntryPoints = selected.EntryPoints
             .Where(ep => ep.Purpose is EntryPointPurpose.GroundLevel)
             .ToArray();
-        ((IStructureRoot)this).AlignEntryPoints(selectedGroundEntryPoints[selectedI], groundEntryTarget1, selectedGroundEntryPoints[selectedJ], groundEntryTarget2, entryPointAnchor);
+        AlignEntryPoints(selectedGroundEntryPoints[selectedI], groundEntryTarget1, selectedGroundEntryPoints[selectedJ], groundEntryTarget2, entryPointAnchor);
 
         if (generate) {
             LoadTilemap();
@@ -308,7 +298,6 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
         _isFound += referenceFileStructure._isFound;
         _onFound += referenceFileStructure._onFound;
         _onTilemapLoaded += referenceFileStructure._onTilemapLoaded;
-        DebugInfoVisibility = StructureManager.DefaultDebugInfoLevel.Clone();
         Id = id == -1 ? StructureManager.NextGeneratableId() : (ushort)id;
         Tilemap = new StructureTilemap(this, (ushort)referenceFileStructure.Tilemap.Width, (ushort)referenceFileStructure.Tilemap.Height);
 
@@ -332,7 +321,7 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
 
     public Color GetDrawColor() => DrawHelper.GetColor(Id);
 
-    public List<DebugLabel> DrawDebugGeometry() {
+    public override List<DebugLabel> DrawDebugGeometry() {
         // draw geometry
         if (DebugInfoVisibility.DisplayBounds) {
             DrawHelper.DrawWorldBasedRectangularPath(Tilemap.BoundingBox.GetDrawPath(), GetDrawColor(), DrawHelper.DebugDrawWidth);
@@ -396,10 +385,10 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
         return [];
     }
 
-    public bool IsFound(Point16 playerPos) => _isFound?.Invoke(this, playerPos) ?? true;
-    public void OnFound() => _onFound?.Invoke(this);
+    public override bool IsFound(Point16 playerPos) => _isFound?.Invoke(this, playerPos) ?? true;
+    public override void OnFound() => _onFound?.Invoke(this);
 
-    public void LoadTilemap() {
+    public override void LoadTilemap() {
         if (Tilemap.IsAllTilesLoaded)
             return;
         
@@ -409,13 +398,13 @@ public sealed class FileStructure : IGeneratable, IStructureRoot, IStructureTags
         Tilemap.IsAllTilesLoaded = true;
     }
 
-    public void ApplyTilemap() => Tilemap.ApplyTilemap();
+    public override void ApplyTilemap() => Tilemap.ApplyTilemap();
 
     /// <summary>
     ///     set the position of the structure in the world. this is the inclusive top-left corner of the structure
     /// </summary>
     /// <param name="position"></param>
-    public void SetPosition(Point16 position) {
+    public override void SetPosition(Point16 position) {
         Tilemap.SetPosition(position);
         foreach (EntryPoint entryPoint in EntryPoints) entryPoint.SetOffset(position);
     }

@@ -11,7 +11,7 @@ namespace SpawnHouses.Content.Tagging;
 /// <summary>
 ///     contains all tags used in generated housing
 /// </summary>
-/// <remarks>Tag saving/loading is based on the tag's identifier, so don't change them once implemented</remarks>
+/// <remarks>Tag saving/loading is based on the tag's name/identifier, so don't change them once implemented</remarks>
 public static class Tags {
     
     #region Structure
@@ -32,8 +32,8 @@ public static class Tags {
     /// there are a number of convenient large rooms intended for general use
     public static Tag<int> Structure_HasLargeRoom = new();
 
-    /// there is a convenient large room intended for storage
-    public static Tag Structure_HasStorage = new();
+    /// there is a convenient large room intended for storage. value indicates the number of chest-equivalent spaces
+    public static Tag<int> Structure_HasStorage = new();
 
     /// structure does NOT have materials that have potential to screw up progression (ex hard mode ores)
     public static Tag Structure_ProgressionSafe = new();
@@ -46,10 +46,19 @@ public static class Tags {
     public static Tag Structure_HasNoRoof = new();
 
     /// if the structure's entry points don't represent the outer bounds of the structure. value represents the furthest extension from an entry point
-    public static Tag<int> Structure_ExtendsPastEntryPoints = new();
+    public static Tag<int> Structure_RoofExtendsPastEntryPoints = new();
 
     /// if the structure has landscaping built into the tilemap. value is the entry points that have landscaping attached to them, and any entry points to add in replacement
     public static Tag<(EntryPoint[] landscapedEntryPoints, EntryPoint[] newEntryPoints)> Structure_BuiltInLandscaping = new();
+
+    /// if the structure has alternate structures that have similar tilemaps but are larger or "improved" in some other way
+    public static Tag<StructureRoot[]> Structure_Upgradable = new();
+
+    /// if the structure requires any other mods. value is the unique name of any required mods
+    public static Tag<string[]> Structure_RequiredMods = new();
+
+    /// if the structure uses Magic Storage
+    public static Tag Structure_UsesMS = new();
 
     #endregion
 

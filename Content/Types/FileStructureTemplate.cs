@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using SpawnHouses.Content.Tagging;
 using SpawnHouses.Content.Types.DataStructures;
-using SpawnHouses.Content.Types.Interfaces;
 using SpawnHouses.Content.Types.RootStructureTypes;
 using Terraria.DataStructures;
 
@@ -14,8 +13,14 @@ using StructureInfo = (Dictionary<string, Point16> positionIdsToPositions, Entry
 ///     all children must not have an explicit constructor
 /// </summary>
 public abstract class FileStructureTemplate {
+    /// <summary>
+    ///     all substructures that could be used to generate a <see cref="FileStructure" />
+    /// </summary>
     public abstract FileSubstructureData[] Substructures { get; }
 
+    /// <summary>
+    ///     all possible position ids for the substructures
+    /// </summary>
     public abstract string[] PositionIds { get; }
 
     /// <summary>
@@ -24,12 +29,13 @@ public abstract class FileStructureTemplate {
     /// </summary>
     /// <param name="posIdsToStruct">mapping of position IDs to friendly substructure names</param>
     /// <returns></returns>
+    /// <remarks>this function MUST be deterministic</remarks>
     public abstract StructureInfo GetStructureInfo(Dictionary<string, FileSubstructureData> posIdsToStruct);
 
-    /// <inheritdoc cref="IStructureRoot.IsFound" />
+    /// <inheritdoc cref="StructureRoot.IsFound" />
     public virtual bool IsFound(FileStructure structure, Point16 playerPos) => true;
 
-    /// <inheritdoc cref="IStructureRoot.OnFound" />
+    /// <inheritdoc cref="StructureRoot.OnFound" />
     public virtual void OnFound(FileStructure structure) {
     }
 

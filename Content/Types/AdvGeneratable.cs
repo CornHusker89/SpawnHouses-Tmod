@@ -19,12 +19,12 @@ public abstract class AdvGeneratable<TSelf, TParams, TGenerator> : IAdvGeneratab
     public DebugInfoLevel DebugInfoVisibility { get; set; }
 
     /// (ideally) a unique identifier. during assignment, any "#" get replaced with advGeneratable's id
-    public string Name { get; }
+    public string Name { get; protected init; }
     
     public bool HasGenerated { get; set; }
     public ushort Id { get; }
     public TParams Params { get; }
-    public TagMap TagsCurrent { get; }
+    public TagMap TagsCurrent { get; set; }
 
     protected TGenerator Generator;
 

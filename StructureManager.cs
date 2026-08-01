@@ -14,6 +14,7 @@ using SpawnHouses.Helpers;
 using SpawnHouses.Items.Debug;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
@@ -68,7 +69,7 @@ public class StructureManager : ModSystem {
     /// <summary>
     ///     gets a shallow copy of all internal structure lists.
     /// </summary>
-    public static IStructureRoot[] GetAllStructuresList() => _advStructures.Concat(_fileStructures.Cast<IStructureRoot>()).ToArray();
+    public static StructureRoot[] GetAllStructuresList() => _advStructures.Concat(_fileStructures.Cast<StructureRoot>()).ToArray();
 
     /// <summary>
     ///     returns the next component id, and advances the counter. begins at id 1
@@ -141,7 +142,7 @@ public class StructureManager : ModSystem {
 
                     // build a signature from what actually gets generated (post (-1,-1) filtering) to dedupe
                     string[] effectivePositionIds = positionIds
-                        .Where(id => structureInfo.positionIdsToPositions.TryGetValue(id, out Point16 p) && !(p.X == -1 && p.Y == -1))
+                        .Where(id => structureInfo.positionIdsToPositions.TryGetValue(id, out Point16 p) && p is not { X: -1, Y: -1 })
                         .ToArray();
                     string signature = string.Join(":", effectivePositionIds.Select(id => $"{id}={positionIdsToSubStructures[id].Name}"));
 
@@ -189,7 +190,7 @@ public class StructureManager : ModSystem {
                     AllFileStructureVariations.Add(structure);
                 }
             }
-
+            
             // adv generator loading
             if (type.GetCustomAttribute<AdvGeneratorLoadable>() is { } advGeneratorInfo) {
                 if (!AdvInstanceGenerators.TryGetValue(advGeneratorInfo.ModuleType, out var generatorList))
@@ -197,6 +198,16 @@ public class StructureManager : ModSystem {
                 IAdvGenerator advGenerator = (IAdvGenerator)Activator.CreateInstance(type)!;
                 advGenerator.Depreciated = advGeneratorInfo.Depreciated;
                 generatorList.Add(advGenerator);
+            }
+        }
+
+        // assign all file structures the upgradable tag if possible
+        var groupedByTemplate = AllFileStructureVariations.GroupBy(s => s.TemplateName);
+        foreach (var group in groupedByTemplate) {
+            var variants = group.ToList();
+            foreach (FileStructure s in variants) {
+                StructureRoot[] upgradeVariants = variants.Where(v => v is { Depreciated: false, Standalone: true }).Cast<StructureRoot>().ToArray();
+                if (upgradeVariants.Length != 0) s.TagsCurrent.Add(Tags.Structure_Upgradable, upgradeVariants);
             }
         }
     }
@@ -256,16 +267,18 @@ public class StructureManager : ModSystem {
 
 #if SPAWNHOUSES_DEBUG
     public override void PostDrawTiles() {
-        _debugDrawFrameCount++;
-
         DrawHelper.BeginWorldSpriteBatch();
 
+        if (Main.netMode == NetmodeID.Server)
+            return;
+
+        _debugDrawFrameCount++;
         if (_debugDrawFrameCount < 20) {
             _debugDrawFrameCount = 0;
             UpdateLabelPositionsAndDraw();
         }
         else {
-            foreach (IStructureRoot structure in GetAllStructuresList())
+            foreach (StructureRoot structure in GetAllStructuresList())
                 structure.DrawDebugGeometry();
         }
 
@@ -281,7 +294,7 @@ public class StructureManager : ModSystem {
         List<Rectangle> structureRects = [];
         _labels.Clear();
 
-        foreach (IStructureRoot structure in GetAllStructuresList()) {
+        foreach (StructureRoot structure in GetAllStructuresList()) {
             TileBox structureGlobalTileBoundingBox;
             if (structure is FileStructure fileStructure)
                 structureGlobalTileBoundingBox = structure.Tilemap.ConvertToGlobal(fileStructure.Tilemap.BoundingBox);
@@ -348,14 +361,42 @@ internal class DictionarySerializer : TagSerializer<Dictionary<string, object>, 
     public override Dictionary<string, object> Deserialize(TagCompound tag) => tag.ToDictionary();
 }
 
-internal class FileStructureSerializer : TagSerializer<FileStructure, TagCompound> {
-    public override TagCompound Serialize(FileStructure value) {
+internal class TagMapSerializer : TagSerializer<TagMap, TagCompound> {
+    public override TagCompound Serialize(TagMap tagMap) {
         TagCompound tag = [];
-        tag["Name"] = value.Name;
-        tag["Id"] = value.Id;
-        tag["Position"] = value.Position;
-        tag["Found"] = value.HasBeenFound;
-        tag["Data"] = value.Data;
+        foreach (var kvp in tagMap.GetEntries()) {
+            if (kvp.Key.Name == null) continue;
+            tag[kvp.Key.Name] = kvp.Value;
+        }
+
+        return tag;
+    }
+
+    public override TagMap Deserialize(TagCompound tagCompound) {
+        TagMap map = new();
+        foreach (var kvp in tagCompound) {
+            object? value = tagCompound.Get<object>(kvp.Key);
+            try {
+                var tag = (Tag<object>)typeof(Tags).GetField(kvp.Key)!.GetValue(null)!;
+                map.Add(tag, value);
+            }
+            catch {
+                SpawnHousesMod.Instance.Logger.Error($"Tag \"{kvp.Key}\" in saved structure data, but not found in tag list");
+            }
+        }
+
+        return map;
+    }
+}
+
+internal class FileStructureSerializer : TagSerializer<FileStructure, TagCompound> {
+    public override TagCompound Serialize(FileStructure structure) {
+        TagCompound tag = [];
+        tag["Name"] = structure.Name;
+        tag["Id"] = structure.Id;
+        tag["Position"] = structure.Position;
+        tag["Found"] = structure.HasBeenFound;
+        tag["Data"] = structure.Data;
         return tag;
     }
 
