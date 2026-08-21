@@ -24,7 +24,7 @@ public class WebClient {
     //         SpawnHousesMod.Instance.Logger.Info("Getting spawn count info from Web API");
     //         HttpResponseMessage response = _client.GetAsync("https://spawnhousescounter.xyz/api/get").Result;
     //         response.EnsureSuccessStatusCode();
-    //         string responseBody = response.Content.ReadAsStringAsync().Result;
+    //         string responseBody = response.Core.ReadAsStringAsync().Result;
     //         return JsonSerializer.Deserialize<Dictionary<string, int>>(responseBody);
     //     }
     //     catch {

@@ -1,0 +1,26 @@
+using SpawnHouses.Core.Geometry;
+using SpawnHouses.Core.Interfaces;
+using SpawnHouses.Core.Parameters;
+using SpawnHouses.Core.RootStructureTypes;
+
+namespace SpawnHouses.Core.AdvGeneratables.Components;
+
+public class Wall : VolumeComponent {
+    /// <summary>
+    ///     constructor that requires params object
+    /// </summary>
+    /// <param name="p"></param>
+    /// <param name="shape"></param>
+    /// <param name="name"></param>
+    public Wall(VolumeComponentParams p, Shape shape, string name) : base(p, shape, name) {
+    }
+
+    /// <summary>
+    ///     constructor that automatically creates a new set of params
+    /// </summary>
+    /// <param name="structure"></param>
+    /// <param name="shape"></param>
+    /// <param name="name"></param>
+    public Wall(AdvStructure structure, Shape shape, string name) : base(new VolumeComponentParams(structure), shape, name) {
+    }
+}

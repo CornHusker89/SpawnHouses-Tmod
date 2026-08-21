@@ -1,4 +1,4 @@
-using SpawnHouses.Content.Types.DataStructures;
+using SpawnHouses.Core.DataStructures;
 using SpawnHouses.Legacy.Helpers;
 using SpawnHouses.Legacy.Structures.StructureParts;
 using Terraria;
@@ -10,7 +10,7 @@ namespace SpawnHouses.Legacy.Structures.StructureTypes.ChainStructures;
 // ReSharper disable ConvertToPrimaryConstructor
 public class MainBasementEntry1 : LegacyChainStructure {
     public MainBasementEntry1(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
-        base("Content/Assets/StructureFiles/mainBasement/mainBasement_Entry1.shstruct",
+        base("Core/Assets/StructureFiles/mainBasement/mainBasement_Entry1.shstruct",
             10,
             16,
             [
@@ -38,7 +38,7 @@ public class MainBasementEntry1 : LegacyChainStructure {
 
 public class MainBasementEntry2 : LegacyChainStructure {
     public MainBasementEntry2(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
-        base("Content/Assets/StructureFiles/mainBasement/mainBasement_Entry2.shstruct",
+        base("Core/Assets/StructureFiles/mainBasement/mainBasement_Entry2.shstruct",
             15,
             15,
             [
@@ -75,7 +75,7 @@ public class MainBasementEntry2 : LegacyChainStructure {
 
 public class MainBasementHallway4 : LegacyChainStructure {
     public MainBasementHallway4(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
-        base("Content/Assets/StructureFiles/mainBasement/mainBasement_Hallway4.shstruct",
+        base("Core/Assets/StructureFiles/mainBasement/mainBasement_Hallway4.shstruct",
             6,
             11,
             [
@@ -103,7 +103,7 @@ public class MainBasementHallway4 : LegacyChainStructure {
 
 public class MainBasementHallway5 : LegacyChainStructure {
     public MainBasementHallway5(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
-        base("Content/Assets/StructureFiles/mainBasement/mainBasement_Hallway5.shstruct",
+        base("Core/Assets/StructureFiles/mainBasement/mainBasement_Hallway5.shstruct",
             8,
             22,
             [
@@ -140,7 +140,7 @@ public class MainBasementHallway5 : LegacyChainStructure {
 
 public class MainBasementHallway9 : LegacyChainStructure {
     public MainBasementHallway9(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
-        base("Content/Assets/StructureFiles/mainBasement/mainBasement_Hallway9.shstruct",
+        base("Core/Assets/StructureFiles/mainBasement/mainBasement_Hallway9.shstruct",
             6,
             11,
             [
@@ -168,7 +168,7 @@ public class MainBasementHallway9 : LegacyChainStructure {
 
 public class MainBasementRoom1 : LegacyChainStructure {
     public MainBasementRoom1(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
-        base("Content/Assets/StructureFiles/mainBasement/mainBasement_Room1.shstruct",
+        base("Core/Assets/StructureFiles/mainBasement/mainBasement_Room1.shstruct",
             22,
             9,
             [
@@ -194,7 +194,7 @@ public class MainBasementRoom1 : LegacyChainStructure {
 
 public class MainBasementRoom1WithFloor : LegacyChainStructure {
     public MainBasementRoom1WithFloor(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
-        base("Content/Assets/StructureFiles/mainBasement/mainBasement_Room1_WithFloor.shstruct",
+        base("Core/Assets/StructureFiles/mainBasement/mainBasement_Room1_WithFloor.shstruct",
             22,
             9,
             [
@@ -222,7 +222,7 @@ public class MainBasementRoom1WithFloor : LegacyChainStructure {
 
 public class MainBasementRoom2 : LegacyChainStructure {
     public MainBasementRoom2(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
-        base("Content/Assets/StructureFiles/mainBasement/mainBasement_Room2.shstruct",
+        base("Core/Assets/StructureFiles/mainBasement/mainBasement_Room2.shstruct",
             23,
             7,
             [
@@ -248,7 +248,7 @@ public class MainBasementRoom2 : LegacyChainStructure {
 
 public class MainBasementRoom2WithRoof : LegacyChainStructure {
     public MainBasementRoom2WithRoof(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
-        base("Content/Assets/StructureFiles/mainBasement/mainBasement_Room2_WithRoof.shstruct",
+        base("Core/Assets/StructureFiles/mainBasement/mainBasement_Room2_WithRoof.shstruct",
             23,
             7,
             [
@@ -276,7 +276,7 @@ public class MainBasementRoom2WithRoof : LegacyChainStructure {
 
 public class MainBasementRoom3 : LegacyChainStructure {
     public MainBasementRoom3(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
-        base("Content/Assets/StructureFiles/mainBasement/mainBasement_Room3.shstruct",
+        base("Core/Assets/StructureFiles/mainBasement/mainBasement_Room3.shstruct",
             10,
             7,
             [
@@ -302,7 +302,7 @@ public class MainBasementRoom3 : LegacyChainStructure {
 
 public class MainBasementRoom4 : LegacyChainStructure {
     public MainBasementRoom4(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
-        base("Content/Assets/StructureFiles/mainBasement/mainBasement_Room4.shstruct",
+        base("Core/Assets/StructureFiles/mainBasement/mainBasement_Room4.shstruct",
             13,
             11,
             [
@@ -330,9 +330,9 @@ public class MainBasementRoom5 : LegacyChainStructure {
     public MainBasementRoom5(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
         base(
             //CompatabilityHelper.IsMsEnabled
-            //? "Content/Assets/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage.shstruct"
+            //? "Core/Assets/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage.shstruct"
             // : 
-            "Content/Assets/StructureFiles/mainBasement/mainBasement_Room5.shstruct",
+            "Core/Assets/StructureFiles/mainBasement/mainBasement_Room5.shstruct",
             22,
             9,
             [
@@ -357,7 +357,7 @@ public class MainBasementRoom5 : LegacyChainStructure {
 
     public override void OnFound() {
         // MainHouse mainHouse = StructureManager.LegacyStructures.Find(s => s is MainHouse) as MainHouse;
-        // if (CompatabilityHelper.IsMSEnabled && FilePath == "Content/Assets/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage.shstruct") {
+        // if (CompatabilityHelper.IsMSEnabled && FilePath == "Core/Assets/StructureFiles/mainBasement/mainBasement_Room5_MagicStorage.shstruct") {
         //     CompatabilityHelper.PlaceMsModule(BoundingBox.Left + 10, BoundingBox.Top + 6, CompatabilityHelper.RemoteAccessTileID, CompatabilityHelper.RemoteAccessTileEntityID);
         //     if (mainHouse is not null && mainHouse.Status != StructureStatus.NotGenerated) CompatabilityHelper.LinkRemoteStorage(new Point16(BoundingBox.Left + 10, BoundingBox.Top + 6), mainHouse.StorageHeartPos);
         //
@@ -380,7 +380,7 @@ public class MainBasementRoom5 : LegacyChainStructure {
 
 public class MainBasementRoom6 : LegacyChainStructure {
     public MainBasementRoom6(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
-        base("Content/Assets/StructureFiles/mainBasement/mainBasement_Room6.shstruct",
+        base("Core/Assets/StructureFiles/mainBasement/mainBasement_Room6.shstruct",
             28,
             15,
             [
@@ -417,7 +417,7 @@ public class MainBasementRoom6 : LegacyChainStructure {
 
 public class MainBasementRoom7 : LegacyChainStructure {
     public MainBasementRoom7(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
-        base("Content/Assets/StructureFiles/mainBasement/mainBasement_Room7.shstruct",
+        base("Core/Assets/StructureFiles/mainBasement/mainBasement_Room7.shstruct",
             27,
             12,
             [
@@ -443,7 +443,7 @@ public class MainBasementRoom7 : LegacyChainStructure {
 
 public class MainBasementRoom8 : LegacyChainStructure {
     public MainBasementRoom8(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1, ushort weight = 10) :
-        base("Content/Assets/StructureFiles/mainBasement/mainBasement_Room8.shstruct",
+        base("Core/Assets/StructureFiles/mainBasement/mainBasement_Room8.shstruct",
             23,
             9,
             [

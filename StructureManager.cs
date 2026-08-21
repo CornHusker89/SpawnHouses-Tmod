@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Content.Debug;
-using SpawnHouses.Content.Tagging;
-using SpawnHouses.Content.Types;
-using SpawnHouses.Content.Types.Attributes;
-using SpawnHouses.Content.Types.DataStructures;
-using SpawnHouses.Content.Types.Interfaces;
-using SpawnHouses.Content.Types.RootStructureTypes;
+using SpawnHouses.Content.Items.Debug;
+using SpawnHouses.Core;
+using SpawnHouses.Core.Attributes;
+using SpawnHouses.Core.DataStructures;
+using SpawnHouses.Core.Debug;
+using SpawnHouses.Core.Interfaces;
+using SpawnHouses.Core.RootStructureTypes;
+using SpawnHouses.Core.Tagging;
 using SpawnHouses.Helpers;
-using SpawnHouses.Items.Debug;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -174,11 +174,9 @@ public class StructureManager : ModSystem {
                         size,
                         structureInfo.entryPoints,
                         structureInfo.tags,
+                        template,
                         positionIdsToFilenames,
-                        structureInfo.positionIdsToPositions,
-                        template.IsFound,
-                        template.OnFound,
-                        template.OnTilemapLoaded);
+                        structureInfo.positionIdsToPositions);
 
                     foreach (string id in effectivePositionIds) {
                         structure.PositionIdToFilename[id] = positionIdsToSubStructures[id].FilePath;
@@ -206,8 +204,18 @@ public class StructureManager : ModSystem {
         foreach (var group in groupedByTemplate) {
             var variants = group.ToList();
             foreach (FileStructure s in variants) {
-                StructureRoot[] upgradeVariants = variants.Where(v => v is { Depreciated: false, Standalone: true }).Cast<StructureRoot>().ToArray();
-                if (upgradeVariants.Length != 0) s.TagsCurrent.Add(Tags.Structure_Upgradable, upgradeVariants);
+                var upgrades = s.Template.GetUpgrades(s);
+
+                if (upgrades == null) {
+                    var upgradeVariants = variants.Where(v => s.IsUpgrade(v)).Cast<StructureRoot>().ToArray();
+                    if (upgradeVariants.Length != 0) s.TagsCurrent.Add(Tags.Structure_Upgradable, upgradeVariants);
+                }
+                else if (upgrades.Length == 0) {
+                    continue;
+                }
+                else {
+                    s.TagsCurrent.Add(Tags.Structure_Upgradable, upgrades);
+                }
             }
         }
     }

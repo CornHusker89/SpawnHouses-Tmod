@@ -1,5 +1,5 @@
 using System;
-using SpawnHouses.Content.Types.DataStructures;
+using SpawnHouses.Core.DataStructures;
 using SpawnHouses.Legacy.Structures.StructureParts;
 using Terraria;
 using Terraria.ID;

@@ -7,12 +7,6 @@ public static class LegacyDirections {
     public const byte Left = 2;
     public const byte Right = 3;
     public const byte None = 4;
-
-    public static byte FlipDirection(byte direction) {
-        if (direction is 1 or 3)
-            return (byte)(direction - 1);
-        return (byte)(direction + 1);
-    }
 }
 
 public static class GenerateChances {

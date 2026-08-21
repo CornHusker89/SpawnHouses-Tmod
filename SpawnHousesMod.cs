@@ -1,5 +1,5 @@
 using System.IO;
-using SpawnHouses.Content.Types.Enums;
+using SpawnHouses.Core.Enums;
 using SpawnHouses.Helpers;
 using Terraria.ModLoader;
 

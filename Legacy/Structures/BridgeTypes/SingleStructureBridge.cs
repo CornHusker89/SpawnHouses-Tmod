@@ -1,6 +1,6 @@
 using System;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Content.Types.DataStructures;
+using SpawnHouses.Core.DataStructures;
 using SpawnHouses.Legacy.Helpers;
 using SpawnHouses.Legacy.Structures.StructureParts;
 using StructureHelper.API;
@@ -110,25 +110,25 @@ public class SingleStructureBridge : Bridge {
 
     // empty
     public class EmptyBridgeHorizontal : SingleStructureBridge {
-        public EmptyBridgeHorizontal() : base("Content/Assets/StructureFiles/empty.shstruct",
+        public EmptyBridgeHorizontal() : base("Core/Assets/StructureFiles/empty.shstruct",
             0, 0, 0, 0, -1, -1, [LegacyDirections.Right, LegacyDirections.Left], hasBoundingBox: false) {
         }
     }
 
     public class EmptyBridgeHorizontalAltGen : SingleStructureBridge {
-        public EmptyBridgeHorizontalAltGen() : base("Content/Assets/StructureFiles/empty.shstruct",
+        public EmptyBridgeHorizontalAltGen() : base("Core/Assets/StructureFiles/empty.shstruct",
             0, 0, 0, 0, -1, -1, [LegacyDirections.Left, LegacyDirections.Right], hasBoundingBox: false) {
         }
     }
 
     public class EmptyBridgeVertical : SingleStructureBridge {
-        public EmptyBridgeVertical() : base("Content/Assets/StructureFiles/empty.shstruct",
+        public EmptyBridgeVertical() : base("Core/Assets/StructureFiles/empty.shstruct",
             0, 0, 0, 0, -1, -1, [LegacyDirections.Down, LegacyDirections.Up], hasBoundingBox: false) {
         }
     }
 
     public class EmptyBridgeVerticalAltGen : SingleStructureBridge {
-        public EmptyBridgeVerticalAltGen() : base("Content/Assets/StructureFiles/empty.shstruct",
+        public EmptyBridgeVerticalAltGen() : base("Core/Assets/StructureFiles/empty.shstruct",
             0, 0, 0, 0, -1, -1, [LegacyDirections.Up, LegacyDirections.Down], hasBoundingBox: false) {
         }
     }
@@ -136,13 +136,13 @@ public class SingleStructureBridge : Bridge {
 
     // straight
     public class MainBasementHallway1 : SingleStructureBridge {
-        public MainBasementHallway1() : base("Content/Assets/StructureFiles/mainBasement/mainBasement_Hallway1.shstruct",
+        public MainBasementHallway1() : base("Core/Assets/StructureFiles/mainBasement/mainBasement_Hallway1.shstruct",
             8, 7, 0, -7, 8, -1, [LegacyDirections.Right, LegacyDirections.Left]) {
         }
     }
 
     public class MainBasementHallway1AltGen : SingleStructureBridge {
-        public MainBasementHallway1AltGen() : base("Content/Assets/StructureFiles/mainBasement/mainBasement_Hallway1.shstruct",
+        public MainBasementHallway1AltGen() : base("Core/Assets/StructureFiles/mainBasement/mainBasement_Hallway1.shstruct",
             8, 7, -9, -7, -10, -1, [LegacyDirections.Left, LegacyDirections.Right]) {
         }
     }
@@ -150,26 +150,26 @@ public class SingleStructureBridge : Bridge {
 
     // L shaped
     public class MainBasementHallway2 : SingleStructureBridge {
-        public MainBasementHallway2() : base("Content/Assets/StructureFiles/mainBasement/mainBasement_Hallway2.shstruct",
+        public MainBasementHallway2() : base("Core/Assets/StructureFiles/mainBasement/mainBasement_Hallway2.shstruct",
             6, 11, -3, -1, 3, 9, [LegacyDirections.Down, LegacyDirections.Left], [new TileBox(0, -1, 0, 0)]) {
         }
     }
 
     public class MainBasementHallway2AltGen : SingleStructureBridge {
-        public MainBasementHallway2AltGen() : base("Content/Assets/StructureFiles/mainBasement/mainBasement_Hallway2.shstruct",
+        public MainBasementHallway2AltGen() : base("Core/Assets/StructureFiles/mainBasement/mainBasement_Hallway2.shstruct",
             6, 11, -7, -11, -5, -11, [LegacyDirections.Left, LegacyDirections.Down], [new TileBox(0, -1, 0, 0)]) {
         }
     }
 
     public class MainBasementHallway2Reversed : SingleStructureBridge {
-        public MainBasementHallway2Reversed() : base("Content/Assets/StructureFiles/mainBasement/mainBasement_Hallway2_r.shstruct",
+        public MainBasementHallway2Reversed() : base("Core/Assets/StructureFiles/mainBasement/mainBasement_Hallway2_r.shstruct",
             6, 11, -3, -1, -4, 9, [LegacyDirections.Down, LegacyDirections.Right], [new TileBox(0, -1, 0, 0)]) {
         }
     }
 
     public class MainBasementHallway2ReversedAltGen : SingleStructureBridge {
         public MainBasementHallway2ReversedAltGen() : base(
-            "Content/Assets/StructureFiles/mainBasement/mainBasement_Hallway2_r.shstruct",
+            "Core/Assets/StructureFiles/mainBasement/mainBasement_Hallway2_r.shstruct",
             6, 11, 0, -11, 2, -11, [LegacyDirections.Right, LegacyDirections.Down], [new TileBox(0, -1, 0, 0)]) {
         }
     }
@@ -177,26 +177,26 @@ public class SingleStructureBridge : Bridge {
 
     // L shaped
     public class MainBasementHallway3 : SingleStructureBridge {
-        public MainBasementHallway3() : base("Content/Assets/StructureFiles/mainBasement/mainBasement_Hallway3.shstruct",
+        public MainBasementHallway3() : base("Core/Assets/StructureFiles/mainBasement/mainBasement_Hallway3.shstruct",
             6, 11, -3, -11, 3, -6, [LegacyDirections.Up, LegacyDirections.Left], [new TileBox(0, -1, 0, 0)]) { // this is a change from the normal legacy logic. before, the points 1 and 2 were swapped, i think to make the rectangle go in reverse?
         }
     }
 
     public class MainBasementHallway3AltGen : SingleStructureBridge {
-        public MainBasementHallway3AltGen() : base("Content/Assets/StructureFiles/mainBasement/mainBasement_Hallway3.shstruct",
+        public MainBasementHallway3AltGen() : base("Core/Assets/StructureFiles/mainBasement/mainBasement_Hallway3.shstruct",
             6, 11, -7, -6, -5, 4, [LegacyDirections.Left, LegacyDirections.Up], [new TileBox(0, -1, 0, 0)]) {
         }
     }
 
     public class MainBasementHallway3Reversed : SingleStructureBridge {
-        public MainBasementHallway3Reversed() : base("Content/Assets/StructureFiles/mainBasement/mainBasement_Hallway3_r.shstruct",
+        public MainBasementHallway3Reversed() : base("Core/Assets/StructureFiles/mainBasement/mainBasement_Hallway3_r.shstruct",
             6, 11, -3, -11, -4, -6, [LegacyDirections.Up, LegacyDirections.Right], [new TileBox(0, -1, 0, 0)]) {
         }
     }
 
     public class MainBasementHallway3ReversedAltGen : SingleStructureBridge {
         public MainBasementHallway3ReversedAltGen() : base(
-            "Content/Assets/StructureFiles/mainBasement/mainBasement_Hallway3_r.shstruct",
+            "Core/Assets/StructureFiles/mainBasement/mainBasement_Hallway3_r.shstruct",
             6, 11, 0, -6, 2, 4, [LegacyDirections.Right, LegacyDirections.Up], [new TileBox(0, -1, 0, 0)]) {
         }
     }
@@ -204,13 +204,13 @@ public class SingleStructureBridge : Bridge {
 
     // just a 2-tile short lil mini lil feller
     public class MainBasementHallway6 : SingleStructureBridge {
-        public MainBasementHallway6() : base("Content/Assets/StructureFiles/mainBasement/mainBasement_Hallway6.shstruct",
+        public MainBasementHallway6() : base("Core/Assets/StructureFiles/mainBasement/mainBasement_Hallway6.shstruct",
             2, 5, 0, -5, 2, -1, [LegacyDirections.Right, LegacyDirections.Left]) {
         }
     }
 
     public class MainBasementHallway6AltGen : SingleStructureBridge {
-        public MainBasementHallway6AltGen() : base("Content/Assets/StructureFiles/mainBasement/mainBasement_Hallway6.shstruct",
+        public MainBasementHallway6AltGen() : base("Core/Assets/StructureFiles/mainBasement/mainBasement_Hallway6.shstruct",
             2, 5, -1, -5, -2, -1, [LegacyDirections.Left, LegacyDirections.Right]) {
         }
     }
@@ -218,13 +218,13 @@ public class SingleStructureBridge : Bridge {
 
     // a 3-tile short mini fella, but a lil bigger
     public class MainBasementHallway7 : SingleStructureBridge {
-        public MainBasementHallway7() : base("Content/Assets/StructureFiles/mainBasement/mainBasement_Hallway7.shstruct",
+        public MainBasementHallway7() : base("Core/Assets/StructureFiles/mainBasement/mainBasement_Hallway7.shstruct",
             3, 5, 0, -5, 3, -1, [LegacyDirections.Right, LegacyDirections.Left]) {
         }
     }
 
     public class MainBasementHallway7AltGen : SingleStructureBridge {
-        public MainBasementHallway7AltGen() : base("Content/Assets/StructureFiles/mainBasement/mainBasement_Hallway7.shstruct",
+        public MainBasementHallway7AltGen() : base("Core/Assets/StructureFiles/mainBasement/mainBasement_Hallway7.shstruct",
             3, 5, -3, -5, -3, -1, [LegacyDirections.Left, LegacyDirections.Right]) {
         }
     }
@@ -232,13 +232,13 @@ public class SingleStructureBridge : Bridge {
 
     // vertical bridge
     public class MainBasementHallway8 : SingleStructureBridge {
-        public MainBasementHallway8() : base("Content/Assets/StructureFiles/mainBasement/mainBasement_Hallway8.shstruct",
+        public MainBasementHallway8() : base("Core/Assets/StructureFiles/mainBasement/mainBasement_Hallway8.shstruct",
             6, 11, -3, -1, -1, 9, [LegacyDirections.Down, LegacyDirections.Up]) {
         }
     }
 
     public class MainBasementHallway8AltGen : SingleStructureBridge {
-        public MainBasementHallway8AltGen() : base("Content/Assets/StructureFiles/mainBasement/mainBasement_Hallway8.shstruct",
+        public MainBasementHallway8AltGen() : base("Core/Assets/StructureFiles/mainBasement/mainBasement_Hallway8.shstruct",
             6, 11, -3, -12, -1, -11, [LegacyDirections.Up, LegacyDirections.Down]) {
         }
     }

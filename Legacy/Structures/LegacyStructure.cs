@@ -1,8 +1,8 @@
 using System;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Content.Tiles;
-using SpawnHouses.Content.Types;
-using SpawnHouses.Content.Types.DataStructures;
+using SpawnHouses.Core;
+using SpawnHouses.Core.DataStructures;
+using SpawnHouses.Core.Tiles;
 using SpawnHouses.Legacy.Helpers;
 using SpawnHouses.Legacy.Structures.StructureParts;
 using StructureHelper.API;

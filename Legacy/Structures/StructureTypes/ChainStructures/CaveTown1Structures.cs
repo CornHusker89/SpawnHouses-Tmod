@@ -7,7 +7,7 @@ namespace SpawnHouses.Legacy.Structures.StructureTypes.ChainStructures;
 public class CaveTown1_Test1 : LegacyChainStructure {
     public CaveTown1_Test1(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
         ushort weight = 10) :
-        base("Content/Assets/StructureFiles/mainBasement/caveTown1_Test1.shstruct",
+        base("Core/Assets/StructureFiles/mainBasement/caveTown1_Test1.shstruct",
             30,
             16,
             [
@@ -35,7 +35,7 @@ public class CaveTown1_Test1 : LegacyChainStructure {
 public class CaveTown1_Test2 : LegacyChainStructure {
     public CaveTown1_Test2(ushort x = 0, ushort y = 0, byte status = StructureStatus.NotGenerated, sbyte cost = -1,
         ushort weight = 10) :
-        base("Content/Assets/StructureFiles/mainBasement/caveTown1_Test2.shstruct",
+        base("Core/Assets/StructureFiles/mainBasement/caveTown1_Test2.shstruct",
             25,
             13,
             [

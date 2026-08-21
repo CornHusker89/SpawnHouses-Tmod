@@ -1,0 +1,140 @@
+using System.Collections.Generic;
+using SpawnHouses.Core.AdvGeneratables.Components;
+using SpawnHouses.Core.Attributes;
+using SpawnHouses.Core.DataStructures;
+using SpawnHouses.Core.Geometry;
+using SpawnHouses.Core.Interfaces;
+using SpawnHouses.Core.Palette;
+using SpawnHouses.Core.Parameters;
+using SpawnHouses.Core.Tagging;
+using SpawnHouses.Core.Tiles;
+using SpawnHouses.Helpers;
+using SpawnHouses.Helpers.Complex;
+using Terraria;
+using Terraria.DataStructures;
+using Terraria.Utilities;
+
+namespace SpawnHouses.Core.Generation.Components;
+
+public static class RoofGen {
+    /// <summary>
+    ///     generic, simple roof with optional gap on the bottom
+    /// </summary>
+    [AdvGeneratorLoadable(typeof(Roof), false)]
+    public class RoofGenerator2 : PathComponentAdvGenerator {
+        public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
+            [
+                Tags.External,
+                Tags.Roof_Short,
+                Tags.Roof_Tall,
+                Tags.Roof_HasLeftOverhang,
+                Tags.Roof_HasRightOverhang
+            ],
+            ComponentHelper.FillShapeTiles.PossibleTags,
+            ComponentHelper.FillShapeWalls.PossibleTags
+        );
+
+        public override Shape GetBoundingShape(PathComponentParams param, Path geometry, UnifiedRandom random) =>
+            new(true, geometry.BoundingBox.TopLeftPoint16 + new Point16(0, -4), geometry.BoundingBox.BottomRightPoint16);
+
+        public override bool Generate(PathComponent component, PathComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) {
+            bool extrudeRoof = param.Structure.LayoutRandom.NextBool();
+
+            Roof roofComponent = (Roof)component;
+            if (roofComponent.StartExtendable) {
+            }
+
+            Path roofLowerPath = extrudeRoof ? roofComponent.Geometry.GetOffsetEvenPath(-1, true, false) : roofComponent.Geometry;
+            Path roofTopPath = roofComponent.Geometry.GetOffsetEvenPath(extrudeRoof ? -2 : -1, true, true);
+            roofTopPath.Reverse(); // so that it can form a shape with the other path
+
+            Shape offsetShape = roofLowerPath.ToShape(roofTopPath);
+            param.TagsRequired.Add(Tags.Component_SlopingAlgorithm, SlopeHelper.SharpTopCorners);
+            param.TagsRequired.Add(Tags.Component_SlopeGrouping, SlopeGrouping.LocalSloping);
+            ComponentHelper.FillShapeTiles.Action(roofComponent, offsetShape, (_, _) => palette.Roof.Primary);
+
+            // add large roof parts if necessary
+            if (param.TagsRequired.HasTag(Tags.Roof_Tall)) {
+                bool tallLeftSide = random.NextBool(3, 4);
+                bool tallRightSide = !tallLeftSide || random.NextBool(3, 4);
+
+                switch (tallLeftSide) {
+                    case true when tallRightSide: {
+                        Shape topShape = roofTopPath.FillFromBoundingBox(new PartialPoint(0, 0, false), new Point16(0, -1));
+                        ComponentHelper.FillShapeWalls.Action(topShape, param.Structure,
+                            (x, _) => x > topShape.BoundingBox.Left && x < topShape.BoundingBox.Right
+                                ? palette.Roof.PrimaryRoofBackground
+                                : null);
+                        break;
+                    }
+                    case true: {
+                        Shape topLeftShape = roofTopPath.FillFromCorner(new Point16(0, 0), new Point16(0, 1));
+                        ComponentHelper.FillShapeWalls.Action(topLeftShape, param.Structure,
+                            (x, _) => x > topLeftShape.BoundingBox.Left && x < topLeftShape.BoundingBox.Right ? palette.Roof.PrimaryRoofBackground : null);
+                        break;
+                    }
+                    default: { // tall right side
+                        Shape topRightShape = roofTopPath.FillFromCorner(new Point16(1, 0), new Point16(0, 1));
+                        ComponentHelper.FillShapeWalls.Action(topRightShape, param.Structure,
+                            (x, _) => x > topRightShape.BoundingBox.Left && x < topRightShape.BoundingBox.Right ? palette.Roof.PrimaryRoofBackground : null);
+                        break;
+                    }
+                }
+
+                component.TagsCurrent.Add(Tags.Roof_Tall);
+
+                // TODO: add the little window things when filling
+            }
+            else if (param.TagsRequired.HasTag(Tags.Roof_Short))
+                component.TagsCurrent.Add(Tags.Roof_Short);
+
+            // create endcaps
+            // TODO: make endcaps work
+            if (param.TagsRequired.HasTag(Tags.Roof_HasLeftOverhang))
+                component.TagsCurrent.Add(Tags.Roof_HasLeftOverhang);
+            if (param.TagsRequired.HasTag(Tags.Roof_HasRightOverhang))
+                component.TagsCurrent.Add(Tags.Roof_HasRightOverhang);
+            if (!roofComponent.LowerXExtendable) {
+            }
+
+            // create bottom bg wall section
+            Path interiorWallPath = new(roofComponent.Geometry.Points);
+            interiorWallPath.Reverse();
+            Shape wallsShape = interiorWallPath.ToShape(roofComponent.Geometry);
+            ComponentHelper.FillShapeWalls.Action(wallsShape, param.Structure,
+                (x, _) => (x > wallsShape.BoundingBox.Left + 8 || !roofComponent.LowerXExtendable)
+                          && (x < wallsShape.BoundingBox.Right || !roofComponent.HigherXExtendable)
+                    ? palette.Roof.PrimaryInteriorBackground
+                    : null);
+
+            component.TagsCurrent.Add(Tags.External);
+            
+            return true;
+        }
+    }
+
+    /// <summary>
+    ///     simple short roof, separated into many small sections with independent sloping
+    /// </summary>
+    public class RoofGenerator3 : PathComponentAdvGenerator {
+        public override HashSet<Tag> PossibleTags { get; } = TagMap.NewTagSet(
+            [
+                Tags.External,
+                Tags.Roof_Short,
+                Tags.Roof_HasLeftOverhang,
+                Tags.Roof_HasRightOverhang,
+                Tags.Component_HasCustomSloping
+            ],
+            [
+                [Tags.Component_SlopingAlgorithm, Tags.Component_SlopeGrouping]
+            ],
+            ComponentHelper.FillShapeTiles.PossibleTags
+        );
+
+        public override bool CanGenerate(PathComponent component, PathComponentParams param, UnifiedRandom random) => false;
+
+        public override Shape GetBoundingShape(PathComponentParams param, Path geometry, UnifiedRandom random) => new(true, geometry.BoundingBox.TopLeftPoint16 + new Point16(0, -4), geometry.BoundingBox.BottomRightPoint16);
+
+        public override bool Generate(PathComponent component, PathComponentParams param, UnifiedRandom random, TilePalette palette, StructureTilemap tilemap) => true;
+    }
+}

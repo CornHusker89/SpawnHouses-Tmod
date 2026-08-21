@@ -1,0 +1,10 @@
+using SpawnHouses.Core.Interfaces;
+
+namespace SpawnHouses.Core.Debug;
+
+public interface IDebugTile {
+    public IComponent Component { get; }
+    public bool IsComponentDoubleAssigned { get; }
+
+    public void SetComponent(IComponent component);
+}
