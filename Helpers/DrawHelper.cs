@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
@@ -12,7 +13,8 @@ namespace SpawnHouses.Helpers;
 
 public static class DrawHelper {
     private static readonly Asset<Texture2D> PixelTexture = ModContent.Request<Texture2D>("SpawnHouses/Core/Assets/Pixel");
-
+    private static readonly Dictionary<(Texture2D, byte), Texture2D> PaintCache = new();
+    
     public static int DebugDrawWidth { get; private set; } = 3;
 
     public static void IncreaseDebugDrawWidth() {
@@ -270,5 +272,138 @@ public static class DrawHelper {
             Roof => RoofColors[component.Id % RoofColors.Length],
             _ => AllColors[component.Id % AllColors.Length]
         };
+    }
+
+    private static (float h, float s, float l) RgbToHsl(Color c) {
+        float r = c.R / 255f, g = c.G / 255f, b = c.B / 255f;
+        float max = Math.Max(r, Math.Max(g, b)), min = Math.Min(r, Math.Min(g, b));
+        float l = (max + min) / 2f;
+        if (Math.Abs(max - min) < 0.03) return (0f, 0f, l); // achromatic
+        float d = max - min;
+        float s = l > 0.5f ? d / (2f - max - min) : d / (max + min);
+        float h;
+        if (Math.Abs(max - r) < 0.03) h = (g - b) / d + (g < b ? 6f : 0f);
+        else if (Math.Abs(max - g) < 0.03) h = (b - r) / d + 2f;
+        else h = (r - g) / d + 4f;
+        return (h / 6f, s, l);
+    }
+
+    private static Color HslToRgb(float h, float s, float l, byte a) {
+        if (s == 0f) {
+            byte v = (byte)(l * 255f);
+            return new Color(v, v, v, a);
+        }
+
+        float q = l < 0.5f ? l * (1f + s) : l + s - l * s;
+        float p = 2f * l - q;
+
+        float Hue2Rgb(float t) {
+            if (t < 0f) t += 1f;
+            if (t > 1f) t -= 1f;
+            if (t < 1f / 6f) return p + (q - p) * 6f * t;
+            if (t < 1f / 2f) return q;
+            if (t < 2f / 3f) return p + (q - p) * (2f / 3f - t) * 6f;
+            return p;
+        }
+
+        return new Color((byte)(Hue2Rgb(h + 1f / 3f) * 255f), (byte)(Hue2Rgb(h) * 255f), (byte)(Hue2Rgb(h - 1f / 3f) * 255f), a);
+    }
+
+    private static float GetPaintHue(byte paintId) {
+        // ids 1-12: red..Pink, evenly spaced. ids 13-24: Deep versions, same hue as (id-12).
+        int baseId = paintId is >= 13 and <= 24 ? paintId - 12 : paintId;
+        return (baseId - 1) / 12f; // 0f-1f hue, matches HslToRgb's h parameter
+    }
+
+    private static bool IsDeepPaint(byte paintId) => paintId is >= 13 and <= 24;
+
+    private const float RegularPaintSaturationScale = 0.7f; // regular (1-12): scale existing saturation down
+    private const float RegularPaintSaturationCap = 0.75f; // ...and cap so already-vivid pixels don't stay punchy
+    private const float DeepPaintSaturationFloor = 0.55f; // deep (13-24): push saturation UP toward vivid
+    private const float BrownSaturationScale = 0.15f;
+    private const float BrownSaturationCap = 0.35f;
+    private const float BrownLightnessScale = 1.3f;
+    private const float BlackSaturationScale = 0.3f;
+    private const float BlackLightnessScale = 0.65f;
+    private const float BlackLightnessCap = 0.4f;
+    private const float WhiteSaturationScale = 0.3f;
+    private const float WhiteLightnessFloor = 0.6f; // pixels blend upward from this floor
+    private const float WhiteLightnessRange = 0.4f; // ...scaled by this much of original lightness
+    private const float GraySaturationScale = 0.15f;
+
+    public static Texture2D GetPaintedTexture(Texture2D baseTex, byte paintId) {
+        if (paintId == 0) return baseTex;
+        (Texture2D baseTex, byte paintId) key = (baseTex, paintId);
+        if (PaintCache.TryGetValue(key, out Texture2D cached)) return cached;
+
+        var pixels = new Color[baseTex.Width * baseTex.Height];
+        baseTex.GetData(pixels);
+
+        switch (paintId) {
+            case 25: // Black — scale saturation down, scale lightness down. Preserves relative shading.
+                for (int i = 0; i < pixels.Length; i++) {
+                    if (pixels[i].A == 0) continue;
+                    (float h, float s, float l) = RgbToHsl(pixels[i]);
+                    float newL = MathF.Min(l * BlackLightnessScale, BlackLightnessCap);
+                    pixels[i] = HslToRgb(h, s * BlackSaturationScale, newL, pixels[i].A);
+                }
+
+                break;
+
+            case 26: // White — scale saturation down, lift lightness toward a floor (still scaled by original).
+                for (int i = 0; i < pixels.Length; i++) {
+                    if (pixels[i].A == 0) continue;
+                    (float h, float s, float l) = RgbToHsl(pixels[i]);
+                    float newL = WhiteLightnessFloor + l * WhiteLightnessRange;
+                    pixels[i] = HslToRgb(h, s * WhiteSaturationScale, newL, pixels[i].A);
+                }
+
+                break;
+
+            case 27: // Gray — scale saturation down only, lightness untouched.
+                for (int i = 0; i < pixels.Length; i++) {
+                    if (pixels[i].A == 0) continue;
+                    (float h, float s, float l) = RgbToHsl(pixels[i]);
+                    pixels[i] = HslToRgb(h, s * GraySaturationScale, l, pixels[i].A);
+                }
+
+                break;
+
+            case 28: // Brown — hue-lock to orange, scale (not floor) saturation, mild darken.
+                for (int i = 0; i < pixels.Length; i++) {
+                    if (pixels[i].A == 0) continue;
+                    (float h, float s, float l) = RgbToHsl(pixels[i]);
+                    float newS = MathF.Min(s * BrownSaturationScale, BrownSaturationCap);
+                    float newL = MathF.Min(l * BrownLightnessScale, 1f);
+                    pixels[i] = HslToRgb(30f / 360f, newS, newL, pixels[i].A);
+                }
+
+                break;
+
+            case 30: // Negative — true RGB invert, no HSL involved.
+                for (int i = 0; i < pixels.Length; i++)
+                    pixels[i] = new Color(255 - pixels[i].R, 255 - pixels[i].G, 255 - pixels[i].B, pixels[i].A);
+                break;
+
+            default: // Regular (1-12): hue replace, scale+cap saturation down.
+                // Deep (13-24): hue replace, floor saturation up.
+                float hue = GetPaintHue(paintId);
+                bool deep = IsDeepPaint(paintId);
+                for (int i = 0; i < pixels.Length; i++) {
+                    if (pixels[i].A == 0) continue;
+                    (float h, float s, float l) = RgbToHsl(pixels[i]);
+                    float newS = deep
+                        ? MathF.Max(s, DeepPaintSaturationFloor)
+                        : MathF.Min(s * RegularPaintSaturationScale, RegularPaintSaturationCap);
+                    pixels[i] = HslToRgb(hue, newS, l, pixels[i].A);
+                }
+
+                break;
+        }
+
+        Texture2D result = new(Main.graphics.GraphicsDevice, baseTex.Width, baseTex.Height);
+        result.SetData(pixels);
+        PaintCache[key] = result;
+        return result;
     }
 }

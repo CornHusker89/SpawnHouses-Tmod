@@ -34,6 +34,7 @@ public class StructureTilemap : IDebugDraw, IBoundingBox {
     public readonly StructureRoot Structure;
     public readonly List<MultiTile> MultiTiles;
     public readonly List<(StructureNBTEntry nbt, Point16 localPos)> NbtData;
+    public readonly TilemapPreview Preview;
     
     /// <summary>
     ///     if there is a full structure loaded into the tilemap. not set by the tilemap itself, set outside the tilemap
@@ -60,6 +61,7 @@ public class StructureTilemap : IDebugDraw, IBoundingBox {
         BoundingBox = new TileBox(pos.X, pos.Y, width, height);
         MultiTiles = [];
         NbtData = [];
+        Preview = new TilemapPreview(this);
 
         _label = new DebugLabel(pos, this);
         DebugInfoVisibility = new DebugInfoLevel();
@@ -343,54 +345,9 @@ public class StructureTilemap : IDebugDraw, IBoundingBox {
     }
 
     /// <summary>
-    ///     creates a picture of the tilemap. tilemap must be laoded
+    ///     creates a new item in the render queue to render this tilemap. this is the only way to generate previews
     /// </summary>
-    public void RenderTilemap() {
-        if (!IsAllTilesLoaded) throw new Exception("tilemap must be fully loaded before rendering tilemap");
-    }
-
-    /// <summary>
-    ///     creates a representation of the tilemap with <see cref="SolidDebugTile" /> and <see cref="NonSolidDebugTile" />
-    /// </summary>
-    /// <returns></returns>
-    public IDebugTile?[,] CreateDebugTilemap() {
-        // set base tiles
-        var debugTilemap = new IDebugTile?[Width, Height];
-        for (int x = 0; x < Width; x++) {
-            for (int y = 0; y < Height; y++) {
-                StructureTile tile = this[x, y];
-                if (tile.IsExteriorComponent || tile.IsFloor || tile.IsWall || tile.IsGap) {
-                    SolidDebugTile debugTile = new();
-                    tile.CopyTo(debugTile);
-                    debugTilemap[x, y] = debugTile;
-                }
-                else if (tile.IsInside) {
-                    NonSolidDebugTile debugTile = new();
-                    tile.CopyTo(debugTile);
-                    debugTilemap[x, y] = debugTile;
-                }
-                else {
-                    debugTilemap[x, y] = null;
-                }
-            }
-        }
-
-        // link tiles to their components
-        if (Structure is AdvStructure advStructure) {
-            List<IComponent>? components = null;
-            if (advStructure.StructureLayout.AllComponents != null)
-                components = advStructure.StructureLayout.AllComponents;
-            else if (advStructure.StructureLayout.ExternalComponents != null)
-                components = advStructure.StructureLayout.ExternalComponents;
-
-            if (components != null)
-                foreach (IComponent component in components)
-                    if (component is VolumeComponent volumeComponent)
-                        volumeComponent.Geometry.ExecuteInArea((x, y) => {
-                            if (InBounds(x, y) && debugTilemap[x, y] != null) debugTilemap[x, y]!.SetComponent(volumeComponent);
-                        });
-        }
-        
-        return debugTilemap;
+    public void QueueRender() {
+        TilemapPreviewRendering.Queue.Add(Preview);
     }
 }

@@ -186,6 +186,7 @@ public class StructureManager : ModSystem {
                     structure.Standalone = fileStructureInfo.Standalone;
                     structure.Depreciated = fileStructureInfo.Depreciated;
                     AllFileStructureVariations.Add(structure);
+                    structure.LoadTilemap();
                 }
             }
             
@@ -218,6 +219,10 @@ public class StructureManager : ModSystem {
                 }
             }
         }
+    }
+
+    public override void PostSetupContent() {
+        foreach (FileStructure structure in AllFileStructureVariations) structure.Tilemap.QueueRender();
     }
 
     public override void Load() {

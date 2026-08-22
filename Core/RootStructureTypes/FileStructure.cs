@@ -179,9 +179,6 @@ public sealed class FileStructure : StructureRoot {
     /// <param name="template"></param>
     /// <param name="positionIdToFilename"></param>
     /// <param name="positionIdToPosition"></param>
-    /// <param name="isFound"></param>
-    /// <param name="onFound"></param>
-    /// <param name="onTilemapLoaded"></param>
     /// <exception cref="ArgumentException"></exception>
     internal FileStructure(string name, Point16 size, EntryPoint[] entryPoints, TagMap tagMap, FileStructureTemplate template,
         Dictionary<string, string> positionIdToFilename, Dictionary<string, Point16> positionIdToPosition) {

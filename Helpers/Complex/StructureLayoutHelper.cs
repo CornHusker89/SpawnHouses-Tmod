@@ -203,7 +203,7 @@ public static class StructureLayoutHelper {
                 (bool valid, bool splitAlongX) = EvaluateCutOnX(param, roomVolume, iterationFloorWidth, iterationWallWidth, xCutCount, yCutCount);
 
                 if (!valid) {
-                    // if the room can't be split at all, don't add it back to the queue
+                    // if the room can't be split at all, don't add it back to the Queue
                     finishedRoomVolumes.Add((roomVolume, $"Rm_BSP_GenOrder{finishedRoomVolumes.Count}"));
                     extraCuts++;
                     continue;

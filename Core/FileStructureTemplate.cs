@@ -49,7 +49,9 @@ public abstract class FileStructureTemplate {
     public virtual void OnFound(FileStructure structure) {
     }
 
-    /// <inheritdoc cref="FileStructure.OnTilemapLoaded" />
+    /// <inheritdoc cref="FileStructure._onTilemapLoaded" />
+    /// . will be called outside the context of a loaded world,
+    /// must not be reliant on Main.tile[] or any other world-dependent factors
     public virtual void OnTilemapLoaded(FileStructure structure) {
     }
 }
