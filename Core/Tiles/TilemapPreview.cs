@@ -42,21 +42,16 @@ public class TilemapPreview {
             if (tile.WallType != 0 && tile.WallType != StructureHelper.StructureHelper.NULL_IDENTIFIER && tile.WallType < TextureAssets.Wall.Length) {
                 Asset<Texture2D> tex = TextureAssets.Wall[tile.WallType];
                 if (!tex.IsLoaded) Main.instance.LoadWall(tile.WallType);
-                Color tint = Color.White;
-                if (tile.WallColor > 0)
-                    tint = WorldGen.paintColor(tile.WallColor);
                 Texture2D paintedTex = DrawHelper.GetPaintedTexture(tex.Value, tile.WallColor);
-                Main.spriteBatch.Draw(paintedTex, new Rectangle(x * 16, y * 16, 16, 16), new Rectangle(8, 8, 16, 16), tint);
+                Main.spriteBatch.Draw(paintedTex, new Rectangle(x * 16, y * 16, 16, 16), new Rectangle(8, 8, 16, 16), Color.White);
             }
 
             if (tile.HasTile && tile.TileType != StructureHelper.StructureHelper.NULL_IDENTIFIER && tile.TileType < TextureAssets.Tile.Length) {
                 Asset<Texture2D> tex = TextureAssets.Tile[tile.TileType];
                 if (!tex.IsLoaded) Main.instance.LoadTiles(tile.TileType);
-                Color tint = Color.White;
-                if (tile.TileColor > 0)
-                    tint = WorldGen.paintColor(tile.TileColor);
+
                 Texture2D paintedTex = DrawHelper.GetPaintedTexture(tex.Value, tile.TileColor);
-                Main.spriteBatch.Draw(paintedTex, new Rectangle(x * 16, y * 16, 16, 16), new Rectangle(tile.TileFrameX, tile.TileFrameY, 16, 16), tint);
+                Main.spriteBatch.Draw(paintedTex, new Rectangle(x * 16, y * 16, 16, 16), new Rectangle(tile.TileFrameX, tile.TileFrameY, 16, 16), Color.White);
             }
         }
 

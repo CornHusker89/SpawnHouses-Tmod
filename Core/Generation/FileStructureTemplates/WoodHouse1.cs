@@ -90,7 +90,4 @@ public class WoodHouse1 : FileStructureTemplate {
         
         return (positionIdsToPositions, entryPoints, tags);
     }
-
-    public override void OnTilemapLoaded(FileStructure structure) {
-    }
 }

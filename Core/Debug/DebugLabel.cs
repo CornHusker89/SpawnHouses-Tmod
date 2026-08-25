@@ -44,10 +44,10 @@ public class DebugLabel {
     public DebugLabel(Point16 root, IDebugDraw parentObj) {
         Root = root;
         _hasParentObj = true;
-        _name = parentObj.Name;
+        _name = parentObj.InternalName;
         _objType = parentObj.GetType().Name;
         _objId = parentObj is IAdvGeneratable generatable ? generatable.Id : (ushort)0;
-        _genName = parentObj is IAdvGeneratable generatable2 ? generatable2.Name : null;
+        _genName = parentObj is IAdvGeneratable generatable2 ? generatable2.InternalName : null;
         InfoLevel = parentObj.DebugInfoVisibility;
         DrawColor = parentObj.GetDrawColor();
     }

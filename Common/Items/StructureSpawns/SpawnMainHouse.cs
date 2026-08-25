@@ -8,7 +8,7 @@ using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace SpawnHouses.Content.Items.StructureSpawns;
+namespace SpawnHouses.Common.Items.StructureSpawns;
 
 public class SpawnMainHouse : ModItem {
     private static int _xSize;

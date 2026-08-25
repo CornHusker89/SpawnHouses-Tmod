@@ -53,7 +53,7 @@ public class StructureLayout : AdvGeneratable<StructureLayout, StructureLayoutPa
     }
 
     public StructureLayout(StructureLayoutParams param, string name) : base(param, new TagMap(), name) {
-        Name = Params.Structure.Name + "_Layout";
+        InternalName = Params.Structure.InternalName + "_Layout";
         _label = new DebugLabel(BoundingBox.TopLeftPoint16, this);
     }
 

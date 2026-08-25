@@ -176,5 +176,14 @@ Mods: {
 				}
 			}
 		}
+
+		Bestiary.Builder: Builder Bestiary Entry
+
+		Dialogue: {
+			Builder: {
+				Greeting: Hello! I really hope this shit works
+				HelpButton: Help
+			}
+		}
 	}
 }

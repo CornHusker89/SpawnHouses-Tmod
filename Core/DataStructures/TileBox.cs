@@ -160,6 +160,14 @@ public readonly struct TileBox {
     public TileBox Offset(Point16 offset) => new(X + offset.X, Y + offset.Y, Width, Height);
 
     /// <summary>
+    ///     moves all edges out by <paramref name="offset" />
+    /// </summary>
+    /// <param name="offset"></param>
+    /// <returns></returns>
+    [Pure]
+    public TileBox Inflate(int offset) => new(X - offset, Y - offset, Width + offset * 2, Height + offset * 2);
+    
+    /// <summary>
     ///     creates a new TileBox with the same size, at a different set position. for an offset, see <see cref="Offset(int,int)" />
     /// </summary>
     /// <param name="x"></param>

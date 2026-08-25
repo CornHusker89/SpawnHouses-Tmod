@@ -19,7 +19,7 @@ namespace SpawnHouses.Core.Tiles;
 
 public class StructureTilemap : IDebugDraw, IBoundingBox {
     // IDebugDraw
-    public string Name => Structure.Name + "_Tilemap";
+    public string InternalName => Structure.InternalName + "_Tilemap";
     public DebugInfoLevel DebugInfoVisibility { get; set; }
 
     // IBoundingBox

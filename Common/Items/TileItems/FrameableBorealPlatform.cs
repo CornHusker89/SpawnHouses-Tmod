@@ -1,7 +1,7 @@
-using SpawnHouses.Content.Tiles;
+using SpawnHouses.Common.Tiles;
 using Terraria.ModLoader;
 
-namespace SpawnHouses.Content.Items.TileItems;
+namespace SpawnHouses.Common.Items.TileItems;
 
 public class FrameableBorealPlatform : ModItem {
     public override void SetDefaults() {

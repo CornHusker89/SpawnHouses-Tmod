@@ -7,9 +7,10 @@ namespace SpawnHouses.Core.Interfaces;
 
 public interface IDebugDraw {
     /// <summary>
-    ///     what this instance is called, used mostly for debug and better identification
+    ///     what this instance is called internally, used mostly for debug and better identification.
+    ///     this will be unique for different types and versions of instances, but not necessarily globally unique 
     /// </summary>
-    public string Name { get; }
+    public string InternalName { get; }
 
     /// <summary>
     ///     the current debug visibility level of this instance
@@ -22,7 +23,7 @@ public interface IDebugDraw {
     public Color GetDrawColor();
     
     /// <summary>
-    ///     draws debug geometry, using <see cref="DebugInfoVisibility" /> and <see cref="Name" />, recursively to all drawable objects contained. does not do any text-related drawing
+    ///     draws debug geometry, using <see cref="DebugInfoVisibility" /> and <see cref="InternalName" />, recursively to all drawable objects contained. does not do any text-related drawing
     /// </summary>
     /// <remarks>assumes that a world-relative batch has begun in <see cref="Main.spriteBatch" />. does not end sprite batch</remarks>
     /// <returns>list of labels to be drawn. will not include labels that should be hidden for any reason</returns>

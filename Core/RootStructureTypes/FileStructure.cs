@@ -25,10 +25,10 @@ namespace SpawnHouses.Core.RootStructureTypes;
 public sealed class FileStructure : StructureRoot {
     
     /// <summary>
-    ///     <inheritdoc cref="IDebugDraw.Name" />. is formatted as follows for <see cref="FileStructure" />s:
+    ///     <inheritdoc cref="IDebugDraw.InternalName" />. is formatted as follows for <see cref="FileStructure" />s:
     ///     {template name}@{position id}={substructure name}:{position id}={substructure name}...
     /// </summary>
-    public override string Name { get; protected set; }
+    public override string InternalName { get; protected set; }
 
     public override TagMap TagsCurrent { get; protected set; }
 
@@ -59,9 +59,9 @@ public sealed class FileStructure : StructureRoot {
     public Dictionary<string, Point16> PositionIdToPosition;
 
     /// <summary>
-    ///     same as <see cref="Name" /> but only contains the template name (everything before the @)
+    ///     same as <see cref="InternalName" /> but only contains the template name (everything before the @)
     /// </summary>
-    public string TemplateName => Name[..Name.IndexOf('@')];
+    public string TemplateName => InternalName[..InternalName.IndexOf('@')];
     public bool HasMultipleSubstructures => PositionIdToFilename.Keys.Count > 1;
     public Point16 Size => new(Tilemap.Width, Tilemap.Height);
     public Point16 Position => Tilemap.GlobalTileOffset;
@@ -172,7 +172,7 @@ public sealed class FileStructure : StructureRoot {
     /// <summary>
     ///     internal-only constructor for making a file structure entirely from raw parameters. used for loading structures and variants
     /// </summary>
-    /// <param name="name"></param>
+    /// <param name="internalName"></param>
     /// <param name="size"></param>
     /// <param name="entryPoints"></param>
     /// <param name="tagMap"></param>
@@ -180,7 +180,7 @@ public sealed class FileStructure : StructureRoot {
     /// <param name="positionIdToFilename"></param>
     /// <param name="positionIdToPosition"></param>
     /// <exception cref="ArgumentException"></exception>
-    internal FileStructure(string name, Point16 size, EntryPoint[] entryPoints, TagMap tagMap, FileStructureTemplate template,
+    internal FileStructure(string internalName, Point16 size, EntryPoint[] entryPoints, TagMap tagMap, FileStructureTemplate template,
         Dictionary<string, string> positionIdToFilename, Dictionary<string, Point16> positionIdToPosition) {
         if (entryPoints.Count(entryPoint => entryPoint.Purpose is EntryPointPurpose.GroundLevel) > 2)
             throw new ArgumentException("Cannot have more than 2 ground-level entry points");
@@ -189,10 +189,11 @@ public sealed class FileStructure : StructureRoot {
         _onFound += template.OnFound;
         _onTilemapLoaded += template.OnTilemapLoaded;
         Id = 0;
+        UserName = "_";
         Tilemap = new StructureTilemap(this, (ushort)size.X, (ushort)size.Y);
         EntryPoints = entryPoints;
         TagsCurrent = tagMap;
-        Name = name;
+        InternalName = internalName;
         Template = template;
 
         Data = [];
@@ -211,26 +212,27 @@ public sealed class FileStructure : StructureRoot {
 #pragma warning restore CS8618
 
     /// <summary>
-    ///     creates a new structure based with the name and specific substructures at each position IDs
+    ///     creates a new structure based with the internalName and specific substructures at each position IDs
     /// </summary>
     /// <param name="pos"></param>
-    /// <param name="name">
-    ///     template's class name or full variation name, depending on if <paramref name="targetPositionIdToName"/>
+    /// <param name="internalName">
+    ///     template's class internalName or full variation internalName, depending on if <paramref internalName="targetPositionIdToName"/>
     ///     is passed. full variation names are created in this format:
-    ///     {template name}@{position id}={substructure name}:{position id}={substructure name}...
+    ///     {template internalName}@{position id}={substructure internalName}:{position id}={substructure internalName}...
     /// </param>
-    /// <param name="targetPositionIdToName">if <paramref name="name"/> is the full variation name, leave null</param>
+    /// <param name="targetPositionIdToName">if <paramref internalName="internalName"/> is the full variation internalName, leave null</param>
+    /// <param name="userName">the user facing name for the structure</param>
     /// <param name="id">if -1, creates a new random seed from the normal terraria random generator</param>
     /// <param name="generate"></param>
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-    public FileStructure(Point16 pos, string name, Dictionary<string, string>? targetPositionIdToName, int id = -1, bool generate = false) {
-        string templateName = name[..name.IndexOf('@')];
-        targetPositionIdToName ??= GetPositionIdsToNames(name);
+    public FileStructure(Point16 pos, string internalName, Dictionary<string, string>? targetPositionIdToName, string? userName = null, int id = -1, bool generate = false) {
+        string templateName = internalName[..internalName.IndexOf('@')];
+        targetPositionIdToName ??= GetPositionIdsToNames(internalName);
         FileStructure? referenceStructure = StructureManager.AllFileStructureVariations.FirstOrDefault(s => {
             if (templateName != s.TemplateName)
                 return false;
 
-            var positionIdToName = GetPositionIdsToNames(s.Name);
+            var positionIdToName = GetPositionIdsToNames(s.InternalName);
 
             if (targetPositionIdToName.Count != positionIdToName.Count)
                 return false;
@@ -244,9 +246,9 @@ public sealed class FileStructure : StructureRoot {
         
         
         if (referenceStructure == null)
-            throw new ArgumentException($"No matching structure found for name '{name}' with the specified substructures");
+            throw new ArgumentException($"No matching structure found for internalName '{internalName}' with the specified substructures");
 
-        InitFromFileStructure(referenceStructure, id);
+        InitFromFileStructure(referenceStructure, id, userName);
         SetPosition(pos);
 
         if (generate) {
@@ -263,13 +265,14 @@ public sealed class FileStructure : StructureRoot {
     /// <param name="groundEntryTarget1"></param>
     /// <param name="groundEntryTarget2">must be ground-level</param>
     /// <param name="tagsRequired"></param>
+    /// <param name="userName">the user facing name for the structure</param>
     /// <param name="tagsNotAllowed"></param>
     /// <param name="maxEntryPointDistDiff"></param>
     /// <param name="entryPointAnchor"></param>
     /// <param name="weightingStrength"></param>
     /// <param name="generate"></param>
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-    public FileStructure(Point16 groundEntryTarget1, Point16 groundEntryTarget2, TagMap tagsRequired, HashSet<Tag>? tagsNotAllowed = null, int maxEntryPointDistDiff = 5,
+    public FileStructure(Point16 groundEntryTarget1, Point16 groundEntryTarget2, TagMap tagsRequired, string? userName = null, HashSet<Tag>? tagsNotAllowed = null, int maxEntryPointDistDiff = 5,
         double weightingStrength = 1.0, EntryPointPositionAnchor entryPointAnchor = EntryPointPositionAnchor.Neutral, bool generate = false) {
         var candidates = CreateCandidateList(groundEntryTarget1, groundEntryTarget2, new NumRange(0, maxEntryPointDistDiff),
             tagsRequired, tagsNotAllowed, weightingStrength);
@@ -278,7 +281,7 @@ public sealed class FileStructure : StructureRoot {
             throw new ValidStructureNotFoundException($"no variations found with required tags and matching entry point spacing within {maxEntryPointDistDiff} tiles");
 
         (FileStructure selected, int selectedI, int selectedJ, double _) = PopWeightedStructureList(candidates);
-        InitFromFileStructure(selected);
+        InitFromFileStructure(selected, -1, userName);
 
         var selectedGroundEntryPoints = selected.EntryPoints
             .Where(ep => ep.Purpose is EntryPointPurpose.GroundLevel)
@@ -298,11 +301,13 @@ public sealed class FileStructure : StructureRoot {
     /// </summary>
     /// <param name="referenceFileStructure"></param>
     /// <param name="id">if -1, creates a new random seed from the normal terraria random generator</param>
-    private void InitFromFileStructure(FileStructure referenceFileStructure, int id = -1) {
+    /// <param name="userName">the user facing name for the structure. leave null for random</param>
+    private void InitFromFileStructure(FileStructure referenceFileStructure, int id = -1, string? userName = null) {
         _isFound += referenceFileStructure._isFound;
         _onFound += referenceFileStructure._onFound;
         _onTilemapLoaded += referenceFileStructure._onTilemapLoaded;
         Id = id == -1 ? StructureManager.NextGeneratableId() : (ushort)id;
+        UserName = userName ?? GetStructureRandomName();
         Tilemap = new StructureTilemap(this, (ushort)referenceFileStructure.Tilemap.Width, (ushort)referenceFileStructure.Tilemap.Height);
 
         List<EntryPoint> entryPoints = [];
@@ -312,7 +317,7 @@ public sealed class FileStructure : StructureRoot {
         TagsCurrent = new TagMap();
         TagsCurrent.AddRange(referenceFileStructure.TagsCurrent);
 
-        Name = referenceFileStructure.Name;
+        InternalName = referenceFileStructure.InternalName;
 
         Template = referenceFileStructure.Template;
 
@@ -324,8 +329,6 @@ public sealed class FileStructure : StructureRoot {
         foreach (var kvp in referenceFileStructure.PositionIdToPosition)
             PositionIdToPosition[kvp.Key] = kvp.Value;
     }
-
-    public Color GetDrawColor() => DrawHelper.GetColor(Id);
 
     public override List<DebugLabel> DrawDebugGeometry() {
         // draw geometry
@@ -349,7 +352,7 @@ public sealed class FileStructure : StructureRoot {
 
         if (DebugInfoVisibility.DisplayPoints) {
             for (int i = 0; i < Tilemap.NbtData.Count; i++) {
-                (StructureNBTEntry nbt, Point16 localPos) = Tilemap.NbtData[i];
+                (StructureNBTEntry _, Point16 localPos) = Tilemap.NbtData[i];
                 DrawHelper.DrawWorldBasedPoint(
                     Tilemap.ConvertToGlobal(localPos).ToPoint() * new Point(16, 16) + new Point(8, 8),
                     DrawHelper.GetColor((ushort)(Id + 1 + i)),

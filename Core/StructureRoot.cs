@@ -27,13 +27,17 @@ public abstract class StructureRoot : IGeneratable, IStructureTags, IDebugDraw {
 
     // IDebugDraw
 
-    public abstract string Name { get; protected set; }
+    public abstract string InternalName { get; protected set; }
+
+    /// <summary>
+    ///     user-facing name of this structure. randomly generated on creation, but can be changed by the user
+    /// </summary>
+    public string UserName { get; set; }
 
     /// <summary>
     ///     <inheritdoc cref="IDebugDraw.DebugInfoVisibility" />. is cloned from <see cref="StructureManager.DefaultDebugInfoLevel" /> on instance creation
     /// </summary>
     public DebugInfoLevel DebugInfoVisibility { get; set; } = StructureManager.DefaultDebugInfoLevel.Clone();
-
 
     /// <summary>
     ///     the container for this structure root, if there is one
@@ -149,6 +153,8 @@ public abstract class StructureRoot : IGeneratable, IStructureTags, IDebugDraw {
 
         return false;
     }
+
+    public string GetStructureRandomName() => "Structure Name Here";
 }
 
 

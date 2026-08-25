@@ -8,7 +8,7 @@ using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace SpawnHouses.Content.Items.StructureSpawns;
+namespace SpawnHouses.Common.Items.StructureSpawns;
 
 public class SpawnBeachHouse : ModItem {
     public override void SetDefaults() {

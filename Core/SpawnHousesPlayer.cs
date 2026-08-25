@@ -2,7 +2,7 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 
-namespace SpawnHouses;
+namespace SpawnHouses.Core;
 
 public class SpawnHousesPlayer : ModPlayer {
     private int _frameCounter;

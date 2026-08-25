@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Content.Items.Debug;
-using SpawnHouses.Core;
+using SpawnHouses.Common.Items.Debug;
 using SpawnHouses.Core.Attributes;
 using SpawnHouses.Core.DataStructures;
 using SpawnHouses.Core.Debug;
@@ -18,7 +17,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
-namespace SpawnHouses;
+namespace SpawnHouses.Core;
 
 #nullable enable
 
@@ -85,8 +84,8 @@ public class StructureManager : ModSystem {
     /// </summary>
     /// <param name="structure"></param>
     public static void RegisterFileStructure(FileStructure structure) {
-        if (!structure.Tilemap.IsAllTilesLoaded)
-            throw new ArgumentException("structure must have an initialized tilemap");
+        // if (!structure.Tilemap.IsAllTilesLoaded)
+        //     throw new ArgumentException("structure must have an initialized tilemap");
         _fileStructures.Add(structure);
     }
     
@@ -405,8 +404,9 @@ internal class TagMapSerializer : TagSerializer<TagMap, TagCompound> {
 internal class FileStructureSerializer : TagSerializer<FileStructure, TagCompound> {
     public override TagCompound Serialize(FileStructure structure) {
         TagCompound tag = [];
-        tag["Name"] = structure.Name;
+        tag["InternalName"] = structure.InternalName;
         tag["Id"] = structure.Id;
+        tag["UserName"] = structure.UserName;
         tag["Position"] = structure.Position;
         tag["Found"] = structure.HasBeenFound;
         tag["Data"] = structure.Data;
@@ -416,8 +416,9 @@ internal class FileStructureSerializer : TagSerializer<FileStructure, TagCompoun
     public override FileStructure Deserialize(TagCompound tag) {
         FileStructure structure = new(
             tag.Get<Point16>("Position"),
-            tag.Get<string>("Name"),
+            tag.Get<string>("InternalName"),
             null,
+            tag.Get<string>("UserName"),
             tag.Get<ushort>("Id"));
         structure.HasBeenFound = tag.GetBool("Found");
         structure.Data = tag.Get<Dictionary<string, object>>("Data");

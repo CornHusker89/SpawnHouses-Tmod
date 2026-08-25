@@ -19,7 +19,7 @@ public abstract class AdvGeneratable<TSelf, TParams, TGenerator> : IAdvGeneratab
     public DebugInfoLevel DebugInfoVisibility { get; set; }
 
     /// (ideally) a unique identifier. during assignment, any "#" get replaced with advGeneratable's id
-    public string Name { get; protected init; }
+    public string InternalName { get; protected init; }
     
     public bool HasGenerated { get; set; }
     public ushort Id { get; }
@@ -34,7 +34,7 @@ public abstract class AdvGeneratable<TSelf, TParams, TGenerator> : IAdvGeneratab
         TagsCurrent = tagsCurrent;
         TagsCurrent.IsLocked = true;
         DebugInfoVisibility = new DebugInfoLevel();
-        Name = name.Replace("#", Id.ToString());
+        InternalName = name.Replace("#", Id.ToString());
     }
 
     public abstract Color GetDrawColor();

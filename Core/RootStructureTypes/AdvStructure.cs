@@ -17,7 +17,7 @@ namespace SpawnHouses.Core.RootStructureTypes;
 ///     the central object that everything for adv. structures revolve around
 /// </summary>
 public sealed class AdvStructure : StructureRoot {
-    public override string Name { get; protected set; }
+    public override string InternalName { get; protected set; }
 
     /// <summary>
     ///     same instance as the <see cref="StructureLayout" />'s <see cref="SpawnHouses.Core.AdvGeneratable{SpawnHouses.Core.AdvGeneratables.StructureLayout,SpawnHouses.Core.Parameters.StructureLayoutParams,SpawnHouses.Core.StructureLayoutAdvGenerator}.TagsCurrent" />
@@ -47,17 +47,17 @@ public sealed class AdvStructure : StructureRoot {
 
     /// <summary>
     /// </summary>
-    /// <param name="name"></param>
-    /// <param name="layoutParam"></param>
-    /// <param name="palette"></param>
-    /// <param name="seed">if -1, creates a new random seed from the normal terraria random generator</param>
-    /// <param name="generate">
+    /// <param internalName="internalName"></param>
+    /// <param internalName="layoutParam"></param>
+    /// <param internalName="palette"></param>
+    /// <param internalName="seed">if -1, creates a new random seed from the normal terraria random generator</param>
+    /// <param internalName="generate">
     ///     if true, will call <see cref="LoadTilemap" />, <see cref="StructureManager.RegisterAdvStructure"/>, and <see cref="ApplyTilemap" /> 
     /// </param>
     // ReSharper disable once NotNullOrRequiredMemberIsNotInitialized
-    public AdvStructure(string name, StructureLayoutParams layoutParam, TilePalette palette, int seed = -1, bool generate = false) {
+    public AdvStructure(string internalName, StructureLayoutParams layoutParam, TilePalette palette, int seed = -1, bool generate = false) {
         // StructureRoot
-        Name = name;
+        InternalName = internalName;
         Id = StructureManager.NextGeneratableId();
         EntryPoints = layoutParam.EntryPoints;
         HasBeenFound = false;
