@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Core.DataStructures;
 using Terraria;
@@ -28,16 +29,31 @@ public class CameraManager : ModSystem {
     private static float _startZoom;
     private static float _targetZoom;
     private static float _duration;
-    private static float _timer;
     private static float _currentZoom;
     private static float _vanillaZoom;
 
-    private static float EaseInOutCubic(float t) => t < 0.5f ? 4f * t * t * t : 1f - MathF.Pow(-2f * t + 2f, 3f) / 2f;
+    private static Vector2 _previousScreenPos;
+    private static Vector2 _currentVelocity; // px/sec
+    private static Vector2 _startVelocity; // captured at BeginSegment
+
+    private static float _previousZoom;
+    private static float _currentZoomVelocity; // zoom units/sec
+    private static float _startZoomVelocity;
+
+    private static readonly Stopwatch Clock = Stopwatch.StartNew(); // per-segment, restarted in BeginSegment
+    private static readonly Stopwatch FrameClock = Stopwatch.StartNew(); // never restarted — for per-tick delta only
+    private static double _lastFrameTime;
+    private const float MaxDeltaTime = 0.05f;
+
+    public static bool IsTransitioning => _state is CamState.TransitioningIn or CamState.TransitioningOut;
 
     public override void PostUpdateEverything() {
+        float deltaTime = GetDeltaTime();
+
         if (_state == CamState.Inactive) {
             _currentZoom = Main.GameViewMatrix.Zoom.X;
             _currentScreenPos = Main.screenPosition;
+            UpdateVelocityTracking(deltaTime);
             return;
         }
 
@@ -45,21 +61,38 @@ public class CameraManager : ModSystem {
 
         if (_state == CamState.Locked) {
             Main.screenPosition = _targetScreenPos;
+            _currentScreenPos = _targetScreenPos;
             _currentZoom = _targetZoom;
+            UpdateVelocityTracking(deltaTime);
             return;
         }
 
         if (_state == CamState.TransitioningOut) _targetScreenPos = GetVanillaTranslation();
 
-        _timer += 1f / 60f;
-        float t = MathHelper.Clamp(_timer / _duration, 0f, 1f);
+        float elapsed = deltaTime;
+        float t = MathHelper.Clamp(elapsed / _duration, 0f, 1f);
 
-        if (_useTeleportCut)
-            _currentScreenPos = t < 0.5f ? Vector2.Lerp(_startScreenPos, _exitScreenPos, EaseInOutCubic(t)) : Vector2.Lerp(_entryScreenPos, _targetScreenPos, EaseInOutCubic(t));
-        else
-            _currentScreenPos = Vector2.Lerp(_startScreenPos, _targetScreenPos, EaseInOutCubic(t));
+        if (_useTeleportCut) {
+            float halfDuration = _duration * 0.5f;
+            if (t < 0.5f) {
+                float localT = MathHelper.Clamp(elapsed / halfDuration, 0f, 1f);
+                // First half: starts from real measured velocity, decelerates to rest at the cut point
+                _currentScreenPos = HermitePosition(_startScreenPos, _startVelocity, _exitScreenPos, Vector2.Zero, localT, halfDuration);
+            }
+            else {
+                float localT = MathHelper.Clamp((elapsed - halfDuration) / halfDuration, 0f, 1f);
+                // Second half: always starts from rest (the cut itself is the discontinuity by design)
+                _currentScreenPos = HermitePosition(_entryScreenPos, Vector2.Zero, _targetScreenPos, Vector2.Zero, localT, halfDuration);
+            }
+        }
+        else {
+            _currentScreenPos = HermitePosition(_startScreenPos, _startVelocity, _targetScreenPos, Vector2.Zero, t, _duration);
+        }
 
-        _currentZoom = MathHelper.Lerp(_startZoom, _targetZoom, EaseInOutCubic(t));
+        // zoom stays on the full, un-split curve — only position teleports, so zoom keeps easing smoothly straight through
+        _currentZoom = HermiteScalar(_startZoom, _startZoomVelocity, _targetZoom, 0f, t, _duration);
+
+        UpdateVelocityTracking(deltaTime);
 
         if (t >= 1f)
             _state = _state == CamState.TransitioningIn ? CamState.Locked : CamState.Inactive;
@@ -76,6 +109,41 @@ public class CameraManager : ModSystem {
         transform.Zoom = new Vector2(_currentZoom);
     }
 
+    private static Vector2 HermitePosition(Vector2 p0, Vector2 v0, Vector2 p1, Vector2 v1, float t, float duration) {
+        float t2 = t * t, t3 = t2 * t;
+        float h00 = 2f * t3 - 3f * t2 + 1f;
+        float h10 = t3 - 2f * t2 + t;
+        float h01 = -2f * t3 + 3f * t2;
+        float h11 = t3 - t2;
+        return h00 * p0 + h10 * (v0 * duration) + h01 * p1 + h11 * (v1 * duration);
+    }
+
+    private static float HermiteScalar(float p0, float v0, float p1, float v1, float t, float duration) {
+        float t2 = t * t, t3 = t2 * t;
+        float h00 = 2f * t3 - 3f * t2 + 1f;
+        float h10 = t3 - 2f * t2 + t;
+        float h01 = -2f * t3 + 3f * t2;
+        float h11 = t3 - t2;
+        return h00 * p0 + h10 * (v0 * duration) + h01 * p1 + h11 * (v1 * duration);
+    }
+
+    private static void UpdateVelocityTracking(float deltaTime) {
+        if (deltaTime > 0f) {
+            _currentVelocity = (_currentScreenPos - _previousScreenPos) / deltaTime;
+            _currentZoomVelocity = (_currentZoom - _previousZoom) / deltaTime;
+        }
+
+        _previousScreenPos = _currentScreenPos;
+        _previousZoom = _currentZoom;
+    }
+
+    private static float GetDeltaTime() {
+        double now = FrameClock.Elapsed.TotalSeconds;
+        float delta = (float)(now - _lastFrameTime);
+        _lastFrameTime = now;
+        return MathHelper.Clamp(delta, 0f, MaxDeltaTime);
+    }
+
     private static Vector2 GetVanillaTranslation() {
         Vector2 screenSize = new(Main.screenWidth, Main.screenHeight);
         return Main.LocalPlayer.Center - screenSize / 2f + new Vector2(0, 9);
@@ -84,69 +152,55 @@ public class CameraManager : ModSystem {
     private static void BeginSegment(Vector2 from, Vector2 to, float fromZoom, float toZoom) {
         _startScreenPos = from;
         _targetScreenPos = to;
+        _startVelocity = _currentVelocity;
         _startZoom = fromZoom;
+        _startZoomVelocity = _currentZoomVelocity;
         _targetZoom = toZoom;
 
         float totalDist = Vector2.Distance(from, to);
         float distTiles = totalDist / 16f;
         float excess = MathF.Max(0f, distTiles - 50f);
         _duration = 0.8f + 0.059f * MathF.Pow(excess, 0.47f);
-        _timer = 0f;
+        Clock.Restart();
+
+        // prevent overshoot
+        if (_currentVelocity.Length() > totalDist / _duration * 1.5f) _startVelocity = Vector2.Normalize(_currentVelocity) * totalDist / _duration * 1.5f;
 
         float speed = 1400f + 45f * MathF.Pow(distTiles, 1f);
-        speed = Math.Min(speed, 9000f);
-        float naturalTravel = speed * _duration; // distance a single, uncut lerp would cover at this speed
+        speed = Math.Min(speed, 9500f);
+        float naturalTravel = speed * _duration;
 
         _useTeleportCut = naturalTravel < totalDist;
 
         if (_useTeleportCut) {
-            Vector2 dir = Vector2.Normalize(to - from);
+            Vector2 dir = totalDist > 0.0001f ? Vector2.Normalize(to - from) : Vector2.Zero;
             float segmentTime = _duration * 0.5f;
-            float travel = speed * segmentTime;
-
-            travel = Math.Min(travel, totalDist / 2f);
+            float travel = Math.Min(speed * segmentTime, totalDist / 2f);
             _exitScreenPos = from + dir * travel;
             _entryScreenPos = to - dir * travel;
         }
     }
 
-    /// <summary>
-    ///     centers cam on world (not tile) position
-    /// </summary>
-    /// <param name="worldPos"></param>
-    /// <param name="zoom"></param>
     public static void TransitionToPosition(Vector2 worldPos, float zoom) {
         Vector2 screenSize = new(Main.screenWidth, Main.screenHeight);
         BeginSegment(Main.screenPosition, worldPos - screenSize / 2f, _currentZoom, zoom);
         _state = CamState.TransitioningIn;
     }
 
-    /// <summary>
-    ///     camera will always see entire box, but may see beyond on one axis of the box
-    /// </summary>
-    /// <param name="rect"></param>
     public static void TransitionToTileRect(TileBox rect) {
         Vector2 screenSize = new(Main.screenWidth, Main.screenHeight);
         Rectangle worldRect = rect.Scale(16);
-
         float zoomX = screenSize.X / worldRect.Width;
         float zoomY = screenSize.Y / worldRect.Height;
         float zoom = Math.Min(zoomX, zoomY);
-
-        Vector2 rectCenterWorld = new(
-            worldRect.X + worldRect.Width / 2f,
-            worldRect.Y + worldRect.Height / 2f
-        );
+        Vector2 rectCenterWorld = new(worldRect.X + worldRect.Width / 2f, worldRect.Y + worldRect.Height / 2f);
         TransitionToPosition(rectCenterWorld, zoom);
     }
 
-    public static void TransitionToStructure(StructureRoot structure, int paddingTiles = 5) {
+    public static void TransitionToStructure(StructureRoot structure, int paddingTiles = 9) {
         TransitionToTileRect(structure.Tilemap.BoundingBox.Inflate(paddingTiles));
     }
 
-    /// <summary>
-    ///     returns camera back to normal position
-    /// </summary>
     public static void ReleaseCamera() {
         if (_state is CamState.Inactive) return;
         BeginSegment(Main.screenPosition, GetVanillaTranslation(), _currentZoom, _vanillaZoom);
