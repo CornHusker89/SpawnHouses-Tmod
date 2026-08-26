@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Core.AdvStructureCore;
 using SpawnHouses.Core.Debug;
 using SpawnHouses.Core.Geometry;
 using SpawnHouses.Core.Parameters;
@@ -9,7 +10,7 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.Utilities;
 
-namespace SpawnHouses.Core.Interfaces;
+namespace SpawnHouses.Core.AdvGeneratables;
 
 public interface IComponent : IAdvGeneratable {
     /// <summary>

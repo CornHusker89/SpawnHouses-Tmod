@@ -1,5 +1,6 @@
 #nullable enable
 using System.Reflection;
+using SpawnHouses.Core.DataStructures;
 using SpawnHouses.Core.Geometry;
 using SpawnHouses.Helpers;
 

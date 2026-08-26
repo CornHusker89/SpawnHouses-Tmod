@@ -4,7 +4,7 @@ using System.Diagnostics.Contracts;
 using Microsoft.Xna.Framework;
 using Terraria.DataStructures;
 
-namespace SpawnHouses.Core.DataStructures;
+namespace SpawnHouses.Core.Geometry;
 
 /// <summary>
 ///     very similar to <see cref="Microsoft.Xna.Framework.Rectangle" />, but all corners are inclusive

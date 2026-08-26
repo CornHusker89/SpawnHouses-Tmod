@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Core.DataStructures;
-using SpawnHouses.Core.Interfaces;
 using Terraria.DataStructures;
 
 namespace SpawnHouses.Core.Geometry;

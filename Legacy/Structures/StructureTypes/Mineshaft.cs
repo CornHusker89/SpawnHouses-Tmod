@@ -10,7 +10,7 @@ namespace SpawnHouses.Legacy.Structures.StructureTypes;
 
 public sealed class Mineshaft : LegacyStructure {
     // constants
-    public static readonly string _filePath = "Core/Assets/StructureFiles/mineshaft.shstruct";
+    public static readonly string _filePath = "Assets/StructureFiles/mineshaft.shstruct";
     public static readonly ushort _structureXSize = 21;
     public static readonly ushort _structureYSize = 22;
 

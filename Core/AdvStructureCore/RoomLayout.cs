@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SpawnHouses.Core.AdvGeneratables.Components;
+using SpawnHouses.Core.DataStructures;
 using SpawnHouses.Core.Enums;
 using SpawnHouses.Core.Geometry;
 using SpawnHouses.Core.Parameters;
@@ -9,7 +10,7 @@ using SpawnHouses.Core.RootStructureTypes;
 using SpawnHouses.Helpers;
 using Terraria.DataStructures;
 
-namespace SpawnHouses.Core;
+namespace SpawnHouses.Core.AdvStructureCore;
 
 /// <summary>
 ///     arrangement of components that represents portions of a structure's internal layout

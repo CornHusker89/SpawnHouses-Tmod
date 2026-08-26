@@ -1,4 +1,4 @@
-using SpawnHouses.Core.Interfaces;
+using SpawnHouses.Core.AdvGeneratables;
 
 namespace SpawnHouses.Core.Debug;
 

@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Core.Debug;
 using Terraria;
 
-namespace SpawnHouses.Core.Interfaces;
+namespace SpawnHouses.Core.Debug;
 
 public interface IDebugDraw {
     /// <summary>

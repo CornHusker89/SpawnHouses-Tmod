@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SpawnHouses.Core;
 using SpawnHouses.Core.DataStructures;
+using SpawnHouses.Core.Geometry;
 using SpawnHouses.Core.Tiles;
 using SpawnHouses.Legacy.Helpers;
 using SpawnHouses.Legacy.Structures.StructureParts;

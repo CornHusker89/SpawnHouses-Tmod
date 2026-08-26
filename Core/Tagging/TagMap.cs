@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SpawnHouses.Core.Interfaces;
+using SpawnHouses.Core.AdvGeneratables;
 
 namespace SpawnHouses.Core.Tagging;
 

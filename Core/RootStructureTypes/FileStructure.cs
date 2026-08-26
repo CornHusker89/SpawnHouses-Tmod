@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 using SpawnHouses.Core.DataStructures;
 using SpawnHouses.Core.Debug;
 using SpawnHouses.Core.Enums;
-using SpawnHouses.Core.Interfaces;
+using SpawnHouses.Core.Systems;
 using SpawnHouses.Core.Tagging;
 using SpawnHouses.Core.Tiles;
 using SpawnHouses.Helpers;
@@ -371,7 +371,7 @@ public sealed class FileStructure : StructureRoot {
                         DebugInfoVisibility,
                         DrawHelper.GetColor((ushort)PositionIdToFilename[positionId].GetHashCode()),
                         positionId,
-                        PositionIdToFilename[positionId].Replace("Core/Assets/StructureFiles/", "")
+                        PositionIdToFilename[positionId].Replace("Assets/StructureFiles/", "")
                     ));
                 }
             }

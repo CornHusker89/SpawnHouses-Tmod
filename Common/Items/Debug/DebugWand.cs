@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Core;
 using SpawnHouses.Core.RootStructureTypes;
+using SpawnHouses.Core.Systems;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;

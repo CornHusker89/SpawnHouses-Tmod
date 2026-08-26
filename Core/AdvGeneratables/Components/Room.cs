@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using SpawnHouses.Core.Geometry;
-using SpawnHouses.Core.Interfaces;
 using SpawnHouses.Core.Parameters;
 using SpawnHouses.Core.RootStructureTypes;
 using SpawnHouses.Core.Tiles;

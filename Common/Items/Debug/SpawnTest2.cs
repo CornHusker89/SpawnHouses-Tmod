@@ -3,9 +3,9 @@
 #nullable enable
 using System;
 using System.IO;
-using SpawnHouses.Core;
-using SpawnHouses.Core.Interfaces;
+using SpawnHouses.Core.AdvGeneratables;
 using SpawnHouses.Core.RootStructureTypes;
+using SpawnHouses.Core.Systems;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;

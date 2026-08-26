@@ -179,10 +179,34 @@ Mods: {
 
 		Bestiary.Builder: Builder Bestiary Entry
 
-		Dialogue: {
+		NPCs: {
 			Builder: {
-				Greeting: Hello! I really hope this shit works
-				HelpButton: Help
+				DisplayName: Builder
+
+				TownNPCMood: {
+					Content: I am content.
+					NoHome: I hate not having a home.
+					FarFromHome: I am too far from home.
+					LoveSpace: I love having so much space.
+					DislikeCrowded: I dislike how crowded I am.
+					HateCrowded: I hate how crowded I am.
+					LoveBiome: I love {BiomeName}.
+					LikeBiome: I like {BiomeName}.
+					HateBiome: I hate {BiomeName}.
+					LoveNPC: I love {NPCName}.
+					LikeNPC: I like {NPCName}.
+					DislikeNPC: I dislike {NPCName}.
+					HateNPC: I hate {NPCName}.
+					LikeNPC_Princess: I like {NPCName}.
+					Princess_LovesNPC: I like {NPCName}.
+				}
+
+				Dialogue: {
+					Greeting: Hello! I really hope this shit works
+					HelpButton: Help
+					StructuresButton: Structures
+					HelpChat: Builder man does not have help. Builder man does not want to give help anyway.
+				}
 			}
 		}
 	}

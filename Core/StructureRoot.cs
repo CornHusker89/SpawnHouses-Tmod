@@ -3,9 +3,11 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Core.AdvStructureCore;
+using SpawnHouses.Core.DataStructures;
 using SpawnHouses.Core.Debug;
 using SpawnHouses.Core.Enums;
-using SpawnHouses.Core.Interfaces;
+using SpawnHouses.Core.Systems;
 using SpawnHouses.Core.Tagging;
 using SpawnHouses.Core.Tiles;
 using SpawnHouses.Helpers;
@@ -154,6 +156,10 @@ public abstract class StructureRoot : IGeneratable, IStructureTags, IDebugDraw {
         return false;
     }
 
+    /// <summary>
+    ///     gets a random user-facing name
+    /// </summary>
+    /// <returns></returns>
     public string GetStructureRandomName() => "Structure Name Here";
 }
 

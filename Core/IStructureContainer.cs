@@ -1,4 +1,4 @@
-namespace SpawnHouses.Core.Interfaces;
+namespace SpawnHouses.Core;
 
 public interface IStructureContainer {
 }

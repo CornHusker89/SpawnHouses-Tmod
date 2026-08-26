@@ -1,6 +1,4 @@
-using SpawnHouses.Core.Tagging;
-
-namespace SpawnHouses.Core.Interfaces;
+namespace SpawnHouses.Core.Tagging;
 
 public interface IStructureTags {
     /// <summary>

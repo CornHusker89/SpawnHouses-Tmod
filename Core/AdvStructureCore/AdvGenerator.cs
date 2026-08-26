@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using SpawnHouses.Core.AdvGeneratables;
 using SpawnHouses.Core.Geometry;
-using SpawnHouses.Core.Interfaces;
 using SpawnHouses.Core.Palette;
 using SpawnHouses.Core.Parameters;
 using SpawnHouses.Core.Tagging;
 using SpawnHouses.Core.Tiles;
 using Terraria.Utilities;
 
-namespace SpawnHouses.Core;
+namespace SpawnHouses.Core.AdvStructureCore;
 
 public abstract class AdvGenerator<TParams, TGeneratable> : IAdvGenerator<TParams, TGeneratable>
     where TParams : IParams

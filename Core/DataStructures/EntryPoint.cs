@@ -1,7 +1,7 @@
 using SpawnHouses.Core.Enums;
 using Terraria.DataStructures;
 
-namespace SpawnHouses.Core;
+namespace SpawnHouses.Core.DataStructures;
 
 public class EntryPoint {
     /// <summary>the upper/left point, not offset</summary>

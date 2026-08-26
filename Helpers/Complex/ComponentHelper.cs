@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SpawnHouses.Core.AdvGeneratables;
 using SpawnHouses.Core.AdvGeneratables.Components;
 using SpawnHouses.Core.Geometry;
-using SpawnHouses.Core.Interfaces;
 using SpawnHouses.Core.Palette;
 using SpawnHouses.Core.RootStructureTypes;
 using SpawnHouses.Core.Tagging;

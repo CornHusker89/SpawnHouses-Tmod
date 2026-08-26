@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Core.AdvGeneratables.Components;
-using SpawnHouses.Core.DataStructures;
+using SpawnHouses.Core.AdvStructureCore;
 using SpawnHouses.Core.Debug;
-using SpawnHouses.Core.Interfaces;
+using SpawnHouses.Core.Geometry;
 using SpawnHouses.Core.Parameters;
 using SpawnHouses.Core.Tagging;
 using SpawnHouses.Helpers;

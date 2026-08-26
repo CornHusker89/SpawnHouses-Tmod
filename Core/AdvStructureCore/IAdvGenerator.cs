@@ -1,11 +1,12 @@
 using System.Collections.Generic;
+using SpawnHouses.Core.AdvGeneratables;
 using SpawnHouses.Core.Palette;
 using SpawnHouses.Core.Parameters;
 using SpawnHouses.Core.Tagging;
 using SpawnHouses.Core.Tiles;
 using Terraria.Utilities;
 
-namespace SpawnHouses.Core.Interfaces;
+namespace SpawnHouses.Core.AdvStructureCore;
 
 public interface IAdvGenerator {
     /// <summary>

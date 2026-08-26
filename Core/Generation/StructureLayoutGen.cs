@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using SpawnHouses.Core.AdvGeneratables;
 using SpawnHouses.Core.AdvGeneratables.Components;
+using SpawnHouses.Core.AdvStructureCore;
 using SpawnHouses.Core.Attributes;
 using SpawnHouses.Core.DataStructures;
 using SpawnHouses.Core.Enums;

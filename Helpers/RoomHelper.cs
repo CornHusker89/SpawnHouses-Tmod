@@ -1,8 +1,8 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using SpawnHouses.Core;
 using SpawnHouses.Core.AdvGeneratables.Components;
+using SpawnHouses.Core.AdvStructureCore;
 using SpawnHouses.Core.Geometry;
 using Terraria.DataStructures;
 using Gap = SpawnHouses.Core.AdvGeneratables.Components.Gap;

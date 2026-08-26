@@ -1,15 +1,17 @@
 using System;
 using System.Collections.Generic;
 using SpawnHouses.Core.AdvGeneratables;
+using SpawnHouses.Core.AdvStructureCore;
+using SpawnHouses.Core.DataStructures;
 using SpawnHouses.Core.Debug;
-using SpawnHouses.Core.Interfaces;
 using SpawnHouses.Core.Palette;
 using SpawnHouses.Core.Parameters;
+using SpawnHouses.Core.Systems;
 using SpawnHouses.Core.Tagging;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.Utilities;
-using IComponent = SpawnHouses.Core.Interfaces.IComponent;
+using IComponent = SpawnHouses.Core.AdvGeneratables.IComponent;
 
 namespace SpawnHouses.Core.RootStructureTypes;
 

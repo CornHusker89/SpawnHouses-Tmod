@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using SpawnHouses.Core.DataStructures;
 using SpawnHouses.Core.Enums;
 using SpawnHouses.Core.RootStructureTypes;
 using SpawnHouses.Core.Tagging;

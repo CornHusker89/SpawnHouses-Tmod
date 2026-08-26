@@ -2,14 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using SpawnHouses.Core.AdvGeneratables;
 using SpawnHouses.Core.Debug;
-using SpawnHouses.Core.Interfaces;
 using SpawnHouses.Core.Parameters;
+using SpawnHouses.Core.Systems;
 using SpawnHouses.Core.Tagging;
 using Terraria;
 using Terraria.Utilities;
 
-namespace SpawnHouses.Core;
+namespace SpawnHouses.Core.AdvStructureCore;
 
 public abstract class AdvGeneratable<TSelf, TParams, TGenerator> : IAdvGeneratable<TSelf, TParams, TGenerator>
     where TSelf : AdvGeneratable<TSelf, TParams, TGenerator>

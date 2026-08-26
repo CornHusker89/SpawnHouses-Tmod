@@ -1,8 +1,8 @@
 #nullable enable
 
 using Microsoft.Xna.Framework;
-using SpawnHouses.Core.DataStructures;
-using SpawnHouses.Core.Interfaces;
+using SpawnHouses.Core.AdvGeneratables;
+using SpawnHouses.Core.Geometry;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent;

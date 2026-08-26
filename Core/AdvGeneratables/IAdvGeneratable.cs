@@ -1,6 +1,9 @@
+using SpawnHouses.Core.AdvStructureCore;
+using SpawnHouses.Core.Debug;
 using SpawnHouses.Core.Parameters;
+using SpawnHouses.Core.Tagging;
 
-namespace SpawnHouses.Core.Interfaces;
+namespace SpawnHouses.Core.AdvGeneratables;
 
 /// <summary>
 ///     a more complex version of the <see cref="IGeneratable" />, supporting debug drawing and dynamic tag-based generation. intended for AdvStructures

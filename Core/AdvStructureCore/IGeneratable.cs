@@ -1,4 +1,4 @@
-namespace SpawnHouses.Core.Interfaces;
+namespace SpawnHouses.Core.AdvStructureCore;
 
 /// <summary>
 ///     the root of any instance or sub-instance of a structure

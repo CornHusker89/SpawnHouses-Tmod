@@ -3,9 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SpawnHouses.Core;
 using SpawnHouses.Core.AdvGeneratables;
 using SpawnHouses.Core.AdvGeneratables.Components;
+using SpawnHouses.Core.AdvStructureCore;
 using SpawnHouses.Core.DataStructures;
 using SpawnHouses.Core.Enums;
 using SpawnHouses.Core.Geometry;

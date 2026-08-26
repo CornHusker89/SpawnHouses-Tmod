@@ -2,10 +2,9 @@ using System.Collections.Generic;
 using SpawnHouses.Core.Attributes;
 using SpawnHouses.Core.DataStructures;
 using SpawnHouses.Core.Enums;
-using SpawnHouses.Core.RootStructureTypes;
 using SpawnHouses.Core.Tagging;
 using Terraria.DataStructures;
-using StructureInfo = (System.Collections.Generic.Dictionary<string, Terraria.DataStructures.Point16> positionIdsToPositions, SpawnHouses.Core.EntryPoint[] entryPoints, SpawnHouses.Core.Tagging.TagMap tags);
+using StructureInfo = (System.Collections.Generic.Dictionary<string, Terraria.DataStructures.Point16> positionIdsToPositions, SpawnHouses.Core.DataStructures.EntryPoint[] entryPoints, SpawnHouses.Core.Tagging.TagMap tags);
 
 namespace SpawnHouses.Core.Generation.FileStructureTemplates;
 
@@ -14,32 +13,32 @@ public class WoodHouse1 : FileStructureTemplate {
     public override FileSubstructureData[] Substructures => [
         new(
             "Left_Small",
-            "Core/Assets/StructureFiles/mainHouse/mainHouse_Small_Left_v4.shstruct",
+            "Assets/StructureFiles/mainHouse/mainHouse_Small_Left_v4.shstruct",
             ["Left"]
         ),
         new(
             "Left_Normal",
-            "Core/Assets/StructureFiles/mainHouse/mainHouse_Left_v4.shstruct",
+            "Assets/StructureFiles/mainHouse/mainHouse_Left_v4.shstruct",
             ["Left"]
         ),
         new(
             "Right_Small",
-            "Core/Assets/StructureFiles/mainHouse/mainHouse_Small_Right_v4.shstruct",
+            "Assets/StructureFiles/mainHouse/mainHouse_Small_Right_v4.shstruct",
             ["Right"]
         ),
         new(
             "Right_Normal",
-            "Core/Assets/StructureFiles/mainHouse/mainHouse_Right_v4.shstruct",
+            "Assets/StructureFiles/mainHouse/mainHouse_Right_v4.shstruct",
             ["Right"]
         ),
         new(
             "Top_Normal",
-            "Core/Assets/StructureFiles/mainHouse/mainHouse_Top_v4.shstruct",
+            "Assets/StructureFiles/mainHouse/mainHouse_Top_v4.shstruct",
             ["Top"]
         ),
         new(
             "Rose",
-            "Core/Assets/StructureFiles/mainHouse/mainHouse_Rose.shstruct",
+            "Assets/StructureFiles/mainHouse/mainHouse_Rose.shstruct",
             ["Rose"]
         )
     ];

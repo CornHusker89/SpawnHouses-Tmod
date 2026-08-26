@@ -2,9 +2,8 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Core.DataStructures;
 using SpawnHouses.Core.Debug;
-using SpawnHouses.Core.Interfaces;
+using SpawnHouses.Core.Geometry;
 using SpawnHouses.Core.Palette;
 using SpawnHouses.Core.RootStructureTypes;
 using SpawnHouses.Helpers;

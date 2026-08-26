@@ -1,13 +1,13 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Core.DataStructures;
+using SpawnHouses.Core.Geometry;
 using Terraria;
 using Terraria.Graphics;
 using Terraria.ModLoader;
 using Vector2 = Microsoft.Xna.Framework.Vector2;
 
-namespace SpawnHouses.Core;
+namespace SpawnHouses.Core.Systems;
 
 public class CameraManager : ModSystem {
     private enum CamState {
@@ -35,6 +35,7 @@ public class CameraManager : ModSystem {
     private static Vector2 _previousScreenPos;
     private static Vector2 _currentVelocity; // px/sec
     private static Vector2 _startVelocity; // captured at BeginSegment
+    private static Vector2 _cutVelocity;
 
     private static float _previousZoom;
     private static float _currentZoomVelocity; // zoom units/sec
@@ -43,11 +44,11 @@ public class CameraManager : ModSystem {
     private static readonly Stopwatch Clock = Stopwatch.StartNew(); // per-segment, restarted in BeginSegment
     private static readonly Stopwatch FrameClock = Stopwatch.StartNew(); // never restarted — for per-tick delta only
     private static double _lastFrameTime;
-    private const float MaxDeltaTime = 0.05f;
-
     public static bool IsTransitioning => _state is CamState.TransitioningIn or CamState.TransitioningOut;
 
     public override void PostUpdateEverything() {
+        if (Main.dedServ) return;
+        
         float deltaTime = GetDeltaTime();
 
         if (_state == CamState.Inactive) {
@@ -56,8 +57,6 @@ public class CameraManager : ModSystem {
             UpdateVelocityTracking(deltaTime);
             return;
         }
-
-        if (Main.dedServ) return;
 
         if (_state == CamState.Locked) {
             Main.screenPosition = _targetScreenPos;
@@ -69,20 +68,17 @@ public class CameraManager : ModSystem {
 
         if (_state == CamState.TransitioningOut) _targetScreenPos = GetVanillaTranslation();
 
-        float elapsed = deltaTime;
-        float t = MathHelper.Clamp(elapsed / _duration, 0f, 1f);
+        float t = MathHelper.Clamp((float)Clock.Elapsed.TotalSeconds / _duration, 0f, 1f);
 
         if (_useTeleportCut) {
             float halfDuration = _duration * 0.5f;
             if (t < 0.5f) {
-                float localT = MathHelper.Clamp(elapsed / halfDuration, 0f, 1f);
-                // First half: starts from real measured velocity, decelerates to rest at the cut point
-                _currentScreenPos = HermitePosition(_startScreenPos, _startVelocity, _exitScreenPos, Vector2.Zero, localT, halfDuration);
+                float localT = MathHelper.Clamp((float)Clock.Elapsed.TotalSeconds / halfDuration, 0f, 1f);
+                _currentScreenPos = HermitePosition(_startScreenPos, _startVelocity, _exitScreenPos, _cutVelocity, localT, halfDuration);
             }
             else {
-                float localT = MathHelper.Clamp((elapsed - halfDuration) / halfDuration, 0f, 1f);
-                // Second half: always starts from rest (the cut itself is the discontinuity by design)
-                _currentScreenPos = HermitePosition(_entryScreenPos, Vector2.Zero, _targetScreenPos, Vector2.Zero, localT, halfDuration);
+                float localT = MathHelper.Clamp(((float)Clock.Elapsed.TotalSeconds - halfDuration) / halfDuration, 0f, 1f);
+                _currentScreenPos = HermitePosition(_entryScreenPos, _cutVelocity, _targetScreenPos, Vector2.Zero, localT, halfDuration);
             }
         }
         else {
@@ -141,7 +137,7 @@ public class CameraManager : ModSystem {
         double now = FrameClock.Elapsed.TotalSeconds;
         float delta = (float)(now - _lastFrameTime);
         _lastFrameTime = now;
-        return MathHelper.Clamp(delta, 0f, MaxDeltaTime);
+        return MathF.Min(delta, 0.0003f);
     }
 
     private static Vector2 GetVanillaTranslation() {
@@ -151,8 +147,8 @@ public class CameraManager : ModSystem {
 
     private static void BeginSegment(Vector2 from, Vector2 to, float fromZoom, float toZoom) {
         _startScreenPos = from;
-        _targetScreenPos = to;
         _startVelocity = _currentVelocity;
+        _targetScreenPos = to;
         _startZoom = fromZoom;
         _startZoomVelocity = _currentZoomVelocity;
         _targetZoom = toZoom;
@@ -160,14 +156,17 @@ public class CameraManager : ModSystem {
         float totalDist = Vector2.Distance(from, to);
         float distTiles = totalDist / 16f;
         float excess = MathF.Max(0f, distTiles - 50f);
-        _duration = 0.8f + 0.059f * MathF.Pow(excess, 0.47f);
+        _duration = 0.6f + 0.05f * MathF.Pow(excess, 0.47f);
         Clock.Restart();
-
+        
         // prevent overshoot
-        if (_currentVelocity.Length() > totalDist / _duration * 1.5f) _startVelocity = Vector2.Normalize(_currentVelocity) * totalDist / _duration * 1.5f;
+        if (_currentVelocity.Length() > totalDist / _duration * 1.5f)
+            _startVelocity = Vector2.Normalize(_currentVelocity) * totalDist / _duration * 0.55f;
+        float maxZoomVelocity = MathF.Abs(toZoom - fromZoom) / _duration * 1.5f;
+        _startZoomVelocity = MathHelper.Clamp(_startZoomVelocity, -maxZoomVelocity, maxZoomVelocity);
 
         float speed = 1400f + 45f * MathF.Pow(distTiles, 1f);
-        speed = Math.Min(speed, 9500f);
+        speed = Math.Min(speed, 7000f);
         float naturalTravel = speed * _duration;
 
         _useTeleportCut = naturalTravel < totalDist;
@@ -178,6 +177,7 @@ public class CameraManager : ModSystem {
             float travel = Math.Min(speed * segmentTime, totalDist / 2f);
             _exitScreenPos = from + dir * travel;
             _entryScreenPos = to - dir * travel;
+            _cutVelocity = dir * speed;
         }
     }
 
@@ -197,8 +197,9 @@ public class CameraManager : ModSystem {
         TransitionToPosition(rectCenterWorld, zoom);
     }
 
-    public static void TransitionToStructure(StructureRoot structure, int paddingTiles = 9) {
-        TransitionToTileRect(structure.Tilemap.BoundingBox.Inflate(paddingTiles));
+    public static void TransitionToStructure(StructureRoot structure, int paddingTiles = -1) {
+        int padding = paddingTiles == -1 ? 3 + (int)Math.Sqrt(Math.Max(structure.Tilemap.BoundingBox.Width, structure.Tilemap.BoundingBox.Height)) : paddingTiles;
+        TransitionToTileRect(structure.Tilemap.BoundingBox.Inflate(padding));
     }
 
     public static void ReleaseCamera() {

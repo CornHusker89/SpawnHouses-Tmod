@@ -1,4 +1,4 @@
-using SpawnHouses.Core.DataStructures;
+using SpawnHouses.Core.Geometry;
 using Terraria;
 using Terraria.ID;
 

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using SpawnHouses.Core;
+using SpawnHouses.Core.Systems;
 using Terraria;
 using Terraria.IO;
 using Terraria.Localization;

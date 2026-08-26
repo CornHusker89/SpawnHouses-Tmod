@@ -4,10 +4,11 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Xna.Framework;
 using SpawnHouses.Common.Items.Debug;
+using SpawnHouses.Core.AdvStructureCore;
 using SpawnHouses.Core.Attributes;
 using SpawnHouses.Core.DataStructures;
 using SpawnHouses.Core.Debug;
-using SpawnHouses.Core.Interfaces;
+using SpawnHouses.Core.Geometry;
 using SpawnHouses.Core.RootStructureTypes;
 using SpawnHouses.Core.Tagging;
 using SpawnHouses.Helpers;
@@ -17,7 +18,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
-namespace SpawnHouses.Core;
+namespace SpawnHouses.Core.Systems;
 
 #nullable enable
 

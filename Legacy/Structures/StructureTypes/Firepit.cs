@@ -9,7 +9,7 @@ namespace SpawnHouses.Legacy.Structures.StructureTypes;
 
 public sealed class Firepit : LegacyStructure {
     // constants
-    public static readonly string _filePath = "Core/Assets/StructureFiles/firepit.shstruct";
+    public static readonly string _filePath = "Assets/StructureFiles/firepit.shstruct";
     public static readonly ushort _structureXSize = 7;
     public static readonly ushort _structureYSize = 3;
 

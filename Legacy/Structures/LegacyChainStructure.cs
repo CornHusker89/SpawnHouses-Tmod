@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using SpawnHouses.Core.DataStructures;
+using SpawnHouses.Core.Geometry;
 using SpawnHouses.Legacy.Helpers;
 using SpawnHouses.Legacy.Structures.StructureParts;
 
